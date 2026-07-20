@@ -1,146 +1,201 @@
 // ========================================
-// DAGOO'S - MAIN.JS
-// La mobilité connectée... Chez les potes, ça roule.
+// DAGOO'S - LANDING PAGE
 // ========================================
 
-(function() {
-    'use strict';
+import { registerUser, loginUser, logoutUser, isAuthenticated, getProfile } from './api.js';
 
-    // ===== HEADER SCROLL =====
-    const header = document.querySelector('.header');
-    let lastScroll = 0;
+console.log('%c🚀 Dagoo\'s', 'font-size: 32px; font-weight: bold; color: #1A5276;');
+console.log('%cLa mobilité connectée... Chez les potes, ça roule.', 'font-size: 18px; color: #F39C12;');
+console.log('%c🇲🇬 Salama Dago !', 'font-size: 16px; color: #27AE60;');
 
-    window.addEventListener('scroll', () => {
-        const currentScroll = window.pageYOffset;
-        if (currentScroll > 50) {
-            header.classList.add('header-scrolled');
-        } else {
-            header.classList.remove('header-scrolled');
+// ===== NETTOYAGE DES TOKENS AU CHARGEMENT =====
+// Ne pas rediriger automatiquement, mais nettoyer si token expiré
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has('token')) {
+    // Si quelqu'un arrive avec un token dans l'URL, on le nettoie
+    console.log('🧹 Nettoyage des paramètres URL...');
+    window.history.replaceState({}, document.title, window.location.pathname);
+}
+
+// ===== GESTION DES FORMULAIRES =====
+
+// Formulaire d'inscription
+const registerForm = document.getElementById('registerForm');
+if (registerForm) {
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const name = document.getElementById('registerName').value.trim();
+        const email = document.getElementById('registerEmail').value.trim();
+        const phone = document.getElementById('registerPhone').value.trim();
+        const role = document.getElementById('registerRole').value;
+        const password = document.getElementById('registerPassword').value;
+        const confirmPassword = document.getElementById('registerConfirmPassword').value;
+        
+        const messageDiv = document.getElementById('registerMessage');
+        
+        // Validation
+        if (password !== confirmPassword) {
+            messageDiv.innerHTML = '<div class="error-message">❌ Les mots de passe ne correspondent pas</div>';
+            return;
         }
-        lastScroll = currentScroll;
+        
+        if (password.length < 6) {
+            messageDiv.innerHTML = '<div class="error-message">❌ Le mot de passe doit contenir au moins 6 caractères</div>';
+            return;
+        }
+        
+        // Bloquer SUPER_ADMIN
+        if (role === 'SUPER_ADMIN') {
+            messageDiv.innerHTML = '<div class="error-message">❌ Ce rôle n\'est pas autorisé</div>';
+            return;
+        }
+        
+        messageDiv.innerHTML = '<div class="info-message">⏳ Inscription en cours...</div>';
+        
+        const result = await registerUser({ name, email, phone, role, password });
+        
+        if (result.success) {
+            messageDiv.innerHTML = `
+                <div class="success-message">
+                    ✅ Compte créé avec succès ! 
+                    <a href="#login" style="color: #1A5276; font-weight: 600;">Connectez-vous</a>
+                </div>
+            `;
+            registerForm.reset();
+        } else {
+            messageDiv.innerHTML = `<div class="error-message">❌ ${result.data?.error || 'Erreur lors de l\'inscription'}</div>`;
+        }
     });
+}
 
-    // ===== MOBILE MENU =====
-    const hamburger = document.querySelector('.hamburger');
-    const nav = document.querySelector('.nav');
-
-    if (hamburger && nav) {
-        hamburger.addEventListener('click', () => {
-            hamburger.classList.toggle('active');
-            nav.classList.toggle('open');
-        });
-
-        // Fermer le menu au clic sur un lien
-        nav.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                hamburger.classList.remove('active');
-                nav.classList.remove('open');
-            });
-        });
-    }
-
-    // ===== ANIMATION DES STATS =====
-    const stats = document.querySelectorAll('.stat-number');
-    
-    if (stats.length > 0) {
-        const animateStats = () => {
-            stats.forEach(stat => {
-                const target = parseInt(stat.dataset.target);
-                const current = parseInt(stat.textContent);
-                const increment = Math.ceil(target / 60);
-                
-                if (current < target) {
-                    const newValue = Math.min(current + increment, target);
-                    stat.textContent = newValue;
-                }
-            });
-        };
-
-        // Observer les stats
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const stat = entry.target;
-                    const target = parseInt(stat.dataset.target);
-                    stat.textContent = '0';
-                    
-                    let current = 0;
-                    const increment = Math.ceil(target / 60);
-                    
-                    const interval = setInterval(() => {
-                        current += increment;
-                        if (current >= target) {
-                            stat.textContent = target;
-                            clearInterval(interval);
-                        } else {
-                            stat.textContent = current;
-                        }
-                    }, 30);
-                    
-                    observer.unobserve(stat);
-                }
-            });
-        }, { threshold: 0.5 });
-
-        stats.forEach(stat => observer.observe(stat));
-    }
-
-    // ===== SMOOTH SCROLL =====
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            const href = this.getAttribute('href');
-            if (href === '#') return;
+// Formulaire de connexion
+const loginForm = document.getElementById('loginForm');
+if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        
+        const messageDiv = document.getElementById('loginMessage');
+        messageDiv.innerHTML = '<div class="info-message">⏳ Connexion en cours...</div>';
+        
+        const result = await loginUser(email, password);
+        
+        if (result.success) {
+            const { token, user } = result.data;
             
-            const target = document.querySelector(href);
-            if (target) {
+            messageDiv.innerHTML = '<div class="success-message">✅ Connexion réussie ! Redirection...</div>';
+            
+            // Redirection vers le dashboard avec token
+            setTimeout(() => {
+                window.location.href = `http://localhost:5001/?token=${encodeURIComponent(token)}&user=${encodeURIComponent(JSON.stringify(user))}`;
+            }, 1000);
+        } else {
+            messageDiv.innerHTML = `<div class="error-message">❌ ${result.data?.error || 'Email ou mot de passe incorrect'}</div>`;
+        }
+    });
+}
+
+// ===== BOUTON DÉCONNEXION SUR LA LANDING (si connecté) =====
+function updateUIForAuth() {
+    const navUl = document.querySelector('.nav ul');
+    if (!navUl) return;
+    
+    // Vérifier si déjà un bouton déconnexion existe
+    const existingLogoutBtn = document.getElementById('landingLogoutBtn');
+    
+    if (isAuthenticated()) {
+        // Ajouter bouton déconnexion s'il n'existe pas déjà
+        if (!existingLogoutBtn) {
+            const logoutLi = document.createElement('li');
+            logoutLi.id = 'landingLogoutBtn';
+            logoutLi.innerHTML = '<a href="#" class="btn-primary btn-small" style="background: #E74C3C;">🚪 Déconnexion</a>';
+            logoutLi.addEventListener('click', (e) => {
                 e.preventDefault();
-                const headerHeight = document.querySelector('.header').offsetHeight;
-                const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight;
-                
-                window.scrollTo({
-                    top: targetPosition,
-                    behavior: 'smooth'
-                });
+                logoutUser();
+                // Recharger la page proprement
+                window.location.href = 'http://localhost:5000/';
+            });
+            navUl.appendChild(logoutLi);
+        }
+        
+        // Cacher le bouton "Salama Dago!"
+        const registerLink = navUl.querySelector('a[href="#register"]');
+        if (registerLink) {
+            registerLink.textContent = '👤 Mon compte';
+            registerLink.href = 'http://localhost:5001/';
+        }
+    } else {
+        // Supprimer le bouton déconnexion s'il existe
+        if (existingLogoutBtn) {
+            existingLogoutBtn.remove();
+        }
+        
+        // Remettre le bouton "Salama Dago!"
+        const registerLink = navUl.querySelector('a[href="#register"]');
+        if (registerLink) {
+            registerLink.textContent = 'Salama Dago !';
+            registerLink.href = '#register';
+        }
+    }
+}
+
+// ===== HAMBURGER MENU =====
+const hamburger = document.querySelector('.hamburger');
+const nav = document.querySelector('.nav ul');
+
+if (hamburger && nav) {
+    hamburger.addEventListener('click', () => {
+        nav.classList.toggle('active');
+        hamburger.classList.toggle('active');
+    });
+}
+
+// ===== ANIMATION DES STATISTIQUES =====
+function animateStats() {
+    const stats = document.querySelectorAll('.stat-number');
+    stats.forEach(stat => {
+        const target = parseInt(stat.getAttribute('data-target'));
+        const duration = 2000;
+        const step = target / (duration / 16);
+        let current = 0;
+        
+        const updateStat = () => {
+            current += step;
+            if (current < target) {
+                stat.textContent = Math.floor(current);
+                requestAnimationFrame(updateStat);
+            } else {
+                stat.textContent = target;
+            }
+        };
+        
+        updateStat();
+    });
+}
+
+// ===== INITIALISATION =====
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Landing page chargée');
+    updateUIForAuth();
+    
+    // Animer les stats quand elles deviennent visibles
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                animateStats();
+                observer.unobserve(entry.target);
             }
         });
     });
+    
+    const heroStats = document.querySelector('.hero-stats');
+    if (heroStats) {
+        observer.observe(heroStats);
+    }
+});
 
-    // ===== ANIMATION AU SCROLL (Intersection Observer) =====
-    const animateOnScroll = (elements, className = 'visible') => {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add(className);
-                }
-            });
-        }, { threshold: 0.1 });
-
-        elements.forEach(el => observer.observe(el));
-    };
-
-    // Appliquer l'animation aux cartes de services
-    const serviceCards = document.querySelectorAll('.service-card');
-    serviceCards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(30px)';
-        card.style.transition = `all 0.5s ease ${index * 0.1}s`;
-        
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                    observer.unobserve(card);
-                }
-            });
-        }, { threshold: 0.1 });
-        
-        observer.observe(card);
-    });
-
-    // ===== CONSOLE MESSAGE =====
-    console.log('%c🚀 Dagoo\'s', 'font-size: 32px; font-weight: bold; color: #1A5276;');
-    console.log('%cLa mobilité connectée... Chez les potes, ça roule.', 'font-size: 18px; color: #F39C12;');
-    console.log('%c🇲🇬 Salama Dago !', 'font-size: 16px; color: #27AE60;');
-
-})();
+// Mettre à jour l'UI quand l'auth change
+window.addEventListener('storage', updateUIForAuth);

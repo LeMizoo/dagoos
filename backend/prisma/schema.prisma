@@ -1,10 +1,9 @@
-// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -14,7 +13,7 @@ model User {
   password      String
   name          String
   phone         String
-  role          Role        @default(DRIVER)
+  role          String      @default("DRIVER")  // SUPER_ADMIN, ADMIN, DRIVER, COOPERATIVE, RIDER
   cooperativeId String?
   cooperative   Cooperative? @relation(fields: [cooperativeId], references: [id])
   driverProfile Driver?
@@ -28,7 +27,7 @@ model Driver {
   user          User      @relation(fields: [userId], references: [id])
   licenseNumber String
   phone         String
-  vehicleId     String?
+  vehicleId     String?   @unique
   vehicle       Vehicle?  @relation(fields: [vehicleId], references: [id])
   isAvailable   Boolean   @default(true)
   rating        Float     @default(0)
@@ -44,7 +43,7 @@ model Vehicle {
   model         String
   year          Int
   color         String
-  type          VehicleType @default(TAXI)
+  type          String    @default("TAXI")  // TAXI, TAXI_MOTO, BUS, TRUCK, DELIVERY
   cooperativeId String
   cooperative   Cooperative @relation(fields: [cooperativeId], references: [id])
   driver        Driver?
@@ -79,7 +78,7 @@ model Trip {
   endLat        Float?
   endLng        Float?
   endAddress    String?
-  status        TripStatus @default(PENDING)
+  status        String    @default("PENDING")  // PENDING, ASSIGNED, IN_PROGRESS, COMPLETED, CANCELLED
   amount        Float
   distance      Float?
   duration      Int?
@@ -94,48 +93,11 @@ model Payment {
   tripId        String    @unique
   trip          Trip      @relation(fields: [tripId], references: [id])
   amount        Float
-  method        PaymentMethod
+  method        String    // MOBILE_MONEY, CASH, CARD
   provider      String?
   transactionId String?
-  status        PaymentStatus @default(PENDING)
+  status        String    @default("PENDING")  // PENDING, COMPLETED, FAILED, REFUNDED
   receiptUrl    String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-}
-
-enum Role {
-  SUPER_ADMIN
-  ADMIN
-  DRIVER
-  COOPERATIVE
-  RIDER
-}
-
-enum VehicleType {
-  TAXI
-  TAXI_MOTO
-  BUS
-  TRUCK
-  DELIVERY
-}
-
-enum TripStatus {
-  PENDING
-  ASSIGNED
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
-}
-
-enum PaymentMethod {
-  MOBILE_MONEY
-  CASH
-  CARD
-}
-
-enum PaymentStatus {
-  PENDING
-  COMPLETED
-  FAILED
-  REFUNDED
 }

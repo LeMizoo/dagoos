@@ -1,0 +1,156 @@
+// ========================================
+// DAGOO'S - MAIN.JS
+// ========================================
+
+// ===== HEADER SCROLL =====
+const header = document.querySelector('.header');
+window.addEventListener('scroll', () => {
+    header.classList.toggle('header-scrolled', window.pageYOffset > 50);
+});
+
+// ===== MOBILE MENU =====
+const hamburger = document.querySelector('.hamburger');
+const nav = document.querySelector('.nav');
+
+if (hamburger && nav) {
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        nav.classList.toggle('open');
+    });
+    nav.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            hamburger.classList.remove('active');
+            nav.classList.remove('open');
+        });
+    });
+}
+
+// ===== STATS ANIMATION =====
+const stats = document.querySelectorAll('.stat-number');
+if (stats.length > 0) {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const stat = entry.target;
+                const target = parseInt(stat.dataset.target);
+                let current = 0;
+                const increment = Math.ceil(target / 60);
+                const interval = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        stat.textContent = target;
+                        clearInterval(interval);
+                    } else {
+                        stat.textContent = current;
+                    }
+                }, 30);
+                observer.unobserve(stat);
+            }
+        });
+    }, { threshold: 0.5 });
+    stats.forEach(stat => observer.observe(stat));
+}
+
+// ===== SMOOTH SCROLL =====
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+        const href = this.getAttribute('href');
+        if (href === '#') return;
+        const target = document.querySelector(href);
+        if (target) {
+            e.preventDefault();
+            const headerHeight = document.querySelector('.header').offsetHeight;
+            const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+            window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+        }
+    });
+});
+
+// ========================================
+// AUTHENTIFICATION - API CONNEXION
+// ========================================
+
+import { registerUser, loginUser, isAuthenticated } from './api.js';
+
+// ===== INSCRIPTION =====
+const registerForm = document.getElementById('registerForm');
+const registerMessage = document.getElementById('registerMessage');
+
+if (registerForm) {
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const name = document.getElementById('registerName').value.trim();
+        const email = document.getElementById('registerEmail').value.trim();
+        const phone = document.getElementById('registerPhone').value.trim();
+        const role = document.getElementById('registerRole').value;
+        const password = document.getElementById('registerPassword').value;
+        const confirmPassword = document.getElementById('registerConfirmPassword').value;
+        
+        if (password !== confirmPassword) {
+            showMessage(registerMessage, '❌ Les mots de passe ne correspondent pas', 'error');
+            return;
+        }
+        if (password.length < 6) {
+            showMessage(registerMessage, '❌ Le mot de passe doit contenir au moins 6 caractères', 'error');
+            return;
+        }
+        
+        const result = await registerUser({ email, password, name, phone, role });
+        
+        if (result.success) {
+            showMessage(registerMessage, `✅ ${result.data.message}`, 'success');
+            registerForm.reset();
+            setTimeout(() => {
+                document.getElementById('login').scrollIntoView({ behavior: 'smooth' });
+            }, 2000);
+        } else {
+            showMessage(registerMessage, `❌ ${result.data.error || 'Une erreur est survenue'}`, 'error');
+        }
+    });
+}
+
+// ===== CONNEXION =====
+const loginForm = document.getElementById('loginForm');
+const loginMessage = document.getElementById('loginMessage');
+
+if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        
+        const result = await loginUser(email, password);
+        
+        if (result.success) {
+            showMessage(loginMessage, `✅ ${result.data.message}`, 'success');
+            // Rediriger vers le dashboard sur le port 5001
+            setTimeout(() => {
+                window.location.href = 'http://localhost:5001/';
+            }, 1500);
+        } else {
+            showMessage(loginMessage, `❌ ${result.data.error || 'Email ou mot de passe incorrect'}`, 'error');
+        }
+    });
+}
+
+// ===== UTILITAIRES =====
+function showMessage(element, message, type) {
+    element.textContent = message;
+    element.className = 'form-message ' + type;
+    element.style.display = 'block';
+    setTimeout(() => { element.style.display = 'none'; }, 5000);
+}
+
+// ===== VÉRIFIER LA SESSION =====
+if (isAuthenticated()) {
+    console.log('✅ Utilisateur déjà connecté');
+    // Rediriger directement vers le dashboard si déjà connecté
+    window.location.href = 'http://localhost:5001/';
+}
+
+// ===== CONSOLE MESSAGE =====
+console.log('%c🚀 Dagoo\'s', 'font-size: 32px; font-weight: bold; color: #1A5276;');
+console.log('%cLa mobilité connectée... Chez les potes, ça roule.', 'font-size: 18px; color: #F39C12;');
+console.log('%c🇲🇬 Salama Dago !', 'font-size: 16px; color: #27AE60;');
