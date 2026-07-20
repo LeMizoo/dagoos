@@ -1,5 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const prisma = new PrismaClient();
@@ -38,7 +38,7 @@ exports.register = async (req, res) => {
         email,
         phone,
         password: hashedPassword,
-        role: role || 'FLEET_MANAGER', // Rôle par défaut
+        role: role || 'FLEET_MANAGER',
       },
     });
 
@@ -71,19 +71,16 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Trouver l'utilisateur
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       return res.status(401).json({ error: 'Email ou mot de passe incorrect.' });
     }
 
-    // Vérifier le mot de passe
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(401).json({ error: 'Email ou mot de passe incorrect.' });
     }
 
-    // Générer le token
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       JWT_SECRET,
