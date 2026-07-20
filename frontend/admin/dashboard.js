@@ -2,17 +2,16 @@
 // DAGOO'S - ADMIN DASHBOARD
 // ========================================
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://dagoos-api.onrender.com/api';
+const LANDING_URL = 'https://dagoos.pages.dev';
 
 console.log('🚀 Dashboard Dagoo\'s chargé');
 
 // ===== NETTOYAGE URL =====
-// Nettoyer les paramètres de l'URL après récupération
 const urlParams = new URLSearchParams(window.location.search);
 let tokenFromUrl = urlParams.get('token');
 const userFromUrl = urlParams.get('user');
 
-// Nettoyer l'URL pour ne pas montrer le token
 if (urlParams.has('token') || urlParams.has('user')) {
     window.history.replaceState({}, document.title, window.location.pathname);
 }
@@ -24,7 +23,6 @@ if (tokenFromUrl === 'null' || tokenFromUrl === 'undefined' || !tokenFromUrl) {
 let token = localStorage.getItem('dagoos_token');
 let user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
 
-// Si token dans l'URL, on le sauvegarde
 if (tokenFromUrl && tokenFromUrl !== 'null') {
     token = tokenFromUrl;
     localStorage.setItem('dagoos_token', token);
@@ -43,17 +41,15 @@ function checkAuth() {
     const logoutBtn = document.getElementById('logoutBtn');
     
     if (!token || token === 'null' || token === 'undefined') {
-        // Pas connecté : cacher le bouton, rediriger après 2 secondes
         if (logoutBtn) logoutBtn.style.display = 'none';
         document.getElementById('userInfo').textContent = '🔒 Non connecté';
         
         setTimeout(() => {
-            window.location.href = 'http://localhost:5000/';
+            window.location.href = LANDING_URL;
         }, 2000);
         return false;
     }
     
-    // Connecté : afficher le bouton
     if (logoutBtn) logoutBtn.style.display = 'flex';
     return true;
 }
@@ -71,16 +67,13 @@ if (user && user.name) {
 const logoutBtn = document.getElementById('logoutBtn');
 if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
-        // Nettoyer TOUT le localStorage
         localStorage.removeItem('dagoos_token');
         localStorage.removeItem('dagoos_user');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         
-        console.log('👋 Déconnexion réussie - Redirection vers l\'accueil...');
-        
-        // Redirection vers la landing page SANS paramètres
-        window.location.href = 'http://localhost:5000/';
+        console.log('👋 Déconnexion réussie');
+        window.location.href = LANDING_URL;
     });
 }
 
@@ -114,7 +107,7 @@ async function loadDashboard() {
             document.getElementById('usersTableBody').innerHTML = `
                 <tr>
                     <td colspan="4" style="text-align:center; color:#E74C3C;">
-                        ⚠️ Session expirée - <a href="http://localhost:5000/" style="color:#1A5276; font-weight:600;">Reconnectez-vous</a>
+                        ⚠️ Session expirée - <a href="${LANDING_URL}" style="color:#1A5276; font-weight:600;">Reconnectez-vous</a>
                     </td>
                 </tr>
             `;

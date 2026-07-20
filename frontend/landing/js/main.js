@@ -2,24 +2,23 @@
 // DAGOO'S - LANDING PAGE
 // ========================================
 
-import { registerUser, loginUser, logoutUser, isAuthenticated, getProfile } from './api.js';
+import { registerUser, loginUser, logoutUser, isAuthenticated } from './api.js';
+
+const DASHBOARD_URL = 'https://dagoos.pages.dev';
+const LANDING_URL = 'https://dagoos.pages.dev';
 
 console.log('%c🚀 Dagoo\'s', 'font-size: 32px; font-weight: bold; color: #1A5276;');
 console.log('%cLa mobilité connectée... Chez les potes, ça roule.', 'font-size: 18px; color: #F39C12;');
 console.log('%c🇲🇬 Salama Dago !', 'font-size: 16px; color: #27AE60;');
 
-// ===== NETTOYAGE DES TOKENS AU CHARGEMENT =====
-// Ne pas rediriger automatiquement, mais nettoyer si token expiré
+// ===== NETTOYAGE URL =====
 const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.has('token')) {
-    // Si quelqu'un arrive avec un token dans l'URL, on le nettoie
     console.log('🧹 Nettoyage des paramètres URL...');
     window.history.replaceState({}, document.title, window.location.pathname);
 }
 
-// ===== GESTION DES FORMULAIRES =====
-
-// Formulaire d'inscription
+// ===== FORMULAIRE INSCRIPTION =====
 const registerForm = document.getElementById('registerForm');
 if (registerForm) {
     registerForm.addEventListener('submit', async (e) => {
@@ -34,7 +33,6 @@ if (registerForm) {
         
         const messageDiv = document.getElementById('registerMessage');
         
-        // Validation
         if (password !== confirmPassword) {
             messageDiv.innerHTML = '<div class="error-message">❌ Les mots de passe ne correspondent pas</div>';
             return;
@@ -45,9 +43,9 @@ if (registerForm) {
             return;
         }
         
-        // Bloquer SUPER_ADMIN
-        if (role === 'SUPER_ADMIN') {
-            messageDiv.innerHTML = '<div class="error-message">❌ Ce rôle n\'est pas autorisé</div>';
+        const allowedRoles = ['COOPERATIVE', 'FLEET_MANAGER'];
+        if (!allowedRoles.includes(role)) {
+            messageDiv.innerHTML = '<div class="error-message">❌ Ce type de compte n\'est pas autorisé</div>';
             return;
         }
         
@@ -69,7 +67,7 @@ if (registerForm) {
     });
 }
 
-// Formulaire de connexion
+// ===== FORMULAIRE CONNEXION =====
 const loginForm = document.getElementById('loginForm');
 if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
@@ -88,9 +86,8 @@ if (loginForm) {
             
             messageDiv.innerHTML = '<div class="success-message">✅ Connexion réussie ! Redirection...</div>';
             
-            // Redirection vers le dashboard avec token
             setTimeout(() => {
-                window.location.href = `http://localhost:5001/?token=${encodeURIComponent(token)}&user=${encodeURIComponent(JSON.stringify(user))}`;
+                window.location.href = `${DASHBOARD_URL}/?token=${encodeURIComponent(token)}&user=${encodeURIComponent(JSON.stringify(user))}`;
             }, 1000);
         } else {
             messageDiv.innerHTML = `<div class="error-message">❌ ${result.data?.error || 'Email ou mot de passe incorrect'}</div>`;
@@ -98,16 +95,14 @@ if (loginForm) {
     });
 }
 
-// ===== BOUTON DÉCONNEXION SUR LA LANDING (si connecté) =====
+// ===== MISE À JOUR UI =====
 function updateUIForAuth() {
     const navUl = document.querySelector('.nav ul');
     if (!navUl) return;
     
-    // Vérifier si déjà un bouton déconnexion existe
     const existingLogoutBtn = document.getElementById('landingLogoutBtn');
     
     if (isAuthenticated()) {
-        // Ajouter bouton déconnexion s'il n'existe pas déjà
         if (!existingLogoutBtn) {
             const logoutLi = document.createElement('li');
             logoutLi.id = 'landingLogoutBtn';
@@ -115,25 +110,21 @@ function updateUIForAuth() {
             logoutLi.addEventListener('click', (e) => {
                 e.preventDefault();
                 logoutUser();
-                // Recharger la page proprement
-                window.location.href = 'http://localhost:5000/';
+                window.location.href = LANDING_URL;
             });
             navUl.appendChild(logoutLi);
         }
         
-        // Cacher le bouton "Salama Dago!"
         const registerLink = navUl.querySelector('a[href="#register"]');
         if (registerLink) {
-            registerLink.textContent = '👤 Mon compte';
-            registerLink.href = 'http://localhost:5001/';
+            registerLink.textContent = '👤 Dashboard';
+            registerLink.href = DASHBOARD_URL;
         }
     } else {
-        // Supprimer le bouton déconnexion s'il existe
         if (existingLogoutBtn) {
             existingLogoutBtn.remove();
         }
         
-        // Remettre le bouton "Salama Dago!"
         const registerLink = navUl.querySelector('a[href="#register"]');
         if (registerLink) {
             registerLink.textContent = 'Salama Dago !';
@@ -145,7 +136,6 @@ function updateUIForAuth() {
 // ===== HAMBURGER MENU =====
 const hamburger = document.querySelector('.hamburger');
 const nav = document.querySelector('.nav ul');
-
 if (hamburger && nav) {
     hamburger.addEventListener('click', () => {
         nav.classList.toggle('active');
@@ -153,7 +143,7 @@ if (hamburger && nav) {
     });
 }
 
-// ===== ANIMATION DES STATISTIQUES =====
+// ===== ANIMATION STATS =====
 function animateStats() {
     const stats = document.querySelectorAll('.stat-number');
     stats.forEach(stat => {
@@ -181,7 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('✅ Landing page chargée');
     updateUIForAuth();
     
-    // Animer les stats quand elles deviennent visibles
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -197,5 +186,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Mettre à jour l'UI quand l'auth change
 window.addEventListener('storage', updateUIForAuth);
