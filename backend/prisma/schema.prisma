@@ -1,0 +1,141 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String      @id @default(cuid())
+  email         String      @unique
+  password      String
+  name          String
+  phone         String
+  role          Role        @default(DRIVER)
+  cooperativeId String?
+  cooperative   Cooperative? @relation(fields: [cooperativeId], references: [id])
+  driverProfile Driver?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Driver {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id])
+  licenseNumber String
+  phone         String
+  vehicleId     String?
+  vehicle       Vehicle?  @relation(fields: [vehicleId], references: [id])
+  isAvailable   Boolean   @default(true)
+  rating        Float     @default(0)
+  trips         Trip[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Vehicle {
+  id            String    @id @default(cuid())
+  plateNumber   String    @unique
+  brand         String
+  model         String
+  year          Int
+  color         String
+  type          VehicleType @default(TAXI)
+  cooperativeId String
+  cooperative   Cooperative @relation(fields: [cooperativeId], references: [id])
+  driver        Driver?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Cooperative {
+  id            String    @id @default(cuid())
+  name          String
+  description   String?
+  address       String
+  phone         String
+  email         String?
+  users         User[]
+  vehicles      Vehicle[]
+  trips         Trip[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Trip {
+  id            String    @id @default(cuid())
+  driverId      String
+  driver        Driver    @relation(fields: [driverId], references: [id])
+  cooperativeId String
+  cooperative   Cooperative @relation(fields: [cooperativeId], references: [id])
+  startLat      Float
+  startLng      Float
+  startAddress  String?
+  endLat        Float?
+  endLng        Float?
+  endAddress    String?
+  status        TripStatus @default(PENDING)
+  amount        Float
+  distance      Float?
+  duration      Int?
+  paymentId     String?
+  payment       Payment?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Payment {
+  id            String    @id @default(cuid())
+  tripId        String    @unique
+  trip          Trip      @relation(fields: [tripId], references: [id])
+  amount        Float
+  method        PaymentMethod
+  provider      String?
+  transactionId String?
+  status        PaymentStatus @default(PENDING)
+  receiptUrl    String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  DRIVER
+  COOPERATIVE
+  RIDER
+}
+
+enum VehicleType {
+  TAXI
+  TAXI_MOTO
+  BUS
+  TRUCK
+  DELIVERY
+}
+
+enum TripStatus {
+  PENDING
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  MOBILE_MONEY
+  CASH
+  CARD
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
