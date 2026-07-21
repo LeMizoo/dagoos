@@ -13,7 +13,7 @@ model User {
   password      String
   name          String
   phone         String
-  role          String      @default("DRIVER")  // SUPER_ADMIN, ADMIN, DRIVER, COOPERATIVE, RIDER
+  role          String      @default("DRIVER")  // SUPER_ADMIN, ADMIN, FLEET_MANAGER, COOPERATIVE, DRIVER
   cooperativeId String?
   cooperative   Cooperative? @relation(fields: [cooperativeId], references: [id])
   driverProfile Driver?

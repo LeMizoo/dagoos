@@ -55,19 +55,78 @@ app.get('/api/users', authMiddleware, async (req, res) => {
         const { PrismaClient } = require('@prisma/client');
         const prisma = new PrismaClient();
         
-        const users = await prisma.user.findMany({
-            select: {
-                id: true,
-                email: true,
-                name: true,
-                phone: true,
-                role: true,
-                createdAt: true
-            },
-            orderBy: {
-                createdAt: 'desc'
-            }
-        });
+        const requestingUser = req.user;
+        let users = [];
+        
+        // SUPER_ADMIN et ADMIN voient tout
+        if (requestingUser.role === 'SUPER_ADMIN' || requestingUser.role === 'ADMIN') {
+            users = await prisma.user.findMany({
+                select: {
+                    id: true,
+                    email: true,
+                    name: true,
+                    phone: true,
+                    role: true,
+                    createdAt: true
+                },
+                orderBy: { createdAt: 'desc' }
+            });
+        }
+        // FLEET_MANAGER voit ses chauffeurs et lui-même
+        else if (requestingUser.role === 'FLEET_MANAGER') {
+            users = await prisma.user.findMany({
+                where: {
+                    OR: [
+                        { id: requestingUser.id },
+                        { role: 'DRIVER' }
+                    ]
+                },
+                select: {
+                    id: true,
+                    email: true,
+                    name: true,
+                    phone: true,
+                    role: true,
+                    createdAt: true
+                },
+                orderBy: { createdAt: 'desc' }
+            });
+        }
+        // COOPERATIVE voit ses membres
+        else if (requestingUser.role === 'COOPERATIVE') {
+            users = await prisma.user.findMany({
+                where: {
+                    OR: [
+                        { id: requestingUser.id },
+                        { cooperativeId: requestingUser.id }
+                    ]
+                },
+                select: {
+                    id: true,
+                    email: true,
+                    name: true,
+                    phone: true,
+                    role: true,
+                    createdAt: true
+                },
+                orderBy: { createdAt: 'desc' }
+            });
+        }
+        // DRIVER ne voit que lui-même
+        else {
+            users = await prisma.user.findMany({
+                where: { id: requestingUser.id },
+                select: {
+                    id: true,
+                    email: true,
+                    name: true,
+                    phone: true,
+                    role: true,
+                    createdAt: true
+                },
+                orderBy: { createdAt: 'desc' }
+            });
+        }
         
         res.json(users);
     } catch (error) {
@@ -75,6 +134,15 @@ app.get('/api/users', authMiddleware, async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+// ===== ROUTES DE GESTION DES CHAUFFEURS =====
+const fleetController = require('./modules/fleet/fleet.controller');
+
+app.post('/api/fleet/drivers', authMiddleware, fleetController.addDriver);
+app.get('/api/fleet/drivers', authMiddleware, fleetController.getDrivers);
+app.get('/api/fleet/drivers/:id', authMiddleware, fleetController.getDriver);
+app.put('/api/fleet/drivers/:id', authMiddleware, fleetController.updateDriver);
+app.delete('/api/fleet/drivers/:id', authMiddleware, fleetController.deleteDriver);
 
 // ===== DÉMARRAGE =====
 app.listen(port, () => {
