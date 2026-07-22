@@ -69,6 +69,18 @@ app.get('/api/drivers', authMiddleware, async (req, res) => {
     }
 });
 
+// ===== ROUTES LOGS =====
+app.get("/api/logs", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const logs = await prisma.log.findMany({ orderBy: { createdAt: "desc" }, take: 100 });
+        res.json(logs);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // ===== DÉMARRAGE =====
 app.listen(port, () => {
   console.log(`✅ Dagoo's API lancée sur http://localhost:${port}`);

@@ -22,6 +22,15 @@ document.getElementById('sidebarUser').textContent = '👑 ' + (user.name || use
 document.getElementById('headerUser').textContent = user.name || user.email;
 document.getElementById('headerAvatar').textContent = (user.name || 'A')[0].toUpperCase();
 
+function setTheme(t) {
+    document.body.classList.remove("dark");
+    document.querySelectorAll(".sidebar-footer .theme-btns button").forEach(b => b.classList.remove("active"));
+    if (t === "dark") { document.body.classList.add("dark"); document.getElementById("theme-dark").classList.add("active"); }
+    else if (t === "light") { document.getElementById("theme-light").classList.add("active"); }
+    else { document.getElementById("theme-system").classList.add("active"); }
+    localStorage.setItem("dago_theme", t);
+}
+
 function logout() { localStorage.clear(); window.location.href = LANDING_URL; }
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 function toggleDropdown() { document.getElementById('userDropdown').classList.toggle('show'); }
