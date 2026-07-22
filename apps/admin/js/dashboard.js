@@ -58,7 +58,7 @@ function loadPage(page) {
         case "messages": main.innerHTML = getMessagesHTML(); loadMessages(); refreshInterval = setInterval(loadMessages, 30000); break;
         case "logs": main.innerHTML = getTableHTML("logs", "Logs", false); loadLogs(); break;
         case "payments": main.innerHTML = "<div class='topbar'><h1>Paiements</h1></div><div class='card' style='text-align:center;padding:60px;'>Bientot disponible</div>"; break;
-        case "settings": main.innerHTML = getSettingsHTML(); setTimeout(function() { switchSettingsTab("FLOTTE"); }, 200); break;
+        case "settings": main.innerHTML = getSettingsHTML(); setTimeout(function() { showPlans("FLOTTE"); }, 300); break;
     }
 }
 
@@ -192,54 +192,49 @@ async function loadLogs() {
 function exportCSV(type) { var items = type === "flottes" ? orgsData.filter(function(o) { return o.type === "FLEET_MANAGER"; }) : orgsData.filter(function(o) { return o.type === "COOPERATIVE"; }); var csv = "Nom,Code,Email,Plan,Statut\n"; items.forEach(function(o) { csv += "\"" + o.name + "\",\"" + o.code + "\",\"" + (o.email || "") + "\",\"" + (o.plan || "") + "\",\"" + o.status + "\"\n"; }); var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" })); a.download = type + ".csv"; a.click(); }
 
 // ===== SETTINGS =====
-var plansData = [];
+var currentSettingsTab = "FLOTTE";
+var allPlansData = [];
 
 function getSettingsHTML() {
-    return "<div class='topbar'><h1>Parametres</h1></div><div style='display:flex;gap:0;margin-bottom:24px;background:var(--card);border-radius:14px;overflow:hidden;'><button class='settings-tab active' id='tab-FLOTTE' onclick='switchSettingsTab(\"FLOTTE\")' style='flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;'>Plans Flotte</button><button class='settings-tab' id='tab-COOP' onclick='switchSettingsTab(\"COOP\")' style='flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;'>Plans Coop</button></div><div id='plans-content'>Chargement des plans...</div><button onclick='savePlans()' style='width:100%;padding:16px;background:#1A5276;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:24px;'><i class='fas fa-save'></i> Enregistrer</button>";
+    return "<div class="topbar"><h1>Parametres</h1></div><div style="display:flex;gap:0;margin-bottom:24px;background:var(--card);border-radius:14px;overflow:hidden;"><button class="settings-tab active" id="tab-FLOTTE" onclick="switchTabSettings('FLOTTE')" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">Plans Flotte</button><button class="settings-tab" id="tab-COOP" onclick="switchTabSettings('COOP')" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">Plans Coop</button></div><div id="plans-content" style="padding:20px;">Chargement...</div><button onclick="saveAllPlans()" style="width:100%;padding:16px;background:#1A5276;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:24px;"><i class="fas fa-save"></i> Enregistrer</button>";
 }
 
-function switchSettingsTab(type) {
+function switchTabSettings(type) {
     currentSettingsTab = type;
     document.querySelectorAll(".settings-tab").forEach(function(b) { b.classList.remove("active"); });
     document.getElementById("tab-" + type).classList.add("active");
-    loadPlansForSettings(type);
+    showPlans(type);
 }
 
-async function loadPlansForSettings(type) {
+async function showPlans(type) {
     try {
         var res = await fetch(API_URL + "/plans");
-        plansData = res.ok ? await res.json() : getDefaultPlans();
-        var plans = plansData.filter(function(p) { return p.type === type; });
-        var html = "<div class='card' style='padding:24px;'><h3>Plans mensuels</h3>";
-        plans.forEach(function(p, i) {
-            html += "<div style='display:flex;align-items:center;gap:16px;padding:16px;border:1px solid var(--border);border-radius:12px;margin-top:12px;flex-wrap:wrap;'><div style='width:100px;font-weight:700;'>" + p.name + "</div><div><input type='number' value='" + p.price + "' onchange='updatePlanField(" + i + ",\"price\",this.value)' style='width:80px;padding:8px;border:1px solid var(--border);border-radius:8px;text-align:center;font-weight:700;'> Ar/mois</div><div style='display:flex;gap:12px;'><span><input type='number' value='" + p.vehiclesMax + "' onchange='updatePlanField(" + i + ",\"vehiclesMax\",this.value)' style='width:50px;padding:6px;border:1px solid var(--border);border-radius:6px;text-align:center;'> vehicules</span><span><input type='number' value='" + p.driversMax + "' onchange='updatePlanField(" + i + ",\"driversMax\",this.value)' style='width:50px;padding:6px;border:1px solid var(--border);border-radius:6px;text-align:center;'> chauffeurs</span></div><span class='badge badge-success'>Actif</span></div>";
+        allPlansData = res.ok ? await res.json() : [];
+        var plans = allPlansData.filter(function(p) { return p.type === type; });
+        var h = "";
+        plans.forEach(function(p) {
+            h += "<div style="display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;flex-wrap:wrap;">";
+            h += "<strong style="width:80px;">" + p.name + "</strong>";
+            h += "<input type="number" value="" + p.price + "" data-id="" + p.id + "" data-field="price" style="width:80px;padding:6px;border:1px solid var(--border);border-radius:6px;text-align:center;"> Ar";
+            h += "<input type="number" value="" + p.vehiclesMax + "" data-id="" + p.id + "" data-field="vehiclesMax" style="width:50px;padding:6px;border:1px solid var(--border);border-radius:6px;text-align:center;"> vehicules";
+            h += "<input type="number" value="" + p.driversMax + "" data-id="" + p.id + "" data-field="driversMax" style="width:50px;padding:6px;border:1px solid var(--border);border-radius:6px;text-align:center;"> chauffeurs";
+            h += "</div>";
         });
-        html += "</div>";
-        document.getElementById("plans-content").innerHTML = html;
-    } catch (e) { document.getElementById("plans-content").innerHTML = "<p>Erreur de chargement</p>"; }
+        document.getElementById("plans-content").innerHTML = h || "<p>Aucun plan</p>";
+    } catch (e) {
+        document.getElementById("plans-content").innerHTML = "<p>Erreur: " + e.message + "</p>";
+    }
 }
 
-function updatePlanField(index, field, value) {
-    var typePlans = plansData.filter(function(p) { return p.type === currentSettingsTab; });
-    if (typePlans[index]) typePlans[index][field] = parseInt(value) || 0;
+function saveAllPlans() {
+    var inputs = document.querySelectorAll("#plans-content input");
+    inputs.forEach(function(inp) {
+        var id = inp.dataset.id;
+        var field = inp.dataset.field;
+        var plan = allPlansData.find(function(p) { return p.id === id; });
+        if (plan) plan[field] = parseInt(inp.value) || 0;
+    });
+    fetch(API_URL + "/plans", { method: "PUT", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token }, body: JSON.stringify({ plans: allPlansData }) }).then(function() { alert("Plans sauvegardes !"); }).catch(function() { alert("Erreur"); });
 }
 
-function savePlans() {
-    fetch(API_URL + "/plans", { method: "PUT", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token }, body: JSON.stringify({ plans: plansData }) }).then(function() { alert("Plans sauvegardes !"); }).catch(function() { alert("Erreur"); });
-}
-
-function getDefaultPlans() {
-    return [
-        { type: "FLEET_MANAGER", name: "Freemium", price: 0, vehiclesMax: 1, driversMax: 1 },
-        { type: "FLEET_MANAGER", name: "Basic", price: 15000, vehiclesMax: 5, driversMax: 10 },
-        { type: "FLEET_MANAGER", name: "Standard", price: 35000, vehiclesMax: 20, driversMax: 50 },
-        { type: "FLEET_MANAGER", name: "Premium", price: 75000, vehiclesMax: 100, driversMax: 200 },
-        { type: "COOPERATIVE", name: "Freemium", price: 0, vehiclesMax: 1, driversMax: 2 },
-        { type: "COOPERATIVE", name: "Basic", price: 20000, vehiclesMax: 5, driversMax: 15 },
-        { type: "COOPERATIVE", name: "Standard", price: 45000, vehiclesMax: 20, driversMax: 60 },
-        { type: "COOPERATIVE", name: "Premium", price: 90000, vehiclesMax: 100, driversMax: 300 }
-    ];
-}
-
-// ===== INIT =====
 loadPage("dashboard");
