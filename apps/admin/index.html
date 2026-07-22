@@ -3,206 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dagoo's - Admin Dashboard</title>
+    <title>Dagoo's Admin - Connexion</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #F8F9FA; }
-        
-        .sidebar {
-            position: fixed; top: 0; left: 0; width: 260px; height: 100vh;
-            background: #1A5276; color: white; padding: 24px; overflow-y: auto; z-index: 100;
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1A1A2E 0%, #16213E 50%, #0F3460 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .sidebar .logo { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; }
-        .sidebar .logo .logo-placeholder {
-            width: 40px; height: 40px; border-radius: 50%; background: #F1C40F;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 18px; color: #1A5276;
+        .login-container {
+            background: white;
+            border-radius: 16px;
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-        .sidebar .logo h1 { font-size: 20px; font-weight: 700; }
-        
-        .nav-item {
-            display: flex; align-items: center; gap: 12px; padding: 12px 16px;
-            border-radius: 8px; color: rgba(255,255,255,0.7); text-decoration: none;
-            transition: 0.3s; margin-bottom: 4px; cursor: pointer;
+        .login-header {
+            text-align: center;
+            margin-bottom: 36px;
         }
-        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: white; }
-        .nav-item i { width: 20px; }
-        
-        .main-content { margin-left: 260px; padding: 32px; }
-        
-        .dashboard-header {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;
+        .login-logo {
+            width: 64px;
+            height: 64px;
+            background: #F1C40F;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 28px;
+            font-weight: 800;
+            color: #1A5276;
         }
-        .dashboard-header h2 { font-size: 28px; color: #1A5276; }
-        
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px; }
-        .stat-card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-        .stat-card .number { font-size: 32px; font-weight: 800; color: #1A5276; }
-        .stat-card .label { color: #6C757D; font-size: 14px; margin-top: 4px; }
-        
-        .section { display: none; }
-        .section.active { display: block; }
-        
-        .table-container { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px; }
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 12px 16px; background: #F8F9FA; font-weight: 600; color: #1A5276; }
-        td { padding: 12px 16px; border-bottom: 1px solid #E9ECEF; }
-        
-        .badge { padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 600; }
-        .badge-super_admin { background: #E74C3C; color: white; }
-        .badge-admin { background: #1A5276; color: white; }
-        .badge-driver { background: #F1C40F; color: #1A1A2E; }
-        .badge-fleet_manager { background: #8E44AD; color: white; }
-        .badge-cooperative { background: #27AE60; color: white; }
-        
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #1A5276; }
+        .login-header h1 {
+            font-size: 24px;
+            color: #1A1A2E;
+            margin-bottom: 4px;
+        }
+        .login-header p {
+            color: #6C757D;
+            font-size: 14px;
+        }
+        .badge {
+            display: inline-block;
+            background: #1A5276;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1A1A2E;
+            margin-bottom: 6px;
+        }
+        .form-group .input-icon {
+            position: relative;
+        }
+        .form-group .input-icon i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6C757D;
+        }
         .form-group input {
-            width: 100%; padding: 10px 14px; border: 2px solid #E9ECEF; border-radius: 8px;
-            font-size: 14px; font-family: 'Inter', sans-serif; transition: 0.3s;
+            width: 100%;
+            padding: 14px 14px 14px 42px;
+            border: 2px solid #E9ECEF;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.3s;
         }
-        .form-group input:focus { outline: none; border-color: #1A5276; }
-        
-        .btn-primary {
-            background: #1A5276; color: white; border: none; padding: 10px 20px;
-            border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s;
+        .form-group input:focus {
+            outline: none;
+            border-color: #1A5276;
         }
-        .btn-primary:hover { background: #154360; }
-        
-        .success-message { background: #D4EFDF; color: #27AE60; padding: 12px; border-radius: 8px; margin-bottom: 16px; }
-        .error-message { background: #FADBD8; color: #E74C3C; padding: 12px; border-radius: 8px; margin-bottom: 16px; }
-        .info-message { background: #D6EAF8; color: #1A5276; padding: 12px; border-radius: 8px; margin-bottom: 16px; }
-        
-        .logout-btn {
-            position: absolute; bottom: 24px; left: 24px;
-            color: rgba(255,255,255,0.6); background: none; border: none;
-            font-size: 16px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s;
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: #1A5276;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-family: 'Inter', sans-serif;
         }
-        .logout-btn:hover { color: #E74C3C; }
-        
-        .add-form { max-width: 500px; }
-        
-        @media (max-width: 768px) {
-            .sidebar { width: 200px; }
-            .main-content { margin-left: 200px; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        .btn-login:hover {
+            background: #154360;
         }
-        @media (max-width: 500px) {
-            .sidebar { display: none; }
-            .main-content { margin-left: 0; }
-            .stats-grid { grid-template-columns: 1fr; }
+        .btn-login:disabled {
+            background: #6C757D;
+            cursor: not-allowed;
+        }
+        .message {
+            text-align: center;
+            margin-top: 16px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+        .message.error {
+            background: #FDE8E8;
+            color: #C0392B;
+            display: block;
+        }
+        .message.success {
+            background: #D5F5E3;
+            color: #27AE60;
+            display: block;
+        }
+        .message.info {
+            background: #D6EAF8;
+            color: #1A5276;
+            display: block;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 24px;
+        }
+        .back-link a {
+            color: #6C757D;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .back-link a:hover {
+            color: #1A5276;
+        }
+        .loader {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <!-- ===== SIDEBAR ===== -->
-    <aside class="sidebar">
-        <div class="logo">
-            <div class="logo-placeholder">D</div>
-            <h1>DAGOO'S</h1>
-        </div>
-        <nav>
-            <a class="nav-item active" data-section="section-users"><i class="fas fa-users"></i> Utilisateurs</a>
-            <a class="nav-item" data-section="section-drivers" style="display:none;"><i class="fas fa-id-card"></i> Chauffeurs</a>
-            <a class="nav-item" data-section="section-vehicles"><i class="fas fa-car"></i> Véhicules</a>
-            <a class="nav-item" data-section="section-trips"><i class="fas fa-route"></i> Courses</a>
-        </nav>
-        <button class="logout-btn" id="logoutBtn" style="display: none;">
-            <i class="fas fa-sign-out-alt"></i> 🚪 Déconnexion
-        </button>
-    </aside>
-
-    <!-- ===== MAIN ===== -->
-    <main class="main-content">
-        <div class="dashboard-header">
-            <h2><i class="fas fa-chart-line" style="color:#F1C40F;"></i> Tableau de bord</h2>
-            <span id="userInfo" style="color:#6C757D; font-size:14px;"></span>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="login-logo">D</div>
+            <h1>Dagoo's Admin</h1>
+            <p>Espace d'administration</p>
+            <span class="badge">🔒 Réservé aux administrateurs</span>
         </div>
         
-        <!-- Statistiques -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="number" id="totalUsers">0</div>
-                <div class="label">👥 Utilisateurs</div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <div class="input-icon">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" placeholder="votre@email.com" required autocomplete="email">
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="number" id="totalDrivers">0</div>
-                <div class="label">🚗 Chauffeurs</div>
+            
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <div class="input-icon">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Votre mot de passe" required autocomplete="current-password">
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="number" id="totalTrips">0</div>
-                <div class="label">📍 Courses</div>
-            </div>
-            <div class="stat-card">
-                <div class="number" id="totalRevenue">0</div>
-                <div class="label">💰 Revenus (Ar)</div>
-            </div>
+            
+            <div id="message" class="message"></div>
+            
+            <button type="submit" class="btn-login" id="loginBtn">
+                <span id="btnText"><i class="fas fa-sign-in-alt"></i> Se connecter</span>
+                <span class="loader" id="loader"></span>
+            </button>
+        </form>
+        
+        <div class="back-link">
+            <a href="https://dago-mobility.pages.dev">← Retour à l'accueil</a>
         </div>
-
-        <!-- SECTION UTILISATEURS -->
-        <div class="section active" id="section-users">
-            <div class="table-container">
-                <h3 style="margin-bottom:16px; color:#1A5276;"><i class="fas fa-users"></i> Tous les utilisateurs</h3>
-                <table>
-                    <thead>
-                        <tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Rôle</th></tr>
-                    </thead>
-                    <tbody id="usersTableBody">
-                        <tr><td colspan="4" style="text-align:center; color:#6C757D;">Chargement...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- SECTION CHAUFFEURS -->
-        <div class="section" id="section-drivers">
-            <div class="table-container">
-                <h3 style="margin-bottom:16px; color:#1A5276;"><i class="fas fa-id-card"></i> Ajouter un chauffeur</h3>
-                <form id="addDriverForm" class="add-form" onsubmit="event.preventDefault(); addDriver(event);">
-                    <div class="form-group"><label>Nom complet</label><input type="text" id="driverName" required></div>
-                    <div class="form-group"><label>Email</label><input type="email" id="driverEmail" required></div>
-                    <div class="form-group"><label>Téléphone</label><input type="text" id="driverPhone" required></div>
-                    <div class="form-group"><label>Mot de passe</label><input type="password" id="driverPassword" required minlength="6"></div>
-                    <div class="form-group"><label>N° Permis</label><input type="text" id="driverLicense"></div>
-                    <button type="submit" class="btn-primary"><i class="fas fa-plus"></i> Ajouter le chauffeur</button>
-                    <div id="addDriverMessage" style="margin-top:12px;"></div>
-                </form>
-            </div>
-
-            <div class="table-container">
-                <h3 style="margin-bottom:16px; color:#1A5276;"><i class="fas fa-list"></i> Liste des chauffeurs</h3>
-                <table>
-                    <thead>
-                        <tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Permis</th><th>Véhicule</th><th>Statut</th><th>Actions</th></tr>
-                    </thead>
-                    <tbody id="driversTableBody">
-                        <tr><td colspan="7" style="text-align:center; color:#6C757D;">Chargement...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- SECTION VÉHICULES -->
-        <div class="section" id="section-vehicles">
-            <div class="table-container">
-                <h3 style="margin-bottom:16px; color:#1A5276;"><i class="fas fa-car"></i> Gestion des véhicules</h3>
-                <p style="color:#6C757D;">🚧 Fonctionnalité à venir...</p>
-            </div>
-        </div>
-
-        <!-- SECTION COURSES -->
-        <div class="section" id="section-trips">
-            <div class="table-container">
-                <h3 style="margin-bottom:16px; color:#1A5276;"><i class="fas fa-route"></i> Gestion des courses</h3>
-                <p style="color:#6C757D;">🚧 Fonctionnalité à venir...</p>
-            </div>
-        </div>
-    </main>
-
-    <script src="dashboard.js"></script>
+    </div>
+    
+    <script src="js/login.js"></script>
 </body>
 </html>
