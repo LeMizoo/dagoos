@@ -16,14 +16,11 @@ const token = localStorage.getItem('dagoos_token');
 const user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
 if (!token || (user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN')) { window.location.href = LOGIN_URL; }
 
-document.getElementById('sidebarUser').textContent = '👑 ' + (user.name || user.email);
-document.getElementById('headerUser').textContent = user.name || user.email;
-document.getElementById('headerAvatar').textContent = (user.name || 'A')[0].toUpperCase();
+document.getElementById("sidebarUser").textContent = user.name || user.email;
+document.getElementById("sidebarAvatar").textContent = (user.name || "A")[0].toUpperCase();
 
 // ===== UTILS =====
 function logout() { localStorage.clear(); window.location.href = LANDING_URL; }
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-function toggleDropdown() { document.getElementById('userDropdown').classList.toggle('show'); }
 document.addEventListener('click', (e) => { if (!e.target.closest('.user-dropdown')) document.getElementById('userDropdown').classList.remove('show'); });
 
 function setTheme(t) {
