@@ -113,6 +113,19 @@ app.put("/api/messages/:id/read", authMiddleware, async (req, res) => {
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
+app.put("/api/messages/:id/reply", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { reply } = req.body;
+        const updated = await prisma.message.update({
+            where: { id: req.params.id },
+            data: { reply, replied: true, repliedAt: new Date(), repliedBy: req.user.email, read: true }
+        });
+        res.json(updated);
+    } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
 app.post("/api/messages", authMiddleware, async (req, res) => {
     try {
         const { PrismaClient } = require("@prisma/client");

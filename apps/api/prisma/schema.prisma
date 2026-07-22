@@ -53,8 +53,12 @@ model Message {
   organization   Organization @relation(fields: [organizationId], references: [id])
   subject        String
   content        String
+  reply          String?
+  repliedAt      DateTime?
+  repliedBy      String?
   type           String       @default("info")
   read           Boolean      @default(false)
+  replied        Boolean      @default(false)
   createdAt      DateTime     @default(now())
 }
 
