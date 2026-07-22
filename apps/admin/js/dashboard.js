@@ -7,8 +7,8 @@ const LANDING_URL = 'https://dago-mobility.pages.dev';
 const LOGIN_URL = 'index.html';
 
 let currentPage = 'dashboard';
+let currentSettingsTab = 'FLOTTE';
 let refreshInterval;
-let theme = localStorage.getItem('dago_theme') || 'light';
 
 // ===== AUTH =====
 const token = localStorage.getItem('dagoos_token');
@@ -18,38 +18,11 @@ if (!token || (user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN')) {
     window.location.href = LOGIN_URL;
 }
 
-// ===== APPLY THEME =====
-function applyTheme(t) {
-    theme = t;
-    localStorage.setItem('dago_theme', t);
-    if (t === 'dark') {
-        document.body.style.background = '#0F172A';
-        document.body.style.color = '#E2E8F0';
-    } else {
-        document.body.style.background = '#F1F5F9';
-        document.body.style.color = '#1A1A2E';
-    }
-}
-applyTheme(theme);
-
 document.getElementById('sidebarUser').textContent = '👑 ' + (user.name || user.email);
 
 function logout() {
     localStorage.clear();
     window.location.href = LANDING_URL;
-}
-
-// ===== TOGGLE EXPAND =====
-function toggleSubmenu(key) {
-    const sub = document.getElementById('sub-' + key);
-    const icon = document.getElementById('icon-' + key);
-    if (sub.style.display === 'none') {
-        sub.style.display = 'block';
-        icon.classList.replace('fa-chevron-right', 'fa-chevron-down');
-    } else {
-        sub.style.display = 'none';
-        icon.classList.replace('fa-chevron-down', 'fa-chevron-right');
-    }
 }
 
 // ===== NAVIGATION =====
@@ -92,13 +65,14 @@ async function loadPage(page) {
         case 'settings':
             main.innerHTML = getSettingsHTML();
             break;
-        case 'plans-flotte':
-            main.innerHTML = getPlansHTML('FLOTTE');
-            break;
-        case 'plans-coop':
-            main.innerHTML = getPlansHTML('COOP');
-            break;
     }
+}
+
+function switchSettingsTab(tab) {
+    currentSettingsTab = tab;
+    document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    document.getElementById('plans-content').innerHTML = getPlansContent(tab);
 }
 
 // ===== DASHBOARD =====
@@ -170,7 +144,10 @@ async function loadDashboardStats() {
 // ===== FLOTTES =====
 function getFleetsHTML() { return `<div class="topbar"><h1>🚛 Flottes</h1></div><div class="card"><div class="card-header"><h3>Toutes les flottes</h3></div><table><thead><tr><th>Nom</th><th>Code</th><th>Email</th><th>Chauffeurs</th><th>Plan</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="fleetsTable"></tbody></table></div>`; }
 async function loadFleets() {
-    const [orgsRes, driversRes] = await Promise.all([fetch(`${API_URL}/organizations`, { headers: { Authorization: `Bearer ${token}` } }), fetch(`${API_URL}/drivers`, { headers: { Authorization: `Bearer ${token}` } })]);
+    const [orgsRes, driversRes] = await Promise.all([
+        fetch(`${API_URL}/organizations`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`${API_URL}/drivers`, { headers: { 'Authorization': `Bearer ${token}` } })
+    ]);
     const orgs = orgsRes.ok ? await orgsRes.json() : [];
     const drivers = driversRes.ok ? await driversRes.json() : [];
     const fleets = orgs.filter(o => o.type === 'FLEET_MANAGER');
@@ -183,7 +160,10 @@ async function loadFleets() {
 // ===== COOPS =====
 function getCoopsHTML() { return `<div class="topbar"><h1>🏢 Coopératives</h1></div><div class="card"><div class="card-header"><h3>Toutes les coopératives</h3></div><table><thead><tr><th>Nom</th><th>Code</th><th>Email</th><th>Chauffeurs</th><th>Plan</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="coopsTable"></tbody></table></div>`; }
 async function loadCoops() {
-    const [orgsRes, driversRes] = await Promise.all([fetch(`${API_URL}/organizations`, { headers: { Authorization: `Bearer ${token}` } }), fetch(`${API_URL}/drivers`, { headers: { Authorization: `Bearer ${token}` } })]);
+    const [orgsRes, driversRes] = await Promise.all([
+        fetch(`${API_URL}/organizations`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`${API_URL}/drivers`, { headers: { 'Authorization': `Bearer ${token}` } })
+    ]);
     const orgs = orgsRes.ok ? await orgsRes.json() : [];
     const drivers = driversRes.ok ? await driversRes.json() : [];
     const coops = orgs.filter(o => o.type === 'COOPERATIVE');
@@ -208,67 +188,79 @@ async function loadDrivers() {
 // ===== PAIEMENTS =====
 function getPaymentsHTML() { return `<div class="topbar"><h1>💳 Paiements</h1></div><div class="card" style="text-align:center;padding:60px;"><i class="fas fa-credit-card" style="font-size:48px;color:#CCC;"></i><h3 style="color:#6C757D;">Module de paiement</h3><p style="color:#AAA;">Bientôt disponible</p></div>`; }
 
-// ===== PARAMÈTRES =====
+// ===== PARAMÈTRES AVEC ONGLETS =====
 function getSettingsHTML() {
     return `
         <div class="topbar"><h1>⚙️ Paramètres</h1></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
-            <a href="#" onclick="loadPage('plans-flotte');return false;" style="background:white;border-radius:14px;padding:24px;text-align:center;text-decoration:none;color:inherit;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-                <span style="font-size:32px;">🏍️</span><h3>Plans Flotte</h3><p style="color:#6C757D;font-size:13px;">Configurer les abonnements</p>
-            </a>
-            <a href="#" onclick="loadPage('plans-coop');return false;" style="background:white;border-radius:14px;padding:24px;text-align:center;text-decoration:none;color:inherit;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-                <span style="font-size:32px;">📦</span><h3>Plans Coop</h3><p style="color:#6C757D;font-size:13px;">Configurer les abonnements</p>
-            </a>
+        
+        <div style="display:flex;gap:0;margin-bottom:24px;background:white;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <button class="settings-tab active" id="tab-FLOTTE" onclick="switchSettingsTab('FLOTTE')" style="flex:1;padding:16px;border:none;background:transparent;cursor:pointer;font-size:15px;font-weight:600;font-family:'Inter',sans-serif;transition:0.3s;">
+                🏍️ Plans Flotte
+            </button>
+            <button class="settings-tab" id="tab-COOP" onclick="switchSettingsTab('COOP')" style="flex:1;padding:16px;border:none;background:transparent;cursor:pointer;font-size:15px;font-weight:600;font-family:'Inter',sans-serif;transition:0.3s;">
+                📦 Plans Coop
+            </button>
         </div>
-        <div class="card" style="padding:24px;">
+        
+        <div id="plans-content">${getPlansContent('FLOTTE')}</div>
+        
+        <div class="card" style="padding:24px;margin-top:24px;">
             <h3>🌐 Général</h3>
-            <div style="margin-top:16px;"><label>💱 Monnaie</label><input value="Ar" style="width:100%;padding:10px;border:1px solid #E9ECEF;border-radius:8px;margin-top:4px;" disabled></div>
-            <div style="margin-top:16px;"><label>🌐 Langue</label>
+            <div style="margin-top:16px;"><label style="font-weight:500;">💱 Monnaie</label><input value="Ar" style="width:100%;padding:10px;border:1px solid #E9ECEF;border-radius:8px;margin-top:4px;" disabled></div>
+            <div style="margin-top:16px;"><label style="font-weight:500;">🌐 Langue</label>
                 <select style="width:100%;padding:10px;border:1px solid #E9ECEF;border-radius:8px;margin-top:4px;">
                     <option>🇫🇷 Français</option><option>🇲🇬 Malagasy</option><option>🇬🇧 English</option>
                 </select>
             </div>
             <div style="margin-top:20px;display:flex;align-items:center;justify-content:space-between;">
                 <div><strong>🔔 Notifications</strong><br><span style="color:#6C757D;font-size:13px;">Activer toutes les notifications</span></div>
-                <button onclick="this.classList.toggle('active')" style="width:48px;height:28px;border-radius:50px;background:#E9ECEF;border:none;cursor:pointer;position:relative;">
+                <button id="notifToggle" onclick="this.classList.toggle('active');" style="width:48px;height:28px;border-radius:50px;background:#E9ECEF;border:none;cursor:pointer;position:relative;">
                     <span style="position:absolute;top:2px;left:2px;width:24px;height:24px;background:white;border-radius:50%;transition:0.3s;"></span>
                 </button>
             </div>
-        </div>`;
+        </div>
+        <button onclick="alert('✅ Paramètres sauvegardés !')" style="width:100%;padding:16px;background:#1A5276;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:24px;">
+            <i class="fas fa-save"></i> Enregistrer
+        </button>
+        
+        <style>
+            .settings-tab.active { background: #1A5276 !important; color: white !important; }
+            .settings-tab:not(.active):hover { background: #F1F5F9; }
+        </style>
+    `;
 }
 
-// ===== PLANS =====
-function getPlansHTML(type) {
-    const title = type === 'FLOTTE' ? '🏍️ Plans Flotte' : '📦 Plans Coop';
+function getPlansContent(type) {
     const plans = type === 'FLOTTE' 
         ? [{ nom: 'Freemium', prix: 0, vehiculesMax: 1, chauffeursMax: 1 }, { nom: 'Basic', prix: 15000, vehiculesMax: 5, chauffeursMax: 10 }, { nom: 'Standard', prix: 35000, vehiculesMax: 20, chauffeursMax: 50 }, { nom: 'Premium', prix: 75000, vehiculesMax: 100, chauffeursMax: 200 }]
         : [{ nom: 'Freemium', prix: 0, vehiculesMax: 1, livreursMax: 2 }, { nom: 'Basic', prix: 20000, vehiculesMax: 5, livreursMax: 15 }, { nom: 'Standard', prix: 45000, vehiculesMax: 20, livreursMax: 60 }, { nom: 'Premium', prix: 90000, vehiculesMax: 100, livreursMax: 300 }];
     
+    const label = type === 'FLOTTE' ? 'chauffeurs' : 'livreurs';
+    const maxField = type === 'FLOTTE' ? 'chauffeursMax' : 'livreursMax';
+    
     return `
-        <div class="topbar"><h1>${title}</h1><a href="#" onclick="loadPage('settings');return false;" style="color:#6C757D;text-decoration:none;">← Retour paramètres</a></div>
-        <div class="card" style="padding:24px;"><h3>📋 Plans mensuels</h3>
+        <div class="card" style="padding:24px;">
+            <h3>📋 Plans mensuels</h3>
             ${plans.map((p,i) => `
-                <div style="display:flex;align-items:center;gap:16px;padding:16px;border:1px solid #F1F5F9;border-radius:12px;margin-top:12px;">
+                <div style="display:flex;align-items:center;gap:16px;padding:16px;border:1px solid #F1F5F9;border-radius:12px;margin-top:12px;flex-wrap:wrap;">
                     <div style="width:100px;font-weight:700;">${p.nom}</div>
                     <div><input type="number" value="${p.prix}" style="width:80px;padding:8px;border:1px solid #E9ECEF;border-radius:8px;text-align:center;font-weight:700;"> <span style="font-size:13px;color:#6C757D;">Ar/mois</span></div>
                     <div style="display:flex;gap:12px;">
                         <span>🏍️ <input type="number" value="${p.vehiculesMax}" style="width:50px;padding:6px;border:1px solid #E9ECEF;border-radius:6px;text-align:center;"> véhicules</span>
-                        <span>👥 <input type="number" value="${p.chauffeursMax || p.livreursMax || 0}" style="width:50px;padding:6px;border:1px solid #E9ECEF;border-radius:6px;text-align:center;"> ${type==='FLOTTE'?'chauffeurs':'livreurs'}</span>
+                        <span>👥 <input type="number" value="${p[maxField] || 0}" style="width:50px;padding:6px;border:1px solid #E9ECEF;border-radius:6px;text-align:center;"> ${label}</span>
                     </div>
                     <span class="badge badge-success">✅ Actif</span>
                 </div>
             `).join('')}
         </div>
-        <div class="card" style="padding:24px;margin-top:24px;">
+        <div class="card" style="padding:24px;margin-top:16px;">
             <h3>📉 Réduction abonnement annuel</h3>
             <div style="display:flex;align-items:center;gap:12px;margin-top:12px;">
                 <input type="number" value="7" style="width:80px;padding:12px;border:1px solid #E9ECEF;border-radius:8px;text-align:center;font-weight:700;font-size:18px;"> <span style="font-size:18px;">%</span>
                 <span style="color:#6C757D;font-size:13px;">pour les abonnements annuels</span>
             </div>
         </div>
-        <button onclick="alert('✅ Paramètres sauvegardés !')" style="width:100%;padding:16px;background:#1A5276;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:24px;">
-            <i class="fas fa-save"></i> Enregistrer
-        </button>`;
+    `;
 }
 
 // ===== INIT =====
