@@ -907,3 +907,17 @@ img {
         padding: 24px;
     }
 }
+
+/* ===== PROVERB HERO - PLUS LISIBLE ===== */
+.hero-proverb {
+    font-size: 15px;
+    color: rgba(255,255,255,0.9);
+    font-style: italic;
+    margin-top: 16px;
+    border-left: 3px solid #F1C40F;
+    padding-left: 14px;
+    background: rgba(0,0,0,0.2);
+    padding: 10px 14px;
+    border-radius: 0 8px 8px 0;
+    line-height: 1.5;
+}
