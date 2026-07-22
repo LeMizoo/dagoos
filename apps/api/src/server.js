@@ -138,6 +138,32 @@ app.post("/api/messages", authMiddleware, async (req, res) => {
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
+// ===== ROUTES PLANS =====
+app.get("/api/plans", async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const plans = await prisma.plan.findMany({ where: { active: true }, orderBy: { price: "asc" } });
+        res.json(plans);
+    } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+app.put("/api/plans", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { plans } = req.body;
+        for (const plan of plans) {
+            await prisma.plan.upsert({
+                where: { id: plan.id || "new" },
+                update: { name: plan.name, price: plan.price, vehiclesMax: plan.vehiclesMax, driversMax: plan.driversMax, active: plan.active },
+                create: { type: plan.type, name: plan.name, price: plan.price, vehiclesMax: plan.vehiclesMax, driversMax: plan.driversMax, active: plan.active }
+            });
+        }
+        res.json({ success: true });
+    } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
 // ===== DÉMARRAGE =====
 app.listen(port, () => {
   console.log(`✅ Dagoo's API lancée sur http://localhost:${port}`);

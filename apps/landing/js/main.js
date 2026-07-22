@@ -64,3 +64,38 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('✅ Landing page chargée');
 });
+
+// ===== CHARGER LES PLANS DYNAMIQUEMENT =====
+async function loadPlans() {
+    try {
+        const response = await fetch('https://dagoos-api.onrender.com/api/plans');
+        if (!response.ok) return;
+        const plans = await response.json();
+        
+        const fleetPlans = plans.filter(p => p.type === 'FLEET_MANAGER');
+        const coopPlans = plans.filter(p => p.type === 'COOPERATIVE');
+        
+        const fleetEl = document.getElementById('fleetPlans');
+        const coopEl = document.getElementById('coopPlans');
+        
+        if (fleetEl) {
+            fleetEl.innerHTML = fleetPlans.map(p => `
+                <div style="display:flex;justify-content:space-between;font-size:12px;">
+                    <span>🔹 ${p.name}</span>
+                    <span><strong>${p.price.toLocaleString()} Ar</strong> · ${p.vehiclesMax} véhicules · ${p.driversMax} chauffeurs</span>
+                </div>`).join('');
+        }
+        
+        if (coopEl) {
+            coopEl.innerHTML = coopPlans.map(p => `
+                <div style="display:flex;justify-content:space-between;font-size:12px;">
+                    <span>🔹 ${p.name}</span>
+                    <span><strong>${p.price.toLocaleString()} Ar</strong> · ${p.vehiclesMax} véhicules · ${p.driversMax} livreurs</span>
+                </div>`).join('');
+        }
+    } catch (e) {
+        console.log('Plans non disponibles, affichage par défaut');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadPlans);

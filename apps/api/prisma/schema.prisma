@@ -98,3 +98,15 @@ model Log {
   ip        String?
   createdAt DateTime @default(now())
 }
+
+model Plan {
+  id            String   @id @default(cuid())
+  type          String
+  name          String
+  price         Float    @default(0)
+  vehiclesMax   Int      @default(1)
+  driversMax    Int      @default(1)
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

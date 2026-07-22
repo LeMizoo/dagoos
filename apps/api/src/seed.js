@@ -75,6 +75,22 @@ async function seed() {
   }
 
   await prisma.$disconnect();
+  // Plans par défaut
+  const defaultPlans = [
+    { type: "FLEET_MANAGER", name: "Freemium", price: 0, vehiclesMax: 1, driversMax: 1 },
+    { type: "FLEET_MANAGER", name: "Basic", price: 15000, vehiclesMax: 5, driversMax: 10 },
+    { type: "FLEET_MANAGER", name: "Standard", price: 35000, vehiclesMax: 20, driversMax: 50 },
+    { type: "FLEET_MANAGER", name: "Premium", price: 75000, vehiclesMax: 100, driversMax: 200 },
+    { type: "COOPERATIVE", name: "Freemium", price: 0, vehiclesMax: 1, driversMax: 2 },
+    { type: "COOPERATIVE", name: "Basic", price: 20000, vehiclesMax: 5, driversMax: 15 },
+    { type: "COOPERATIVE", name: "Standard", price: 45000, vehiclesMax: 20, driversMax: 60 },
+    { type: "COOPERATIVE", name: "Premium", price: 90000, vehiclesMax: 100, driversMax: 300 }
+  ];
+  for (const p of defaultPlans) {
+    const existing = await prisma.plan.findFirst({ where: { type: p.type, name: p.name } });
+    if (!existing) { await prisma.plan.create({ data: p }); console.log("✅ Plan:", p.type, p.name); }
+  }
+
   console.log('✅ Seed terminé');
 }
 
