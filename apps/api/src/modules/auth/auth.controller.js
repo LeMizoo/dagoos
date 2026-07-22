@@ -42,7 +42,7 @@ exports.register = async (req, res) => {
         phone,
         logo: logo || DEFAULT_LOGO,
         plan: 'Freemium',
-        status: 'active'
+        status: 'pending'
       }
     });
 

@@ -106,7 +106,7 @@ async function loadOrgs(type, orgType) {
         var html = '';
         items.forEach(function(o) {
             var count = driversData.filter(function(d) { return d.organization && d.organization.code === o.code; }).length;
-            var suspBtn = o.status === 'active' ? '<button class="btn-sm btn-suspend" onclick="toggleOrgStatus(\'' + o.id + '\',\'' + o.status + '\')"><i class="fas fa-ban"></i></button>' : '<button class="btn-sm btn-success" onclick="toggleOrgStatus(\'' + o.id + '\',\'' + o.status + '\')"><i class="fas fa-check"></i></button>';
+            var actionBtns = "";
             html += '<tr><td><img src="' + (o.logo || 'assets/logo/b-trans.png') + '" class="logo-cell" style="vertical-align:middle;margin-right:8px;"><strong>' + o.name + '</strong></td><td><code>' + (orgType === 'FLEET_MANAGER' ? 'FL-' : 'CO-') + o.code + '</code></td><td>' + (o.email || 'N/A') + '</td><td>' + count + '</td><td><span class="badge badge-info">' + (o.plan || 'Freemium') + '</span></td><td><span class="badge ' + (o.status === 'active' ? 'badge-success' : 'badge-danger') + '">' + o.status + '</span></td><td class="action-btns"><button class="btn-sm btn-view" onclick="viewOrg(\'' + o.id + '\')"><i class="fas fa-eye"></i></button><button class="btn-sm btn-edit" onclick="editOrg(\'' + o.id + '\')"><i class="fas fa-edit"></i></button>' + suspBtn + '</td></tr>';
         });
         document.getElementById(type + 'Table').innerHTML = html || '<tr><td colspan="7">Aucune donnee</td></tr>';
@@ -135,6 +135,18 @@ function editOrg(id) {
     h += '</select></div>';
     var saveBtn = showModal('Modifier ' + org.name, h, true);
     if (saveBtn) saveBtn.onclick = function() { var name = document.getElementById('editName').value; var email = document.getElementById('editEmail').value; var plan = document.getElementById('editPlan').value; fetch(API_URL + '/organizations/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ name: name, email: email, plan: plan }) }).then(function() { closeModal(); loadPage(currentPage); }); };
+}
+
+function validateOrg(id) {
+    if (confirm("Valider cette organisation ?")) {
+        fetch(API_URL + "/organizations/" + id + "/status", { method: "PATCH", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token }, body: JSON.stringify({ status: "active" }) }).then(function() { loadPage(currentPage); });
+    }
+}
+function rejectOrg(id) {
+    var reason = prompt("Motif du rejet :");
+    if (reason && confirm("Refuser cette organisation ?")) {
+        fetch(API_URL + "/organizations/" + id + "/status", { method: "PATCH", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token }, body: JSON.stringify({ status: "rejected" }) }).then(function() { loadPage(currentPage); });
+    }
 }
 
 function toggleOrgStatus(id, status) {
