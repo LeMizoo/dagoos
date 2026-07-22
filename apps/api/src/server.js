@@ -88,9 +88,7 @@ app.get("/api/stats", async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ===== ROUTES DRIVERS (protégé) =====
-app.get('/api/drivers', /* public */  (req, res) => { return (async (req, res), async (req, res) => {
-// ===== ROUTES DRIVERS (protégé) =====
+// ===== ROUTES DRIVERS (publique) =====
 app.get("/api/drivers", async (req, res) => {
     try {
         const { PrismaClient } = require("@prisma/client");
