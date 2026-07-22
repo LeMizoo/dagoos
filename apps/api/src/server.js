@@ -34,6 +34,26 @@ app.post('/api/auth/driver-login', authController.driverLogin);
 app.get('/api/auth/profile', authMiddleware, authController.profile);
 
 // ===== ROUTES ORGANISATIONS =====
+app.put("/api/organizations/:id", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { name, email, plan, status } = req.body;
+        const org = await prisma.organization.update({ where: { id: req.params.id }, data: { name, email, plan, status } });
+        res.json(org);
+    } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+app.patch("/api/organizations/:id/status", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { status } = req.body;
+        const org = await prisma.organization.update({ where: { id: req.params.id }, data: { status } });
+        res.json(org);
+    } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
 app.get('/api/organizations', authController.getOrganizations);
 
 // ===== ROUTES UTILISATEURS (protégé) =====

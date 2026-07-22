@@ -134,18 +134,18 @@ function editOrg(id) {
     ['Freemium','Basic','Standard','Premium'].forEach(function(p) { h += '<option ' + (org.plan === p ? 'selected' : '') + '>' + p + '</option>'; });
     h += '</select></div>';
     var saveBtn = showModal('Modifier ' + org.name, h, true);
-    if (saveBtn) saveBtn.onclick = function() { alert('Modifications sauvegardees (simulation)'); closeModal(); loadPage(currentPage); };
+    if (saveBtn) saveBtn.onclick = function() { var name = document.getElementById('editName').value; var email = document.getElementById('editEmail').value; var plan = document.getElementById('editPlan').value; fetch(API_URL + '/organizations/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ name: name, email: email, plan: plan }) }).then(function() { closeModal(); loadPage(currentPage); }); };
 }
 
 function toggleOrgStatus(id, status) {
     var newStatus = status === 'active' ? 'suspended' : 'active';
-    if (confirm('Changer en ' + newStatus + ' ?')) { alert('Statut change (simulation)'); loadPage(currentPage); }
+    if (confirm('Changer en ' + newStatus + ' ?')) { fetch(API_URL + '/organizations/' + id + '/status', { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ status: newStatus }) }).then(function() { loadPage(currentPage); }); }
 }
 
 function addOrg(type) {
     var h = '<div class="form-group"><label>Nom</label><input id="addName"></div><div class="form-group"><label>Email</label><input id="addEmail"></div>';
     var saveBtn = showModal('Ajouter ' + (type === 'FLEET_MANAGER' ? 'Flotte' : 'Cooperative'), h, true);
-    if (saveBtn) saveBtn.onclick = function() { var n = document.getElementById('addName').value; if (!n) return alert('Nom requis'); alert(n + ' cree (simulation)'); closeModal(); loadPage(currentPage); };
+    if (saveBtn) saveBtn.onclick = function() { var n = document.getElementById('addName').value; if (!n) return alert('Nom requis'); var email = document.getElementById('addEmail').value; fetch(API_URL + '/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: n, email: email, password: '123456', role: type }) }).then(function() { closeModal(); loadPage(currentPage); }); };
 }
 
 function viewDriver(id) {
