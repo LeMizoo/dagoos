@@ -4,14 +4,133 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dagoo's - La mobilité connectée à Madagascar</title>
-    <meta name="description" content="Dagoo's - La première plateforme malgache de mobilité connectée. Transport, livraison, gestion de flotte.">
-    <meta name="keywords" content="transport Madagascar, mobilité, taxi, livraison, flotte, coopérative">
+    <meta name="description" content="Dagoo's - La première plateforme malgache de mobilité connectée.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        /* ===== HERO SLIDER ===== */
+        .hero {
+            position: relative;
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        .hero-slider {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0;
+        }
+        .hero-slide {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        .hero-slide.active {
+            opacity: 1;
+        }
+        .hero-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, rgba(26,26,46,0.85) 0%, rgba(26,82,118,0.75) 100%);
+            z-index: 1;
+        }
+        .hero .container {
+            position: relative;
+            z-index: 2;
+        }
+        .hero-text h1, .hero-text p, .hero-text .hero-badge {
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+        
+        /* ===== ESPACES (2 cartes) ===== */
+        .spaces-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .space-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px 32px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            color: inherit;
+        }
+        .space-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+        .space-icon {
+            font-size: 56px;
+            margin-bottom: 16px;
+        }
+        .space-card h3 {
+            font-size: 22px;
+            color: #1A1A2E;
+            margin-bottom: 8px;
+        }
+        .space-card p {
+            color: #6C757D;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        .space-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-small {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: #1A5276;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #154360;
+        }
+        .btn-secondary {
+            background: #F1C40F;
+            color: #1A1A2E;
+        }
+        .btn-secondary:hover {
+            background: #F39C12;
+        }
+        .btn-outline-dark {
+            border: 2px solid #1A5276;
+            color: #1A5276;
+            background: transparent;
+        }
+        .btn-outline-dark:hover {
+            background: #1A5276;
+            color: white;
+        }
+        
+        @media (max-width: 600px) {
+            .spaces-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     
@@ -32,16 +151,23 @@
                     </ul>
                 </nav>
                 <button class="hamburger" aria-label="Menu">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+                    <span></span><span></span><span></span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- ===== HERO ===== -->
+    <!-- ===== HERO AVEC SLIDER ===== -->
     <section class="hero">
+        <div class="hero-slider" id="heroSlider">
+            <div class="hero-slide active" style="background-image: url('assets/images/slide/S0001.jpg');"></div>
+            <div class="hero-slide" style="background-image: url('assets/images/slide/S0002.jpg');"></div>
+            <div class="hero-slide" style="background-image: url('assets/images/slide/S0003.jpg');"></div>
+            <div class="hero-slide" style="background-image: url('assets/images/slide/flotte-04.png');"></div>
+            <div class="hero-slide" style="background-image: url('assets/images/slide/flotte-05.png');"></div>
+            <div class="hero-slide" style="background-image: url('assets/images/slide/flotte-06.png');"></div>
+        </div>
+        <div class="hero-overlay"></div>
         <div class="container">
             <div class="hero-content">
                 <div class="hero-text">
@@ -95,15 +221,6 @@
                 <p>Créez votre compte gratuitement ou connectez-vous</p>
             </div>
             <div class="spaces-grid">
-                <!-- Admin -->
-                <div class="space-card">
-                    <div class="space-icon">👑</div>
-                    <h3>Administration</h3>
-                    <p>Supervision globale de la plateforme</p>
-                    <div class="space-buttons">
-                        <a href="https://dago-admin.pages.dev" class="btn-small btn-primary">Se connecter</a>
-                    </div>
-                </div>
                 <!-- Flotte -->
                 <div class="space-card">
                     <div class="space-icon">🚛</div>
@@ -124,16 +241,6 @@
                         <a href="https://dago-coop.pages.dev" class="btn-small btn-outline-dark">Se connecter</a>
                     </div>
                 </div>
-                <!-- Chauffeur -->
-                <div class="space-card">
-                    <div class="space-icon">🛵</div>
-                    <h3>Chauffeur</h3>
-                    <p>Recevez vos courses en temps réel</p>
-                    <div class="space-buttons">
-                        <a href="https://dago-driver.pages.dev" class="btn-small btn-outline-dark">Se connecter</a>
-                    </div>
-                    <p style="font-size:12px; color:#6C757D; margin-top:8px;">Compte créé par votre flotte ou coopérative</p>
-                </div>
             </div>
         </div>
     </section>
@@ -144,7 +251,6 @@
             <div class="section-header">
                 <span class="section-tag">Nos services</span>
                 <h2>Une solution complète pour le transport</h2>
-                <p>Dagoo's connecte tous les acteurs de la mobilité malgache</p>
             </div>
             <div class="services-grid">
                 <div class="service-card">
@@ -248,33 +354,18 @@
                     <p>La mobilité connectée... Chez les potes, ça roule.</p>
                 </div>
                 <div class="footer-links">
-                    <div>
-                        <h4>Produit</h4>
-                        <a href="#">Fonctionnalités</a>
-                        <a href="#">Tarifs</a>
-                        <a href="#">FAQ</a>
-                    </div>
-                    <div>
-                        <h4>Entreprise</h4>
-                        <a href="#">À propos</a>
-                        <a href="#">Blog</a>
-                        <a href="#">Carrières</a>
-                    </div>
-                    <div>
-                        <h4>Support</h4>
-                        <a href="#">Centre d'aide</a>
-                        <a href="#">Contact</a>
-                        <a href="#">Statut</a>
-                    </div>
+                    <div><h4>Produit</h4><a href="#">Fonctionnalités</a><a href="#">Tarifs</a><a href="#">FAQ</a></div>
+                    <div><h4>Entreprise</h4><a href="#">À propos</a><a href="#">Blog</a><a href="#">Carrières</a></div>
+                    <div><h4>Support</h4><a href="#">Centre d'aide</a><a href="#">Contact</a><a href="#">Statut</a></div>
                 </div>
             </div>
             <div class="footer-bottom">
                 <p>&copy; 2026 Dagoo's. Tous droits réservés.</p>
                 <div class="social-links">
-                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
                 </div>
             </div>
         </div>
