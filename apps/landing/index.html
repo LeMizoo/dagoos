@@ -28,7 +28,7 @@
                         <li><a href="#services">Services</a></li>
                         <li><a href="#features">Fonctionnalités</a></li>
                         <li><a href="#about">À propos</a></li>
-                        <li><a href="#spaces" class="btn-primary btn-small">Accéder à mon espace</a></li>
+                        <li><a href="#spaces" class="btn-primary btn-small">Commencer gratuitement</a></li>
                     </ul>
                 </nav>
                 <button class="hamburger" aria-label="Menu">
@@ -58,7 +58,7 @@
                     </p>
                     <div class="hero-buttons">
                         <a href="#spaces" class="btn-secondary">
-                            <i class="fas fa-rocket"></i> Accéder à mon espace
+                            <i class="fas fa-rocket"></i> Commencer gratuitement
                         </a>
                         <a href="#services" class="btn-outline">
                             <i class="fas fa-arrow-down"></i> Découvrir
@@ -92,33 +92,48 @@
             <div class="section-header">
                 <span class="section-tag">Espaces</span>
                 <h2>Choisissez votre espace</h2>
-                <p>Des outils adaptés à chaque acteur du transport</p>
+                <p>Créez votre compte gratuitement ou connectez-vous</p>
             </div>
             <div class="spaces-grid">
-                <a href="https://dago-admin.pages.dev" class="space-card">
+                <!-- Admin -->
+                <div class="space-card">
                     <div class="space-icon">👑</div>
                     <h3>Administration</h3>
                     <p>Supervision globale de la plateforme</p>
-                    <span class="space-link">Se connecter →</span>
-                </a>
-                <a href="https://dago-fleet.pages.dev" class="space-card">
+                    <div class="space-buttons">
+                        <a href="https://dago-admin.pages.dev" class="btn-small btn-primary">Se connecter</a>
+                    </div>
+                </div>
+                <!-- Flotte -->
+                <div class="space-card">
                     <div class="space-icon">🚛</div>
                     <h3>Gestion de Flotte</h3>
                     <p>Gérez vos véhicules et chauffeurs</p>
-                    <span class="space-link">Se connecter →</span>
-                </a>
-                <a href="https://dago-coop.pages.dev" class="space-card">
+                    <div class="space-buttons">
+                        <a href="https://dago-fleet.pages.dev/register" class="btn-small btn-secondary">Créer un compte</a>
+                        <a href="https://dago-fleet.pages.dev" class="btn-small btn-outline-dark">Se connecter</a>
+                    </div>
+                </div>
+                <!-- Coopérative -->
+                <div class="space-card">
                     <div class="space-icon">🏢</div>
                     <h3>Coopérative</h3>
                     <p>Multi-sociétés et livraisons</p>
-                    <span class="space-link">Se connecter →</span>
-                </a>
-                <a href="https://dago-driver.pages.dev" class="space-card">
+                    <div class="space-buttons">
+                        <a href="https://dago-coop.pages.dev/register" class="btn-small btn-secondary">Créer un compte</a>
+                        <a href="https://dago-coop.pages.dev" class="btn-small btn-outline-dark">Se connecter</a>
+                    </div>
+                </div>
+                <!-- Chauffeur -->
+                <div class="space-card">
                     <div class="space-icon">🛵</div>
                     <h3>Chauffeur</h3>
                     <p>Recevez vos courses en temps réel</p>
-                    <span class="space-link">Se connecter →</span>
-                </a>
+                    <div class="space-buttons">
+                        <a href="https://dago-driver.pages.dev" class="btn-small btn-outline-dark">Se connecter</a>
+                    </div>
+                    <p style="font-size:12px; color:#6C757D; margin-top:8px;">Compte créé par votre flotte ou coopérative</p>
+                </div>
             </div>
         </div>
     </section>
@@ -140,17 +155,17 @@
                 <div class="service-card">
                     <div class="service-icon">🏢</div>
                     <h3>Coopératives</h3>
-                    <p>Gérez plusieurs sociétés avec des comptes séparés et des rapports consolidés.</p>
+                    <p>Gérez plusieurs sociétés avec des comptes séparés.</p>
                 </div>
                 <div class="service-card">
                     <div class="service-icon">💳</div>
                     <h3>Paiements Mobile Money</h3>
-                    <p>Intégration MVola, Orange Money et Airtel Money pour des transactions fluides.</p>
+                    <p>Intégration MVola, Orange Money et Airtel Money.</p>
                 </div>
                 <div class="service-card">
                     <div class="service-icon">📍</div>
                     <h3>Suivi GPS</h3>
-                    <p>Suivez vos véhicules en temps réel avec une cartographie précise.</p>
+                    <p>Suivez vos véhicules en temps réel.</p>
                 </div>
             </div>
         </div>
@@ -166,31 +181,19 @@
             <div class="features-grid">
                 <div class="feature-item">
                     <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
-                    <div>
-                        <h4>Sécurité renforcée</h4>
-                        <p>Authentification sécurisée et chiffrement des données</p>
-                    </div>
+                    <div><h4>Sécurité renforcée</h4><p>Authentification sécurisée et chiffrement</p></div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
-                    <div>
-                        <h4>Analytics avancés</h4>
-                        <p>Tableaux de bord et rapports personnalisés</p>
-                    </div>
+                    <div><h4>Analytics avancés</h4><p>Tableaux de bord et rapports</p></div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
-                    <div>
-                        <h4>Mobile PWA</h4>
-                        <p>Application chauffeurs avec mode hors-ligne</p>
-                    </div>
+                    <div><h4>Mobile PWA</h4><p>Application chauffeurs hors-ligne</p></div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon"><i class="fas fa-handshake"></i></div>
-                    <div>
-                        <h4>Communauté de confiance</h4>
-                        <p>Un écosystème basé sur la confiance et la convivialité</p>
-                    </div>
+                    <div><h4>Communauté</h4><p>Basé sur la confiance et la convivialité</p></div>
                 </div>
             </div>
         </div>
@@ -203,14 +206,8 @@
                 <div class="about-text">
                     <span class="section-tag">À propos</span>
                     <h2>Pourquoi Dagoo's ?</h2>
-                    <p>
-                        <strong>Dago</strong> est le surnom que les Malgaches se donnent entre eux. 
-                        <strong>Dagoo's</strong> signifie donc <strong>"Chez les potes"</strong>.
-                    </p>
-                    <p>
-                        Notre mission est de digitaliser le transport malgache tout en gardant 
-                        l'âme et la convivialité qui font la force de notre pays.
-                    </p>
+                    <p><strong>Dago</strong> est le surnom que les Malgaches se donnent entre eux. <strong>Dagoo's</strong> signifie <strong>"Chez les potes"</strong>.</p>
+                    <p>Notre mission : digitaliser le transport malgache tout en gardant l'âme et la convivialité de notre pays.</p>
                     <div class="about-values">
                         <span class="value-tag">🤝 Confiance</span>
                         <span class="value-tag">💡 Innovation</span>
@@ -220,9 +217,7 @@
                 </div>
                 <div class="about-image">
                     <div class="about-quote">
-                        <blockquote>
-                            "La mobilité connectée... Chez les potes, ça roule."
-                        </blockquote>
+                        <blockquote>"La mobilité connectée... Chez les potes, ça roule."</blockquote>
                         <cite>— Dagoo's Team</cite>
                     </div>
                 </div>
@@ -235,9 +230,9 @@
         <div class="container">
             <div class="cta-content">
                 <h2>Prêt à rejoindre l'aventure ?</h2>
-                <p>Rejoignez la communauté des Dago qui transforment le transport malgache.</p>
+                <p>Créez votre compte gratuitement et rejoignez la communauté.</p>
                 <a href="#spaces" class="btn-primary btn-large">
-                    <i class="fas fa-rocket"></i> Choisir mon espace
+                    <i class="fas fa-rocket"></i> Commencer gratuitement
                 </a>
             </div>
         </div>
