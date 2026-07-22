@@ -99,3 +99,25 @@ async function loadPlans() {
 }
 
 document.addEventListener('DOMContentLoaded', loadPlans);
+
+// ===== CHARGER LES STATS =====
+async function loadStats() {
+    try {
+        var res = await Promise.all([
+            fetch('https://dagoos-api.onrender.com/api/organizations'),
+            fetch('https://dagoos-api.onrender.com/api/drivers')
+        ]);
+        var orgs = res[0].ok ? await res[0].json() : [];
+        var drivers = res[1].ok ? await res[1].json() : [];
+        var fleets = orgs.filter(function(o) { return o.type === 'FLEET_MANAGER'; }).length;
+        var coops = orgs.filter(function(o) { return o.type === 'COOPERATIVE'; }).length;
+        document.getElementById('statFleets').textContent = fleets;
+        document.getElementById('statDrivers').textContent = drivers.length;
+        document.getElementById('statCoops').textContent = coops;
+    } catch (e) {}
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadStats();
+    loadPlans();
+});
