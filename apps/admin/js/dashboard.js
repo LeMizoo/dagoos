@@ -32,8 +32,6 @@ function setTheme(t) {
 }
 
 function showModal(title, content) { document.getElementById("modalContent").innerHTML = `<h2>${title}</h2>${content}<div class="btn-row"><button class="btn btn-primary" onclick="closeModal()">Fermer</button></div>`; document.getElementById("modalOverlay").classList.add("show"); }
-    document.getElementById('modalContent').innerHTML = `<h2>${title}</h2>${content}<div class="btn-row"><button class="btn btn-primary" onclick="closeModal()">Fermer</button></div>`;
-    document.getElementById('modalOverlay').classList.add('show');
 }
 function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
 
