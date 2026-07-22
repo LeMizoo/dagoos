@@ -1,5 +1,5 @@
 // ========================================
-// DAGO ADMIN - DASHBOARD v7
+// DAGO ADMIN - DASHBOARD v8 FINAL
 // ========================================
 
 var API_URL = 'https://dagoos-api.onrender.com/api';
@@ -62,7 +62,8 @@ function loadPage(page) {
 }
 
 function getTableHTML(type, title, showAdd) {
-    var cols = type === 'flottes' || type === 'coops' ? '<th>Nom</th><th>Code</th><th>Email</th><th>Chauffeurs</th><th>Plan</th><th>Statut</th><th>Actions</th>' : '<th>Date</th><th>Utilisateur</th><th>Action</th><th>Details</th>';
+    var cols = (type === 'flottes' || type === 'coops') ? '<th>Nom</th><th>Code</th><th>Email</th><th>Chauffeurs</th><th>Plan</th><th>Statut</th><th>Actions</th>' : '<th>Date</th><th>Utilisateur</th><th>Action</th><th>Details</th>';
+    if (type === 'drivers') cols = '<th>Code</th><th>Nom</th><th>Organisation</th><th>Statut</th><th>Actions</th>';
     var addBtn = showAdd ? '<button class="btn btn-primary btn-sm" onclick="addOrg(\'' + (type === 'flottes' ? 'FLEET_MANAGER' : 'COOPERATIVE') + '\')"><i class="fas fa-plus"></i> Ajouter</button>' : '';
     return '<div class="topbar"><h1>' + title + '</h1><div style="display:flex;gap:8px;">' + addBtn + '<button class="btn btn-sm" style="background:var(--border);" onclick="exportCSV(\'' + type + '\')"><i class="fas fa-download"></i> CSV</button></div></div><div class="card"><table><thead><tr>' + cols + '</tr></thead><tbody id="' + type + 'Table"></tbody></table></div>';
 }
@@ -106,8 +107,18 @@ async function loadOrgs(type, orgType) {
         var html = '';
         items.forEach(function(o) {
             var count = driversData.filter(function(d) { return d.organization && d.organization.code === o.code; }).length;
-            var actionBtns = "";
-            html += '<tr><td><img src="' + (o.logo || 'assets/logo/b-trans.png') + '" class="logo-cell" style="vertical-align:middle;margin-right:8px;"><strong>' + o.name + '</strong></td><td><code>' + (orgType === 'FLEET_MANAGER' ? 'FL-' : 'CO-') + o.code + '</code></td><td>' + (o.email || 'N/A') + '</td><td>' + count + '</td><td><span class="badge badge-info">' + (o.plan || 'Freemium') + '</span></td><td><span class="badge ' + (o.status === 'active' ? 'badge-success' : 'badge-danger') + '">' + o.status + '</span></td><td class="action-btns"><button class="btn-sm btn-view" onclick="viewOrg(\'' + o.id + '\')"><i class="fas fa-eye"></i></button><button class="btn-sm btn-edit" onclick="editOrg(\'' + o.id + '\')"><i class="fas fa-edit"></i></button>' + suspBtn + '</td></tr>';
+            var statusBadge = o.status === 'active' ? 'badge-success' : o.status === 'pending' ? 'badge-warning' : 'badge-danger';
+            var actions = '<button class="btn-sm btn-view" onclick="viewOrg(\'' + o.id + '\')"><i class="fas fa-eye"></i></button>';
+            actions += '<button class="btn-sm btn-edit" onclick="editOrg(\'' + o.id + '\')"><i class="fas fa-edit"></i></button>';
+            if (o.status === 'pending') {
+                actions += '<button class="btn-sm btn-success" onclick="validateOrg(\'' + o.id + '\')" title="Valider"><i class="fas fa-check"></i></button>';
+                actions += '<button class="btn-sm btn-suspend" onclick="rejectOrg(\'' + o.id + '\')" title="Refuser"><i class="fas fa-times"></i></button>';
+            } else if (o.status === 'active') {
+                actions += '<button class="btn-sm btn-suspend" onclick="toggleOrgStatus(\'' + o.id + '\',\'active\')"><i class="fas fa-ban"></i></button>';
+            } else if (o.status === 'suspended') {
+                actions += '<button class="btn-sm btn-success" onclick="toggleOrgStatus(\'' + o.id + '\',\'suspended\')"><i class="fas fa-check"></i></button>';
+            }
+            html += '<tr><td><img src="' + (o.logo || 'assets/logo/b-trans.png') + '" class="logo-cell" style="vertical-align:middle;margin-right:8px;"><strong>' + o.name + '</strong></td><td><code>' + (orgType === 'FLEET_MANAGER' ? 'FL-' : 'CO-') + o.code + '</code></td><td>' + (o.email || 'N/A') + '</td><td>' + count + '</td><td><span class="badge badge-info">' + (o.plan || 'Freemium') + '</span></td><td><span class="badge ' + statusBadge + '">' + o.status + '</span></td><td class="action-btns">' + actions + '</td></tr>';
         });
         document.getElementById(type + 'Table').innerHTML = html || '<tr><td colspan="7">Aucune donnee</td></tr>';
     } catch (e) { console.error(e); }
@@ -117,49 +128,53 @@ async function loadDrivers() {
     var res = await fetch(API_URL + '/drivers', { headers: { Authorization: 'Bearer ' + token } });
     driversData = res.ok ? await res.json() : [];
     var html = '';
-    driversData.forEach(function(d) { html += '<tr><td><code>' + d.driverCode + '</code></td><td>' + (d.user ? d.user.name : 'N/A') + '</td><td>' + (d.organization ? d.organization.name : 'N/A') + '</td><td><span class="badge ' + (d.status === 'active' ? 'badge-success' : 'badge-danger') + '">' + d.status + '</span></td><td><button class="btn-sm btn-view" onclick="viewDriver(\'' + d.id + '\')"><i class="fas fa-eye"></i></button></td></tr>'; });
+    driversData.forEach(function(d) { html += '<tr><td><code>' + d.driverCode + '</code></td><td>' + (d.user ? d.user.name : 'N/A') + '</td><td>' + (d.organization ? d.organization.name : 'N/A') + '</td><td>' + d.status + '</td><td><button class="btn-sm btn-view" onclick="viewDriver(\'' + d.id + '\')"><i class="fas fa-eye"></i></button></td></tr>'; });
     document.getElementById('driversTable').innerHTML = html || '<tr><td colspan="5">Aucun chauffeur</td></tr>';
 }
 
 // ===== ACTIONS =====
 function viewOrg(id) {
     var org = orgsData.find(function(o) { return o.id === id; }); if (!org) return;
-    var drv = driversData.filter(function(d) { return d.organization && d.organization.code === org.code; });
-    showModal(org.name, '<p><strong>Code:</strong> ' + org.code + '</p><p><strong>Email:</strong> ' + (org.email || 'N/A') + '</p><p><strong>Plan:</strong> ' + (org.plan || 'Freemium') + '</p><p><strong>Statut:</strong> ' + org.status + '</p><p><strong>Chauffeurs:</strong> ' + drv.length + '</p>');
+    showModal(org.name, '<p><strong>Code:</strong> ' + org.code + '</p><p><strong>Email:</strong> ' + (org.email || 'N/A') + '</p><p><strong>Plan:</strong> ' + (org.plan || 'Freemium') + '</p><p><strong>Statut:</strong> ' + org.status + '</p>');
 }
-
 function editOrg(id) {
     var org = orgsData.find(function(o) { return o.id === id; }); if (!org) return;
     var h = '<div class="form-group"><label>Nom</label><input id="editName" value="' + org.name + '"></div><div class="form-group"><label>Email</label><input id="editEmail" value="' + (org.email || '') + '"></div><div class="form-group"><label>Plan</label><select id="editPlan">';
     ['Freemium','Basic','Standard','Premium'].forEach(function(p) { h += '<option ' + (org.plan === p ? 'selected' : '') + '>' + p + '</option>'; });
     h += '</select></div>';
     var saveBtn = showModal('Modifier ' + org.name, h, true);
-    if (saveBtn) saveBtn.onclick = function() { var name = document.getElementById('editName').value; var email = document.getElementById('editEmail').value; var plan = document.getElementById('editPlan').value; fetch(API_URL + '/organizations/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ name: name, email: email, plan: plan }) }).then(function() { closeModal(); loadPage(currentPage); }); };
+    if (saveBtn) saveBtn.onclick = function() {
+        var name = document.getElementById('editName').value;
+        var email = document.getElementById('editEmail').value;
+        var plan = document.getElementById('editPlan').value;
+        fetch(API_URL + '/organizations/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ name: name, email: email, plan: plan }) }).then(function() { closeModal(); loadPage(currentPage); });
+    };
 }
-
 function validateOrg(id) {
-    if (confirm("Valider cette organisation ?")) {
-        fetch(API_URL + "/organizations/" + id + "/status", { method: "PATCH", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token }, body: JSON.stringify({ status: "active" }) }).then(function() { loadPage(currentPage); });
+    if (confirm('Valider cette organisation ?')) {
+        fetch(API_URL + '/organizations/' + id + '/status', { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ status: 'active' }) }).then(function() { loadPage(currentPage); });
     }
 }
 function rejectOrg(id) {
-    var reason = prompt("Motif du rejet :");
-    if (reason && confirm("Refuser cette organisation ?")) {
-        fetch(API_URL + "/organizations/" + id + "/status", { method: "PATCH", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token }, body: JSON.stringify({ status: "rejected" }) }).then(function() { loadPage(currentPage); });
+    if (confirm('Refuser cette organisation ?')) {
+        fetch(API_URL + '/organizations/' + id + '/status', { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ status: 'rejected' }) }).then(function() { loadPage(currentPage); });
     }
 }
-
 function toggleOrgStatus(id, status) {
     var newStatus = status === 'active' ? 'suspended' : 'active';
-    if (confirm('Changer en ' + newStatus + ' ?')) { fetch(API_URL + '/organizations/' + id + '/status', { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ status: newStatus }) }).then(function() { loadPage(currentPage); }); }
+    if (confirm('Changer en ' + newStatus + ' ?')) {
+        fetch(API_URL + '/organizations/' + id + '/status', { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ status: newStatus }) }).then(function() { loadPage(currentPage); });
+    }
 }
-
 function addOrg(type) {
     var h = '<div class="form-group"><label>Nom</label><input id="addName"></div><div class="form-group"><label>Email</label><input id="addEmail"></div>';
     var saveBtn = showModal('Ajouter ' + (type === 'FLEET_MANAGER' ? 'Flotte' : 'Cooperative'), h, true);
-    if (saveBtn) saveBtn.onclick = function() { var n = document.getElementById('addName').value; if (!n) return alert('Nom requis'); var email = document.getElementById('addEmail').value; fetch(API_URL + '/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: n, email: email, password: '123456', role: type }) }).then(function() { closeModal(); loadPage(currentPage); }); };
+    if (saveBtn) saveBtn.onclick = function() {
+        var n = document.getElementById('addName').value; if (!n) return alert('Nom requis');
+        var email = document.getElementById('addEmail').value;
+        fetch(API_URL + '/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: n, email: email, password: '123456', role: type }) }).then(function() { closeModal(); loadPage(currentPage); });
+    };
 }
-
 function viewDriver(id) {
     var d = driversData.find(function(d) { return d.id === id; }); if (!d) return;
     showModal(d.user ? d.user.name : d.driverCode, '<p><strong>Code:</strong> ' + d.driverCode + '</p><p><strong>Organisation:</strong> ' + (d.organization ? d.organization.name : 'N/A') + '</p><p><strong>Statut:</strong> ' + d.status + '</p>');
@@ -172,12 +187,11 @@ async function loadMessages() {
         var messages = res.ok ? await res.json() : [];
         var html = '';
         messages.forEach(function(m) {
-            html += '<tr style="' + (!m.read ? 'background:#FEF3C7;' : '') + '"><td><strong>' + (m.organization ? m.organization.name : 'Admin') + '</strong></td><td>' + m.subject + '</td><td>' + (m.content || '').substring(0, 60) + '</td><td><span class="badge badge-' + (m.type === 'urgent' ? 'danger' : 'info') + '">' + m.type + '</span></td><td style="font-size:11px;">' + new Date(m.createdAt).toLocaleString('fr') + '</td><td class="action-btns">' + (m.reply ? '<span class="badge badge-success">Repondu: ' + m.reply.substring(0, 30) + '</span>' : '<button class="btn-sm btn-primary" onclick="replyMessage(\'' + m.id + '\')"><i class="fas fa-reply"></i></button>') + '</td></tr>';
+            html += '<tr style="' + (!m.read ? 'background:#FEF3C7;' : '') + '"><td><strong>' + (m.organization ? m.organization.name : 'Admin') + '</strong></td><td>' + m.subject + '</td><td>' + (m.content || '').substring(0, 60) + '</td><td><span class="badge badge-' + (m.type === 'urgent' ? 'danger' : 'info') + '">' + m.type + '</span></td><td style="font-size:11px;">' + new Date(m.createdAt).toLocaleString('fr') + '</td><td class="action-btns">' + (m.reply ? '<span class="badge badge-success">Repondu</span>' : '<button class="btn-sm btn-primary" onclick="replyMessage(\'' + m.id + '\')"><i class="fas fa-reply"></i></button>') + '</td></tr>';
         });
         document.getElementById('messagesTable').innerHTML = html || '<tr><td colspan="6">Aucun message</td></tr>';
     } catch (e) { console.error(e); }
 }
-
 function newMessage() {
     var h = '<div class="form-group"><label>Destinataire</label><select id="msgOrg">';
     orgsData.forEach(function(o) { h += '<option value="' + o.id + '">' + o.name + '</option>'; });
@@ -189,11 +203,9 @@ function newMessage() {
         var content = document.getElementById('msgContent').value;
         if (!subject || !content) return alert('Sujet et message requis');
         await fetch(API_URL + '/messages', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ organizationId: orgId, subject: subject, content: content }) });
-        closeModal();
-        loadMessages();
+        closeModal(); loadMessages();
     };
 }
-
 async function replyMessage(id) {
     var reply = prompt('Votre reponse :');
     if (!reply) return;
@@ -219,18 +231,18 @@ function exportCSV(type) {
     items.forEach(function(o) { csv += '"' + o.name + '","' + o.code + '","' + (o.email || '') + '","' + (o.plan || '') + '","' + o.status + '"\n'; });
     var a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }));
-    a.download = type + '.csv';
-    a.click();
+    a.download = type + '.csv'; a.click();
 }
 
 // ===== SETTINGS =====
 function getSettingsHTML() {
-    return '<div class="topbar"><h1>Parametres</h1></div><div style="display:flex;gap:0;margin-bottom:24px;background:var(--card);border-radius:14px;overflow:hidden;"><button class="settings-tab active" onclick="switchTab(\'FLOTTE\')" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">Plans Flotte</button><button class="settings-tab" onclick="switchTab(\'COOP\')" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">Plans Coop</button></div><div id="plans-content">Chargement...</div><button onclick="alert(\'Sauvegarde !\')" style="width:100%;padding:16px;background:#1A5276;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:24px;"><i class="fas fa-save"></i> Enregistrer</button>';
+    return '<div class="topbar"><h1>Parametres</h1></div><div style="display:flex;gap:0;margin-bottom:24px;background:var(--card);border-radius:14px;overflow:hidden;"><button class="settings-tab active" onclick="switchTab(\'FLOTTE\')" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">Plans Flotte</button><button class="settings-tab" onclick="switchTab(\'COOP\')" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">Plans Coop</button></div><div id="plans-content" style="padding:20px;">Chargement...</div>';
 }
 function switchTab(t) {
     document.querySelectorAll('.settings-tab').forEach(function(b) { b.classList.remove('active'); });
     event.target.classList.add('active');
-    document.getElementById('plans-content').innerHTML = '<p>Plans ' + t + ' (en developpement)</p>';
+    document.getElementById('plans-content').innerHTML = '<p>Plans ' + t + ' - Modification en cours de developpement</p>';
 }
 
+// ===== INIT =====
 loadPage('dashboard');
