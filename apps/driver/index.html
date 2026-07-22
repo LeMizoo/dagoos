@@ -19,56 +19,74 @@
             display: flex; align-items: center; justify-content: center;
         }
         .login-container {
-            background: #1A1A2E; border-radius: 16px; padding: 48px 40px;
-            width: 100%; max-width: 440px; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            background: #1A1A2E; border-radius: 16px; padding: 40px 32px;
+            width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
             color: white;
         }
-        .login-header { text-align: center; margin-bottom: 36px; }
+        .login-header { text-align: center; margin-bottom: 28px; }
         .login-logo {
-            width: 64px; height: 64px; background: #F1C40F; border-radius: 50%;
+            width: 56px; height: 56px; background: #F1C40F; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 16px; font-size: 32px; color: #1A1A2E;
+            margin: 0 auto 12px; font-size: 28px; color: #1A1A2E;
         }
-        .login-header h1 { font-size: 24px; margin-bottom: 4px; }
-        .login-header p { color: #AAA; font-size: 14px; }
+        .login-header h1 { font-size: 22px; margin-bottom: 4px; }
+        .login-header p { color: #AAA; font-size: 13px; }
         .badge {
             display: inline-block; background: #F1C40F; color: #1A1A2E;
-            padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 600; margin-top: 8px;
+            padding: 4px 10px; border-radius: 50px; font-size: 11px; font-weight: 600; margin-top: 6px;
         }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; color: #CCC; }
-        .form-group .input-icon { position: relative; }
-        .form-group .input-icon i {
-            position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #F1C40F;
+        .note {
+            text-align: center; margin-bottom: 20px; padding: 10px; background: #2C2C44;
+            border-radius: 8px; font-size: 12px; color: #AAA;
         }
-        .form-group input {
-            width: 100%; padding: 14px 14px 14px 42px;
+        .note i { color: #F1C40F; }
+        
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: #CCC; }
+        .form-group select, .form-group input {
+            width: 100%; padding: 12px;
             border: 2px solid #333; background: #2C2C44; color: white;
             border-radius: 8px; font-size: 15px; font-family: 'Inter', sans-serif; transition: border-color 0.3s;
         }
-        .form-group input:focus { outline: none; border-color: #F1C40F; }
+        .form-group select:focus, .form-group input:focus { outline: none; border-color: #F1C40F; }
+        .form-group select option { background: #2C2C44; color: white; }
+        
+        .code-row { display: flex; gap: 10px; align-items: flex-end; }
+        .code-row .code-prefix {
+            background: #F1C40F; color: #1A1A2E; padding: 12px 10px; border-radius: 8px;
+            font-weight: 700; font-size: 14px; white-space: nowrap;
+        }
+        
+        .pin-row { display: flex; gap: 8px; justify-content: center; }
+        .pin-row input {
+            width: 44px; height: 52px; text-align: center; font-size: 22px; font-weight: 700;
+            padding: 0; border: 2px solid #333; background: #2C2C44; color: #F1C40F;
+            border-radius: 8px;
+        }
+        .pin-row input:focus { border-color: #F1C40F; outline: none; }
+        
         .btn-login {
             width: 100%; padding: 14px; background: #F1C40F; color: #1A1A2E;
             border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
-            cursor: pointer; transition: background 0.3s; font-family: 'Inter', sans-serif;
+            cursor: pointer; transition: background 0.3s; font-family: 'Inter', sans-serif; margin-top: 20px;
         }
         .btn-login:hover { background: #F39C12; }
         .btn-login:disabled { background: #555; color: #999; cursor: not-allowed; }
         .message {
-            text-align: center; margin-top: 16px; padding: 10px; border-radius: 8px;
-            font-size: 14px; display: none;
+            text-align: center; margin-top: 12px; padding: 10px; border-radius: 8px;
+            font-size: 13px; display: none;
         }
         .message.error { background: #3B1111; color: #E74C3C; display: block; }
         .message.success { background: #0B3D0B; color: #2ECC71; display: block; }
         .message.info { background: #1A3D5C; color: #3498DB; display: block; }
-        .links { text-align: center; margin-top: 24px; }
-        .links a { color: #AAA; text-decoration: none; font-size: 14px; }
+        .links { text-align: center; margin-top: 20px; }
+        .links a { color: #AAA; text-decoration: none; font-size: 13px; }
         .links a:hover { color: #F1C40F; }
-        .note {
-            text-align: center; margin-top: 16px; padding: 12px; background: #2C2C44;
-            border-radius: 8px; font-size: 13px; color: #AAA;
+        
+        @media (max-width: 400px) {
+            .login-container { padding: 28px 18px; }
+            .pin-row input { width: 38px; height: 46px; font-size: 20px; }
         }
-        .note i { color: #F1C40F; }
     </style>
 </head>
 <body>
@@ -85,21 +103,35 @@
             Votre compte est créé par votre gestionnaire de flotte ou coopérative.
         </div>
         
-        <form id="loginForm" style="margin-top: 24px;">
+        <form id="loginForm">
+            <!-- Sélection Flotte/Coop -->
             <div class="form-group">
-                <label for="email">Email</label>
-                <div class="input-icon">
-                    <i class="fas fa-envelope"></i>
-                    <input type="email" id="email" placeholder="votre@email.com" required>
+                <label>🏢 Flotte / Coopérative</label>
+                <select id="organization" required>
+                    <option value="">— Sélectionner —</option>
+                </select>
+            </div>
+            
+            <!-- CODE -->
+            <div class="form-group">
+                <label>🔑 Code chauffeur</label>
+                <div class="code-row">
+                    <span class="code-prefix" id="codePrefix">--</span>
+                    <input type="text" id="driverCode" placeholder="AL001" required style="flex:1; text-transform: uppercase;">
                 </div>
             </div>
+            
+            <!-- PIN -->
             <div class="form-group">
-                <label for="password">Mot de passe</label>
-                <div class="input-icon">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" id="password" placeholder="Votre mot de passe" required>
+                <label>🔒 PIN (4 chiffres)</label>
+                <div class="pin-row" id="pinInputs">
+                    <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                    <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                    <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                    <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric">
                 </div>
             </div>
+            
             <div id="message" class="message"></div>
             <button type="submit" class="btn-login" id="loginBtn">
                 <i class="fas fa-sign-in-alt"></i> Se connecter
