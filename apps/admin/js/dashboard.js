@@ -22,7 +22,6 @@ document.getElementById("sidebarAvatar").textContent = (user.name || "A")[0].toU
 // ===== UTILS =====
 function logout() { localStorage.clear(); window.location.href = LANDING_URL; }
 document.addEventListener('click', (e) => { if (!e.target.closest('.user-dropdown')) document.getElementById('userDropdown').classList.remove('show'); });
-
 function setTheme(t) {
     document.body.classList.remove('dark');
     document.querySelectorAll('.sidebar-footer .theme-btns button').forEach(b => b.classList.remove('active'));
