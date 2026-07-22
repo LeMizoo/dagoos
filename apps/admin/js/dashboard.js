@@ -21,7 +21,7 @@ document.getElementById("sidebarAvatar").textContent = (user.name || "A")[0].toU
 
 // ===== UTILS =====
 function logout() { localStorage.clear(); window.location.href = LANDING_URL; }
-document.addEventListener('click', (e) => { if (!e.target.closest('.user-dropdown')) document.getElementById('userDropdown').classList.remove('show'); });
+// listener supprimé
 function setTheme(t) {
     document.body.classList.remove('dark');
     document.querySelectorAll('.sidebar-footer .theme-btns button').forEach(b => b.classList.remove('active'));
@@ -31,10 +31,9 @@ function setTheme(t) {
     localStorage.setItem('dago_theme', t);
 }
 
-function showModal(title, content, onSave) {
-    document.getElementById('modalContent').innerHTML = `<h2>${title}</h2>${content}<div class="btn-row"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" id="modalSaveBtn">Enregistrer</button></div>`;
+function showModal(title, content) { document.getElementById("modalContent").innerHTML = `<h2>${title}</h2>${content}<div class="btn-row"><button class="btn btn-primary" onclick="closeModal()">Fermer</button></div>`; document.getElementById("modalOverlay").classList.add("show"); }
+    document.getElementById('modalContent').innerHTML = `<h2>${title}</h2>${content}<div class="btn-row"><button class="btn btn-primary" onclick="closeModal()">Fermer</button></div>`;
     document.getElementById('modalOverlay').classList.add('show');
-    if (onSave) document.getElementById('modalSaveBtn').onclick = onSave;
 }
 function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
 
@@ -222,11 +221,11 @@ function viewOrg(id) {
 }
 function editOrg(id) {
     const org = orgsData.find(o => o.id === id); if (!org) return;
-    showModal('Modifier '+org.name, `<div class="form-group"><label>Nom</label><input id="editName" value="${org.name}"></div><div class="form-group"><label>Email</label><input id="editEmail" value="${org.email||''}"></div><div class="form-group"><label>Plan</label><select id="editPlan"><option ${org.plan==='Freemium'?'selected':''}>Freemium</option><option ${org.plan==='Basic'?'selected':''}>Basic</option><option ${org.plan==='Standard'?'selected':''}>Standard</option><option ${org.plan==='Premium'?'selected':''}>Premium</option></select></div>`, async () => { alert('✅ Modifications sauvegardées (simulation)'); closeModal(); loadPage(currentPage); });
+    showModal("Modifier " + org.name, "<div class="form-group"><label>Nom</label><input id="editName" value="" + org.name + ""></div><div class="form-group"><label>Email</label><input id="editEmail" value="" + (org.email||"") + ""></div><div class="form-group"><label>Plan</label><select id="editPlan"><option " + (org.plan=="Freemium"?"selected":"") + ">Freemium</option><option " + (org.plan=="Basic"?"selected":"") + ">Basic</option><option " + (org.plan=="Standard"?"selected":"") + ">Standard</option><option " + (org.plan=="Premium"?"selected":"") + ">Premium</option></select></div>");
 }
 function toggleOrgStatus(id, s) { if (confirm(`Changer le statut en "${s==='active'?'suspended':'active'}" ?`)) { alert('✅ Statut changé (simulation)'); loadPage(currentPage); } }
 function viewDriver(id) { const d = driversData.find(d=>d.id===id); if(!d)return; showModal(d.user?.name||d.driverCode,`<p><strong>Code:</strong> ${d.driverCode}</p><p><strong>Organisation:</strong> ${d.organization?.name||'N/A'}</p><p><strong>Statut:</strong> ${d.status}</p>`); }
-function addOrg(type) { showModal('Ajouter',`<div class="form-group"><label>Nom</label><input id="addName"></div><div class="form-group"><label>Email</label><input id="addEmail"></div>`,async()=>{const n=document.getElementById('addName').value;if(!n)return alert('Nom requis');alert('✅ '+n+' créé (simulation)');closeModal();loadPage(currentPage);});}
+function addOrg(type) { showModal('Ajouter',`<div class="form-group"><label>Nom</label><input id="addName"></div><div class="form-group"><label>Email</label><input id="addEmail"></div>`);}
 
 // ===== FILTER / SORT / EXPORT =====
 function filterTable(type, query) { const q = query.toLowerCase(); if (type==='flottes'||type==='coops') { const orgType = type==='flottes'?'FLEET_MANAGER':'COOPERATIVE'; const filtered = orgsData.filter(o => o.type===orgType && (o.name||'').toLowerCase().includes(q)); renderOrgs(type, filtered); } }
