@@ -236,9 +236,72 @@ function exportCSV(type) {
 
 // ===== SETTINGS =====
 function getSettingsHTML() {
-    return '<div class="topbar"><h1>Parametres</h1></div><div style="display:flex;gap:0;margin-bottom:24px;background:var(--card);border-radius:14px;overflow:hidden;"><button class="settings-tab active" onclick="switchTab(\'FLOTTE\')" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">Plans Flotte</button><button class="settings-tab" onclick="switchTab(\'COOP\')" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">Plans Coop</button></div><div id="plans-content" style="padding:20px;">Chargement...</div>';
+    return '<div class="topbar"><h1>Parametres</h1></div>
+        <div style="display:flex;gap:0;margin-bottom:24px;background:var(--card);border-radius:14px;overflow:hidden;">
+            <button class="settings-tab active" onclick="switchSettingsTab("FLOTTE")" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">Plans Flotte</button>
+            <button class="settings-tab" onclick="switchSettingsTab("COOP")" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">Plans Coop</button>
+        </div>
+        <div id="plans-content"></div>
+        <button onclick="savePlans()" style="width:100%;padding:16px;background:#1A5276;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:24px;"><i class="fas fa-save"></i> Enregistrer</button>';
 }
-function switchTab(t) {
+
+var currentSettingsTab = "FLOTTE";
+var plansData = [];
+
+function switchSettingsTab(type) {
+    currentSettingsTab = type;
+    document.querySelectorAll(".settings-tab").forEach(function(b) { b.classList.remove("active"); });
+    event.target.classList.add("active");
+    loadPlansForSettings(type);
+}
+
+async function loadPlansForSettings(type) {
+    try {
+        var res = await fetch(API_URL + "/plans");
+        plansData = res.ok ? await res.json() : getDefaultPlans();
+        var plans = plansData.filter(function(p) { return p.type === type; });
+        var html = "<div class="card" style="padding:24px;"><h3>Plans mensuels</h3>";
+        plans.forEach(function(p, i) {
+            html += "<div style="display:flex;align-items:center;gap:16px;padding:16px;border:1px solid var(--border);border-radius:12px;margin-top:12px;flex-wrap:wrap;">
+                <div style="width:100px;font-weight:700;">" + p.name + "</div>
+                <div><input type="number" value="" + p.price + "" onchange="updatePlanField(" + i + ",\"price\",this.value)" style="width:80px;padding:8px;border:1px solid var(--border);border-radius:8px;text-align:center;font-weight:700;"> <span>Ar/mois</span></div>
+                <div style="display:flex;gap:12px;">
+                    <span><input type="number" value="" + p.vehiclesMax + "" onchange="updatePlanField(" + i + ",\"vehiclesMax\",this.value)" style="width:50px;padding:6px;border:1px solid var(--border);border-radius:6px;text-align:center;"> vehicules</span>
+                    <span><input type="number" value="" + p.driversMax + "" onchange="updatePlanField(" + i + ",\"driversMax\",this.value)" style="width:50px;padding:6px;border:1px solid var(--border);border-radius:6px;text-align:center;"> chauffeurs</span>
+                </div>
+                <span class="badge badge-success">Actif</span>
+            </div>";
+        });
+        html += "</div>";
+        document.getElementById("plans-content").innerHTML = html;
+    } catch (e) { document.getElementById("plans-content").innerHTML = "<p>Erreur de chargement</p>"; }
+}
+
+function updatePlanField(index, field, value) {
+    var typePlans = plansData.filter(function(p) { return p.type === currentSettingsTab; });
+    if (typePlans[index]) typePlans[index][field] = parseInt(value) || 0;
+}
+
+function savePlans() {
+    fetch(API_URL + "/plans", { method: "PUT", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token }, body: JSON.stringify({ plans: plansData }) })
+        .then(function() { alert("Plans sauvegardes !"); })
+        .catch(function() { alert("Erreur lors de la sauvegarde"); });
+}
+
+function getDefaultPlans() {
+    return [
+        { type: "FLEET_MANAGER", name: "Freemium", price: 0, vehiclesMax: 1, driversMax: 1 },
+        { type: "FLEET_MANAGER", name: "Basic", price: 15000, vehiclesMax: 5, driversMax: 10 },
+        { type: "FLEET_MANAGER", name: "Standard", price: 35000, vehiclesMax: 20, driversMax: 50 },
+        { type: "FLEET_MANAGER", name: "Premium", price: 75000, vehiclesMax: 100, driversMax: 200 },
+        { type: "COOPERATIVE", name: "Freemium", price: 0, vehiclesMax: 1, driversMax: 2 },
+        { type: "COOPERATIVE", name: "Basic", price: 20000, vehiclesMax: 5, driversMax: 15 },
+        { type: "COOPERATIVE", name: "Standard", price: 45000, vehiclesMax: 20, driversMax: 60 },
+        { type: "COOPERATIVE", name: "Premium", price: 90000, vehiclesMax: 100, driversMax: 300 }
+    ];
+}
+
+loadPage("settings");
     document.querySelectorAll('.settings-tab').forEach(function(b) { b.classList.remove('active'); });
     event.target.classList.add('active');
     document.getElementById('plans-content').innerHTML = '<p>Plans ' + t + ' - Modification en cours de developpement</p>';
