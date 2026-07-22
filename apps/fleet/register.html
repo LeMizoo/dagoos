@@ -10,57 +10,32 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #1A5276 0%, #154360 50%, #0F3460 100%);
-            min-height: 100vh;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .register-container {
-            background: white; border-radius: 16px; padding: 48px 40px;
-            width: 100%; max-width: 520px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        .register-header { text-align: center; margin-bottom: 36px; }
-        .register-logo {
-            width: 64px; height: 64px; background: #F1C40F; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 16px; font-size: 32px;
-        }
-        .register-header h1 { font-size: 24px; color: #1A1A2E; margin-bottom: 4px; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #1A5276 0%, #154360 50%, #0F3460 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .register-container { background: white; border-radius: 16px; padding: 40px; width: 100%; max-width: 520px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .register-header { text-align: center; margin-bottom: 28px; }
+        .register-logo { width: 64px; height: 64px; background: #F1C40F; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 32px; }
+        .register-header h1 { font-size: 22px; color: #1A1A2E; margin-bottom: 4px; }
         .register-header p { color: #6C757D; font-size: 14px; }
-        .badge {
-            display: inline-block; background: #1A5276; color: white;
-            padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 600; margin-top: 8px;
-        }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-size: 14px; font-weight: 500; color: #1A1A2E; margin-bottom: 6px; }
-        .form-group input {
-            width: 100%; padding: 14px; border: 2px solid #E9ECEF;
-            border-radius: 8px; font-size: 15px; font-family: 'Inter', sans-serif; transition: border-color 0.3s;
-        }
-        .form-group input:focus { outline: none; border-color: #1A5276; }
-        .btn-register {
-            width: 100%; padding: 14px; background: #1A5276; color: white;
-            border: none; border-radius: 8px; font-size: 16px; font-weight: 600;
-            cursor: pointer; transition: background 0.3s; font-family: 'Inter', sans-serif;
-        }
+        .badge { display: inline-block; background: #1A5276; color: white; padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 600; margin-top: 6px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 500; color: #1A1A2E; margin-bottom: 6px; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 2px solid #E9ECEF; border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif; transition: 0.3s; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #1A5276; }
+        .logo-upload { display: flex; align-items: center; gap: 12px; }
+        .logo-preview { width: 50px; height: 50px; border-radius: 50%; background: #F1F5F9; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px dashed #E9ECEF; }
+        .logo-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .btn-register { width: 100%; padding: 14px; background: #1A5276; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; font-family: 'Inter', sans-serif; margin-top: 8px; }
         .btn-register:hover { background: #154360; }
-        .btn-register:disabled { background: #6C757D; cursor: not-allowed; }
-        .message {
-            text-align: center; margin-top: 16px; padding: 10px; border-radius: 8px;
-            font-size: 14px; display: none;
-        }
+        .message { text-align: center; margin-top: 12px; padding: 10px; border-radius: 8px; font-size: 13px; display: none; }
         .message.error { background: #FDE8E8; color: #C0392B; display: block; }
         .message.success { background: #D5F5E3; color: #27AE60; display: block; }
         .message.info { background: #D6EAF8; color: #1A5276; display: block; }
-        .links { text-align: center; margin-top: 24px; }
-        .links a { color: #6C757D; text-decoration: none; font-size: 14px; }
+        .links { text-align: center; margin-top: 18px; }
+        .links a { color: #6C757D; text-decoration: none; font-size: 13px; }
         .links a:hover { color: #1A5276; }
         .links span { color: #6C757D; margin: 0 8px; }
-        @media (max-width: 500px) {
-            .form-row { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -73,41 +48,30 @@
         </div>
         
         <form id="registerForm">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="name">Nom complet</label>
-                    <input type="text" id="name" placeholder="Votre nom" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" placeholder="exemple@email.com" required>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="phone">Téléphone</label>
-                    <input type="tel" id="phone" placeholder="034 00 000 00" required>
+            <div class="form-group">
+                <label>🖼️ Logo (optionnel)</label>
+                <div class="logo-upload">
+                    <div class="logo-preview" id="logoPreview">
+                        <i class="fas fa-building" style="color:#CCC;font-size:20px;"></i>
+                    </div>
+                    <input type="file" id="logoInput" accept="image/*" style="flex:1;font-size:13px;">
                 </div>
             </div>
             <div class="form-row">
-                <div class="form-group">
-                    <label for="password">Mot de passe</label>
-                    <input type="password" id="password" placeholder="Min 6 caractères" required minlength="6"><i class="fas fa-eye toggle-password" id="toggleRegPassword" onclick="togglePassword("password","toggleRegPassword")" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;color:#6C757D;z-index:2;"></i>
-                </div>
-                <div class="form-group">
-                    <label for="confirmPassword">Confirmer</label>
-                    <input type="password" id="confirmPassword" placeholder="Répéter le mot de passe" required><i class="fas fa-eye toggle-password" id="toggleRegConfirm" onclick="togglePassword("confirmPassword","toggleRegConfirm")" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;color:#6C757D;z-index:2;"></i>
-                </div>
+                <div class="form-group"><label>Nom complet</label><input type="text" id="name" placeholder="Votre nom" required></div>
+                <div class="form-group"><label>Email</label><input type="email" id="email" placeholder="exemple@email.com" required></div>
+            </div>
+            <div class="form-group"><label>Téléphone</label><input type="tel" id="phone" placeholder="034 00 000 00" required></div>
+            <div class="form-row">
+                <div class="form-group"><label>Mot de passe</label><input type="password" id="password" placeholder="Min 6 caractères" required minlength="6"></div>
+                <div class="form-group"><label>Confirmer</label><input type="password" id="confirmPassword" placeholder="Répéter" required></div>
             </div>
             <div id="message" class="message"></div>
-            <button type="submit" class="btn-register" id="registerBtn">
-                <i class="fas fa-user-plus"></i> Créer mon compte
-            </button>
+            <button type="submit" class="btn-register"><i class="fas fa-user-plus"></i> Créer mon compte</button>
         </form>
         
         <div class="links">
-            <a href="index.html">Déjà un compte ? Se connecter</a>
-            <span>|</span>
+            <a href="index.html">Déjà un compte ? Se connecter</a><span>|</span>
             <a href="https://dago-mobility.pages.dev">← Accueil</a>
         </div>
     </div>

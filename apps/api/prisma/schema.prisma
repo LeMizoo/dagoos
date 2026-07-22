@@ -26,6 +26,9 @@ model Organization {
   type      String
   email     String   @unique
   phone     String?
+  logo      String?
+  plan      String   @default("Freemium")
+  status    String   @default("active")
   createdAt DateTime @default(now())
   drivers   Driver[]
 }
@@ -68,5 +71,14 @@ model Payment {
   amount    Float
   method    String
   status    String   @default("pending")
+  createdAt DateTime @default(now())
+}
+
+model Log {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  details   String?
+  ip        String?
   createdAt DateTime @default(now())
 }

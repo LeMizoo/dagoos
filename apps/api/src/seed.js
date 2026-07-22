@@ -3,6 +3,8 @@ const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
+const DEFAULT_LOGO = 'https://dago-mobility.pages.dev/assets/logo/b-trans.png';
+
 async function seed() {
   console.log('🌱 Seed: initialisation...');
 
@@ -22,19 +24,19 @@ async function seed() {
     console.log('✅ SUPER_ADMIN créé');
   }
 
-  // Organisations de démo
+  // Organisations de démo avec logo par défaut
   const orgs = [
-    { name: 'Flotte Alasora', code: 'AL', type: 'FLEET_MANAGER', email: 'flotte-alasora@dagoos.mg', phone: '0340000001' },
-    { name: 'Flotte Rasoa', code: 'RA', type: 'FLEET_MANAGER', email: 'flotte-rasoa@dagoos.mg', phone: '0340000002' },
-    { name: 'Coopérative Tana', code: 'TN', type: 'COOPERATIVE', email: 'coop-tana@dagoos.mg', phone: '0340000003' },
-    { name: 'Coopérative Tamatave', code: 'TM', type: 'COOPERATIVE', email: 'coop-tamatave@dagoos.mg', phone: '0340000004' }
+    { name: 'Flotte Alasora', code: 'AL', type: 'FLEET_MANAGER', email: 'flotte-alasora@dagoos.mg', phone: '0340000001', logo: DEFAULT_LOGO, plan: 'Freemium' },
+    { name: 'Flotte Rasoa', code: 'RA', type: 'FLEET_MANAGER', email: 'flotte-rasoa@dagoos.mg', phone: '0340000002', logo: DEFAULT_LOGO, plan: 'Basic' },
+    { name: 'Coopérative Tana', code: 'TN', type: 'COOPERATIVE', email: 'coop-tana@dagoos.mg', phone: '0340000003', logo: DEFAULT_LOGO, plan: 'Freemium' },
+    { name: 'Coopérative Tamatave', code: 'TM', type: 'COOPERATIVE', email: 'coop-tamatave@dagoos.mg', phone: '0340000004', logo: DEFAULT_LOGO, plan: 'Standard' }
   ];
 
   for (const org of orgs) {
     const exists = await prisma.organization.findUnique({ where: { code: org.code } });
     if (!exists) {
       await prisma.organization.create({ data: org });
-      console.log('✅ Organisation:', org.name);
+      console.log('✅ Organisation:', org.name, '- Plan:', org.plan);
     }
   }
 
