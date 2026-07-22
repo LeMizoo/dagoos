@@ -7,12 +7,8 @@ const loginBtn = document.getElementById('loginBtn');
 const orgSelect = document.getElementById('organization');
 const codePrefix = document.getElementById('codePrefix');
 const driverCodeInput = document.getElementById('driverCode');
+const codeHint = document.getElementById('codeHint');
 const pinInputs = document.querySelectorAll('#pinInputs input');
-
-// ===== STRUCTURE DES CODES =====
-// Format : [TYPE]-[CODE_ENTITE][NUMERO]
-// Exemples : FL-AL001 (Flotte Alasora, chauffeur 001)
-//            CO-TN001 (Coop Tana, chauffeur 001)
 
 // ===== CHARGER LES ORGANISATIONS =====
 async function loadOrganizations() {
@@ -24,37 +20,26 @@ async function loadOrganizations() {
                 const option = document.createElement('option');
                 option.value = org.id;
                 const typePrefix = org.type === 'COOPERATIVE' ? 'CO' : 'FL';
-                const entityCode = org.code;
-                option.textContent = `${org.type === 'COOPERATIVE' ? '🏢' : '🚛'} ${org.name} (${typePrefix}-${entityCode}XXX)`;
-                option.dataset.prefix = `${typePrefix}-${entityCode}`;
+                option.textContent = `${org.type === 'COOPERATIVE' ? '🏢' : '🚛'} ${org.name}`;
+                option.dataset.prefix = `${typePrefix}-${org.code}`;
+                option.dataset.type = typePrefix;
                 orgSelect.appendChild(option);
             });
         }
     } catch (error) {
-        console.log('Mode démo');
-        const defaults = [
-            { name: 'Flotte Alasora', type: 'FLEET_MANAGER', code: 'AL' },
-            { name: 'Flotte Rasoa', type: 'FLEET_MANAGER', code: 'RA' },
-            { name: 'Coop Tana', type: 'COOPERATIVE', code: 'TN' }
-        ];
-        defaults.forEach(org => {
-            const option = document.createElement('option');
-            option.value = org.code;
-            const typePrefix = org.type === 'COOPERATIVE' ? 'CO' : 'FL';
-            option.textContent = `${org.type === 'COOPERATIVE' ? '🏢' : '🚛'} ${org.name} (${typePrefix}-${org.code}XXX)`;
-            option.dataset.prefix = `${typePrefix}-${org.code}`;
-            orgSelect.appendChild(option);
-        });
+        console.log('Organisations non disponibles');
     }
 }
 
-// ===== MISE À JOUR DU PRÉFIXE =====
+// ===== MISE À JOUR DYNAMIQUE =====
 orgSelect.addEventListener('change', () => {
     const selected = orgSelect.options[orgSelect.selectedIndex];
     const prefix = selected.dataset.prefix || '--';
+    
     codePrefix.textContent = prefix;
-    // Vider le champ code
     driverCodeInput.value = '';
+    driverCodeInput.placeholder = 'ex: 001';
+    codeHint.textContent = `Votre code complet sera : ${prefix}001`;
     driverCodeInput.focus();
 });
 
@@ -83,17 +68,12 @@ function getPin() {
 function getFullCode() {
     const selected = orgSelect.options[orgSelect.selectedIndex];
     const prefix = selected.dataset.prefix || '';
-    // Prendre uniquement les chiffres/lettres après le préfixe
     let driverNumber = driverCodeInput.value.trim().toUpperCase();
-    // Si l'utilisateur a tapé le code complet (ex: FL-AL001), extraire juste la partie numéro
-    if (driverNumber.includes('-')) {
-        const parts = driverNumber.split('-');
-        driverNumber = parts[parts.length - 1];
-    }
-    // Enlever le préfixe si l'utilisateur l'a inclus
-    if (driverNumber.startsWith(prefix.replace('FL-', '').replace('CO-', ''))) {
-        driverNumber = driverNumber.substring(prefix.replace('FL-', '').replace('CO-', '').length);
-    }
+    
+    // Supprimer tout tiret
+    driverNumber = driverNumber.replace(/-/g, '');
+    
+    // Retourner le code complet
     return `${prefix}${driverNumber}`;
 }
 
@@ -101,18 +81,18 @@ function getFullCode() {
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const organizationId = orgSelect.value;
-    const rawInput = driverCodeInput.value.trim();
-    const pin = getPin();
-    
-    if (!organizationId) {
-        showMessage('Veuillez sélectionner votre flotte/coopérative', 'error');
+    if (!orgSelect.value) {
+        showMessage('Veuillez sélectionner votre entité', 'error');
         return;
     }
+    
+    const rawInput = driverCodeInput.value.trim();
     if (!rawInput) {
         showMessage('Veuillez entrer votre numéro chauffeur', 'error');
         return;
     }
+    
+    const pin = getPin();
     if (pin.length !== 4) {
         showMessage('Veuillez entrer votre PIN à 4 chiffres', 'error');
         return;
@@ -122,7 +102,7 @@ loginForm.addEventListener('submit', async (e) => {
     
     loginBtn.disabled = true;
     loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connexion...';
-    showMessage(`Vérification du code ${fullCode}...`, 'info');
+    showMessage(`Vérification de ${fullCode}...`, 'info');
     
     try {
         const response = await fetch(`${API_URL}/auth/driver-login`, {

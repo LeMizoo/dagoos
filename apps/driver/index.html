@@ -43,23 +43,33 @@
         
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: #CCC; }
-        .form-group select, .form-group input {
+        .form-group select {
             width: 100%; padding: 12px;
             border: 2px solid #333; background: #2C2C44; color: white;
-            border-radius: 8px; font-size: 15px; font-family: 'Inter', sans-serif; transition: border-color 0.3s;
+            border-radius: 8px; font-size: 15px; font-family: 'Inter', sans-serif;
         }
-        .form-group select:focus, .form-group input:focus { outline: none; border-color: #F1C40F; }
+        .form-group select:focus { outline: none; border-color: #F1C40F; }
         .form-group select option { background: #2C2C44; color: white; }
         
-        .code-row { display: flex; gap: 10px; align-items: flex-end; }
-        .code-row .code-prefix {
-            background: #F1C40F; color: #1A1A2E; padding: 12px 10px; border-radius: 8px;
-            font-weight: 700; font-size: 14px; white-space: nowrap;
+        .code-input-group {
+            display: flex; align-items: center; gap: 0;
+            border: 2px solid #333; border-radius: 8px; overflow: hidden;
+            transition: border-color 0.3s;
         }
+        .code-input-group:focus-within { border-color: #F1C40F; }
+        .code-input-group .prefix {
+            background: #F1C40F; color: #1A1A2E; padding: 12px 14px;
+            font-weight: 700; font-size: 15px; white-space: nowrap;
+        }
+        .code-input-group input {
+            flex: 1; padding: 12px; border: none; background: #2C2C44; color: white;
+            font-size: 15px; font-family: 'Inter', sans-serif; outline: none;
+        }
+        .code-input-group input::placeholder { color: #555; font-size: 13px; }
         
         .pin-row { display: flex; gap: 8px; justify-content: center; }
         .pin-row input {
-            width: 44px; height: 52px; text-align: center; font-size: 22px; font-weight: 700;
+            width: 48px; height: 56px; text-align: center; font-size: 24px; font-weight: 700;
             padding: 0; border: 2px solid #333; background: #2C2C44; color: #F1C40F;
             border-radius: 8px;
         }
@@ -72,6 +82,7 @@
         }
         .btn-login:hover { background: #F39C12; }
         .btn-login:disabled { background: #555; color: #999; cursor: not-allowed; }
+        
         .message {
             text-align: center; margin-top: 12px; padding: 10px; border-radius: 8px;
             font-size: 13px; display: none;
@@ -79,13 +90,16 @@
         .message.error { background: #3B1111; color: #E74C3C; display: block; }
         .message.success { background: #0B3D0B; color: #2ECC71; display: block; }
         .message.info { background: #1A3D5C; color: #3498DB; display: block; }
+        
         .links { text-align: center; margin-top: 20px; }
         .links a { color: #AAA; text-decoration: none; font-size: 13px; }
         .links a:hover { color: #F1C40F; }
         
+        .code-hint { font-size: 11px; color: #777; margin-top: 4px; text-align: right; }
+        
         @media (max-width: 400px) {
             .login-container { padding: 28px 18px; }
-            .pin-row input { width: 38px; height: 46px; font-size: 20px; }
+            .pin-row input { width: 42px; height: 50px; font-size: 20px; }
         }
     </style>
 </head>
@@ -108,27 +122,28 @@
             <div class="form-group">
                 <label>🏢 Flotte / Coopérative</label>
                 <select id="organization" required>
-                    <option value="">— Sélectionner —</option>
+                    <option value="">— Sélectionner votre entité —</option>
                 </select>
             </div>
             
             <!-- CODE -->
             <div class="form-group">
-                <label>🔑 Code chauffeur</label>
-                <div class="code-row">
-                    <span class="code-prefix" id="codePrefix">--</span>
-                    <input type="text" id="driverCode" placeholder="AL001" required style="flex:1; text-transform: uppercase;">
+                <label>🔑 Votre code chauffeur</label>
+                <div class="code-input-group">
+                    <span class="prefix" id="codePrefix">--</span>
+                    <input type="text" id="driverCode" placeholder="ex: 001" required autocomplete="off" style="text-transform: uppercase;">
                 </div>
+                <div class="code-hint" id="codeHint">Sélectionnez d'abord votre entité</div>
             </div>
             
             <!-- PIN -->
             <div class="form-group">
                 <label>🔒 PIN (4 chiffres)</label>
                 <div class="pin-row" id="pinInputs">
-                    <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric">
-                    <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric">
-                    <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric">
-                    <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                    <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" placeholder="•">
+                    <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" placeholder="•">
+                    <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" placeholder="•">
+                    <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" placeholder="•">
                 </div>
             </div>
             
