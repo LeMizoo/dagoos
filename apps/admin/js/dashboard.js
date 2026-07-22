@@ -138,7 +138,7 @@ async function loadOrgs(type, orgType) {
                 '<td><code>' + (orgType === 'FLEET_MANAGER' ? 'FL-' : 'CO-') + o.code + '</code></td><td>' + (o.email || 'N/A') + '</td><td>' + count + '</td>' +
                 '<td><span class="badge badge-info">' + (o.plan || 'Freemium') + '</span></td>' +
                 '<td><span class="badge ' + (o.status === 'active' ? 'badge-success' : 'badge-danger') + '">' + (o.status || 'actif') + '</span></td>' +
-                '<td class="action-btns"><button class="btn-sm btn-view" onclick="viewOrg(\'' + o.id + '\')"><i class="fas fa-eye"></i></button></td></tr>';
+                '<td class="action-btns"><button class="btn-sm btn-view" onclick="viewOrg('' + o.id + '')"><i class="fas fa-eye"></i></button><button class="btn-sm btn-edit" onclick="editOrg('' + o.id + '')"><i class="fas fa-edit"></i></button><button class="btn-sm ' + (o.status === 'active' ? 'btn-suspend' : 'btn-success') + '" onclick="toggleOrgStatus('' + o.id + '','' + o.status + '')"><i class="fas fa-' + (o.status === 'active' ? 'ban' : 'check') + '"></i></button></td></tr>';
         }
         document.getElementById(type + 'Table').innerHTML = html || '<tr><td colspan="7" style="text-align:center;color:var(--text2);">Aucune donnee</td></tr>';
     } catch (e) { console.error(e); }
