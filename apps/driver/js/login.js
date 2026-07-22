@@ -11,8 +11,8 @@ const pinInputs = document.querySelectorAll('#pinInputs input');
 
 // ===== STRUCTURE DES CODES =====
 // Format : [TYPE]-[CODE_ENTITE][NUMERO]
-// Exemples : FL-AL001 (Flotte AL, chauffeur 001)
-//            CO-RA001 (Coopérative RA, chauffeur 001)
+// Exemples : FL-AL001 (Flotte Alasora, chauffeur 001)
+//            CO-TN001 (Coop Tana, chauffeur 001)
 
 // ===== CHARGER LES ORGANISATIONS =====
 async function loadOrganizations() {
@@ -24,37 +24,25 @@ async function loadOrganizations() {
                 const option = document.createElement('option');
                 option.value = org.id;
                 const typePrefix = org.type === 'COOPERATIVE' ? 'CO' : 'FL';
-                const entityCode = org.code || org.name.substring(0,2).toUpperCase();
+                const entityCode = org.code;
                 option.textContent = `${org.type === 'COOPERATIVE' ? '🏢' : '🚛'} ${org.name} (${typePrefix}-${entityCode}XXX)`;
                 option.dataset.prefix = `${typePrefix}-${entityCode}`;
-                orgSelect.appendChild(option);
-            });
-        } else {
-            // Fallback démo
-            const defaults = [
-                { name: 'Flotte Alasora', type: 'FLEET_MANAGER', code: 'AL' },
-                { name: 'Flotte Rasoa', type: 'FLEET_MANAGER', code: 'RA' },
-                { name: 'Coop Tana', type: 'COOPERATIVE', code: 'TN' },
-                { name: 'Coop Tamatave', type: 'COOPERATIVE', code: 'TM' }
-            ];
-            defaults.forEach(org => {
-                const option = document.createElement('option');
-                option.value = org.code;
-                const typePrefix = org.type === 'COOPERATIVE' ? 'CO' : 'FL';
-                option.textContent = `${org.type === 'COOPERATIVE' ? '🏢' : '🚛'} ${org.name} (${typePrefix}-${org.code}XXX)`;
-                option.dataset.prefix = `${typePrefix}-${org.code}`;
                 orgSelect.appendChild(option);
             });
         }
     } catch (error) {
         console.log('Mode démo');
-        ['AL', 'RA', 'TN'].forEach(code => {
-            const typePrefix = code.startsWith('T') ? 'CO' : 'FL';
-            const type = code.startsWith('T') ? 'COOPERATIVE' : 'FLEET_MANAGER';
+        const defaults = [
+            { name: 'Flotte Alasora', type: 'FLEET_MANAGER', code: 'AL' },
+            { name: 'Flotte Rasoa', type: 'FLEET_MANAGER', code: 'RA' },
+            { name: 'Coop Tana', type: 'COOPERATIVE', code: 'TN' }
+        ];
+        defaults.forEach(org => {
             const option = document.createElement('option');
-            option.value = code;
-            option.textContent = `${type === 'COOPERATIVE' ? '🏢' : '🚛'} Entité ${code} (${typePrefix}-${code}XXX)`;
-            option.dataset.prefix = `${typePrefix}-${code}`;
+            option.value = org.code;
+            const typePrefix = org.type === 'COOPERATIVE' ? 'CO' : 'FL';
+            option.textContent = `${org.type === 'COOPERATIVE' ? '🏢' : '🚛'} ${org.name} (${typePrefix}-${org.code}XXX)`;
+            option.dataset.prefix = `${typePrefix}-${org.code}`;
             orgSelect.appendChild(option);
         });
     }
@@ -64,7 +52,10 @@ async function loadOrganizations() {
 orgSelect.addEventListener('change', () => {
     const selected = orgSelect.options[orgSelect.selectedIndex];
     const prefix = selected.dataset.prefix || '--';
-    codePrefix.textContent = prefix + '-';
+    codePrefix.textContent = prefix;
+    // Vider le champ code
+    driverCodeInput.value = '';
+    driverCodeInput.focus();
 });
 
 // ===== GESTION DES INPUTS PIN =====
@@ -92,7 +83,17 @@ function getPin() {
 function getFullCode() {
     const selected = orgSelect.options[orgSelect.selectedIndex];
     const prefix = selected.dataset.prefix || '';
-    const driverNumber = driverCodeInput.value.trim().toUpperCase();
+    // Prendre uniquement les chiffres/lettres après le préfixe
+    let driverNumber = driverCodeInput.value.trim().toUpperCase();
+    // Si l'utilisateur a tapé le code complet (ex: FL-AL001), extraire juste la partie numéro
+    if (driverNumber.includes('-')) {
+        const parts = driverNumber.split('-');
+        driverNumber = parts[parts.length - 1];
+    }
+    // Enlever le préfixe si l'utilisateur l'a inclus
+    if (driverNumber.startsWith(prefix.replace('FL-', '').replace('CO-', ''))) {
+        driverNumber = driverNumber.substring(prefix.replace('FL-', '').replace('CO-', '').length);
+    }
     return `${prefix}${driverNumber}`;
 }
 
@@ -101,14 +102,14 @@ loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const organizationId = orgSelect.value;
-    const driverNumber = driverCodeInput.value.trim().toUpperCase();
+    const rawInput = driverCodeInput.value.trim();
     const pin = getPin();
     
     if (!organizationId) {
         showMessage('Veuillez sélectionner votre flotte/coopérative', 'error');
         return;
     }
-    if (!driverNumber) {
+    if (!rawInput) {
         showMessage('Veuillez entrer votre numéro chauffeur', 'error');
         return;
     }
