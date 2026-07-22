@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dagoo's - La mobilité connectée à Madagascar</title>
+    <title>Dago Mobility - La mobilité connectée à Madagascar</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="apple-touch-icon" href="favicon.ico">
-    <meta name="description" content="Dagoo's - La première plateforme malgache de mobilité connectée.">
+    <meta name="description" content="Dago Mobility - La première plateforme malgache de mobilité connectée. Transport, livraison, gestion de flotte.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,123 +15,27 @@
     <link rel="stylesheet" href="css/style.css">
     
     <style>
-        /* ===== HERO SLIDER ===== */
-        .hero {
-            position: relative;
-            overflow: hidden;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-        }
-        .hero-slider {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 0;
-        }
-        .hero-slide {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-size: cover;
-            background-position: center;
-            opacity: 0;
-            transition: opacity 1s ease-in-out;
-        }
-        .hero-slide.active {
-            opacity: 1;
-        }
-        .hero-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, rgba(26,26,46,0.85) 0%, rgba(26,82,118,0.75) 100%);
-            z-index: 1;
-        }
-        .hero .container {
-            position: relative;
-            z-index: 2;
-        }
-        .hero-text h1, .hero-text p, .hero-text .hero-badge {
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-        }
+        .hero { position: relative; overflow: hidden; min-height: 100vh; display: flex; align-items: center; }
+        .hero-slider { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+        .hero-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; opacity: 0; transition: opacity 1s ease-in-out; }
+        .hero-slide.active { opacity: 1; }
+        .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(26,26,46,0.85) 0%, rgba(26,82,118,0.75) 100%); z-index: 1; }
+        .hero .container { position: relative; z-index: 2; }
+        .hero-text h1, .hero-text p, .hero-text .hero-badge { text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
         
-        /* ===== ESPACES (2 cartes) ===== */
-        .spaces-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 32px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .space-card {
-            background: white;
-            border-radius: 16px;
-            padding: 40px 32px;
-            text-align: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
-            text-decoration: none;
-            color: inherit;
-        }
-        .space-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-        }
-        .space-icon {
-            font-size: 56px;
-            margin-bottom: 16px;
-        }
-        .space-card h3 {
-            font-size: 22px;
-            color: #1A1A2E;
-            margin-bottom: 8px;
-        }
-        .space-card p {
-            color: #6C757D;
-            font-size: 14px;
-            margin-bottom: 24px;
-        }
-        .space-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .btn-small {
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-        .btn-primary {
-            background: #1A5276;
-            color: white;
-        }
-        .btn-primary:hover {
-            background: #154360;
-        }
-        .btn-secondary {
-            background: #F1C40F;
-            color: #1A1A2E;
-        }
-        .btn-secondary:hover {
-            background: #F39C12;
-        }
-        .btn-outline-dark {
-            border: 2px solid #1A5276;
-            color: #1A5276;
-            background: transparent;
-        }
-        .btn-outline-dark:hover {
-            background: #1A5276;
-            color: white;
-        }
+        .spaces-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px; max-width: 800px; margin: 0 auto; }
+        .space-card { background: white; border-radius: 16px; padding: 40px 32px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.08); transition: transform 0.3s, box-shadow 0.3s; text-decoration: none; color: inherit; }
+        .space-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.15); }
+        .space-icon { font-size: 56px; margin-bottom: 16px; }
+        .space-card h3 { font-size: 22px; color: #1A1A2E; margin-bottom: 8px; }
+        .space-card p { color: #6C757D; font-size: 14px; margin-bottom: 24px; }
+        .space-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .btn-small { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.3s; }
+        .btn-primary { background: #1A5276; color: white; } .btn-primary:hover { background: #154360; }
+        .btn-secondary { background: #F1C40F; color: #1A1A2E; } .btn-secondary:hover { background: #F39C12; }
+        .btn-outline-dark { border: 2px solid #1A5276; color: #1A5276; background: transparent; } .btn-outline-dark:hover { background: #1A5276; color: white; }
         
-        @media (max-width: 600px) {
-            .spaces-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        @media (max-width: 600px) { .spaces-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -141,25 +45,23 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <img src="assets/logo/b-trans.png" alt="Dagoo's" class="logo-img">
-                    <span class="logo-text">DAGOO'S</span>
+                    <img src="assets/logo/b-trans.png" alt="Dago Mobility" class="logo-img">
+                    <span class="logo-text">DAGO MOBILITY</span>
                 </div>
                 <nav class="nav">
                     <ul>
                         <li><a href="#services">Services</a></li>
                         <li><a href="#features">Fonctionnalités</a></li>
                         <li><a href="#about">À propos</a></li>
-                        <li><a href="#spaces" class="btn-primary btn-small">Commencer gratuitement</a></li>
+                        <li><a href="#spaces" class="btn-primary btn-small">Commencer</a></li>
                     </ul>
                 </nav>
-                <button class="hamburger" aria-label="Menu">
-                    <span></span><span></span><span></span>
-                </button>
+                <button class="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
             </div>
         </div>
     </header>
 
-    <!-- ===== HERO AVEC SLIDER ===== -->
+    <!-- ===== HERO ===== -->
     <section class="hero">
         <div class="hero-slider" id="heroSlider">
             <div class="hero-slide active" style="background-image: url('assets/images/slide/S0001.jpg');"></div>
@@ -173,42 +75,29 @@
         <div class="container">
             <div class="hero-content">
                 <div class="hero-text">
-                    <span class="hero-badge">🚀 Plateforme de mobilité</span>
+                    <span class="hero-badge">🚀 Dago Mobility</span>
                     <h1>
                         <span class="highlight">La mobilité connectée...</span>
                         <br>
                         <span class="highlight-orange">Chez les potes, ça roule.</span>
                     </h1>
                     <p class="hero-description">
-                        Dagoo's est la première plateforme malgache qui allie technologie de pointe 
-                        et convivialité. Gérez vos flottes, suivez vos chauffeurs, et offrez une 
-                        expérience de transport unique.
+                        <strong>Dago</strong> est le surnom de Madagascar. <strong>Dagoo's</strong> signifie <strong>"Chez les potes"</strong>.
+                        Dago Mobility est la plateforme qui digitalise le transport malgache en gardant 
+                        l'âme et la convivialité de notre pays.
                     </p>
                     <div class="hero-buttons">
-                        <a href="#spaces" class="btn-secondary">
-                            <i class="fas fa-rocket"></i> Commencer gratuitement
-                        </a>
-                        <a href="#services" class="btn-outline">
-                            <i class="fas fa-arrow-down"></i> Découvrir
-                        </a>
+                        <a href="#spaces" class="btn-secondary"><i class="fas fa-rocket"></i> Commencer</a>
+                        <a href="#services" class="btn-outline"><i class="fas fa-arrow-down"></i> Découvrir</a>
                     </div>
                     <div class="hero-stats">
-                        <div class="stat">
-                            <span class="stat-number" data-target="500">0</span>
-                            <span class="stat-label">Chauffeurs</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number" data-target="50">0</span>
-                            <span class="stat-label">Coopératives</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number" data-target="1000">0</span>
-                            <span class="stat-label">Courses / jour</span>
-                        </div>
+                        <div class="stat"><span class="stat-number" data-target="500">0</span><span class="stat-label">Chauffeurs</span></div>
+                        <div class="stat"><span class="stat-number" data-target="50">0</span><span class="stat-label">Coopératives</span></div>
+                        <div class="stat"><span class="stat-number" data-target="1000">0</span><span class="stat-label">Courses / jour</span></div>
                     </div>
                 </div>
                 <div class="hero-image">
-                    <img src="assets/logo/b-trans.png" alt="Dagoo's" class="hero-logo">
+                    <img src="assets/logo/b-trans.png" alt="Dago Mobility" class="hero-logo">
                 </div>
             </div>
         </div>
@@ -223,7 +112,6 @@
                 <p>Créez votre compte gratuitement ou connectez-vous</p>
             </div>
             <div class="spaces-grid">
-                <!-- Flotte -->
                 <div class="space-card">
                     <div class="space-icon">🚛</div>
                     <h3>Gestion de Flotte</h3>
@@ -233,7 +121,6 @@
                         <a href="https://dago-fleet.pages.dev" class="btn-small btn-outline-dark">Se connecter</a>
                     </div>
                 </div>
-                <!-- Coopérative -->
                 <div class="space-card">
                     <div class="space-icon">🏢</div>
                     <h3>Coopérative</h3>
@@ -253,28 +140,13 @@
             <div class="section-header">
                 <span class="section-tag">Nos services</span>
                 <h2>Une solution complète pour le transport</h2>
+                <p>Dago Mobility connecte tous les acteurs de la mobilité malgache</p>
             </div>
             <div class="services-grid">
-                <div class="service-card">
-                    <div class="service-icon">🚗</div>
-                    <h3>Gestion de flottes</h3>
-                    <p>Enregistrez et gérez vos véhicules et chauffeurs en temps réel.</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">🏢</div>
-                    <h3>Coopératives</h3>
-                    <p>Gérez plusieurs sociétés avec des comptes séparés.</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">💳</div>
-                    <h3>Paiements Mobile Money</h3>
-                    <p>Intégration MVola, Orange Money et Airtel Money.</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">📍</div>
-                    <h3>Suivi GPS</h3>
-                    <p>Suivez vos véhicules en temps réel.</p>
-                </div>
+                <div class="service-card"><div class="service-icon">🚗</div><h3>Gestion de flottes</h3><p>Enregistrez et gérez vos véhicules et chauffeurs en temps réel.</p></div>
+                <div class="service-card"><div class="service-icon">🏢</div><h3>Coopératives</h3><p>Gérez plusieurs sociétés avec des comptes séparés et des rapports consolidés.</p></div>
+                <div class="service-card"><div class="service-icon">💳</div><h3>Paiements Mobile Money</h3><p>Intégration MVola, Orange Money et Airtel Money pour des transactions fluides.</p></div>
+                <div class="service-card"><div class="service-icon">📍</div><h3>Suivi GPS</h3><p>Suivez vos véhicules en temps réel avec une cartographie précise.</p></div>
             </div>
         </div>
     </section>
@@ -282,27 +154,12 @@
     <!-- ===== FEATURES ===== -->
     <section id="features" class="features">
         <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Fonctionnalités</span>
-                <h2>Tout ce dont vous avez besoin</h2>
-            </div>
+            <div class="section-header"><span class="section-tag">Fonctionnalités</span><h2>Tout ce dont vous avez besoin</h2></div>
             <div class="features-grid">
-                <div class="feature-item">
-                    <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
-                    <div><h4>Sécurité renforcée</h4><p>Authentification sécurisée et chiffrement</p></div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
-                    <div><h4>Analytics avancés</h4><p>Tableaux de bord et rapports</p></div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
-                    <div><h4>Mobile PWA</h4><p>Application chauffeurs hors-ligne</p></div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon"><i class="fas fa-handshake"></i></div>
-                    <div><h4>Communauté</h4><p>Basé sur la confiance et la convivialité</p></div>
-                </div>
+                <div class="feature-item"><div class="feature-icon"><i class="fas fa-shield-alt"></i></div><div><h4>Sécurité renforcée</h4><p>Authentification sécurisée et chiffrement des données</p></div></div>
+                <div class="feature-item"><div class="feature-icon"><i class="fas fa-chart-line"></i></div><div><h4>Analytics avancés</h4><p>Tableaux de bord et rapports personnalisés</p></div></div>
+                <div class="feature-item"><div class="feature-icon"><i class="fas fa-mobile-alt"></i></div><div><h4>Mobile PWA</h4><p>Application chauffeurs avec mode hors-ligne</p></div></div>
+                <div class="feature-item"><div class="feature-icon"><i class="fas fa-handshake"></i></div><div><h4>Communauté Dago</h4><p>Un écosystème basé sur la confiance et la convivialité</p></div></div>
             </div>
         </div>
     </section>
@@ -313,20 +170,27 @@
             <div class="about-content">
                 <div class="about-text">
                     <span class="section-tag">À propos</span>
-                    <h2>Pourquoi Dagoo's ?</h2>
-                    <p><strong>Dago</strong> est le surnom que les Malgaches se donnent entre eux. <strong>Dagoo's</strong> signifie <strong>"Chez les potes"</strong>.</p>
-                    <p>Notre mission : digitaliser le transport malgache tout en gardant l'âme et la convivialité de notre pays.</p>
+                    <h2>Dago, Dagoo's, Dago Mobility</h2>
+                    <p>
+                        <strong>Dago</strong> est le surnom que les Malgaches donnent à Madagascar. 
+                        <strong>Dagoo's</strong> signifie <strong>"Chez les potes"</strong>, 
+                        une façon familière de dire "Madagascar pour les Malgaches".
+                    </p>
+                    <p>
+                        <strong>Dago Mobility</strong> est la plateforme qui digitalise le transport 
+                        malgache tout en gardant l'âme et la convivialité qui font la force de notre pays.
+                    </p>
                     <div class="about-values">
                         <span class="value-tag">🤝 Confiance</span>
                         <span class="value-tag">💡 Innovation</span>
-                        <span class="value-tag">🇲🇬 Malgache</span>
+                        <span class="value-tag">🇲🇬 Dago</span>
                         <span class="value-tag">🌍 Scalable</span>
                     </div>
                 </div>
                 <div class="about-image">
                     <div class="about-quote">
                         <blockquote>"La mobilité connectée... Chez les potes, ça roule."</blockquote>
-                        <cite>— Dagoo's Team</cite>
+                        <cite>— L'équipe Dago</cite>
                     </div>
                 </div>
             </div>
@@ -338,10 +202,8 @@
         <div class="container">
             <div class="cta-content">
                 <h2>Prêt à rejoindre l'aventure ?</h2>
-                <p>Créez votre compte gratuitement et rejoignez la communauté.</p>
-                <a href="#spaces" class="btn-primary btn-large">
-                    <i class="fas fa-rocket"></i> Commencer gratuitement
-                </a>
+                <p>Créez votre compte gratuitement et rejoignez la communauté Dago.</p>
+                <a href="#spaces" class="btn-primary btn-large"><i class="fas fa-rocket"></i> Commencer</a>
             </div>
         </div>
     </section>
@@ -351,8 +213,8 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <img src="assets/logo/b-trans.png" alt="Dagoo's" width="40">
-                    <span class="footer-logo-text">DAGOO'S</span>
+                    <img src="assets/logo/b-trans.png" alt="Dago Mobility" width="40">
+                    <span class="footer-logo-text">DAGO MOBILITY</span>
                     <p>La mobilité connectée... Chez les potes, ça roule.</p>
                 </div>
                 <div class="footer-links">
@@ -362,7 +224,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 Dagoo's. Tous droits réservés.</p>
+                <p>&copy; 2026 Dago Mobility. Tous droits réservés.</p>
                 <div class="social-links">
                     <a href="#"><i class="fab fa-facebook"></i></a>
                     <a href="#"><i class="fab fa-twitter"></i></a>
