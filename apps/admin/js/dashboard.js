@@ -216,7 +216,7 @@ async function loadPlans() {
     try {
         var res = await fetch(API_URL + '/plans');
         allPlansData = res.ok ? await res.json() : [];
-        var plans = allPlansData.filter(function(p) { return p.type === currentSettingsTab; });
+        var plans = allPlansData.filter(function(p) { return p.type === (currentSettingsTab === 'FLOTTE' ? 'FLEET_MANAGER' : 'COOPERATIVE'); });
         var h = '';
         plans.forEach(function(p) {
             h += '<div style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;flex-wrap:wrap;">';
