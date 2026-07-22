@@ -3,7 +3,7 @@
 // ========================================
 
 const API_URL = 'https://dagoos-api.onrender.com/api';
-const DASHBOARD_URL = "https://dagoos.pages.dev/landing/admin";
+const DASHBOARD_URL = "https://dago-admin.pages.dev";
 
 console.log('%c🚀 Dagoo\'s', 'font-size: 32px; font-weight: bold; color: #1A5276;');
 console.log('%cLa mobilité connectée... Chez les potes, ça roule.', 'font-size: 18px; color: #F39C12;');

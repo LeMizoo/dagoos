@@ -3,7 +3,7 @@
 // ========================================
 
 const API_URL = 'https://dagoos-api.onrender.com/api';
-const LANDING_URL = "https://dagoos.pages.dev";
+const LANDING_URL = "https://dago-mobility.pages.dev";
 
 console.log('🚀 Dashboard Dagoos v2 chargé');
 
