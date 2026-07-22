@@ -58,7 +58,7 @@ function loadPage(page) {
         case "messages": main.innerHTML = getMessagesHTML(); loadMessages(); refreshInterval = setInterval(loadMessages, 30000); break;
         case "logs": main.innerHTML = getTableHTML("logs", "Logs", false); loadLogs(); break;
         case "payments": main.innerHTML = "<div class='topbar'><h1>Paiements</h1></div><div class='card' style='text-align:center;padding:60px;'>Bientot disponible</div>"; break;
-        case "settings": main.innerHTML = getSettingsHTML(); switchSettingsTab("FLOTTE"); break;
+        case "settings": main.innerHTML = getSettingsHTML(); setTimeout(function() { switchSettingsTab("FLOTTE"); }, 200); break;
     }
 }
 
@@ -192,11 +192,10 @@ async function loadLogs() {
 function exportCSV(type) { var items = type === "flottes" ? orgsData.filter(function(o) { return o.type === "FLEET_MANAGER"; }) : orgsData.filter(function(o) { return o.type === "COOPERATIVE"; }); var csv = "Nom,Code,Email,Plan,Statut\n"; items.forEach(function(o) { csv += "\"" + o.name + "\",\"" + o.code + "\",\"" + (o.email || "") + "\",\"" + (o.plan || "") + "\",\"" + o.status + "\"\n"; }); var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" })); a.download = type + ".csv"; a.click(); }
 
 // ===== SETTINGS =====
-var currentSettingsTab = "FLOTTE";
 var plansData = [];
 
 function getSettingsHTML() {
-    return "<div class='topbar'><h1>Parametres</h1></div><div style='display:flex;gap:0;margin-bottom:24px;background:var(--card);border-radius:14px;overflow:hidden;'><button class='settings-tab active' id='tab-FLOTTE' onclick='switchSettingsTab(\"FLOTTE\")' style='flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;'>Plans Flotte</button><button class='settings-tab' id='tab-COOP' onclick='switchSettingsTab(\"COOP\")' style='flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;'>Plans Coop</button></div><div id='plans-content'></div><button onclick='savePlans()' style='width:100%;padding:16px;background:#1A5276;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:24px;'><i class='fas fa-save'></i> Enregistrer</button>";
+    return "<div class='topbar'><h1>Parametres</h1></div><div style='display:flex;gap:0;margin-bottom:24px;background:var(--card);border-radius:14px;overflow:hidden;'><button class='settings-tab active' id='tab-FLOTTE' onclick='switchSettingsTab(\"FLOTTE\")' style='flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;'>Plans Flotte</button><button class='settings-tab' id='tab-COOP' onclick='switchSettingsTab(\"COOP\")' style='flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;'>Plans Coop</button></div><div id='plans-content'>Chargement des plans...</div><button onclick='savePlans()' style='width:100%;padding:16px;background:#1A5276;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:24px;'><i class='fas fa-save'></i> Enregistrer</button>";
 }
 
 function switchSettingsTab(type) {
