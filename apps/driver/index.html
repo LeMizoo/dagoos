@@ -3,17 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dagoo's - Driver</title>
+    <title>Dagoo's Driver - Connexion</title>
     <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#F1C40F">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        body { font-family: Inter, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #F1C40F; color: #1A1A2E; }
-        h1 { font-size: 3rem; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #F1C40F 0%, #F39C12 50%, #E67E22 100%);
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .login-container {
+            background: #1A1A2E; border-radius: 16px; padding: 48px 40px;
+            width: 100%; max-width: 440px; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            color: white;
+        }
+        .login-header { text-align: center; margin-bottom: 36px; }
+        .login-logo {
+            width: 64px; height: 64px; background: #F1C40F; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px; font-size: 32px; color: #1A1A2E;
+        }
+        .login-header h1 { font-size: 24px; margin-bottom: 4px; }
+        .login-header p { color: #AAA; font-size: 14px; }
+        .badge {
+            display: inline-block; background: #F1C40F; color: #1A1A2E;
+            padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 600; margin-top: 8px;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; color: #CCC; }
+        .form-group .input-icon { position: relative; }
+        .form-group .input-icon i {
+            position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #F1C40F;
+        }
+        .form-group input {
+            width: 100%; padding: 14px 14px 14px 42px;
+            border: 2px solid #333; background: #2C2C44; color: white;
+            border-radius: 8px; font-size: 15px; font-family: 'Inter', sans-serif; transition: border-color 0.3s;
+        }
+        .form-group input:focus { outline: none; border-color: #F1C40F; }
+        .btn-login {
+            width: 100%; padding: 14px; background: #F1C40F; color: #1A1A2E;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
+            cursor: pointer; transition: background 0.3s; font-family: 'Inter', sans-serif;
+        }
+        .btn-login:hover { background: #F39C12; }
+        .btn-login:disabled { background: #555; color: #999; cursor: not-allowed; }
+        .message {
+            text-align: center; margin-top: 16px; padding: 10px; border-radius: 8px;
+            font-size: 14px; display: none;
+        }
+        .message.error { background: #3B1111; color: #E74C3C; display: block; }
+        .message.success { background: #0B3D0B; color: #2ECC71; display: block; }
+        .message.info { background: #1A3D5C; color: #3498DB; display: block; }
+        .links { text-align: center; margin-top: 24px; }
+        .links a { color: #AAA; text-decoration: none; font-size: 14px; }
+        .links a:hover { color: #F1C40F; }
+        .note {
+            text-align: center; margin-top: 16px; padding: 12px; background: #2C2C44;
+            border-radius: 8px; font-size: 13px; color: #AAA;
+        }
+        .note i { color: #F1C40F; }
     </style>
 </head>
 <body>
-    <div style="text-align:center;">
-        <h1>🛵 Dagoo's Driver</h1>
-        <p>Application chauffeur - Bientôt disponible</p>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="login-logo">🛵</div>
+            <h1>Dagoo's Driver</h1>
+            <p>Espace Chauffeur</p>
+            <span class="badge">Application mobile</span>
+        </div>
+        
+        <div class="note">
+            <i class="fas fa-info-circle"></i> 
+            Votre compte est créé par votre gestionnaire de flotte ou coopérative.
+        </div>
+        
+        <form id="loginForm" style="margin-top: 24px;">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <div class="input-icon">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" placeholder="votre@email.com" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <div class="input-icon">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Votre mot de passe" required>
+                </div>
+            </div>
+            <div id="message" class="message"></div>
+            <button type="submit" class="btn-login" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Se connecter
+            </button>
+        </form>
+        
+        <div class="links">
+            <a href="https://dago-mobility.pages.dev">← Accueil</a>
+        </div>
     </div>
+    <script src="js/login.js"></script>
 </body>
 </html>
