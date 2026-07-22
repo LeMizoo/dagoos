@@ -6,7 +6,7 @@ console.log('%c🚀 Dago Mobility', 'font-size: 32px; font-weight: bold; color: 
 console.log('%cLa mobilité connectée... Chez les potes, ça roule.', 'font-size: 18px; color: #F39C12;');
 
 // ===== PROVERBES MALGACHES =====
-const proverbs = [
+var proverbs = [
     '"Ny asa tsy mba vintana, fa fitsirihana" — Le succès dépend de votre persévérance.',
     '"Aleo very tsiky toy izay very hiky" — Protégez votre activité avec Dago Mobility.',
     '"Ny fianarana no lova tsara indrindra" — Le savoir est le meilleur héritage.',
@@ -14,110 +14,119 @@ const proverbs = [
 ];
 
 // ===== HERO SLIDER =====
-let currentSlide = 0;
-const slides = document.querySelectorAll('.hero-slide');
-const totalSlides = slides.length;
+var currentSlide = 0;
+var slides = document.querySelectorAll('.hero-slide');
+var totalSlides = slides.length;
 
-// Créer les dots
-const dotsContainer = document.getElementById('heroDots');
-for (let i = 0; i < totalSlides; i++) {
-    const dot = document.createElement('button');
-    dot.onclick = () => goToSlide(i);
-    if (i === 0) dot.classList.add('active');
-    dotsContainer.appendChild(dot);
+var dotsContainer = document.getElementById('heroDots');
+if (dotsContainer && totalSlides > 1) {
+    for (var i = 0; i < totalSlides; i++) {
+        var dot = document.createElement('button');
+        dot.onclick = (function(idx) { return function() { goToSlide(idx); }; })(i);
+        if (i === 0) dot.classList.add('active');
+        dotsContainer.appendChild(dot);
+    }
+}
+
+var heroSection = document.querySelector('.hero');
+if (heroSection && totalSlides > 1) {
+    var prevBtn = document.createElement('button');
+    prevBtn.className = 'hero-nav prev';
+    prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+    prevBtn.onclick = prevSlide;
+    var nextBtn = document.createElement('button');
+    nextBtn.className = 'hero-nav next';
+    nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+    nextBtn.onclick = nextSlide;
+    heroSection.appendChild(prevBtn);
+    heroSection.appendChild(nextBtn);
 }
 
 function updateSlides() {
-    slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide));
-    document.querySelectorAll('#heroDots button').forEach((d, i) => d.classList.toggle('active', i === currentSlide));
-    document.getElementById('proverb').textContent = proverbs[currentSlide % proverbs.length];
+    slides.forEach(function(s, i) { s.classList.toggle('active', i === currentSlide); });
+    var dots = document.querySelectorAll('#heroDots button');
+    dots.forEach(function(d, i) { d.classList.toggle('active', i === currentSlide); });
+    var proverbEl = document.getElementById('proverb');
+    if (proverbEl) proverbEl.textContent = proverbs[currentSlide % proverbs.length];
 }
 
 function nextSlide() { currentSlide = (currentSlide + 1) % totalSlides; updateSlides(); }
 function prevSlide() { currentSlide = (currentSlide - 1 + totalSlides) % totalSlides; updateSlides(); }
 function goToSlide(i) { currentSlide = i; updateSlides(); }
 
-if (totalSlides > 1) {
-    setInterval(nextSlide, 5000);
-}
+if (totalSlides > 1) setInterval(nextSlide, 5000);
 
-// ===== CLOSE DROPDOWN ON CLICK OUTSIDE =====
-document.addEventListener('click', (e) => {
-    if (!e.target.closest('.login-dropdown')) {
-        document.getElementById('loginDropdown')?.classList.remove('show');
-    }
+// ===== HEADER SCROLL =====
+var header = document.querySelector('.header');
+window.addEventListener('scroll', function() {
+    if (header) header.classList.toggle('header-scrolled', window.pageYOffset > 50);
 });
 
+// ===== MOBILE MENU =====
+var hamburger = document.querySelector('.hamburger');
+var navMenu = document.querySelector('.nav');
+if (hamburger && navMenu) {
+    hamburger.addEventListener('click', function() {
+        hamburger.classList.toggle('active');
+        navMenu.classList.toggle('open');
+    });
+    navMenu.querySelectorAll('a').forEach(function(link) {
+        link.addEventListener('click', function() {
+            hamburger.classList.remove('active');
+            navMenu.classList.remove('open');
+        });
+    });
+}
+
 // ===== SMOOTH SCROLL =====
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
     anchor.addEventListener('click', function(e) {
-        const href = this.getAttribute('href');
+        var href = this.getAttribute('href');
         if (href === '#') return;
-        const target = document.querySelector(href);
+        var target = document.querySelector(href);
         if (target) {
             e.preventDefault();
-            target.scrollIntoView({ behavior: 'smooth' });
+            var headerHeight = document.querySelector('.header') ? document.querySelector('.header').offsetHeight : 0;
+            window.scrollTo({ top: target.getBoundingClientRect().top + window.pageYOffset - headerHeight, behavior: 'smooth' });
         }
     });
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('✅ Landing page chargée');
-});
-
-// ===== CHARGER LES PLANS DYNAMIQUEMENT =====
-async function loadPlans() {
-    try {
-        const response = await fetch('https://dagoos-api.onrender.com/api/plans');
-        if (!response.ok) return;
-        const plans = await response.json();
-        
-        const fleetPlans = plans.filter(p => p.type === 'FLEET_MANAGER');
-        const coopPlans = plans.filter(p => p.type === 'COOPERATIVE');
-        
-        const fleetEl = document.getElementById('fleetPlans');
-        const coopEl = document.getElementById('coopPlans');
-        
-        if (fleetEl) {
-            fleetEl.innerHTML = fleetPlans.map(p => `
-                <div style="display:flex;justify-content:space-between;font-size:12px;">
-                    <span>🔹 ${p.name}</span>
-                    <span><strong>${p.price.toLocaleString()} Ar</strong> · ${p.vehiclesMax} véhicules · ${p.driversMax} chauffeurs</span>
-                </div>`).join('');
-        }
-        
-        if (coopEl) {
-            coopEl.innerHTML = coopPlans.map(p => `
-                <div style="display:flex;justify-content:space-between;font-size:12px;">
-                    <span>🔹 ${p.name}</span>
-                    <span><strong>${p.price.toLocaleString()} Ar</strong> · ${p.vehiclesMax} véhicules · ${p.driversMax} livreurs</span>
-                </div>`).join('');
-        }
-    } catch (e) {
-        console.log('Plans non disponibles, affichage par défaut');
-    }
-}
-
-document.addEventListener('DOMContentLoaded', loadPlans);
-
 // ===== CHARGER LES STATS =====
 async function loadStats() {
     try {
-        var res = await Promise.all([
-            fetch('https://dagoos-api.onrender.com/api/organizations'),
-            fetch('https://dagoos-api.onrender.com/api/drivers')
-        ]);
-        var orgs = res[0].ok ? await res[0].json() : [];
-        var drivers = res[1].ok ? await res[1].json() : [];
-        var fleets = orgs.filter(function(o) { return o.type === 'FLEET_MANAGER'; }).length;
-        var coops = orgs.filter(function(o) { return o.type === 'COOPERATIVE'; }).length;
-        document.getElementById('statFleets').textContent = fleets;
-        document.getElementById('statDrivers').textContent = drivers.length;
-        document.getElementById('statCoops').textContent = coops;
+        var res = await fetch('https://dagoos-api.onrender.com/api/stats');
+        var data = res.ok ? await res.json() : { fleets: 0, coops: 0, drivers: 0 };
+        var elF = document.getElementById('statFleets');
+        var elD = document.getElementById('statDrivers');
+        var elC = document.getElementById('statCoops');
+        if (elF) elF.textContent = data.fleets;
+        if (elD) elD.textContent = data.drivers;
+        if (elC) elC.textContent = data.coops;
+    } catch (e) {}
+}
+
+// ===== CHARGER LES PLANS =====
+async function loadPlans() {
+    try {
+        var res = await fetch('https://dagoos-api.onrender.com/api/plans');
+        if (!res.ok) return;
+        var plans = await res.json();
+        var fleetPlans = plans.filter(function(p) { return p.type === 'FLEET_MANAGER'; });
+        var coopPlans = plans.filter(function(p) { return p.type === 'COOPERATIVE'; });
+        var fleetEl = document.getElementById('fleetPlans');
+        var coopEl = document.getElementById('coopPlans');
+        if (fleetEl) fleetEl.innerHTML = fleetPlans.map(function(p) {
+            return '<div style="display:flex;justify-content:space-between;font-size:12px;"><span>🔹 ' + p.name + '</span><span><strong>' + p.price.toLocaleString() + ' Ar</strong> · ' + p.vehiclesMax + ' véhicules · ' + p.driversMax + ' chauffeurs</span></div>';
+        }).join('');
+        if (coopEl) coopEl.innerHTML = coopPlans.map(function(p) {
+            return '<div style="display:flex;justify-content:space-between;font-size:12px;"><span>🔹 ' + p.name + '</span><span><strong>' + p.price.toLocaleString() + ' Ar</strong> · ' + p.vehiclesMax + ' véhicules · ' + p.driversMax + ' livreurs</span></div>';
+        }).join('');
     } catch (e) {}
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Landing page chargée');
     loadStats();
     loadPlans();
 });

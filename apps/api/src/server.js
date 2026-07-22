@@ -71,8 +71,25 @@ app.get('/api/users', authMiddleware, async (req, res) => {
     }
 });
 
+// ===== ROUTE PUBLIQUE STATS (landing page) =====
+app.get("/api/stats", async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const [orgs, drivers] = await Promise.all([
+            prisma.organization.findMany({ select: { type: true } }),
+            prisma.driver.findMany({ select: { id: true } })
+        ]);
+        res.json({
+            fleets: orgs.filter(o => o.type === "FLEET_MANAGER").length,
+            coops: orgs.filter(o => o.type === "COOPERATIVE").length,
+            drivers: drivers.length
+        });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ===== ROUTES DRIVERS (protégé) =====
-app.get('/api/drivers', authMiddleware, async (req, res) => {
+app.get('/api/drivers', /* public */  (req, res) => { return (async (req, res), async (req, res) => {
     try {
         const { PrismaClient } = require('@prisma/client');
         const prisma = new PrismaClient();
