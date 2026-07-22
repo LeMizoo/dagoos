@@ -170,7 +170,7 @@ async function loadDashboardStats() {
 // ===== FLOTTES =====
 function getFleetsHTML() { return `<div class="topbar"><h1>🚛 Flottes</h1></div><div class="card"><div class="card-header"><h3>Toutes les flottes</h3></div><table><thead><tr><th>Nom</th><th>Code</th><th>Email</th><th>Chauffeurs</th><th>Plan</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="fleetsTable"></tbody></table></div>`; }
 async function loadFleets() {
-    const [orgsRes, driversRes] = await Promise.all([fetch(`${API_URL}/organizations`), fetch(`${API_URL}/drivers`)]);
+    const [orgsRes, driversRes] = await Promise.all([fetch(`${API_URL}/organizations`, { headers: { Authorization: `Bearer ${token}` } }), fetch(`${API_URL}/drivers`, { headers: { Authorization: `Bearer ${token}` } })]);
     const orgs = orgsRes.ok ? await orgsRes.json() : [];
     const drivers = driversRes.ok ? await driversRes.json() : [];
     const fleets = orgs.filter(o => o.type === 'FLEET_MANAGER');
@@ -183,7 +183,7 @@ async function loadFleets() {
 // ===== COOPS =====
 function getCoopsHTML() { return `<div class="topbar"><h1>🏢 Coopératives</h1></div><div class="card"><div class="card-header"><h3>Toutes les coopératives</h3></div><table><thead><tr><th>Nom</th><th>Code</th><th>Email</th><th>Chauffeurs</th><th>Plan</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="coopsTable"></tbody></table></div>`; }
 async function loadCoops() {
-    const [orgsRes, driversRes] = await Promise.all([fetch(`${API_URL}/organizations`), fetch(`${API_URL}/drivers`)]);
+    const [orgsRes, driversRes] = await Promise.all([fetch(`${API_URL}/organizations`, { headers: { Authorization: `Bearer ${token}` } }), fetch(`${API_URL}/drivers`, { headers: { Authorization: `Bearer ${token}` } })]);
     const orgs = orgsRes.ok ? await orgsRes.json() : [];
     const drivers = driversRes.ok ? await driversRes.json() : [];
     const coops = orgs.filter(o => o.type === 'COOPERATIVE');
