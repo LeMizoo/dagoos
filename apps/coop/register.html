@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dagoo's Coop - Connexion</title>
+    <title>Dagoo's Coop - Inscription</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -16,40 +16,37 @@
             min-height: 100vh;
             display: flex; align-items: center; justify-content: center;
         }
-        .login-container {
+        .register-container {
             background: white; border-radius: 16px; padding: 48px 40px;
-            width: 100%; max-width: 440px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%; max-width: 520px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-        .login-header { text-align: center; margin-bottom: 36px; }
-        .login-logo {
+        .register-header { text-align: center; margin-bottom: 36px; }
+        .register-logo {
             width: 64px; height: 64px; background: #F1C40F; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             margin: 0 auto 16px; font-size: 32px;
         }
-        .login-header h1 { font-size: 24px; color: #1A1A2E; margin-bottom: 4px; }
-        .login-header p { color: #6C757D; font-size: 14px; }
+        .register-header h1 { font-size: 24px; color: #1A1A2E; margin-bottom: 4px; }
+        .register-header p { color: #6C757D; font-size: 14px; }
         .badge {
             display: inline-block; background: #27AE60; color: white;
             padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 600; margin-top: 8px;
         }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-size: 14px; font-weight: 500; color: #1A1A2E; margin-bottom: 6px; }
-        .form-group .input-icon { position: relative; }
-        .form-group .input-icon i {
-            position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #6C757D;
-        }
         .form-group input {
-            width: 100%; padding: 14px 14px 14px 42px; border: 2px solid #E9ECEF;
+            width: 100%; padding: 14px; border: 2px solid #E9ECEF;
             border-radius: 8px; font-size: 15px; font-family: 'Inter', sans-serif; transition: border-color 0.3s;
         }
         .form-group input:focus { outline: none; border-color: #27AE60; }
-        .btn-login {
+        .btn-register {
             width: 100%; padding: 14px; background: #27AE60; color: white;
             border: none; border-radius: 8px; font-size: 16px; font-weight: 600;
             cursor: pointer; transition: background 0.3s; font-family: 'Inter', sans-serif;
         }
-        .btn-login:hover { background: #1E8449; }
-        .btn-login:disabled { background: #6C757D; cursor: not-allowed; }
+        .btn-register:hover { background: #1E8449; }
+        .btn-register:disabled { background: #6C757D; cursor: not-allowed; }
         .message {
             text-align: center; margin-top: 16px; padding: 10px; border-radius: 8px;
             font-size: 14px; display: none;
@@ -61,51 +58,59 @@
         .links a { color: #6C757D; text-decoration: none; font-size: 14px; }
         .links a:hover { color: #27AE60; }
         .links span { color: #6C757D; margin: 0 8px; }
-        .loader {
-            display: none; width: 20px; height: 20px; border: 2px solid white;
-            border-top: 2px solid transparent; border-radius: 50%;
-            animation: spin 0.8s linear infinite; margin: 0 auto;
+        @media (max-width: 500px) {
+            .form-row { grid-template-columns: 1fr; }
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <div class="login-logo">🏢</div>
-            <h1>Dagoo's Coop</h1>
-            <p>Espace Coopérative</p>
-            <span class="badge">Transport & Logistique</span>
+    <div class="register-container">
+        <div class="register-header">
+            <div class="register-logo">🏢</div>
+            <h1>Créer un compte Coopérative</h1>
+            <p>Gérez votre coopérative de transport</p>
+            <span class="badge">🆓 Gratuit</span>
         </div>
         
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="email">Email</label>
-                <div class="input-icon">
-                    <i class="fas fa-envelope"></i>
-                    <input type="email" id="email" placeholder="votre@email.com" required>
+        <form id="registerForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="name">Nom de la coopérative</label>
+                    <input type="text" id="name" placeholder="Nom" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="exemple@email.com" required>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="password">Mot de passe</label>
-                <div class="input-icon">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" id="password" placeholder="Votre mot de passe" required>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="phone">Téléphone</label>
+                    <input type="tel" id="phone" placeholder="034 00 000 00" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input type="password" id="password" placeholder="Min 6 caractères" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirmer</label>
+                    <input type="password" id="confirmPassword" placeholder="Répéter le mot de passe" required>
                 </div>
             </div>
             <div id="message" class="message"></div>
-            <button type="submit" class="btn-login" id="loginBtn">
-                <span id="btnText"><i class="fas fa-sign-in-alt"></i> Se connecter</span>
-                <span class="loader" id="loader"></span>
+            <button type="submit" class="btn-register" id="registerBtn">
+                <i class="fas fa-user-plus"></i> Créer mon compte
             </button>
         </form>
         
         <div class="links">
-            <a href="register.html">Créer un compte</a>
+            <a href="index.html">Déjà un compte ? Se connecter</a>
             <span>|</span>
             <a href="https://dago-mobility.pages.dev">← Accueil</a>
         </div>
     </div>
-    <script src="js/login.js"></script>
+    <script src="js/register.js"></script>
 </body>
 </html>

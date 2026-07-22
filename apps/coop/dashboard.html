@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dagoo's Coop - Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #F8F9FA; }
+        .topbar {
+            background: #27AE60; color: white; padding: 16px 32px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .topbar h1 { font-size: 20px; }
+        .topbar button {
+            background: rgba(255,255,255,0.2); color: white; border: none;
+            padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: 'Inter', sans-serif;
+        }
+        .topbar button:hover { background: rgba(255,255,255,0.3); }
+        .content { padding: 32px; max-width: 800px; margin: 0 auto; }
+        .welcome-card {
+            background: white; border-radius: 12px; padding: 48px;
+            text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .welcome-card .icon { font-size: 64px; margin-bottom: 16px; }
+        .welcome-card h2 { color: #27AE60; margin-bottom: 8px; }
+        .welcome-card p { color: #6C757D; }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <h1>🏢 Dagoo's Coop</h1>
+        <div>
+            <span id="userName" style="margin-right: 16px;"></span>
+            <button onclick="logout()">🚪 Déconnexion</button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="welcome-card">
+            <div class="icon">🏢</div>
+            <h2>Bienvenue sur votre espace Coopérative !</h2>
+            <p>Gérez votre coopérative, vos livraisons et vos contrats. Fonctionnalités complètes à venir.</p>
+        </div>
+    </div>
+    <script>
+        const user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
+        if (!localStorage.getItem('dagoos_token') || user.role !== 'COOPERATIVE') {
+            window.location.href = 'index.html';
+        }
+        document.getElementById('userName').textContent = '👋 ' + (user.name || user.email);
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'https://dago-mobility.pages.dev';
+        }
+    </script>
+</body>
+</html>
