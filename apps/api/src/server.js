@@ -81,6 +81,50 @@ app.get("/api/logs", authMiddleware, async (req, res) => {
     }
 });
 
+// ===== ROUTES MESSAGES =====
+app.get("/api/messages", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const messages = await prisma.message.findMany({
+            include: { organization: { select: { name: true, code: true, type: true, logo: true } } },
+            orderBy: { createdAt: "desc" },
+            take: 100
+        });
+        res.json(messages);
+    } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+app.get("/api/messages/unread-count", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const count = await prisma.message.count({ where: { read: false } });
+        res.json({ count });
+    } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+app.put("/api/messages/:id/read", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        await prisma.message.update({ where: { id: req.params.id }, data: { read: true } });
+        res.json({ success: true });
+    } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+app.post("/api/messages", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { organizationId, subject, content, type } = req.body;
+        const message = await prisma.message.create({
+            data: { organizationId, subject, content, type: type || "info" }
+        });
+        res.status(201).json(message);
+    } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
 // ===== DÉMARRAGE =====
 app.listen(port, () => {
   console.log(`✅ Dagoo's API lancée sur http://localhost:${port}`);

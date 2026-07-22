@@ -71,6 +71,7 @@ async function loadPage(page) {
     
     switch(page) {
         case 'dashboard': main.innerHTML = getDashboardHTML(); await loadDashboardStats(); refreshInterval = setInterval(loadDashboardStats, 30000); break;
+            loadMessages();
         case 'fleets': main.innerHTML = getTableHTML('flottes', '🚛 Flottes'); await loadFleets(); break;
         case 'coops': main.innerHTML = getTableHTML('coops', '🏢 Coopératives'); await loadCoops(); break;
         case 'drivers': main.innerHTML = getTableHTML('drivers', '🛵 Chauffeurs'); await loadDrivers(); break;
@@ -400,6 +401,42 @@ function getPlansContent(type) {
         <div class="card" style="padding:24px;margin-top:16px;"><h3>📉 Réduction annuelle</h3>
             <div style="display:flex;align-items:center;gap:12px;margin-top:12px;"><input type="number" value="7" style="width:80px;padding:12px;border:1px solid #E9ECEF;border-radius:8px;text-align:center;font-weight:700;font-size:18px;"> <span style="font-size:18px;">%</span></div>
         </div>`;
+}
+
+// ===== MESSAGES =====
+let unreadCount = 0;
+async function loadMessages() {
+    try {
+        const res = await fetch(`${API_URL}/messages`, { headers: { Authorization: `Bearer ${token}` } });
+        const messages = res.ok ? await res.json() : [];
+        document.getElementById("messagesTable").innerHTML = messages.length ? messages.map(m => `
+            <tr style="${!m.read ? "background:#FEF3C7;font-weight:600;" : ""}">
+                <td><img src="${m.organization?.logo||"assets/logo/b-trans.png"}" class="logo-cell" style="vertical-align:middle;margin-right:6px;">${m.organization?.name||"N/A"}</td>
+                <td>${m.subject}</td>
+                <td>${m.content.substring(0, 80)}${m.content.length>80?"...":""}</td>
+                <td><span class="badge badge-${m.type==="urgent"?"danger":"info"}">${m.type}</span></td>
+                <td>${new Date(m.createdAt).toLocaleString("fr")}</td>
+                <td>${!m.read ? `<button class="btn-sm btn-view" onclick="markAsRead("${m.id}")">✔ Lire</button>` : "✅"}</td>
+            </tr>`).join("") : "<tr><td colspan=\"6\" style=\"text-align:center;color:#6C757D;\">Aucun message</td></tr>";
+        
+        const countRes = await fetch(`${API_URL}/messages/unread-count`, { headers: { Authorization: `Bearer ${token}` } });
+        const countData = countRes.ok ? await countRes.json() : { count: 0 };
+        unreadCount = countData.count;
+        const badge = document.getElementById("msgCount");
+        const notifBadge = document.querySelector(".notif-btn .badge");
+        if (unreadCount > 0) {
+            if (badge) { badge.style.display = "inline"; badge.textContent = unreadCount; }
+            if (notifBadge) notifBadge.style.display = "block";
+        } else {
+            if (badge) badge.style.display = "none";
+            if (notifBadge) notifBadge.style.display = "none";
+        }
+    } catch (e) { console.error(e); }
+}
+
+async function markAsRead(id) {
+    await fetch(`${API_URL}/messages/${id}/read`, { method: "PUT", headers: { Authorization: `Bearer ${token}` } });
+    loadMessages();
 }
 
 // ===== PAYMENTS =====
