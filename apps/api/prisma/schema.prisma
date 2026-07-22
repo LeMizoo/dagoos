@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  phone     String?
+  role      String   @default("DRIVER")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  driver    Driver?
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  code      String   @unique
+  type      String
+  email     String   @unique
+  phone     String?
+  createdAt DateTime @default(now())
+  drivers   Driver[]
+}
+
+model Driver {
+  id             String       @id @default(cuid())
+  userId         String       @unique
+  user           User         @relation(fields: [userId], references: [id])
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  driverCode     String       @unique
+  pin            String
+  license        String?
+  status         String       @default("active")
+  createdAt      DateTime     @default(now())
+}
+
+model Vehicle {
+  id        String   @id @default(cuid())
+  plate     String   @unique
+  model     String?
+  year      Int?
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+}
+
+model Trip {
+  id        String   @id @default(cuid())
+  driverId  String
+  vehicleId String
+  status    String   @default("pending")
+  startAt   DateTime?
+  endAt     DateTime?
+  createdAt DateTime @default(now())
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  tripId    String
+  amount    Float
+  method    String
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+}

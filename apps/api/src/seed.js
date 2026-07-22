@@ -1,0 +1,79 @@
+const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
+
+const prisma = new PrismaClient();
+
+async function seed() {
+  console.log('🌱 Seed: initialisation...');
+
+  // SUPER_ADMIN
+  const adminEmail = 'tovoniaina.rahendrison@gmail.com';
+  const adminExists = await prisma.user.findUnique({ where: { email: adminEmail } });
+  if (!adminExists) {
+    await prisma.user.create({
+      data: {
+        email: adminEmail,
+        password: await bcrypt.hash('ByDagoos2026!', 10),
+        name: 'Tovoniaina RAHENDRISON',
+        phone: '0340700405',
+        role: 'SUPER_ADMIN'
+      }
+    });
+    console.log('✅ SUPER_ADMIN créé');
+  }
+
+  // Organisations de démo
+  const orgs = [
+    { name: 'Flotte Alasora', code: 'AL', type: 'FLEET_MANAGER', email: 'flotte-alasora@dagoos.mg', phone: '0340000001' },
+    { name: 'Flotte Rasoa', code: 'RA', type: 'FLEET_MANAGER', email: 'flotte-rasoa@dagoos.mg', phone: '0340000002' },
+    { name: 'Coopérative Tana', code: 'TN', type: 'COOPERATIVE', email: 'coop-tana@dagoos.mg', phone: '0340000003' },
+    { name: 'Coopérative Tamatave', code: 'TM', type: 'COOPERATIVE', email: 'coop-tamatave@dagoos.mg', phone: '0340000004' }
+  ];
+
+  for (const org of orgs) {
+    const exists = await prisma.organization.findUnique({ where: { code: org.code } });
+    if (!exists) {
+      await prisma.organization.create({ data: org });
+      console.log('✅ Organisation:', org.name);
+    }
+  }
+
+  // Chauffeurs de démo
+  const demoDrivers = [
+    { name: 'Rakoto Jean', code: 'FL-AL001', pin: '1234', orgCode: 'AL' },
+    { name: 'Rabe Pierre', code: 'FL-AL002', pin: '5678', orgCode: 'AL' },
+    { name: 'Rasoanaivo', code: 'CO-TN001', pin: '4321', orgCode: 'TN' }
+  ];
+
+  for (const d of demoDrivers) {
+    const exists = await prisma.driver.findUnique({ where: { driverCode: d.code } });
+    if (!exists) {
+      const org = await prisma.organization.findUnique({ where: { code: d.orgCode } });
+      if (org) {
+        const user = await prisma.user.create({
+          data: {
+            email: `${d.code.toLowerCase()}@driver.dagoos.mg`,
+            password: await bcrypt.hash(d.pin, 10),
+            name: d.name,
+            role: 'DRIVER'
+          }
+        });
+        await prisma.driver.create({
+          data: {
+            userId: user.id,
+            organizationId: org.id,
+            driverCode: d.code,
+            pin: await bcrypt.hash(d.pin, 10),
+            status: 'active'
+          }
+        });
+        console.log('✅ Chauffeur:', d.code, d.name);
+      }
+    }
+  }
+
+  await prisma.$disconnect();
+  console.log('✅ Seed terminé');
+}
+
+seed().catch(e => { console.error(e); process.exit(1); });
