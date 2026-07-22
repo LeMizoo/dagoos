@@ -32,3 +32,7 @@ logs/
 # Prisma
 *.db
 *.db-journal
+node_modules/
+dist/
+.env
+*.db
