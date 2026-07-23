@@ -85,7 +85,7 @@ async function loadDashboardData() {
         
         var drvRes = await fetch(API_URL + '/drivers', { headers: { Authorization: 'Bearer ' + token } });
         driversData = drvRes.ok ? await drvRes.json() : [];
-        var myDrivers = driversData.filter(function(d) { return d.organization d.organization && d.organization.code === orgCode()d.organization && d.organization.code === orgCode() d.organization.email === user.email; });
+        var myDrivers = driversData.filter(function(d) { return d.organization && d.organization.email === user.email; });
         document.getElementById('statDrivers').textContent = myDrivers.length;
         document.getElementById('driverCount').textContent = myDrivers.length;
         document.getElementById('recentDrivers').innerHTML = myDrivers.slice(0, 5).map(function(d) {
