@@ -27,11 +27,12 @@ function setTheme(t) {
     localStorage.setItem('dago_theme', t);
 }
 
-function showModal(title, content, hasSave) {
+function showModal(title, content, callback) { document.getElementById("modalContent").innerHTML = "<h2>" + title + "</h2>" + content + "<div class=\"btn-row\"><button class=\"btn btn-secondary\" onclick=\"closeModal()\">Annuler</button><button class=\"btn btn-primary\" id=\"modalSaveBtn\">Enregistrer</button></div>"; document.getElementById("modalOverlay").classList.add("show"); if (callback) { document.getElementById("modalSaveBtn").onclick = callback; } }
+    
     var btnRow = hasSave ? '<div class="btn-row"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" id="modalSaveBtn">Enregistrer</button></div>' : '<div class="btn-row"><button class="btn btn-primary" onclick="closeModal()">Fermer</button></div>';
     document.getElementById('modalContent').innerHTML = '<h2>' + title + '</h2>' + content + btnRow;
     document.getElementById('modalOverlay').classList.add('show');
-    return document.getElementById('modalSaveBtn');
+    setTimeout(function() { var btn = document.getElementById("modalSaveBtn"); if (btn && onSave) btn.onclick = onSave; }, 100); return true;
 }
 function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
 
@@ -147,7 +148,9 @@ function editOrg(id) {
     var h = '<div class="form-group"><label>Nom</label><input id="editName" value="' + o.name + '"></div><div class="form-group"><label>Email</label><input id="editEmail" value="' + (o.email || '') + '"></div><div class="form-group"><label>Plan</label><select id="editPlan">';
     ['Freemium','Basic','Standard','Premium'].forEach(function(p) { h += '<option ' + (o.plan === p ? 'selected' : '') + '>' + p + '</option>'; });
     h += '</select></div>';
-    var saveBtn = showModal('Modifier ' + o.name, h, true);
+    var saveBtn = showModal("Modifier " + o.name, h, function() {
+        fetch(API_URL + "/organizations/" + id, { method: "PUT", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token }, body: JSON.stringify({ name: document.getElementById("editName").value, email: document.getElementById("editEmail").value, plan: document.getElementById("editPlan").value }) }).then(function() { closeModal(); loadPage(currentPage); });
+    });
     if (saveBtn) saveBtn.onclick = function() {
         fetch(API_URL + '/organizations/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ name: document.getElementById('editName').value, email: document.getElementById('editEmail').value, plan: document.getElementById('editPlan').value }) }).then(function() { closeModal(); loadPage(currentPage); });
     };
@@ -157,7 +160,9 @@ function rejectOrg(id) { if (confirm('Refuser ?')) { fetch(API_URL + '/organizat
 function toggleOrgStatus(id, s) { var ns = s === 'active' ? 'suspended' : 'active'; if (confirm('Changer en ' + ns + ' ?')) { fetch(API_URL + '/organizations/' + id + '/status', { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ status: ns }) }).then(function() { loadPage(currentPage); }); } }
 function addOrg(type) {
     var h = '<div class="form-group"><label>Nom</label><input id="addName"></div><div class="form-group"><label>Email</label><input id="addEmail"></div>';
-    var saveBtn = showModal('Ajouter ' + (type === 'FLEET_MANAGER' ? 'Flotte' : 'Cooperative'), h, true);
+    var saveBtn = showModal("Modifier " + o.name, h, function() {
+        fetch(API_URL + "/organizations/" + id, { method: "PUT", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token }, body: JSON.stringify({ name: document.getElementById("editName").value, email: document.getElementById("editEmail").value, plan: document.getElementById("editPlan").value }) }).then(function() { closeModal(); loadPage(currentPage); });
+    });
     if (saveBtn) saveBtn.onclick = function() { var n = document.getElementById('addName').value; if (!n) return alert('Nom requis'); fetch(API_URL + '/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: n, email: document.getElementById('addEmail').value, password: '123456', role: type }) }).then(function() { closeModal(); loadPage(currentPage); }); };
 }
 function viewDriver(id) { var d = driversData.find(function(x) { return x.id === id; }); if (!d) return; showModal(d.user ? d.user.name : d.driverCode, '<p><strong>Code:</strong> ' + d.driverCode + '</p><p><strong>Organisation:</strong> ' + (d.organization ? d.organization.name : 'N/A') + '</p><p><strong>Statut:</strong> ' + d.status + '</p>'); }
@@ -176,7 +181,9 @@ function newMessage() {
     var h = '<div class="form-group"><label>Destinataire</label><select id="msgOrg">';
     orgsData.forEach(function(o) { h += '<option value="' + o.id + '">' + o.name + '</option>'; });
     h += '</select></div><div class="form-group"><label>Sujet</label><input id="msgSubject"></div><div class="form-group"><label>Message</label><textarea id="msgContent" rows="4" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"></textarea></div>';
-    var saveBtn = showModal('Nouveau message', h, true);
+    var saveBtn = showModal("Modifier " + o.name, h, function() {
+        fetch(API_URL + "/organizations/" + id, { method: "PUT", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token }, body: JSON.stringify({ name: document.getElementById("editName").value, email: document.getElementById("editEmail").value, plan: document.getElementById("editPlan").value }) }).then(function() { closeModal(); loadPage(currentPage); });
+    });
     if (saveBtn) saveBtn.onclick = function() {
         fetch(API_URL + '/messages', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ organizationId: document.getElementById('msgOrg').value, subject: document.getElementById('msgSubject').value, content: document.getElementById('msgContent').value }) }).then(function() { closeModal(); loadMessages(); });
     };
