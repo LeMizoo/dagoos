@@ -31,12 +31,14 @@ exports.register = async (req, res) => {
 
     // Créer l'organisation associée avec logo
     const code = name.substring(0, 2).toUpperCase() + Math.random().toString(36).substring(2, 4).toUpperCase();
+    const slug = name.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
     const type = userRole === 'COOPERATIVE' ? 'COOPERATIVE' : 'FLEET_MANAGER';
     
     await prisma.organization.create({
       data: {
         name,
         code,
+        slug,
         type,
         email,
         phone,
@@ -81,6 +83,7 @@ exports.login = async (req, res) => {
 exports.driverLogin = async (req, res) => {
   try {
     const { code, pin } = req.body;
+        slug,
     if (!code || !pin) return res.status(400).json({ error: 'Code et PIN requis.' });
 
     const driver = await prisma.driver.findFirst({ where: { driverCode: code }, include: { user: true, organization: true } });
@@ -93,6 +96,7 @@ exports.driverLogin = async (req, res) => {
     const token = jwt.sign({ id: driver.user.id, email: driver.user.email || `${code}@driver.dagoos.mg`, role: 'DRIVER', driverId: driver.id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 
     res.json({ message: 'Connexion réussie !', token, user: { id: driver.user.id, name: driver.user.name || code, email: driver.user.email, role: 'DRIVER', driverCode: driver.driverCode, organization: driver.organization.name } });
+        slug,
   } catch (error) {
     res.status(500).json({ error: 'Erreur connexion chauffeur.' });
   }

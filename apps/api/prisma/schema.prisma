@@ -20,18 +20,20 @@ model User {
 }
 
 model Organization {
-  id        String   @id @default(cuid())
-  name      String
-  code      String   @unique
-  type      String
-  email     String   @unique
-  phone     String?
-  logo      String?
-  plan      String   @default("Freemium")
-  status    String   @default("active")
-  createdAt DateTime @default(now())
-  drivers   Driver[]
-  messages  Message[]
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  slug        String   @unique
+  type        String
+  email       String   @unique
+  phone       String?
+  logo        String?
+  description String?
+  plan        String   @default("Freemium")
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  drivers     Driver[]
+  messages    Message[]
 }
 
 model Driver {

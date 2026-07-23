@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chargement...</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #1A5276, #154360); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .card { background: white; border-radius: 20px; padding: 48px; max-width: 500px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .card img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 16px; background: #F1F5F9; }
+        .card h1 { font-size: 24px; color: #1A1A2E; margin-bottom: 4px; }
+        .card .badge { display: inline-block; background: #1A5276; color: white; padding: 4px 12px; border-radius: 50px; font-size: 12px; margin-bottom: 16px; }
+        .card p { color: #6C757D; line-height: 1.6; margin-bottom: 20px; }
+        .card .info { display: flex; gap: 20px; justify-content: center; margin-bottom: 24px; }
+        .card .info div { text-align: center; }
+        .card .info strong { display: block; font-size: 20px; color: #1A5276; }
+        .card .info span { font-size: 11px; color: #6C757D; }
+        .btn { display: inline-block; padding: 12px 24px; background: #1A5276; color: white; border-radius: 10px; text-decoration: none; font-weight: 600; transition: 0.3s; }
+        .btn:hover { background: #154360; }
+        .footer { margin-top: 20px; font-size: 11px; color: #AAA; }
+        .footer a { color: #1A5276; }
+    </style>
+</head>
+<body>
+    <div class="card" id="app"></div>
+    <script>
+        var slug = window.location.pathname.replace('/', '').replace('.html', '');
+        if (!slug) { document.getElementById('app').innerHTML = '<h1>Page non trouvee</h1>'; }
+        
+        fetch('https://dagoos-api.onrender.com/api/organizations')
+            .then(function(r) { return r.json(); })
+            .then(function(orgs) {
+                var org = orgs.find(function(o) { return o.slug === slug; });
+                if (!org) { document.getElementById('app').innerHTML = '<h1>🚛 Flotte non trouvee</h1><p>Cette page vitrine n existe pas.</p>'; return; }
+                document.title = org.name + ' - Dago Mobility';
+                document.getElementById('app').innerHTML = 
+                    '<img src="' + (org.logo || 'https://dago-mobility.pages.dev/assets/logo/b-trans.png') + '" alt="' + org.name + '">' +
+                    '<h1>' + org.name + '</h1>' +
+                    '<span class="badge">🚛 Flotte Dago Mobility</span>' +
+                    '<p>' + (org.description || 'Service de transport a Madagascar.') + '</p>' +
+                    '<div class="info">' +
+                        '<div><strong>' + (org.driversCount || 0) + '</strong><span>Chauffeurs</span></div>' +
+                        '<div><strong>' + (org.plan || 'Freemium') + '</strong><span>Plan</span></div>' +
+                    '</div>' +
+                    '<p style="font-size:13px;">📞 ' + (org.phone || 'Non renseigne') + ' | ✉️ ' + (org.email || '') + '</p>' +
+                    '<a href="https://dago-fleet.pages.dev" class="btn">Se connecter</a>' +
+                    '<div class="footer">Propulse par <a href="https://dago-mobility.pages.dev">Dago Mobility</a></div>';
+            })
+            .catch(function() { document.getElementById('app').innerHTML = '<h1>Erreur</h1>'; });
+    </script>
+</body>
+</html>

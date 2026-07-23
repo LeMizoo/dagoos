@@ -26,10 +26,10 @@ async function seed() {
 
   // Organisations de démo avec logo par défaut
   const orgs = [
-    { name: 'Flotte Alasora', code: 'AL', type: 'FLEET_MANAGER', email: 'flotte-alasora@dagoos.mg', phone: '0340000001', logo: DEFAULT_LOGO, plan: 'Freemium' },
-    { name: 'Flotte Rasoa', code: 'RA', type: 'FLEET_MANAGER', email: 'flotte-rasoa@dagoos.mg', phone: '0340000002', logo: DEFAULT_LOGO, plan: 'Basic' },
-    { name: 'Coopérative Tana', code: 'TN', type: 'COOPERATIVE', email: 'coop-tana@dagoos.mg', phone: '0340000003', logo: DEFAULT_LOGO, plan: 'Freemium' },
-    { name: 'Coopérative Tamatave', code: 'TM', type: 'COOPERATIVE', email: 'coop-tamatave@dagoos.mg', phone: '0340000004', logo: DEFAULT_LOGO, plan: 'Standard' }
+    { name: "Flotte Alasora", code: "AL", slug: "flotte-alasora", type: 'FLEET_MANAGER', email: 'flotte-alasora@dagoos.mg', phone: '0340000001', logo: DEFAULT_LOGO, plan: 'Freemium' },
+    { name: "Flotte Rasoa", code: "RA", slug: "flotte-rasoa", type: 'FLEET_MANAGER', email: 'flotte-rasoa@dagoos.mg', phone: '0340000002', logo: DEFAULT_LOGO, plan: 'Basic' },
+    { name: "Cooperative Tana", code: "TN", slug: "coop-tana", type: 'COOPERATIVE', email: 'coop-tana@dagoos.mg', phone: '0340000003', logo: DEFAULT_LOGO, plan: 'Freemium' },
+    { name: "Cooperative Tamatave", code: "TM", slug: "coop-tamatave", type: 'COOPERATIVE', email: 'coop-tamatave@dagoos.mg', phone: '0340000004', logo: DEFAULT_LOGO, plan: 'Standard' }
   ];
 
   for (const org of orgs) {
