@@ -107,6 +107,8 @@ async function loadStats() {
 }
 
 // ===== CHARGER LES PLANS =====
+function p(n, s) { return n + ' ' + (n <= 1 ? s : s + 's'); }
+
 async function loadPlans() {
     try {
         var res = await fetch('https://dagoos-api.onrender.com/api/plans');
@@ -117,10 +119,10 @@ async function loadPlans() {
         var fleetEl = document.getElementById('fleetPlans');
         var coopEl = document.getElementById('coopPlans');
         if (fleetEl) fleetEl.innerHTML = fleetPlans.map(function(p) {
-            return '<div style="display:flex;justify-content:space-between;font-size:12px;"><span>🔹 ' + p.name + '</span><span><strong>' + p.price.toLocaleString() + ' Ar</strong> · ' + p.vehiclesMax + ' véhicules · ' + p.driversMax + ' chauffeurs' + (p.name === 'Premium' ? ' <span style="background:#F1C40F;color:#1A1A2E;padding:2px 6px;border-radius:50px;font-size:10px;font-weight:600;">💡</span>' : '') + '</span></div>';
+            return '<div style="display:flex;justify-content:space-between;font-size:12px;"><span>🔹 ' + p.name + '</span><span><strong>' + p.price.toLocaleString() + ' Ar</strong> ' + p(p.vehiclesMax, 'véhicule') + ' · ' + p(p.driversMax, 'chauffeur') + ' ' + (p.name === 'Premium' ? ' <span style="background:#F1C40F;color:#1A1A2E;padding:2px 6px;border-radius:50px;font-size:10px;font-weight:600;">💡</span>' : '') + '</span></div>';
         }).join('');
         if (coopEl) coopEl.innerHTML = coopPlans.map(function(p) {
-            return '<div style="display:flex;justify-content:space-between;font-size:12px;"><span>🔹 ' + p.name + '</span><span><strong>' + p.price.toLocaleString() + ' Ar</strong> · ' + p.vehiclesMax + ' véhicules · ' + p.driversMax + ' livreurs' + (p.name === 'Premium' ? ' <span style="background:#F1C40F;color:#1A1A2E;padding:2px 6px;border-radius:50px;font-size:10px;font-weight:600;">💡</span>' : '') + '</span></div>';
+            return '<div style="display:flex;justify-content:space-between;font-size:12px;"><span>🔹 ' + p.name + '</span><span><strong>' + p.price.toLocaleString() + ' Ar</strong> ' + p(p.vehiclesMax, 'véhicule') + ' · ' + p(p.driversMax, 'livreur') + ' ' + (p.name === 'Premium' ? ' <span style="background:#F1C40F;color:#1A1A2E;padding:2px 6px;border-radius:50px;font-size:10px;font-weight:600;">💡</span>' : '') + '</span></div>';
         }).join('');
     } catch (e) {}
 }
