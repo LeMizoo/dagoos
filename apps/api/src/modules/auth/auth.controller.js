@@ -101,7 +101,7 @@ exports.driverLogin = async (req, res) => {
 // ===== ORGANISATIONS =====
 exports.getOrganizations = async (req, res) => {
   try {
-    const orgs = await prisma.organization.findMany({ select: { id: true, name: true, code: true, slug: true, type: true, logo: true, plan: true, status: true } });
+    const orgs = await prisma.organization.findMany({ select: { id: true, name: true, code: true, slug: true, type: true, email: true, phone: true, description: true, logo: true, plan: true, status: true } });
     res.json(orgs);
   } catch (error) {
     res.status(500).json({ error: 'Erreur.' });
