@@ -208,6 +208,7 @@ function getSettingsHTML() {
 function switchTabSettings(type) {
     if (type === "LANDING") { loadLandingEditor(); return; }
     currentSettingsTab = type;
+    if (type === "LANDING") { loadLandingEditor(); return; }
     document.querySelectorAll('.settings-tab').forEach(function(b) { b.classList.remove('active'); });
     document.getElementById('tab-' + type).classList.add('active');
     loadPlans();
@@ -271,6 +272,40 @@ async function loadLandingEditor() {
     } catch (e) {
         document.getElementById('plans-content').innerHTML = '<p>Erreur: ' + e.message + '</p>';
     }
+}
+
+function saveLandingContent() {
+    var inputs = document.querySelectorAll('#plans-content input, #plans-content textarea');
+    var sections = [];
+    var sectionMap = {};
+    inputs.forEach(function(inp) {
+        var sec = inp.dataset.section;
+        if (!sectionMap[sec]) { sectionMap[sec] = { section: sec, title: '', subtitle: '', body: '' }; }
+        sectionMap[sec][inp.dataset.field] = inp.value;
+    });
+    for (var key in sectionMap) { sections.push(sectionMap[key]); }
+    fetch(API_URL + '/landing-content', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ sections: sections }) }).then(function() { alert('✅ Contenu sauvegarde !'); }).catch(function() { alert('Erreur'); });
+}
+
+// ===== LANDING EDITOR =====
+async function loadLandingEditor() {
+    try {
+        var res = await fetch(API_URL + '/landing-content');
+        var sections = res.ok ? await res.json() : [];
+        var h = '<div class="card" style="padding:24px;"><h3>📄 Contenu de la landing page</h3><p style="color:var(--text2);">Modifiez les textes sur dago-mobility.pages.dev</p>';
+        var defaultSections = ['hero', 'apps', 'features', 'about', 'cta', 'footer'];
+        defaultSections.forEach(function(sec) {
+            var data = sections.find(function(s) { return s.section === sec; }) || {};
+            h += '<div style="margin-top:20px;border:1px solid var(--border);border-radius:10px;padding:16px;">';
+            h += '<h4 style="text-transform:uppercase;font-size:12px;color:var(--text2);margin-bottom:10px;">' + sec + '</h4>';
+            h += '<div class="form-group"><label>Titre</label><input value="' + (data.title || '') + '" data-section="' + sec + '" data-field="title" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"></div>';
+            h += '<div class="form-group"><label>Sous-titre</label><input value="' + (data.subtitle || '') + '" data-section="' + sec + '" data-field="subtitle" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"></div>';
+            h += '<div class="form-group"><label>Texte</label><textarea data-section="' + sec + '" data-field="body" rows="3" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;">' + (data.body || '') + '</textarea></div>';
+            h += '</div>';
+        });
+        h += '<button onclick="saveLandingContent()" style="width:100%;padding:14px;background:#1A5276;color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:20px;"><i class="fas fa-save"></i> Enregistrer le contenu</button></div>';
+        document.getElementById('plans-content').innerHTML = h;
+    } catch (e) { document.getElementById('plans-content').innerHTML = '<p>Erreur: ' + e.message + '</p>'; }
 }
 
 function saveLandingContent() {
