@@ -1,5 +1,5 @@
 // ========================================
-// DAGO ADMIN - DASHBOARD v10 FINAL
+// DAGO ADMIN - DASHBOARD FINAL
 // ========================================
 
 var API_URL = 'https://dagoos-api.onrender.com/api';
@@ -27,9 +27,23 @@ function setTheme(t) {
     localStorage.setItem('dago_theme', t);
 }
 
-function showModal(title, content, callback) { document.getElementById("modalContent").innerHTML = "<h2>" + title + "</h2>" + content + "<div class=\"btn-row\"><button class=\"btn btn-secondary\" onclick=\"closeModal()\">Annuler</button><button class=\"btn btn-primary\" id=\"modalSaveBtn\">Enregistrer</button></div>"; document.getElementById("modalOverlay").classList.add("show"); if (callback) { document.getElementById("modalSaveBtn").onclick = callback; } }
-    
 function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+
+function showModal(title, content, callback) {
+    var html = '<h2>' + title + '</h2>' + content;
+    if (callback) {
+        html += '<div class="btn-row"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" id="modalSaveBtn">Enregistrer</button></div>';
+    } else {
+        html += '<div class="btn-row"><button class="btn btn-primary" onclick="closeModal()">Fermer</button></div>';
+    }
+    document.getElementById('modalContent').innerHTML = html;
+    document.getElementById('modalOverlay').classList.add('show');
+    if (callback) {
+        document.getElementById('modalSaveBtn').onclick = function() {
+            callback();
+        };
+    }
+}
 
 // ===== NAVIGATION =====
 document.querySelectorAll('.sidebar-nav a[data-page]').forEach(function(link) {
@@ -85,7 +99,6 @@ async function loadDashboardStats() {
             fetch(API_URL + '/organizations', { headers: { Authorization: 'Bearer ' + token } }),
             fetch(API_URL + '/drivers', { headers: { Authorization: 'Bearer ' + token } })
         ]);
-        var usersData = res[0].ok ? await res[0].json() : [];
         orgsData = res[1].ok ? await res[1].json() : [];
         driversData = res[2].ok ? await res[2].json() : [];
         var fleets = orgsData.filter(function(o) { return o.type === 'FLEET_MANAGER'; }).length;
@@ -115,8 +128,8 @@ async function loadOrgs(type, orgType) {
             var actions = '<button class="btn-sm btn-view" onclick="viewOrg(\'' + o.id + '\')"><i class="fas fa-eye"></i></button>';
             actions += '<button class="btn-sm btn-edit" onclick="editOrg(\'' + o.id + '\')"><i class="fas fa-edit"></i></button>';
             if (o.status === 'pending') {
-                actions += '<button class="btn-sm btn-success" onclick="validateOrg(\'' + o.id + '\')" title="Valider"><i class="fas fa-check"></i></button>';
-                actions += '<button class="btn-sm btn-suspend" onclick="rejectOrg(\'' + o.id + '\')" title="Refuser"><i class="fas fa-times"></i></button>';
+                actions += '<button class="btn-sm btn-success" onclick="validateOrg(\'' + o.id + '\')"><i class="fas fa-check"></i></button>';
+                actions += '<button class="btn-sm btn-suspend" onclick="rejectOrg(\'' + o.id + '\')"><i class="fas fa-times"></i></button>';
             } else if (o.status === 'active') {
                 actions += '<button class="btn-sm btn-suspend" onclick="toggleOrgStatus(\'' + o.id + '\',\'active\')"><i class="fas fa-ban"></i></button>';
             } else if (o.status === 'suspended') {
@@ -128,134 +141,30 @@ async function loadOrgs(type, orgType) {
     } catch (e) { console.error(e); }
 }
 
-async function loadDrivers() {
-    var res = await fetch(API_URL + '/drivers', { headers: { Authorization: 'Bearer ' + token } });
-    driversData = res.ok ? await res.json() : [];
-    var html = '';
-    driversData.forEach(function(d) { html += '<tr><td><code>' + d.driverCode + '</code></td><td>' + (d.user ? d.user.name : 'N/A') + '</td><td>' + (d.organization ? d.organization.name : 'N/A') + '</td><td>' + d.status + '</td><td><button class="btn-sm btn-view" onclick="viewDriver(\'' + d.id + '\')"><i class="fas fa-eye"></i></button></td></tr>'; });
-    document.getElementById('driversTable').innerHTML = html || '<tr><td colspan="5">Aucun chauffeur</td></tr>';
-}
-
-// ===== ACTIONS =====
-function viewOrg(id) { var o = orgsData.find(function(x) { return x.id === id; }); if (!o) return; showModal(o.name, '<p><strong>Code:</strong> ' + o.code + '</p><p><strong>Email:</strong> ' + (o.email || 'N/A') + '</p><p><strong>Plan:</strong> ' + (o.plan || 'Freemium') + '</p><p><strong>Statut:</strong> ' + o.status + '</p>'); }
+// ===== EDIT ORG =====
 function editOrg(id) {
     var o = orgsData.find(function(x) { return x.id === id; }); if (!o) return;
-    var h = '<div class="form-group"><label>Nom</label><input id="editName" value="' + o.name + '"></div><div class="form-group"><label>Email</label><input id="editEmail" value="' + (o.email || '') + '"></div><div class="form-group"><label>Plan</label><select id="editPlan">';
+    var h = '<div class="form-group"><label>Nom</label><input id="editName" value="' + o.name + '"></div>';
+    h += '<div class="form-group"><label>Email</label><input id="editEmail" value="' + (o.email || '') + '"></div>';
+    h += '<div class="form-group"><label>Plan</label><select id="editPlan">';
     ['Freemium','Basic','Standard','Premium'].forEach(function(p) { h += '<option ' + (o.plan === p ? 'selected' : '') + '>' + p + '</option>'; });
     h += '</select></div>';
-    var saveBtn = showModal("Modifier " + o.name, h, function() {
-        fetch(API_URL + "/organizations/" + id, { method: "PUT", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token }, body: JSON.stringify({ name: document.getElementById("editName").value, email: document.getElementById("editEmail").value, plan: document.getElementById("editPlan").value }) }).then(function() { closeModal(); loadPage(currentPage); });
+    showModal('Modifier ' + o.name, h, function() {
+        fetch(API_URL + '/organizations/' + id, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+            body: JSON.stringify({ name: document.getElementById('editName').value, email: document.getElementById('editEmail').value, plan: document.getElementById('editPlan').value })
+        }).then(function() { closeModal(); loadPage(currentPage); });
     });
 }
+
+function viewOrg(id) { var o = orgsData.find(function(x) { return x.id === id; }); if (!o) return; showModal(o.name, '<p><strong>Code:</strong> ' + o.code + '</p><p><strong>Email:</strong> ' + (o.email || 'N/A') + '</p><p><strong>Plan:</strong> ' + (o.plan || 'Freemium') + '</p><p><strong>Statut:</strong> ' + o.status + '</p>'); }
 function validateOrg(id) { if (confirm('Valider ?')) { fetch(API_URL + '/organizations/' + id + '/status', { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ status: 'active' }) }).then(function() { loadPage(currentPage); }); } }
 function rejectOrg(id) { if (confirm('Refuser ?')) { fetch(API_URL + '/organizations/' + id + '/status', { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ status: 'rejected' }) }).then(function() { loadPage(currentPage); }); } }
 function toggleOrgStatus(id, s) { var ns = s === 'active' ? 'suspended' : 'active'; if (confirm('Changer en ' + ns + ' ?')) { fetch(API_URL + '/organizations/' + id + '/status', { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ status: ns }) }).then(function() { loadPage(currentPage); }); } }
-function addOrg(type) {
-    var h = '<div class="form-group"><label>Nom</label><input id="addName"></div><div class="form-group"><label>Email</label><input id="addEmail"></div>';
-    var saveBtn = showModal("Modifier " + o.name, h, function() {
-        fetch(API_URL + "/organizations/" + id, { method: "PUT", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token }, body: JSON.stringify({ name: document.getElementById("editName").value, email: document.getElementById("editEmail").value, plan: document.getElementById("editPlan").value }) }).then(function() { closeModal(); loadPage(currentPage); });
-    });
-}
-function replyMessage(id) { var r = prompt('Reponse :'); if (r) { fetch(API_URL + '/messages/' + id + '/reply', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ reply: r }) }).then(function() { loadMessages(); }); } }
-
-// ===== LOGS =====
-async function loadLogs() {
-    try { var res = await fetch(API_URL + '/logs', { headers: { Authorization: 'Bearer ' + token } }); var logs = res.ok ? await res.json() : []; var html = ''; logs.slice(0, 50).forEach(function(l) { html += '<tr><td>' + new Date(l.createdAt).toLocaleString('fr') + '</td><td>' + (l.userId || 'Systeme') + '</td><td>' + l.action + '</td><td>' + (l.details || '') + '</td></tr>'; }); document.getElementById('logsTable').innerHTML = html || '<tr><td colspan="4">Aucun log</td></tr>'; } catch (e) {}
-}
 
 // ===== EXPORT =====
 function exportCSV(type) { var items = type === 'flottes' ? orgsData.filter(function(o) { return o.type === 'FLEET_MANAGER'; }) : orgsData.filter(function(o) { return o.type === 'COOPERATIVE'; }); var csv = 'Nom,Code,Email,Plan,Statut\n'; items.forEach(function(o) { csv += '"' + o.name + '","' + o.code + '","' + (o.email || '') + '","' + (o.plan || '') + '","' + o.status + '"\n'; }); var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })); a.download = type + '.csv'; a.click(); }
-
-// ===== SETTINGS =====
-var allPlansData = [];
-var currentSettingsTab = 'FLOTTE';
-
-function getSettingsHTML() {
-    var h = '<div class="topbar"><h1>Parametres</h1></div>';
-    h += '<div style="display:flex;gap:0;margin-bottom:24px;background:var(--card);border-radius:14px;overflow:hidden;">';
-    h += '<button class="settings-tab active" id="tab-FLOTTE" onclick="switchTabSettings(\'FLOTTE\')" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">Plans Flotte</button>';
-    h += '<button class="settings-tab" id="tab-COOP" onclick="switchTabSettings(\'COOP\')" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">Plans Coop</button>';
-    h += '<button class="settings-tab" id="tab-LANDING" onclick="switchTabSettings(\'LANDING\')" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">📄 Contenu Landing</button>';
-    h += '</div><div id="plans-content" style="padding:20px;">Chargement...</div>';
-    h += '<button onclick="saveAllPlans()" style="width:100%;padding:16px;background:#1A5276;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:24px;"><i class="fas fa-save"></i> Enregistrer</button>';
-    return h;
-}
-
-function switchTabSettings(type) {
-    if (type === "LANDING") { loadLandingEditor(); return; }
-    currentSettingsTab = type;
-    document.querySelectorAll('.settings-tab').forEach(function(b) { b.classList.remove('active'); });
-    document.getElementById('tab-' + type).classList.add('active');
-    loadPlans();
-}
-
-async function loadPlans() {
-    try {
-        var res = await fetch(API_URL + '/plans');
-        allPlansData = res.ok ? await res.json() : [];
-        var plans = allPlansData.filter(function(p) { return p.type === (currentSettingsTab === 'FLOTTE' ? 'FLEET_MANAGER' : 'COOPERATIVE'); });
-        var h = '';
-        plans.forEach(function(p) {
-            h += '<div style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;flex-wrap:wrap;">';
-            h += '<strong style="width:80px;">' + p.name + '</strong>' + (p.name === 'Premium' ? ' <span style="font-size:10px;background:#F1C40F;color:#1A1A2E;padding:2px 6px;border-radius:50px;">🌐 Page perso incluse</span>' : '');
-            h += '<input type="number" value="' + p.price + '" data-id="' + p.id + '" data-field="price" style="width:80px;padding:6px;border:1px solid var(--border);border-radius:6px;text-align:center;"> Ar';
-            h += '<input type="number" value="' + p.vehiclesMax + '" data-id="' + p.id + '" data-field="vehiclesMax" style="width:50px;padding:6px;border:1px solid var(--border);border-radius:6px;text-align:center;"> vehicules';
-            h += '<input type="number" value="' + p.driversMax + '" data-id="' + p.id + '" data-field="driversMax" style="width:50px;padding:6px;border:1px solid var(--border);border-radius:6px;text-align:center;"> chauffeurs';
-            h += '</div>';
-        });
-        document.getElementById('plans-content').innerHTML = '<div class="card" style="padding:20px;"><h3>Plans ' + (currentSettingsTab === 'FLOTTE' ? 'Flotte' : 'Coop') + '</h3>' + (h || '<p>Aucun plan</p>') + '</div>';
-    document.getElementById("plans-content").innerHTML += '<div class="card" style="padding:24px;margin-top:24px;"><h3>🌐 General</h3><div style="margin-top:16px;"><label>💱 Monnaie</label><select id="monnaie" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;margin-top:4px;"><option>Ar (Ariary)</option><option>EUR</option><option>USD</option></select></div><div style="margin-top:16px;"><label>🌐 Langue</label><select id="langue" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;margin-top:4px;"><option>🇫🇷 Francais</option><option>🇲🇬 Malagasy</option><option>🇬🇧 English</option></select></div><div style="margin-top:20px;display:flex;align-items:center;justify-content:space-between;"><div><strong>🚧 Mode maintenance</strong><br><span style="color:var(--text2);font-size:13px;">Bloquer acces plateforme</span></div><label style="position:relative;display:inline-block;width:48px;height:28px;"><input type="checkbox" id="maintenanceMode" style="opacity:0;width:0;height:0;"><span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#E9ECEF;border-radius:50px;transition:0.3s;"></span></label></div></div>';
-    } catch (e) {
-        document.getElementById('plans-content').innerHTML = '<p>Erreur de chargement: ' + e.message + '</p>';
-    }
-}
-
-function saveAllPlans() {
-    var inputs = document.querySelectorAll('#plans-content input');
-    inputs.forEach(function(inp) {
-        var id = inp.dataset.id;
-        var field = inp.dataset.field;
-        var plan = allPlansData.find(function(p) { return p.id === id; });
-        if (plan) plan[field] = parseInt(inp.value) || 0;
-    });
-    fetch(API_URL + '/plans', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ plans: allPlansData }) }).then(function() { alert('Plans sauvegardes !'); }).catch(function() { alert('Erreur'); });
-}
-
-// ===== INIT =====
-
-// ===== LANDING EDITOR =====
-async function loadLandingEditor() {
-    try {
-        var res = await fetch(API_URL + '/landing-content');
-        var sections = res.ok ? await res.json() : [];
-        var h = '<div class="card" style="padding:24px;"><h3>📄 Contenu de la landing page</h3><p style="color:var(--text2);">Modifiez les textes sur dago-mobility.pages.dev</p>';
-        var defaultSections = ['hero', 'apps', 'features', 'about', 'cta', 'footer'];
-        defaultSections.forEach(function(sec) {
-            var data = sections.find(function(s) { return s.section === sec; }) || {};
-            h += '<div style="margin-top:20px;border:1px solid var(--border);border-radius:10px;padding:16px;">';
-            h += '<h4 style="text-transform:uppercase;font-size:12px;color:var(--text2);margin-bottom:10px;">' + sec + '</h4>';
-            h += '<div class="form-group"><label>Titre</label><input value="' + (data.title || '') + '" data-section="' + sec + '" data-field="title" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"></div>';
-            h += '<div class="form-group"><label>Sous-titre</label><input value="' + (data.subtitle || '') + '" data-section="' + sec + '" data-field="subtitle" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"></div>';
-            h += '<div class="form-group"><label>Texte</label><textarea data-section="' + sec + '" data-field="body" rows="3" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;">' + (data.body || '') + '</textarea></div>';
-            h += '</div>';
-        });
-        h += '<button onclick="saveLandingContent()" style="width:100%;padding:14px;background:#1A5276;color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:20px;"><i class="fas fa-save"></i> Enregistrer le contenu</button></div>';
-        document.getElementById('plans-content').innerHTML = h;
-    } catch (e) { document.getElementById('plans-content').innerHTML = '<p>Erreur: ' + e.message + '</p>'; }
-}
-
-function saveLandingContent() {
-    var inputs = document.querySelectorAll('#plans-content input, #plans-content textarea');
-    var sections = [];
-    var sectionMap = {};
-    inputs.forEach(function(inp) {
-        var sec = inp.dataset.section;
-        if (!sectionMap[sec]) { sectionMap[sec] = { section: sec, title: '', subtitle: '', body: '' }; }
-        sectionMap[sec][inp.dataset.field] = inp.value;
-    });
-    for (var key in sectionMap) { sections.push(sectionMap[key]); }
-    fetch(API_URL + '/landing-content', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ sections: sections }) }).then(function() { alert('✅ Contenu sauvegarde !'); }).catch(function() { alert('Erreur'); });
-}
 
 // ===== INIT =====
 loadPage('dashboard');
