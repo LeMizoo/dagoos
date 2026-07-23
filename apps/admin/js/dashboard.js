@@ -200,6 +200,7 @@ function getSettingsHTML() {
     h += '<div style="display:flex;gap:0;margin-bottom:24px;background:var(--card);border-radius:14px;overflow:hidden;">';
     h += '<button class="settings-tab active" id="tab-FLOTTE" onclick="switchTabSettings(\'FLOTTE\')" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">Plans Flotte</button>';
     h += '<button class="settings-tab" id="tab-COOP" onclick="switchTabSettings(\'COOP\')" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">Plans Coop</button>';
+    h += '<button class="settings-tab" id="tab-LANDING" onclick="switchTabSettings(\'LANDING\')" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">📄 Contenu Landing</button>';
     h += '</div><div id="plans-content" style="padding:20px;">Chargement...</div>';
     h += '<button onclick="saveAllPlans()" style="width:100%;padding:16px;background:#1A5276;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:24px;"><i class="fas fa-save"></i> Enregistrer</button>';
     return h;
