@@ -1,5 +1,5 @@
 var API_URL = 'https://dagoos-api.onrender.com/api';
-var LANDING_URL = 'https://dago-mobility.pages.dev';
+var LANDING_URL = "index.html";
 var token = localStorage.getItem('dagoos_token');
 var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
 var orgData = null;
