@@ -91,6 +91,21 @@ async function seed() {
     if (!existing) { await prisma.plan.create({ data: p }); console.log("✅ Plan:", p.type, p.name); }
   }
 
+  // Comptes utilisateurs pour les organisations
+  const orgUsers = [
+    { email: "flotte-alasora@dagoos.mg", password: "123456", name: "Gerant Alasora", role: "FLEET_MANAGER" },
+    { email: "flotte-rasoa@dagoos.mg", password: "123456", name: "Gerant Rasoa", role: "FLEET_MANAGER" },
+    { email: "coop-tana@dagoos.mg", password: "123456", name: "Gerant Tana", role: "COOPERATIVE" },
+    { email: "coop-tamatave@dagoos.mg", password: "123456", name: "Gerant Tamatave", role: "COOPERATIVE" }
+  ];
+  for (const u of orgUsers) {
+    const exists = await prisma.user.findUnique({ where: { email: u.email } });
+    if (!exists) {
+      await prisma.user.create({ data: { email: u.email, password: await bcrypt.hash(u.password, 10), name: u.name, role: u.role } });
+      console.log("✅ Utilisateur:", u.email);
+    }
+  }
+
   console.log('✅ Seed terminé');
 }
 
