@@ -73,7 +73,7 @@ async function loadDashboardData() {
     try {
         var res = await fetch(API_URL + '/organizations', { headers: { Authorization: 'Bearer ' + token } });
         var orgs = res.ok ? await res.json() : [];
-        var org = orgs.find(function(o) { return o.code === orgCode(); });
+        var org = orgs.find(function(o) { return o.email === user.email; });
         if (org) {
             document.getElementById('orgName').textContent = '🏢 ' + org.name;
             var statusHTML = '';
@@ -85,7 +85,7 @@ async function loadDashboardData() {
         
         var drvRes = await fetch(API_URL + '/drivers', { headers: { Authorization: 'Bearer ' + token } });
         driversData = drvRes.ok ? await drvRes.json() : [];
-        var myDrivers = driversData.filter(function(d) { return d.organization && d.organization.code === orgCode(); });
+        var myDrivers = driversData.filter(function(d) { return d.organization d.organization && d.organization.code === orgCode()d.organization && d.organization.code === orgCode() d.organization.email === user.email; });
         document.getElementById('statDrivers').textContent = myDrivers.length;
         document.getElementById('driverCount').textContent = myDrivers.length;
         document.getElementById('recentDrivers').innerHTML = myDrivers.slice(0, 5).map(function(d) {
@@ -100,7 +100,7 @@ function getDriversHTML() {
         '<div class="card"><table><thead><tr><th>Code</th><th>Nom</th><th>Email</th><th>Statut</th></tr></thead><tbody id="driversTable"><tr><td colspan="4">Chargement...</td></tr></tbody></table></div>';
 }
 async function loadDrivers() {
-    var myDrivers = driversData.filter(function(d) { return d.organization && d.organization.code === orgCode(); });
+    var myDrivers = driversData.filter(function(d) { return d.organization d.organization && d.organization.code === orgCode()d.organization && d.organization.code === orgCode() d.organization.email === user.email; });
     document.getElementById('driversTable').innerHTML = myDrivers.length ? myDrivers.map(function(d) {
         return '<tr><td><code>' + d.driverCode + '</code></td><td>' + (d.user ? d.user.name : 'N/A') + '</td><td>' + (d.user ? d.user.email : 'N/A') + '</td><td><span class="badge ' + (d.status === 'active' ? 'badge-success' : 'badge-warning') + '">' + d.status + '</span></td></tr>';
     }).join('') : '<tr><td colspan="4">Aucun chauffeur</td></tr>';
@@ -126,7 +126,7 @@ async function loadOrgInfo() {
     try {
         var res = await fetch(API_URL + '/organizations', { headers: { Authorization: 'Bearer ' + token } });
         var orgs = res.ok ? await res.json() : [];
-        var org = orgs.find(function(o) { return o.code === orgCode(); });
+        var org = orgs.find(function(o) { return o.email === user.email; });
         if (org) {
             document.getElementById('orgInfo').innerHTML = 
                 '<div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">' +
