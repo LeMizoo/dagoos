@@ -12,6 +12,7 @@ document.getElementById('sidebarUser').textContent = (user.name || user.email);
 document.getElementById('sidebarAvatar').textContent = (user.name || 'A')[0].toUpperCase();
 
 function logout() { localStorage.clear(); window.location.href = 'https://dago-mobility.pages.dev'; }
+function toggleSidebar() { document.getElementById("sidebar").classList.toggle("open"); document.getElementById("sidebarOverlay").classList.toggle("show"); }
 
 function setTheme(t) {
     document.body.classList.remove('dark');
