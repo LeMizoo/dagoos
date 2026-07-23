@@ -221,7 +221,7 @@ async function loadPlans() {
         var h = '';
         plans.forEach(function(p) {
             h += '<div style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;flex-wrap:wrap;">';
-            h += '<strong style="width:80px;">' + p.name + '</strong>';
+            h += '<strong style="width:80px;">' + p.name + '</strong>' + (p.name === 'Premium' ? ' <span style="font-size:10px;background:#F1C40F;color:#1A1A2E;padding:2px 6px;border-radius:50px;">🌐 Page perso incluse</span>' : '');
             h += '<input type="number" value="' + p.price + '" data-id="' + p.id + '" data-field="price" style="width:80px;padding:6px;border:1px solid var(--border);border-radius:6px;text-align:center;"> Ar';
             h += '<input type="number" value="' + p.vehiclesMax + '" data-id="' + p.id + '" data-field="vehiclesMax" style="width:50px;padding:6px;border:1px solid var(--border);border-radius:6px;text-align:center;"> vehicules';
             h += '<input type="number" value="' + p.driversMax + '" data-id="' + p.id + '" data-field="driversMax" style="width:50px;padding:6px;border:1px solid var(--border);border-radius:6px;text-align:center;"> chauffeurs';
