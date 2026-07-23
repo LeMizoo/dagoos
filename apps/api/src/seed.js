@@ -106,6 +106,29 @@ async function seed() {
     }
   }
 
+  // Comptes de test pour tous les plans
+  const testUsers = [
+    { name: "Fleet Freemium", email: "fleet-freemium@test.mg", password: "123456", role: "FLEET_MANAGER", plan: "Freemium" },
+    { name: "Fleet Basic", email: "fleet-basic@test.mg", password: "123456", role: "FLEET_MANAGER", plan: "Basic" },
+    { name: "Fleet Standard", email: "fleet-standard@test.mg", password: "123456", role: "FLEET_MANAGER", plan: "Standard" },
+    { name: "Fleet Premium", email: "fleet-premium@test.mg", password: "123456", role: "FLEET_MANAGER", plan: "Premium" },
+    { name: "Coop Freemium", email: "coop-freemium@test.mg", password: "123456", role: "COOPERATIVE", plan: "Freemium" },
+    { name: "Coop Basic", email: "coop-basic@test.mg", password: "123456", role: "COOPERATIVE", plan: "Basic" },
+    { name: "Coop Standard", email: "coop-standard@test.mg", password: "123456", role: "COOPERATIVE", plan: "Standard" },
+    { name: "Coop Premium", email: "coop-premium@test.mg", password: "123456", role: "COOPERATIVE", plan: "Premium" }
+  ];
+  for (const u of testUsers) {
+    const exists = await prisma.user.findUnique({ where: { email: u.email } });
+    if (!exists) {
+      const user = await prisma.user.create({ data: { email: u.email, password: await bcrypt.hash(u.password, 10), name: u.name, role: u.role } });
+      const code = u.name.substring(0,2).toUpperCase() + Math.random().toString(36).substring(2,4).toUpperCase();
+      const slug = u.name.toLowerCase().replace(/[^a-z0-9]/g, "-");
+      const type = u.role === "COOPERATIVE" ? "COOPERATIVE" : "FLEET_MANAGER";
+      await prisma.organization.create({ data: { name: u.name, code, slug, type, email: u.email, phone: "0340000000", logo: DEFAULT_LOGO, plan: u.plan, status: "active" } });
+      console.log("✅ Test:", u.email, "-", u.plan);
+    }
+  }
+
   console.log('✅ Seed terminé');
 }
 
