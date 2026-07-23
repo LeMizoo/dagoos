@@ -88,6 +88,19 @@ app.get("/api/stats", async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.post("/api/drivers", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const bcrypt = require("bcryptjs");
+        const prisma = new PrismaClient();
+        const { name, driverCode, pin, organizationId } = req.body;
+        const hashedPin = await bcrypt.hash(pin, 10);
+        const user = await prisma.user.create({ data: { name, email: driverCode + "@driver.dagoos.mg", password: hashedPin, role: "DRIVER" } });
+        const driver = await prisma.driver.create({ data: { userId: user.id, organizationId, driverCode, pin: hashedPin, status: "active" } });
+        res.status(201).json(driver);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ===== ROUTES DRIVERS (publique) =====
 app.get("/api/drivers", async (req, res) => {
     try {
