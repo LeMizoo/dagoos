@@ -76,10 +76,12 @@
         .modal .btn-secondary { background: #E9ECEF; color: #1A1A2E; }
         
         @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } .main-content { margin-left: 0; } .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        .mobile-menu-btn { display: flex !important; align-items: center; justify-content: center; }
         @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
+    <button class="mobile-menu-btn" onclick="document.getElementById("sidebar").classList.toggle("open")" style="display:none;position:fixed;top:10px;left:10px;z-index:1001;background:#1A5276;color:white;border:none;width:40px;height:40px;border-radius:8px;font-size:18px;cursor:pointer;"><i class="fas fa-bars"></i></button>
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-logo">
             <img src="assets/logo/b-trans.png" alt="Dagoo's">
@@ -128,3 +130,28 @@
     <script src="js/router.js"></script>
 </body>
 </html>
+<style>
+@media (max-width: 1024px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 768px) {
+        .mobile-menu-btn { display: flex !important; align-items: center; justify-content: center; }
+    .sidebar { transform: translateX(-100%); position: fixed; z-index: 1000; }
+    .sidebar.open { transform: translateX(0); }
+    .main-content { margin-left: 0 !important; }
+    .main-content-inner { padding: 12px; }
+    .topbar { flex-direction: column; align-items: flex-start; }
+    .stats-grid { grid-template-columns: 1fr !important; }
+    table { font-size: 11px; }
+    th, td { padding: 6px 8px; }
+    .action-btns { flex-wrap: wrap; }
+    .btn-sm { padding: 2px 4px; font-size: 9px; }
+    .modal { width: 95%; padding: 16px; }
+    .card-header { flex-direction: column; gap: 8px; }
+}
+@media (max-width: 480px) {
+    .sidebar { width: 260px; }
+    .topbar h1 { font-size: 16px; }
+    .stat-info .stat-number { font-size: 18px; }
+}
+</style>
