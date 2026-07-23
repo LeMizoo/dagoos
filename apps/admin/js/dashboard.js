@@ -29,11 +29,6 @@ function setTheme(t) {
 
 function showModal(title, content, callback) { document.getElementById("modalContent").innerHTML = "<h2>" + title + "</h2>" + content + "<div class=\"btn-row\"><button class=\"btn btn-secondary\" onclick=\"closeModal()\">Annuler</button><button class=\"btn btn-primary\" id=\"modalSaveBtn\">Enregistrer</button></div>"; document.getElementById("modalOverlay").classList.add("show"); if (callback) { document.getElementById("modalSaveBtn").onclick = callback; } }
     
-    var btnRow = hasSave ? '<div class="btn-row"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" id="modalSaveBtn">Enregistrer</button></div>' : '<div class="btn-row"><button class="btn btn-primary" onclick="closeModal()">Fermer</button></div>';
-    document.getElementById('modalContent').innerHTML = '<h2>' + title + '</h2>' + content + btnRow;
-    document.getElementById('modalOverlay').classList.add('show');
-    setTimeout(function() { var btn = document.getElementById("modalSaveBtn"); if (btn && onSave) btn.onclick = onSave; }, 100); return true;
-}
 function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
 
 // ===== NAVIGATION =====
