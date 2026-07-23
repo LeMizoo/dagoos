@@ -201,6 +201,32 @@ app.put("/api/plans", authMiddleware, async (req, res) => {
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
+// ===== LANDING CONTENT =====
+app.get("/api/landing-content", async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const content = await prisma.landingContent.findMany({ where: { active: true } });
+        res.json(content);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.put("/api/landing-content", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { sections } = req.body;
+        for (const s of sections) {
+            await prisma.landingContent.upsert({
+                where: { section: s.section },
+                update: { title: s.title, subtitle: s.subtitle, body: s.body, imageUrl: s.imageUrl },
+                create: { section: s.section, title: s.title, subtitle: s.subtitle, body: s.body, imageUrl: s.imageUrl }
+            });
+        }
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ===== DÉMARRAGE =====
 app.listen(port, () => {
   console.log(`✅ Dagoo's API lancée sur http://localhost:${port}`);
