@@ -111,18 +111,6 @@ model Plan {
   updatedAt     DateTime @updatedAt
 }
 
-  id        String   @id @default(cuid())
-  section   String   @unique
-  title     String?
-  subtitle  String?
-  body      String?
-  imageUrl  String?
-  active    Boolean  @default(true)
-  updatedAt DateTime @updatedAt
-}
-
-  id        String   @id @default(cuid())
-
 model LandingContent {
   id        String   @id @default(cuid())
   section   String   @unique
