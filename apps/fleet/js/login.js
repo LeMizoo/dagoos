@@ -78,3 +78,10 @@ function togglePassword(inputId, iconId) {
         icon.classList.replace('fa-eye-slash', 'fa-eye');
     }
 }
+
+function togglePassword(id, iconId) {
+    var inp = document.getElementById(id);
+    var icon = document.getElementById(iconId);
+    if (inp.type === 'password') { inp.type = 'text'; icon.classList.replace('fa-eye', 'fa-eye-slash'); }
+    else { inp.type = 'password'; icon.classList.replace('fa-eye-slash', 'fa-eye'); }
+}

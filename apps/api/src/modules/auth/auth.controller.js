@@ -24,20 +24,19 @@ exports.register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const userRole = role || 'FLEET_MANAGER';
 
-    // Créer l'utilisateur
     const user = await prisma.user.create({
       data: { name, email, phone, password: hashedPassword, role: userRole }
     });
 
-    // Créer l'organisation associée avec logo
     const code = name.substring(0, 2).toUpperCase() + Math.random().toString(36).substring(2, 4).toUpperCase();
-    const slug = name.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+    const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
     const type = userRole === 'COOPERATIVE' ? 'COOPERATIVE' : 'FLEET_MANAGER';
     
     await prisma.organization.create({
       data: {
         name,
         code,
+        slug,
         type,
         email,
         phone,
@@ -102,7 +101,7 @@ exports.driverLogin = async (req, res) => {
 // ===== ORGANISATIONS =====
 exports.getOrganizations = async (req, res) => {
   try {
-    const orgs = await prisma.organization.findMany({ select: { id: true, name: true, code: true, type: true, logo: true, plan: true, status: true } });
+    const orgs = await prisma.organization.findMany({ select: { id: true, name: true, code: true, slug: true, type: true, logo: true, plan: true, status: true } });
     res.json(orgs);
   } catch (error) {
     res.status(500).json({ error: 'Erreur.' });
