@@ -81,6 +81,8 @@
     </style>
 </head>
 <body>
+    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <button class="mobile-menu-btn" onclick="document.getElementById("sidebar").classList.toggle("open")" style="display:none;position:fixed;top:10px;left:10px;z-index:1001;background:#1A5276;color:white;border:none;width:40px;height:40px;border-radius:8px;font-size:18px;cursor:pointer;"><i class="fas fa-bars"></i></button>
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-logo">
@@ -153,5 +155,20 @@
     .sidebar { width: 260px; }
     .topbar h1 { font-size: 16px; }
     .stat-info .stat-number { font-size: 18px; }
+}
+</style>
+<style>
+.mobile-menu-btn { display: none; position: fixed; top: 12px; left: 12px; z-index: 1001; background: #1A5276; color: white; border: none; width: 44px; height: 44px; border-radius: 10px; font-size: 20px; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; }
+@media (max-width: 768px) {
+    .mobile-menu-btn { display: flex !important; align-items: center; justify-content: center; }
+    .sidebar { transform: translateX(-100%); position: fixed; z-index: 1000; transition: transform 0.3s ease; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-overlay.show { display: block; }
+    .main-content { margin-left: 0 !important; }
+    .main-content-inner { padding: 12px; padding-top: 56px; }
+    .stats-grid { grid-template-columns: 1fr !important; }
+    table { display: block; overflow-x: auto; white-space: nowrap; }
+    .topbar { flex-direction: column; gap: 8px; align-items: flex-start; }
 }
 </style>
