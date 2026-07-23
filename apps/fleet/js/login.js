@@ -1,87 +1,37 @@
-const API_URL = 'https://dagoos-api.onrender.com/api';
-const DASHBOARD_URL = 'dashboard.html';
-const LANDING_URL = 'https://dago-mobility.pages.dev';
+var API_URL = 'https://dagoos-api.onrender.com/api';
+var DASHBOARD_URL = 'dashboard.html';
 
-const loginForm = document.getElementById('loginForm');
-const messageDiv = document.getElementById('message');
-const loginBtn = document.getElementById('loginBtn');
-const btnText = document.getElementById('btnText');
-const loader = document.getElementById('loader');
-
-const token = localStorage.getItem('dagoos_token');
-const user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
-
-if (token && user.role === 'FLEET_MANAGER') {
-    window.location.href = DASHBOARD_URL;
-}
-
-function showMessage(text, type) {
-    messageDiv.textContent = text;
-    messageDiv.className = 'message ' + type;
-}
-
-function setLoading(loading) {
-    if (loading) {
-        btnText.style.display = 'none';
-        loader.style.display = 'block';
-        loginBtn.disabled = true;
-    } else {
-        btnText.style.display = 'inline';
-        loader.style.display = 'none';
-        loginBtn.disabled = false;
-    }
-}
-
-loginForm.addEventListener('submit', async (e) => {
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
+    var msg = document.getElementById('message');
+    var email = document.getElementById('email').value.trim();
+    var password = document.getElementById('password').value;
     
-    setLoading(true);
-    showMessage('Connexion en cours...', 'info');
+    msg.className = 'message info'; msg.textContent = 'Connexion...';
     
     try {
-        const response = await fetch(`${API_URL}/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+        var res = await fetch(API_URL + '/auth/login', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email, password: password })
         });
-        const data = await response.json();
-        
-        if (response.ok) {
+        var data = await res.json();
+        if (res.ok) {
             if (data.user.role !== 'FLEET_MANAGER' && data.user.role !== 'SUPER_ADMIN' && data.user.role !== 'ADMIN') {
-                showMessage('⛔ Accès réservé aux gestionnaires de flotte', 'error');
-                setLoading(false);
+                msg.className = 'message error'; msg.textContent = '⛔ Accès réservé aux gestionnaires de flotte';
                 return;
             }
             localStorage.setItem('dagoos_token', data.token);
             localStorage.setItem('dagoos_user', JSON.stringify(data.user));
-            showMessage('✅ Connexion réussie !', 'success');
-            setTimeout(() => { window.location.href = DASHBOARD_URL; }, 1000);
+            msg.className = 'message success'; msg.textContent = '✅ Connexion réussie !';
+            setTimeout(function() { window.location.href = DASHBOARD_URL; }, 1000);
         } else {
-            showMessage('❌ ' + (data.error || 'Email ou mot de passe incorrect'), 'error');
+            msg.className = 'message error'; msg.textContent = '❌ ' + (data.error || 'Email ou mot de passe incorrect');
         }
-    } catch (error) {
-        showMessage('❌ Erreur de connexion', 'error');
-    }
-    setLoading(false);
+    } catch (err) { msg.className = 'message error'; msg.textContent = '❌ Erreur réseau'; }
 });
 
-function togglePassword(inputId, iconId) {
-    const input = document.getElementById(inputId);
-    const icon = document.getElementById(iconId);
-    if (input.type === 'password') {
-        input.type = 'text';
-        icon.classList.replace('fa-eye', 'fa-eye-slash');
-    } else {
-        input.type = 'password';
-        icon.classList.replace('fa-eye-slash', 'fa-eye');
-    }
-}
-
-function togglePassword(id, iconId) {
+function togglePassword(id, icon) {
     var inp = document.getElementById(id);
-    var icon = document.getElementById(iconId);
     if (inp.type === 'password') { inp.type = 'text'; icon.classList.replace('fa-eye', 'fa-eye-slash'); }
     else { inp.type = 'password'; icon.classList.replace('fa-eye-slash', 'fa-eye'); }
 }
