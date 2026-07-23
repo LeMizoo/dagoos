@@ -7,28 +7,32 @@ async function loadFleets() {
     var orgs = await apiGet('/organizations');
     var drivers = await apiGet('/drivers');
     var fleets = orgs.filter(function(o) { return o.type === 'FLEET_MANAGER'; });
+    var statuses = ['active', 'pending', 'suspended', 'rejected'];
+    var statusLabels = { active: 'Actif', pending: 'En attente', suspended: 'Suspendu', rejected: 'Rejete' };
+    
     document.getElementById('fleetsTable').innerHTML = fleets.map(function(o) {
         var count = drivers.filter(function(d) { return d.organization && d.organization.code === o.code; }).length;
         var statusBadge = o.status === 'active' ? 'badge-success' : o.status === 'pending' ? 'badge-warning' : o.status === 'suspended' ? 'badge-danger' : 'badge-danger';
+        
+        var statusSelect = '<select onchange="changeStatus(\'' + o.id + '\', this.value)" style="padding:4px 8px;border-radius:6px;border:1px solid var(--border);font-size:11px;cursor:pointer;">';
+        statuses.forEach(function(s) {
+            statusSelect += '<option value="' + s + '" ' + (o.status === s ? 'selected' : '') + '>' + (statusLabels[s] || s) + '</option>';
+        });
+        statusSelect += '</select>';
+        
         var actions = '<button class="btn-sm btn-view" onclick="viewOrg(\'' + o.id + '\')"><i class="fas fa-eye"></i></button>';
         actions += '<button class="btn-sm btn-edit" onclick="editOrg(\'' + o.id + '\')"><i class="fas fa-edit"></i></button>';
-        // Toujours pouvoir valider si pending
-        if (o.status === 'pending') {
-            actions += '<button class="btn-sm btn-success" onclick="validateOrg(\'' + o.id + '\')" title="Valider"><i class="fas fa-check"></i></button>';
-            actions += '<button class="btn-sm btn-suspend" onclick="rejectOrg(\'' + o.id + '\')" title="Refuser"><i class="fas fa-times"></i></button>';
-        }
-        // Toujours pouvoir suspendre si actif
-        if (o.status === 'active') {
-            actions += '<button class="btn-sm btn-suspend" onclick="toggleOrgStatus(\'' + o.id + '\',\'active\')" title="Suspendre"><i class="fas fa-ban"></i></button>';
-        }
-        // Toujours pouvoir réactiver si suspendu
-        if (o.status === 'suspended') {
-            actions += '<button class="btn-sm btn-success" onclick="toggleOrgStatus(\'' + o.id + '\',\'suspended\')" title="Reactive"><i class="fas fa-check"></i></button>';
-        }
-        // Toujours pouvoir supprimer/rejeter si rejected
-        if (o.status === 'rejected') {
-            actions += '<button class="btn-sm btn-success" onclick="validateOrg(\'' + o.id + '\')" title="Revalider"><i class="fas fa-undo"></i></button>';
-        }
-        return '<tr><td><strong>' + o.name + '</strong></td><td><code>FL-' + o.code + '</code></td><td>' + (o.email || 'N/A') + '</td><td>' + (o.plan || 'Freemium') + '</td><td><span class="badge ' + statusBadge + '">' + o.status + '</span></td><td class="action-btns">' + actions + '</td></tr>';
+        
+        return '<tr><td><strong>' + o.name + '</strong></td><td><code>FL-' + o.code + '</code></td><td>' + (o.email || 'N/A') + '</td><td>' + (o.plan || 'Freemium') + '</td><td>' + statusSelect + '</td><td class="action-btns">' + actions + '</td></tr>';
     }).join('') || '<tr><td colspan="6">Aucune flotte</td></tr>';
+}
+
+function changeStatus(id, newStatus) {
+    if (confirm('Changer le statut en ' + newStatus + ' ?')) {
+        apiPatch('/organizations/' + id + '/status', { status: newStatus }).then(function() {
+            loadFleets();
+        });
+    } else {
+        loadFleets();
+    }
 }
