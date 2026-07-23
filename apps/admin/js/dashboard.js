@@ -151,9 +151,6 @@ function editOrg(id) {
     var saveBtn = showModal("Modifier " + o.name, h, function() {
         fetch(API_URL + "/organizations/" + id, { method: "PUT", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token }, body: JSON.stringify({ name: document.getElementById("editName").value, email: document.getElementById("editEmail").value, plan: document.getElementById("editPlan").value }) }).then(function() { closeModal(); loadPage(currentPage); });
     });
-    if (saveBtn) saveBtn.onclick = function() {
-        fetch(API_URL + '/organizations/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ name: document.getElementById('editName').value, email: document.getElementById('editEmail').value, plan: document.getElementById('editPlan').value }) }).then(function() { closeModal(); loadPage(currentPage); });
-    };
 }
 function validateOrg(id) { if (confirm('Valider ?')) { fetch(API_URL + '/organizations/' + id + '/status', { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ status: 'active' }) }).then(function() { loadPage(currentPage); }); } }
 function rejectOrg(id) { if (confirm('Refuser ?')) { fetch(API_URL + '/organizations/' + id + '/status', { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ status: 'rejected' }) }).then(function() { loadPage(currentPage); }); } }
@@ -163,30 +160,6 @@ function addOrg(type) {
     var saveBtn = showModal("Modifier " + o.name, h, function() {
         fetch(API_URL + "/organizations/" + id, { method: "PUT", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token }, body: JSON.stringify({ name: document.getElementById("editName").value, email: document.getElementById("editEmail").value, plan: document.getElementById("editPlan").value }) }).then(function() { closeModal(); loadPage(currentPage); });
     });
-    if (saveBtn) saveBtn.onclick = function() { var n = document.getElementById('addName').value; if (!n) return alert('Nom requis'); fetch(API_URL + '/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: n, email: document.getElementById('addEmail').value, password: '123456', role: type }) }).then(function() { closeModal(); loadPage(currentPage); }); };
-}
-function viewDriver(id) { var d = driversData.find(function(x) { return x.id === id; }); if (!d) return; showModal(d.user ? d.user.name : d.driverCode, '<p><strong>Code:</strong> ' + d.driverCode + '</p><p><strong>Organisation:</strong> ' + (d.organization ? d.organization.name : 'N/A') + '</p><p><strong>Statut:</strong> ' + d.status + '</p>'); }
-
-// ===== MESSAGES =====
-async function loadMessages() {
-    try {
-        var res = await fetch(API_URL + '/messages', { headers: { Authorization: 'Bearer ' + token } });
-        var msgs = res.ok ? await res.json() : [];
-        var html = '';
-        msgs.forEach(function(m) { html += '<tr><td>' + (m.organization ? m.organization.name : 'Admin') + '</td><td>' + m.subject + '</td><td>' + (m.content || '').substring(0, 60) + '</td><td>' + m.type + '</td><td>' + new Date(m.createdAt).toLocaleString('fr') + '</td><td>' + (m.reply ? 'Repondu' : '<button class="btn-sm btn-primary" onclick="replyMessage(\'' + m.id + '\')">Repondre</button>') + '</td></tr>'; });
-        document.getElementById('messagesTable').innerHTML = html || '<tr><td colspan="6">Aucun message</td></tr>';
-    } catch (e) {}
-}
-function newMessage() {
-    var h = '<div class="form-group"><label>Destinataire</label><select id="msgOrg">';
-    orgsData.forEach(function(o) { h += '<option value="' + o.id + '">' + o.name + '</option>'; });
-    h += '</select></div><div class="form-group"><label>Sujet</label><input id="msgSubject"></div><div class="form-group"><label>Message</label><textarea id="msgContent" rows="4" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"></textarea></div>';
-    var saveBtn = showModal("Modifier " + o.name, h, function() {
-        fetch(API_URL + "/organizations/" + id, { method: "PUT", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token }, body: JSON.stringify({ name: document.getElementById("editName").value, email: document.getElementById("editEmail").value, plan: document.getElementById("editPlan").value }) }).then(function() { closeModal(); loadPage(currentPage); });
-    });
-    if (saveBtn) saveBtn.onclick = function() {
-        fetch(API_URL + '/messages', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ organizationId: document.getElementById('msgOrg').value, subject: document.getElementById('msgSubject').value, content: document.getElementById('msgContent').value }) }).then(function() { closeModal(); loadMessages(); });
-    };
 }
 function replyMessage(id) { var r = prompt('Reponse :'); if (r) { fetch(API_URL + '/messages/' + id + '/reply', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ reply: r }) }).then(function() { loadMessages(); }); } }
 
