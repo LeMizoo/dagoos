@@ -5,7 +5,7 @@
 const API_URL = 'https://dagoos-api.onrender.com/api';
 const LANDING_URL = "https://dago-mobility.pages.dev";
 
-console.log('🚀 Dashboard Dagoos v2 chargé');
+console.log('<i class="fas fa-rocket"></i> Dashboard Dagoos v2 chargé');
 
 // ===== NETTOYAGE URL =====
 const urlParams = new URLSearchParams(window.location.search);
@@ -42,7 +42,7 @@ function checkAuth() {
     
     if (!token || token === 'null' || token === 'undefined') {
         if (logoutBtn) logoutBtn.style.display = 'none';
-        document.getElementById('userInfo').textContent = '🔒 Non connecté';
+        document.getElementById('userInfo').textContent = '<i class="fas fa-lock"></i> Non connecté';
         setTimeout(() => { window.location.href = LANDING_URL; }, 2000);
         return false;
     }
@@ -130,7 +130,7 @@ async function loadUsers() {
             tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#E74C3C;">⚠️ Session expirée - <a href="' + LANDING_URL + '">Reconnectez-vous</a></td></tr>';
             document.getElementById('logoutBtn').style.display = 'none';
         } else {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#E74C3C;">❌ Erreur de connexion</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#E74C3C;"><i class="fas fa-times-circle"></i> Erreur de connexion</td></tr>';
         }
     }
 }
@@ -153,7 +153,7 @@ async function loadDrivers() {
                         <td>${d.vehicle?.plateNumber || 'Non assigné'}</td>
                         <td><span class="badge ${d.isAvailable ? 'badge-cooperative' : 'badge-super_admin'}">${d.isAvailable ? 'Disponible' : 'Indisponible'}</span></td>
                         <td>
-                            <button onclick="editDriver('${d.id}')" style="background:#1A5276; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; margin-right:4px;">✏️</button>
+                            <button onclick="editDriver('${d.id}')" style="background:#1A5276; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; margin-right:4px;"><i class="fas fa-edit"></i></button>
                             <button onclick="deleteDriver('${d.id}')" style="background:#E74C3C; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer;">🗑️</button>
                         </td>
                     </tr>
@@ -167,7 +167,7 @@ async function loadDrivers() {
         if (error.message === 'SESSION_EXPIRED') {
             tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#E74C3C;">⚠️ Session expirée</td></tr>';
         } else {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#E74C3C;">❌ Erreur de connexion</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#E74C3C;"><i class="fas fa-times-circle"></i> Erreur de connexion</td></tr>';
         }
     }
 }
@@ -187,11 +187,11 @@ async function addDriver(e) {
     };
     
     if (data.password.length < 6) {
-        msg.innerHTML = '<div class="error-message">❌ Le mot de passe doit contenir au moins 6 caractères</div>';
+        msg.innerHTML = '<div class="error-message"><i class="fas fa-times-circle"></i> Le mot de passe doit contenir au moins 6 caractères</div>';
         return;
     }
     
-    msg.innerHTML = '<div class="info-message">⏳ Ajout en cours...</div>';
+    msg.innerHTML = '<div class="info-message"><i class="fas fa-hourglass-half"></i> Ajout en cours...</div>';
     
     try {
         const response = await apiFetch('/fleet/drivers', {
@@ -201,15 +201,15 @@ async function addDriver(e) {
         const result = await response.json();
         
         if (response.ok) {
-            msg.innerHTML = '<div class="success-message">✅ Chauffeur ajouté avec succès !</div>';
+            msg.innerHTML = '<div class="success-message"><i class="fas fa-check-circle"></i> Chauffeur ajouté avec succès !</div>';
             form.reset();
             loadDrivers();
             loadUsers();
         } else {
-            msg.innerHTML = `<div class="error-message">❌ ${result.error || 'Erreur lors de l\'ajout'}</div>`;
+            msg.innerHTML = `<div class="error-message"><i class="fas fa-times-circle"></i> ${result.error || 'Erreur lors de l\'ajout'}</div>`;
         }
     } catch (error) {
-        msg.innerHTML = '<div class="error-message">❌ Erreur de connexion</div>';
+        msg.innerHTML = '<div class="error-message"><i class="fas fa-times-circle"></i> Erreur de connexion</div>';
     }
 }
 
@@ -224,10 +224,10 @@ async function deleteDriver(id) {
             loadUsers();
         } else {
             const result = await response.json();
-            alert('❌ ' + (result.error || 'Erreur lors de la suppression'));
+            alert('<i class="fas fa-times-circle"></i> ' + (result.error || 'Erreur lors de la suppression'));
         }
     } catch (error) {
-        alert('❌ Erreur de connexion');
+        alert('<i class="fas fa-times-circle"></i> Erreur de connexion');
     }
 }
 
@@ -244,10 +244,10 @@ async function editDriver(id) {
             loadDrivers();
         } else {
             const result = await response.json();
-            alert('❌ ' + (result.error || 'Erreur lors de la modification'));
+            alert('<i class="fas fa-times-circle"></i> ' + (result.error || 'Erreur lors de la modification'));
         }
     } catch (error) {
-        alert('❌ Erreur de connexion');
+        alert('<i class="fas fa-times-circle"></i> Erreur de connexion');
     }
 }
 
@@ -281,6 +281,6 @@ async function loadDashboard() {
 
 // ===== INITIALISATION =====
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('✅ Dashboard v2 initialisé');
+    console.log('<i class="fas fa-check-circle"></i> Dashboard v2 initialisé');
     loadDashboard();
 });

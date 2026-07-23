@@ -14,7 +14,7 @@ var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
 
 if (!token || (user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN')) { window.location.href = LOGIN_URL; }
 
-document.getElementById('sidebarUser').textContent = '👑 ' + (user.name || user.email);
+document.getElementById('sidebarUser').textContent = '<i class="fas fa-crown"></i> ' + (user.name || user.email);
 document.getElementById('sidebarAvatar').textContent = (user.name || 'A')[0].toUpperCase();
 
 function logout() { localStorage.clear(); window.location.href = LANDING_URL; }

@@ -9,7 +9,7 @@ function init_home() {
                 '<div class="stat-card"><div class="stat-number">0</div><div class="stat-label">Courses aujourd\'hui</div></div>' +
                 '<div class="stat-card"><div class="stat-number">0 Ar</div><div class="stat-label">Revenus</div></div>' +
             '</div>' +
-            '<div class="card"><div class="card-header"><h3>🛵 Courses récentes</h3></div><div style="text-align:center;padding:40px;color:#6C757D;">Aucune course</div></div>' +
+            '<div class="card"><div class="card-header"><h3><i class="fas fa-motorcycle"></i> Courses récentes</h3></div><div style="text-align:center;padding:40px;color:#6C757D;">Aucune course</div></div>' +
         '</div>';
     updateTime();
     setInterval(updateTime, 30000);

@@ -36,12 +36,12 @@
             .then(function(r) { return r.json(); })
             .then(function(orgs) {
                 var org = orgs.find(function(o) { return o.slug === slug; });
-                if (!org) { document.getElementById('app').innerHTML = '<h1>🚛 Flotte non trouvee</h1><p>Cette page vitrine n existe pas.</p>'; return; }
+                if (!org) { document.getElementById('app').innerHTML = '<h1><i class="fas fa-truck"></i> Flotte non trouvee</h1><p>Cette page vitrine n existe pas.</p>'; return; }
                 document.title = org.name + ' - Dago Mobility';
                 document.getElementById('app').innerHTML = 
                     '<img src="' + (org.logo || 'https://dago-mobility.pages.dev/assets/logo/b-trans.png') + '" alt="' + org.name + '">' +
                     '<h1>' + org.name + '</h1>' +
-                    '<span class="badge">🚛 Flotte Dago Mobility</span>' +
+                    '<span class="badge"><i class="fas fa-truck"></i> Flotte Dago Mobility</span>' +
                     '<p>' + (org.description || 'Service de transport a Madagascar.') + '</p>' +
                     '<div class="info">' +
                         '<div><strong>' + (org.driversCount || 0) + '</strong><span>Chauffeurs</span></div>' +

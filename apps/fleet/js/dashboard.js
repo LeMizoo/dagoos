@@ -7,7 +7,7 @@ var currentPage = 'dashboard';
 
 if (!token || user.role !== 'FLEET_MANAGER') { window.location.href = 'index.html'; }
 
-document.getElementById('sidebarUser').textContent = '🚛 ' + (user.name || user.email);
+document.getElementById('sidebarUser').textContent = '<i class="fas fa-truck"></i> ' + (user.name || user.email);
 
 function logout() { localStorage.clear(); window.location.href = 'index.html'; }
 function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
@@ -50,7 +50,7 @@ function getDashboardHTML() {
             '<button onclick="loadPage(\'vehicles\')" class="action-card" style="background:#1A5276;"><i class="fas fa-plus" style="font-size:24px;margin-bottom:8px;"></i><span style="font-weight:600;">Ajouter un véhicule</span></button>' +
             '<button onclick="loadPage(\'drivers\')" class="action-card" style="background:#27AE60;"><i class="fas fa-users" style="font-size:24px;margin-bottom:8px;"></i><span style="font-weight:600;">Gérer les chauffeurs</span></button>' +
         '</div>' +
-        '<div class="card"><div class="card-header"><h3>🛵 Derniers chauffeurs</h3></div><table><tbody id="recentDrivers"><tr><td colspan="3">Chargement...</td></tr></tbody></table></div>';
+        '<div class="card"><div class="card-header"><h3><i class="fas fa-motorcycle"></i> Derniers chauffeurs</h3></div><table><tbody id="recentDrivers"><tr><td colspan="3">Chargement...</td></tr></tbody></table></div>';
 }
 
 async function loadDashboardData() {
@@ -58,7 +58,7 @@ async function loadDashboardData() {
         var res = await fetch(API_URL + '/organizations', { headers: { Authorization: 'Bearer ' + token } });
         var orgs = res.ok ? await res.json() : [];
         orgData = orgs.find(function(o) { return o.email === user.email; }) || null;
-        if (orgData) document.getElementById('orgName').textContent = '🏢 ' + orgData.name;
+        if (orgData) document.getElementById('orgName').textContent = '<i class="fas fa-building"></i> ' + orgData.name;
         var drvRes = await fetch(API_URL + '/drivers', { headers: { Authorization: 'Bearer ' + token } });
         driversData = drvRes.ok ? await drvRes.json() : [];
         var myDrivers = driversData.filter(function(d) { return d.organization && d.organization.email === user.email; });
@@ -72,7 +72,7 @@ async function loadDashboardData() {
 
 // ===== DRIVERS =====
 function getDriversHTML() {
-    return '<div class="topbar"><h1>🛵 Chauffeurs</h1><button class="btn btn-primary" onclick="showAddDriver()"><i class="fas fa-plus"></i> Ajouter</button></div><div class="card"><table><thead><tr><th>Code</th><th>Nom</th><th>Statut</th></tr></thead><tbody id="driversTable"></tbody></table></div>';
+    return '<div class="topbar"><h1><i class="fas fa-motorcycle"></i> Chauffeurs</h1><button class="btn btn-primary" onclick="showAddDriver()"><i class="fas fa-plus"></i> Ajouter</button></div><div class="card"><table><thead><tr><th>Code</th><th>Nom</th><th>Statut</th></tr></thead><tbody id="driversTable"></tbody></table></div>';
 }
 function loadDrivers() {
     var myDrivers = driversData.filter(function(d) { return d.organization && d.organization.email === user.email; });
@@ -105,13 +105,13 @@ function getVehiclesHTML() {
 
 // ===== SETTINGS =====
 function getSettingsHTML() {
-    return '<div class="topbar"><h1>⚙️ Paramètres</h1></div>' +
+    return '<div class="topbar"><h1><i class="fas fa-cog"></i> Paramètres</h1></div>' +
         '<div class="card" style="padding:24px;margin-bottom:20px;">' +
-            '<h3 style="margin-bottom:16px;">🏢 Profil de la flotte</h3>' +
+            '<h3 style="margin-bottom:16px;"><i class="fas fa-building"></i> Profil de la flotte</h3>' +
             '<div id="orgInfo">Chargement...</div>' +
         '</div>' +
         '<div class="card" style="padding:24px;">' +
-            '<h3 style="margin-bottom:16px;">🌐 Page vitrine</h3>' +
+            '<h3 style="margin-bottom:16px;"><i class="fas fa-globe"></i> Page vitrine</h3>' +
             '<div id="vitrineInfo">Chargement...</div>' +
         '</div>';
 }
@@ -142,7 +142,7 @@ async function loadSettingsData() {
             var vitrineUrl = 'https://dago-fleet.pages.dev/' + (orgData.slug || orgData.code.toLowerCase());
             vitrineHTML = 
                 '<div style="background:#F1F5F9;border-radius:12px;padding:20px;text-align:center;">' +
-                    '<p style="font-size:24px;margin-bottom:8px;">🌐</p>' +
+                    '<p style="font-size:24px;margin-bottom:8px;"><i class="fas fa-globe"></i></p>' +
                     '<h4>Votre page vitrine est active !</h4>' +
                     '<p style="color:#6C757D;margin:8px 0;">Partagez ce lien avec vos clients :</p>' +
                     '<a href="' + vitrineUrl + '" target="_blank" style="display:inline-block;background:#1A5276;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:600;margin:8px 0;">' + vitrineUrl + ' <i class="fas fa-external-link-alt"></i></a>' +
@@ -151,7 +151,7 @@ async function loadSettingsData() {
         } else {
             vitrineHTML = 
                 '<div style="background:#FEF3C7;border-radius:12px;padding:20px;text-align:center;">' +
-                    '<p style="font-size:24px;margin-bottom:8px;">🔒</p>' +
+                    '<p style="font-size:24px;margin-bottom:8px;"><i class="fas fa-lock"></i></p>' +
                     '<h4>Page vitrine disponible en Premium</h4>' +
                     '<p style="color:#92400E;margin:8px 0;">Passez au plan Standard ou Premium pour obtenir votre page vitrine personnalisée.</p>' +
                     '<p style="font-size:11px;color:#6C757D;">Contactez votre administrateur pour upgrader votre plan.</p>' +
@@ -169,7 +169,7 @@ function saveProfile() {
         phone: document.getElementById('editPhone').value,
         description: document.getElementById('editDesc').value
     };
-    fetch(API_URL + '/organizations/' + orgData.id, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify(data) }).then(function() { alert('✅ Profil mis à jour !'); loadSettingsData(); });
+    fetch(API_URL + '/organizations/' + orgData.id, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify(data) }).then(function() { alert('<i class="fas fa-check-circle"></i> Profil mis à jour !'); loadSettingsData(); });
 }
 
 loadPage('dashboard');

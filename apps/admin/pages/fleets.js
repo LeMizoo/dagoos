@@ -1,6 +1,6 @@
 function init_fleets() {
     var main = document.getElementById('mainInner');
-    main.innerHTML = '<div class="topbar"><h1>🚛 Flottes</h1><button class="btn btn-primary btn-sm" onclick="addOrg(\'FLEET_MANAGER\')"><i class="fas fa-plus"></i> Ajouter</button></div><div class="card"><table><thead><tr><th>Nom</th><th>Code</th><th>Email</th><th>Plan</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="fleetsTable"></tbody></table></div>';
+    main.innerHTML = '<div class="topbar"><h1><i class="fas fa-truck"></i> Flottes</h1><button class="btn btn-primary btn-sm" onclick="addOrg(\'FLEET_MANAGER\')"><i class="fas fa-plus"></i> Ajouter</button></div><div class="card"><table><thead><tr><th>Nom</th><th>Code</th><th>Email</th><th>Plan</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="fleetsTable"></tbody></table></div>';
     loadFleets();
 }
 

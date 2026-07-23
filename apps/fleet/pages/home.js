@@ -17,7 +17,7 @@ async function loadHomeData() {
         var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
         var org = orgs.find(function(o) { return o.email === user.email; });
         if (org) {
-            document.getElementById('orgName').textContent = '🏢 ' + org.name + ' (' + (org.plan || 'Freemium') + ')';
+            document.getElementById('orgName').textContent = '<i class="fas fa-building"></i> ' + org.name + ' (' + (org.plan || 'Freemium') + ')';
             document.getElementById('driverCount').textContent = '...';
         }
         var drivers = await apiGet('/drivers');

@@ -1,6 +1,6 @@
 function init_logs() {
     var main = document.getElementById('mainInner');
-    main.innerHTML = '<div class="topbar"><h1>📋 Logs</h1></div><div class="card"><table><thead><tr><th>Date</th><th>Utilisateur</th><th>Action</th></tr></thead><tbody id="logsTable"></tbody></table></div>';
+    main.innerHTML = '<div class="topbar"><h1><i class="fas fa-clipboard-list"></i> Logs</h1></div><div class="card"><table><thead><tr><th>Date</th><th>Utilisateur</th><th>Action</th></tr></thead><tbody id="logsTable"></tbody></table></div>';
     loadLogs();
 }
 

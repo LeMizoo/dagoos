@@ -21,7 +21,7 @@ async function seed() {
         role: 'SUPER_ADMIN'
       }
     });
-    console.log('✅ SUPER_ADMIN créé');
+    console.log('<i class="fas fa-check-circle"></i> SUPER_ADMIN créé');
   }
 
   // Organisations de démo avec logo par défaut
@@ -36,7 +36,7 @@ async function seed() {
     const exists = await prisma.organization.findUnique({ where: { code: org.code } });
     if (!exists) {
       await prisma.organization.create({ data: org });
-      console.log('✅ Organisation:', org.name, '- Plan:', org.plan);
+      console.log('<i class="fas fa-check-circle"></i> Organisation:', org.name, '- Plan:', org.plan);
     }
   }
 
@@ -69,7 +69,7 @@ async function seed() {
             status: 'active'
           }
         });
-        console.log('✅ Chauffeur:', d.code, d.name);
+        console.log('<i class="fas fa-check-circle"></i> Chauffeur:', d.code, d.name);
       }
     }
   }
@@ -88,7 +88,7 @@ async function seed() {
   ];
   for (const p of defaultPlans) {
     const existing = await prisma.plan.findFirst({ where: { type: p.type, name: p.name } });
-    if (!existing) { await prisma.plan.create({ data: p }); console.log("✅ Plan:", p.type, p.name); }
+    if (!existing) { await prisma.plan.create({ data: p }); console.log("<i class="fas fa-check-circle"></i> Plan:", p.type, p.name); }
   }
 
   // Comptes utilisateurs pour les organisations
@@ -102,11 +102,11 @@ async function seed() {
     const exists = await prisma.user.findUnique({ where: { email: u.email } });
     if (!exists) {
       await prisma.user.create({ data: { email: u.email, password: await bcrypt.hash(u.password, 10), name: u.name, role: u.role } });
-      console.log("✅ Utilisateur:", u.email);
+      console.log("<i class="fas fa-check-circle"></i> Utilisateur:", u.email);
     }
   }
 
-  console.log('✅ Seed terminé');
+  console.log('<i class="fas fa-check-circle"></i> Seed terminé');
 }
 
 seed().catch(e => { console.error(e); process.exit(1); });

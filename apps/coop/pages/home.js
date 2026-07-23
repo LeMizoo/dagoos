@@ -16,7 +16,7 @@ async function loadHomeData() {
         var orgs = await apiGet('/organizations');
         var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
         var org = orgs.find(function(o) { return o.email === user.email; });
-        if (org) document.getElementById('orgName').textContent = '🏢 ' + org.name + ' (' + (org.plan || 'Freemium') + ')';
+        if (org) document.getElementById('orgName').textContent = '<i class="fas fa-building"></i> ' + org.name + ' (' + (org.plan || 'Freemium') + ')';
         var drivers = await apiGet('/drivers');
         var myDrivers = drivers.filter(function(d) { return d.organization && d.organization.email === user.email; });
         document.getElementById('statDrivers').textContent = myDrivers.length;

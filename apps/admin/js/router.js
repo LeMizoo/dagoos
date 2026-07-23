@@ -7,7 +7,7 @@ if (!localStorage.getItem('dagoos_token') || (user.role !== 'SUPER_ADMIN' && use
     window.location.href = 'index.html';
 }
 
-document.getElementById('sidebarUser').textContent = '👑 ' + (user.name || user.email);
+document.getElementById('sidebarUser').textContent = '<i class="fas fa-crown"></i> ' + (user.name || user.email);
 document.getElementById('sidebarAvatar').textContent = (user.name || 'A')[0].toUpperCase();
 
 function logout() { localStorage.clear(); window.location.href = 'https://dago-mobility.pages.dev'; }

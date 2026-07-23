@@ -19,15 +19,15 @@ registerForm.addEventListener('submit', async (e) => {
     const confirmPassword = document.getElementById('confirmPassword').value;
     
     if (password !== confirmPassword) {
-        showMessage('❌ Les mots de passe ne correspondent pas', 'error');
+        showMessage('<i class="fas fa-times-circle"></i> Les mots de passe ne correspondent pas', 'error');
         return;
     }
     if (password.length < 6) {
-        showMessage('❌ Le mot de passe doit contenir au moins 6 caractères', 'error');
+        showMessage('<i class="fas fa-times-circle"></i> Le mot de passe doit contenir au moins 6 caractères', 'error');
         return;
     }
     
-    showMessage('⏳ Création du compte en cours...', 'info');
+    showMessage('<i class="fas fa-hourglass-half"></i> Création du compte en cours...', 'info');
     
     try {
         const response = await fetch(`${API_URL}/auth/register`, {
@@ -38,13 +38,13 @@ registerForm.addEventListener('submit', async (e) => {
         const data = await response.json();
         
         if (response.ok) {
-            showMessage('✅ Compte créé avec succès ! <a href="' + LOGIN_URL + '" style="color:#27AE60;font-weight:600;">Se connecter</a>', 'success');
+            showMessage('<i class="fas fa-check-circle"></i> Compte créé avec succès ! <a href="' + LOGIN_URL + '" style="color:#27AE60;font-weight:600;">Se connecter</a>', 'success');
             registerForm.reset();
         } else {
-            showMessage('❌ ' + (data.error || 'Erreur lors de l\'inscription'), 'error');
+            showMessage('<i class="fas fa-times-circle"></i> ' + (data.error || 'Erreur lors de l\'inscription'), 'error');
         }
     } catch (error) {
-        showMessage('❌ Erreur de connexion au serveur', 'error');
+        showMessage('<i class="fas fa-times-circle"></i> Erreur de connexion au serveur', 'error');
     }
 });
 

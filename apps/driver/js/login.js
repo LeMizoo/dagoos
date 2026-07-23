@@ -20,7 +20,7 @@ async function loadOrganizations() {
                 const option = document.createElement('option');
                 option.value = org.id;
                 const typePrefix = org.type === 'COOPERATIVE' ? 'CO' : 'FL';
-                option.textContent = `${org.type === 'COOPERATIVE' ? '🏢' : '🚛'} ${org.name}`;
+                option.textContent = `${org.type === 'COOPERATIVE' ? '<i class="fas fa-building"></i>' : '<i class="fas fa-truck"></i>'} ${org.name}`;
                 option.dataset.prefix = `${typePrefix}-${org.code}`;
                 option.dataset.type = typePrefix;
                 orgSelect.appendChild(option);
@@ -115,13 +115,13 @@ loginForm.addEventListener('submit', async (e) => {
         if (response.ok) {
             localStorage.setItem('dagoos_token', data.token);
             localStorage.setItem('dagoos_user', JSON.stringify(data.user));
-            showMessage('✅ Bienvenue ' + (data.user.name || fullCode) + ' !', 'success');
+            showMessage('<i class="fas fa-check-circle"></i> Bienvenue ' + (data.user.name || fullCode) + ' !', 'success');
             setTimeout(() => { window.location.href = DASHBOARD_URL; }, 1000);
         } else {
-            showMessage('❌ ' + (data.error || 'Code ou PIN incorrect'), 'error');
+            showMessage('<i class="fas fa-times-circle"></i> ' + (data.error || 'Code ou PIN incorrect'), 'error');
         }
     } catch (error) {
-        showMessage('❌ Erreur de connexion', 'error');
+        showMessage('<i class="fas fa-times-circle"></i> Erreur de connexion', 'error');
     }
     
     loginBtn.disabled = false;

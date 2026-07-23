@@ -1,7 +1,7 @@
 var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
 if (!localStorage.getItem('dagoos_token') || user.role !== 'COOPERATIVE') { window.location.href = 'index.html'; }
 
-document.getElementById('sidebarUser').textContent = '🏢 ' + (user.name || user.email);
+document.getElementById('sidebarUser').textContent = '<i class="fas fa-building"></i> ' + (user.name || user.email);
 
 function logout() { localStorage.clear(); window.location.href = 'index.html'; }
 

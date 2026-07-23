@@ -1,6 +1,6 @@
 function init_drivers() {
     var main = document.getElementById('mainContent');
-    main.innerHTML = '<div class="topbar"><h1>🛵 Livreurs</h1></div><div class="card"><table><thead><tr><th>Code</th><th>Nom</th><th>Statut</th></tr></thead><tbody id="driversTable"></tbody></table></div>';
+    main.innerHTML = '<div class="topbar"><h1><i class="fas fa-motorcycle"></i> Livreurs</h1></div><div class="card"><table><thead><tr><th>Code</th><th>Nom</th><th>Statut</th></tr></thead><tbody id="driversTable"></tbody></table></div>';
     loadDrivers();
 }
 

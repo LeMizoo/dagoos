@@ -4,7 +4,7 @@
 
 function init_home() {
     var main = document.getElementById('mainInner');
-    main.innerHTML = '<div class="topbar"><h1>📊 Tableau de bord</h1></div><div class="stats-grid" id="statsGrid"><div class="stat-card">Chargement...</div></div>';
+    main.innerHTML = '<div class="topbar"><h1><i class="fas fa-chart-bar"></i> Tableau de bord</h1></div><div class="stats-grid" id="statsGrid"><div class="stat-card">Chargement...</div></div>';
     loadHomeStats();
     setInterval(loadHomeStats, 30000);
 }

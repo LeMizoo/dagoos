@@ -2,7 +2,7 @@
 // DAGO MOBILITY - LANDING PAGE
 // ========================================
 
-console.log('%c🚀 Dago Mobility', 'font-size: 32px; font-weight: bold; color: #1A5276;');
+console.log('%c<i class="fas fa-rocket"></i> Dago Mobility', 'font-size: 32px; font-weight: bold; color: #1A5276;');
 console.log('%cLa mobilité connectée... Chez les potes, ça roule.', 'font-size: 18px; color: #F39C12;');
 
 // ===== PROVERBES MALGACHES =====
@@ -119,16 +119,16 @@ async function loadPlans() {
         var fleetEl = document.getElementById('fleetPlans');
         var coopEl = document.getElementById('coopPlans');
         if (fleetEl) fleetEl.innerHTML = fleetPlans.map(function(p) {
-            return '<div style="display:flex;justify-content:space-between;font-size:12px;"><span>🔹 ' + p.name + '</span><span><strong>' + p.price.toLocaleString() + ' Ar</strong> ' + plural(p.vehiclesMax, 'véhicule') + ' · ' + plural(p.driversMax, 'chauffeur') + ' ' + (p.name === 'Premium' ? ' <span style="background:#F1C40F;color:#1A1A2E;padding:2px 6px;border-radius:50px;font-size:10px;font-weight:600;">💡</span>' : '') + '</span></div>';
+            return '<div style="display:flex;justify-content:space-between;font-size:12px;"><span><i class="fas fa-circle"></i> ' + p.name + '</span><span><strong>' + p.price.toLocaleString() + ' Ar</strong> ' + plural(p.vehiclesMax, 'véhicule') + ' · ' + plural(p.driversMax, 'chauffeur') + ' ' + (p.name === 'Premium' ? ' <span style="background:#F1C40F;color:#1A1A2E;padding:2px 6px;border-radius:50px;font-size:10px;font-weight:600;"><i class="fas fa-lightbulb"></i></span>' : '') + '</span></div>';
         }).join('');
         if (coopEl) coopEl.innerHTML = coopPlans.map(function(p) {
-            return '<div style="display:flex;justify-content:space-between;font-size:12px;"><span>🔹 ' + p.name + '</span><span><strong>' + p.price.toLocaleString() + ' Ar</strong> ' + plural(p.vehiclesMax, 'véhicule') + ' · ' + plural(p.driversMax, 'livreur') + ' ' + (p.name === 'Premium' ? ' <span style="background:#F1C40F;color:#1A1A2E;padding:2px 6px;border-radius:50px;font-size:10px;font-weight:600;">💡</span>' : '') + '</span></div>';
+            return '<div style="display:flex;justify-content:space-between;font-size:12px;"><span><i class="fas fa-circle"></i> ' + p.name + '</span><span><strong>' + p.price.toLocaleString() + ' Ar</strong> ' + plural(p.vehiclesMax, 'véhicule') + ' · ' + plural(p.driversMax, 'livreur') + ' ' + (p.name === 'Premium' ? ' <span style="background:#F1C40F;color:#1A1A2E;padding:2px 6px;border-radius:50px;font-size:10px;font-weight:600;"><i class="fas fa-lightbulb"></i></span>' : '') + '</span></div>';
         }).join('');
     } catch (e) {}
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('✅ Landing page chargée');
+    console.log('<i class="fas fa-check-circle"></i> Landing page chargée');
     loadStats();
     loadPlans();
 });
