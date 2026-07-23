@@ -37,6 +37,14 @@ function init_payments() {
                     '<div class="form-group"><label>RIB</label><input value="00000-00000-00000" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"></div>' +
                 '</div>' +
             '</div>' +
+                <div style="border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:16px;">
+                    <h4><i class="fas fa-money-bill-wave"></i> Paiement en especes</h4>
+                    <div class="form-group"><label>Actif</label><select style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"><option>Oui</option><option>Non</option></select></div>
+                    <div class="form-group"><label>Nom du remettant</label><input placeholder="Nom complet" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"></div>
+                    <div class="form-group"><label>Numero de recu / quittance</label><input placeholder="N° recu" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"></div>
+                    <div class="form-group"><label>Motifs</label><input placeholder="Motif du paiement" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"></div>
+                    <div class="form-group"><label>Montant TTC (Ar)</label><input type="number" placeholder="0" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"></div>
+                </div>
             '<button onclick="alert(\'Configuration sauvegardee !\')" style="width:100%;padding:14px;background:#1A5276;color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:20px;"><i class="fas fa-save"></i> Enregistrer la configuration</button>' +
         '</div>' +
         
