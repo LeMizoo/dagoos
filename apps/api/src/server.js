@@ -342,4 +342,4 @@ app.post("/api/transactions", authMiddleware, async (req, res) => {
 app.listen(port, () => {
   console.log(`<i class="fas fa-check-circle"></i> Dagoo's API lancée sur http://localhost:${port}`);
   console.log(`<i class="fas fa-flag"></i>  Salama Dago !`);
-});
+}); 
