@@ -101,6 +101,48 @@ app.post("/api/drivers", authMiddleware, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.get("/api/vehicles", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const vehicles = await prisma.vehicle.findMany({ orderBy: { plate: "asc" } });
+        res.json(vehicles);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post("/api/vehicles", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { plate, model, year, currentKm, nextMaintenanceKm } = req.body;
+        const vehicle = await prisma.vehicle.create({ data: { plate, model, year: parseInt(year), currentKm: parseInt(currentKm), nextMaintenanceKm: parseInt(nextMaintenanceKm) } });
+        res.status(201).json(vehicle);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.put("/api/vehicles/:id", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { currentKm, status } = req.body;
+        const data = {};
+        if (currentKm !== undefined) data.currentKm = parseInt(currentKm);
+        if (status) data.status = status;
+        const vehicle = await prisma.vehicle.update({ where: { id: req.params.id }, data });
+        res.json(vehicle);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.patch("/api/drivers/:id", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { status } = req.body;
+        const driver = await prisma.driver.update({ where: { id: req.params.id }, data: { status } });
+        res.json(driver);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ===== ROUTES DRIVERS (publique) =====
 app.get("/api/drivers", async (req, res) => {
     try {
