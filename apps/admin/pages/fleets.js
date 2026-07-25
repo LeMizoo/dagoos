@@ -14,8 +14,8 @@ async function loadFleets() {
     
     document.getElementById('fleetsTable').innerHTML = fleets.map(function(o) {
         var nbDrivers = drivers.filter(function(d) { return d.organization && d.organization.code === o.code; }).length;
-        var nbVehicles = vehicles.length; // Idéalement filtrer par organisation
-        var nbProps = proprietaires.length;
+        var nbVehicles = vehicles.filter(function(v) { return v.organizationId === o.id; }).length;
+        var nbProps = proprietaires.filter(function(p) { return p.organizationId === o.id; }).length;
         var ca = 0; // À calculer depuis les courses
         
         var statusSelect = '<select onchange="changeStatus(\'' + o.id + '\', this.value)" style="padding:4px 8px;border-radius:6px;border:1px solid var(--border);font-size:11px;cursor:pointer;">';
