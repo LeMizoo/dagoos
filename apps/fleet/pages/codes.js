@@ -1,5 +1,5 @@
 function init_codes() {
-    setTimeout(function() { loadData(); }, 100);
+    setTimeout(function() { loadCodes(); }, 100);
     var main = document.getElementById('mainContent');
     main.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
         '<h1><i class="fas fa-key"></i> Codes d\'accès chauffeurs</h1>' +

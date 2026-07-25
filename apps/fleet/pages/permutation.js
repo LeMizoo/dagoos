@@ -1,5 +1,5 @@
 function init_permutation() {
-    setTimeout(function() { loadData(); }, 100);
+    setTimeout(function() { loadPermutation(); }, 100);
     var main = document.getElementById('mainContent');
     main.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
         '<h1><i class="fas fa-exchange-alt"></i> Permutation véhicule</h1></div>' +
