@@ -21,9 +21,7 @@ async function loadVehicleList() {
     var sel = document.getElementById('selectVehicle');
     sel.innerHTML = '<option value="">-- Sélectionner --</option>';
     
-    if (!vehicles.length) { sel.innerHTML = "<option value="">-- Aucun vehicule --</option>"; document.getElementById("vehicleDetail").innerHTML = ""; return;
-        document.getElementById('vehicleDetail').innerHTML = '<p style="text-align:center;padding:30px;color:var(--text2);">Aucun véhicule dans votre flotte</p>';
-        return;
+    if (!vehicles.length) { sel.innerHTML = "<option value="">-- Aucun vehicule --</option>"; document.getElementById("vehicleDetail").innerHTML = ""; return; }
     }
     
     vehicles.forEach(function(v) {
