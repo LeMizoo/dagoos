@@ -171,7 +171,7 @@ async function seed() {
     if (org) {
       const exists = await prisma.proprietaire.findFirst({ where: { email: p.email } });
       if (!exists) {
-        await prisma.proprietaire.create({ data: { ...p, organizationId: org.id } });
+        await prisma.proprietaire.create({ data: { name: p.name, cin: p.cin, phone: p.phone, email: p.email, address: p.address, nif: p.nif, stat: p.stat, organizationId: org.id } });
         console.log("✅ Propriétaire:", p.name, "-", p.orgEmail);
       }
     }
