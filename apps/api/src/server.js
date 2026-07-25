@@ -341,6 +341,25 @@ app.post("/api/transactions", authMiddleware, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ===== PROPRIETAIRES =====
+app.get("/api/proprietaires", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const props = await prisma.proprietaire.findMany({ include: { vehicles: { select: { plate: true, model: true } } }, orderBy: { name: "asc" } });
+        res.json(props);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.post("/api/proprietaires", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { name, cin, phone, email, address, organizationId } = req.body;
+        const p = await prisma.proprietaire.create({ data: { name, cin, phone, email, address, organizationId } });
+        res.status(201).json(p);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ===== DÉMARRAGE =====
 app.listen(port, () => {
   console.log(`<i class="fas fa-check-circle"></i> Dagoo's API lancée sur http://localhost:${port}`);

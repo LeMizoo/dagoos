@@ -66,6 +66,8 @@ model Message {
 }
 
 model Vehicle {
+  proprietaireId   String?
+  proprietaire     Proprietaire? @relation(fields: [proprietaireId], references: [id])
   id                String   @id @default(cuid())
   plate             String   @unique
   model             String?
@@ -135,3 +137,21 @@ model LandingContent {
   active    Boolean  @default(true)
   updatedAt DateTime @updatedAt
 }
+
+model Proprietaire {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  cin            String?
+  phone          String?
+  email          String?
+  address        String?
+  nif            String?
+  stat           String?
+  status         String       @default("active")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  vehicles       Vehicle[]
+}
+

@@ -203,6 +203,20 @@ async function seed() {
     }
   }
 
+  // === PROPRIÉTAIRES DE TEST ===
+  const proprietaires = [
+    { orgEmail: "fleet-premium@test.mg", name: "Rakoto Jean", cin: "123456789", phone: "0340000001", email: "rakoto@test.mg" },
+    { orgEmail: "fleet-premium@test.mg", name: "Rabe Paul", cin: "987654321", phone: "0340000002", email: "rabe@test.mg" },
+    { orgEmail: "fleet-standard@test.mg", name: "Rasoa Marie", cin: "456789123", phone: "0340000003", email: "rasoa@test.mg" }
+  ];
+  for (const p of proprietaires) {
+    const org = await prisma.organization.findUnique({ where: { email: p.orgEmail } });
+    if (org) {
+      const exists = await prisma.proprietaire.findFirst({ where: { email: p.email } });
+      if (!exists) { await prisma.proprietaire.create({ data: { ...p, organizationId: org.id } }); console.log("✅ Propriétaire:", p.name); }
+    }
+  }
+
   console.log('✅ Seed terminé');
 }
 
