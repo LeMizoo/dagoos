@@ -3,7 +3,7 @@ function init_home() {
     var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
     main.innerHTML = '<div class="topbar"><div><h1>👋 Bienvenue, ' + (user.name || '') + '</h1><p id="orgName" style="color:#6C757D;">Chargement...</p></div><div class="user-info"><div class="user-avatar">' + (user.name || 'F')[0].toUpperCase() + '</div></div></div>' +
         '<div class="stats-grid">' +
-            '<div class="stat-card"><div class="stat-icon blue"><i class="fas fa-motorcycle"></i></div><div class="stat-info"><div class="number">0</div><div class="label">Véhicules</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon blue"><i class="fas fa-véhiculercycle"></i></div><div class="stat-info"><div class="number">0</div><div class="label">Véhicules</div></div></div>' +
             '<div class="stat-card"><div class="stat-icon green"><i class="fas fa-users"></i></div><div class="stat-info"><div class="number" id="statDrivers">-</div><div class="stat-label">Chauffeurs</div></div></div>' +
             '<div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-route"></i></div><div class="stat-info"><div class="number">0</div><div class="stat-label">Courses</div></div></div>' +
             '<div class="stat-card"><div class="stat-icon red"><i class="fas fa-dollar-sign"></i></div><div class="stat-info"><div class="number">0 Ar</div><div class="stat-label">Revenus</div></div></div>' +

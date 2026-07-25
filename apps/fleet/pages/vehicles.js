@@ -2,8 +2,8 @@ function init_vehicles() {
     var main = document.getElementById('mainContent');
     main.innerHTML = 
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">' +
-            '<h1 style="font-size:20px;"><i class="fas fa-motorcycle"></i> Gestion des motos</h1>' +
-            '<button class="btn btn-primary" onclick="showAddVehicle()"><i class="fas fa-plus"></i> Nouvelle moto</button>' +
+            '<h1 style="font-size:20px;"><i class="fas fa-véhiculercycle"></i> Gestion des véhicules</h1>' +
+            '<button class="btn btn-primary" onclick="showAddVehicle()"><i class="fas fa-plus"></i> Nouvelle véhicule</button>' +
         '</div>' +
         
         // FILTRES
@@ -19,9 +19,9 @@ function init_vehicles() {
             '</div>' +
         '</div>' +
         
-        // LISTE MOTOS
+        // LISTE véhiculeS
         '<div class="card">' +
-            '<div class="card-header"><h3><i class="fas fa-list"></i> Parc moto</h3><span style="font-size:11px;color:var(--text2);" id="vehicleCount">0 moto(s)</span></div>' +
+            '<div class="card-header"><h3><i class="fas fa-list"></i> Parc véhicule</h3><span style="font-size:11px;color:var(--text2);" id="vehicleCount">0 véhicule(s)</span></div>' +
             '<div style="overflow-x:auto;">' +
                 '<table>' +
                     '<thead><tr><th>Immatriculation</th><th>Marque / Modèle</th><th>Chauffeur</th><th>Km actuels</th><th>Vidange</th><th>Assurance</th><th>Vignette</th><th>Actions</th></tr></thead>' +
@@ -54,7 +54,7 @@ async function loadVehicles() {
         var drvRes = await apiGet('/drivers');
         allDriversData = drvRes || [];
         renderVehicles(allVehicles);
-        document.getElementById('vehicleCount').textContent = allVehicles.length + ' moto(s)';
+        document.getElementById('vehicleCount').textContent = allVehicles.length + ' véhicule(s)';
     } catch(e) {
         document.getElementById('vehiclesTable').innerHTML = '<tr><td colspan="8">Erreur de chargement</td></tr>';
     }
@@ -62,7 +62,7 @@ async function loadVehicles() {
 
 function renderVehicles(data) {
     if (!data.length) {
-        document.getElementById('vehiclesTable').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text2);">Aucune moto enregistrée</td></tr>';
+        document.getElementById('vehiclesTable').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text2);">Aucune véhicule enregistrée</td></tr>';
         return;
     }
     
@@ -113,7 +113,7 @@ function renderVehicles(data) {
         if (driver && driver.user) driverName = driver.user.name;
         
         html += '<tr>' +
-            '<td><a href="#" onclick="viewVehicle(\'' + v.id + '\')" style="color:#1A5276;font-weight:600;text-decoration:none;"><i class="fas fa-motorcycle"></i> ' + (v.plate || 'N/A') + '</a></td>' +
+            '<td><a href="#" onclick="viewVehicle(\'' + v.id + '\')" style="color:#1A5276;font-weight:600;text-decoration:none;"><i class="fas fa-véhiculercycle"></i> ' + (v.plate || 'N/A') + '</a></td>' +
             '<td>' + (v.model || 'N/A') + '</td>' +
             '<td>' + (driverName !== 'Non assignée' ? '<i class="fas fa-user"></i> ' + driverName : '<span style="color:#E74C3C;">' + driverName + '</span>') + '</td>' +
             '<td style="font-weight:600;">' + (v.currentKm || 0).toLocaleString() + ' km</td>' +
@@ -172,7 +172,7 @@ function showAddVehicle() {
     h += '<div class="form-group"><label>Date fin assurance</label><input type="date" id="addAssurance"></div>';
     h += '<div class="form-group"><label>Date fin vignette</label><input type="date" id="addVignette"></div>';
     
-    showModal('Nouvelle moto', h, function() {
+    showModal('Nouvelle véhicule', h, function() {
         var data = {
             plate: document.getElementById('addPlate').value,
             model: document.getElementById('addModel').value,
@@ -202,7 +202,7 @@ function viewVehicle(id) {
     info += '<div><strong>Chauffeur:</strong> ' + driverName + '</div>';
     info += '</div>';
     
-    showModal('Fiche Moto: ' + (v.plate || ''), info);
+    showModal('Fiche véhicule: ' + (v.plate || ''), info);
 }
 
 function editVehicle(id) {
@@ -234,14 +234,14 @@ function assignVehicle(id) {
     freeDrivers.forEach(function(d) { h += '<option value="' + d.id + '">' + (d.user ? d.user.name : d.driverCode) + '</option>'; });
     h += '</select></div>';
     
-    showModal('Assigner la moto', h, function() {
+    showModal('Assigner la véhicule', h, function() {
         var driverId = document.getElementById('assignDriver').value;
         apiPatch('/drivers/' + driverId, { vehicleId: id }).then(function() { closeModal(); loadVehicles(); });
     });
 }
 
 function unassignVehicle(id) {
-    if (!confirm('Désassigner cette moto ?')) return;
+    if (!confirm('Désassigner cette véhicule ?')) return;
     var driver = allDriversData.find(function(d) { return d.vehicleId === id; });
     if (driver) {
         apiPatch('/drivers/' + driver.id, { vehicleId: null }).then(function() { loadVehicles(); });

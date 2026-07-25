@@ -1,10 +1,10 @@
-function init_fiche_moto() {
+function init_fiche_véhicule() {
     var main = document.getElementById('mainContent');
     main.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
-        '<h1><i class="fas fa-file-alt"></i> Fiche Moto</h1>' +
+        '<h1><i class="fas fa-file-alt"></i> Fiche véhicule</h1>' +
         '<div style="display:flex;gap:8px;"><button class="btn btn-edit" onclick="editCurrentVehicle()"><i class="fas fa-edit"></i> Modifier</button>' +
-        '<button class="btn btn-primary" onclick="showAddVehicle()"><i class="fas fa-plus"></i> Nouvelle moto</button></div></div>' +
-        '<div class="card" style="padding:20px;"><div class="form-group"><label>Sélectionner une moto</label><select id="selectVehicle" onchange="loadVehicleDetail()" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;"><option value="">-- Sélectionner --</option></select></div>' +
+        '<button class="btn btn-primary" onclick="showAddVehicle()"><i class="fas fa-plus"></i> Nouvelle véhicule</button></div></div>' +
+        '<div class="card" style="padding:20px;"><div class="form-group"><label>Sélectionner une véhicule</label><select id="selectVehicle" onchange="loadVehicleDetail()" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;"><option value="">-- Sélectionner --</option></select></div>' +
         '<div id="vehicleDetail" style="margin-top:16px;"></div></div>';
     loadVehicleList();
 }
@@ -15,7 +15,7 @@ async function loadVehicleList() {
     var vehicles = await apiGet('/vehicles');
     var sel = document.getElementById('selectVehicle');
     if (!vehicles.length) {
-        sel.innerHTML = '<option value="">Aucune moto</option>';
+        sel.innerHTML = '<option value="">Aucune véhicule</option>';
         return;
     }
     vehicles.forEach(function(v) {

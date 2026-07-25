@@ -70,7 +70,7 @@ function showAddVehicle() {
     h += '<div class="form-group"><label>Km actuels</label><input type="number" id="addKm" value="0"></div>';
     h += '<div class="form-group"><label>Prochaine vidange (km)</label><input type="number" id="addVidange" value="3000"></div>';
     h += '<div class="form-group"><label>Date fin assurance</label><input type="date" id="addAssurance"></div>';
-    showModal('Nouvelle moto', h, function() {
+    showModal('Nouvelle véhicule', h, function() {
         var plate = document.getElementById('addPlate').value;
         if (!plate) return alert('Immatriculation requise');
         apiPost('/vehicles', {
