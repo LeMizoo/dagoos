@@ -35,6 +35,7 @@ model Organization {
   drivers     Driver[]
   messages     Message[]
   proprietaires Proprietaire[]
+  vehicles     Vehicle[]
 }
 
 model Driver {
@@ -69,6 +70,8 @@ model Message {
 }
 
 model Vehicle {
+  organizationId  String?
+  organization    Organization? @relation(fields: [organizationId], references: [id])
   proprietaireId   String?
   proprietaire     Proprietaire? @relation(fields: [proprietaireId], references: [id])
   id                String   @id @default(cuid())

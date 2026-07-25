@@ -133,7 +133,7 @@ async function seed() {
     if (org) {
       for (const v of orgData.items) {
         const exists = await prisma.vehicle.findUnique({ where: { plate: v.plate } });
-        if (!exists) { await prisma.vehicle.create({ data: v }); console.log('✅ Véhicule:', v.plate); }
+        if (!exists) { await prisma.vehicle.create({ data: { ...v, organizationId: org.id } }); console.log('✅ Véhicule:', v.plate); }
       }
     }
   }
