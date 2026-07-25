@@ -126,6 +126,8 @@ async function loadHomeData() {
         document.getElementById('fleetSummary').textContent = myDrivers.length + ' chauffeurs - ' + myVehicles.length + ' véhicules';
         document.getElementById('orgPlan').textContent = (org ? org.plan : 'Freemium');
         document.getElementById('driverCount').textContent = myDrivers.length;
+    var vc = document.getElementById("vehicleCount"); if (vc) vc.textContent = myVehicles.length;
+    var pc = document.getElementById("propCount"); if (pc) pc.textContent = proprietaires.length;
         
         // Alertes
         el = document.getElementById('alertsGrid');
