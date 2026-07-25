@@ -42,3 +42,12 @@ function showModal(title, content, callback) {
     document.getElementById('modalOverlay').classList.add('show');
     if (callback) document.getElementById('modalSaveBtn').onclick = callback;
 }
+
+function loadPageScript(page) {
+    var main = document.getElementById('mainContent');
+    main.innerHTML = '<p style="text-align:center;padding:40px;">Chargement...</p>';
+    var script = document.createElement('script');
+    script.src = 'pages/' + page + '.js';
+    script.onload = function() { if (typeof window['init_' + page] === 'function') window['init_' + page](); };
+    document.body.appendChild(script);
+}

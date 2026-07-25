@@ -124,11 +124,17 @@ app.put("/api/vehicles/:id", authMiddleware, async (req, res) => {
     try {
         const { PrismaClient } = require("@prisma/client");
         const prisma = new PrismaClient();
-        const { currentKm, status } = req.body;
+        const { currentKm, nextMaintenanceKm, insuranceDate, vignetteDate, status } = req.body;
         const data = {};
         if (currentKm !== undefined) data.currentKm = parseInt(currentKm);
+        if (nextMaintenanceKm !== undefined) data.nextMaintenanceKm = parseInt(nextMaintenanceKm);
+        if (insuranceDate !== undefined) data.insuranceDate = insuranceDate;
+        if (vignetteDate !== undefined) data.vignetteDate = vignetteDate;
         if (status) data.status = status;
         const vehicle = await prisma.vehicle.update({ where: { id: req.params.id }, data });
+        res.json(vehicle);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
         res.json(vehicle);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });

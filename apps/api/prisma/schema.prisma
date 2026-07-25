@@ -45,6 +45,7 @@ model Driver {
   driverCode     String       @unique
   pin            String
   license        String?
+  vehicleId      String?
   status         String       @default("active")
   createdAt      DateTime     @default(now())
 }
@@ -69,9 +70,16 @@ model Vehicle {
   plate             String   @unique
   model             String?
   year              Int?
+  cc                String?
+  color             String?
+  engineNo          String?
+  chassisNo         String?
   currentKm         Int      @default(0)
   nextMaintenanceKm Int      @default(3000)
-  insuranceValid    Boolean  @default(true)
+  insuranceDate     String?
+  vignetteDate      String?
+  purchasePrice     Float?
+  purchaseDate      String?
   status            String   @default("active")
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
