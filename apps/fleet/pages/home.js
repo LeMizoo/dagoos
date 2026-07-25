@@ -93,7 +93,7 @@ async function loadHomeData() {
         
         var org = orgs.find(function(o) { return o.email === user.email; });
         var myDrivers = drivers.filter(function(d) { return d.organization && d.organization.email === user.email; });
-        var myVehicles = vehicles; // Tous les véhicules pour l'instant
+        var myVehicles = vehicles.filter(function(v) { return v.organizationId === (org ? org.id : null); });
         
         // Barre de statut
         var statusBar = document.getElementById('orgStatusBar');
