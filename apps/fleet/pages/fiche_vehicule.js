@@ -90,3 +90,4 @@ function editCurrentVehicle() {
 }
  
 // force deploy v2
+// FICHE VEHICULE V2 -  Sat, Jul 25, 2026 5:22:28 PM
