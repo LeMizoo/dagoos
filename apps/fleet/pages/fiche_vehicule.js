@@ -22,7 +22,6 @@ async function loadVehicleList() {
     sel.innerHTML = '<option value="">-- Sélectionner --</option>';
     
     if (!vehicles.length) { sel.innerHTML = "<option value="">-- Aucun vehicule --</option>"; document.getElementById("vehicleDetail").innerHTML = ""; return; }
-    }
     
     vehicles.forEach(function(v) {
         var opt = document.createElement('option');
