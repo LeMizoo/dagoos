@@ -46,7 +46,9 @@ model Driver {
   driverCode     String       @unique
   pin            String
   license        String?
-  vehicleId      String?
+  vehicleId       String?
+  proprietaireId  String?
+  proprietaire    Proprietaire? @relation(fields: [proprietaireId], references: [id])
   status         String       @default("active")
   createdAt      DateTime     @default(now())
 }
@@ -154,5 +156,6 @@ model Proprietaire {
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   vehicles       Vehicle[]
+  drivers        Driver[]
 }
 
