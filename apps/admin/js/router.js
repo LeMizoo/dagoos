@@ -114,3 +114,41 @@ function loadPageScript(page) {
     script.onload = function() { if (typeof window['init_' + page.replace(/-/g, '_')] === 'function') window['init_' + page.replace(/-/g, '_')](); };
     document.body.appendChild(script);
 }
+
+// ===== PAGINATION =====
+var currentPages = {};
+
+function paginate(tableId, data, itemsPerPage, renderFn) {
+    if (!currentPages[tableId]) currentPages[tableId] = 1;
+    var page = currentPages[tableId];
+    var totalPages = Math.ceil(data.length / itemsPerPage);
+    var start = (page - 1) * itemsPerPage;
+    var pageData = data.slice(start, start + itemsPerPage);
+    
+    renderFn(pageData);
+    
+    var paginationHTML = '';
+    if (totalPages > 1) {
+        paginationHTML += '<div style="text-align:center;padding:10px;font-size:12px;">';
+        for (var i = 1; i <= totalPages; i++) {
+            paginationHTML += '<button onclick="goToPage(\'' + tableId + '\', ' + i + ', ' + itemsPerPage + ')" style="padding:4px 10px;margin:2px;border:1px solid var(--border);border-radius:4px;cursor:pointer;' + (i === page ? 'background:#1A5276;color:white;' : '') + '">' + i + '</button>';
+        }
+        paginationHTML += '</div>';
+    }
+    
+    var table = document.getElementById(tableId);
+    if (table) {
+        var existingPagination = table.parentNode.querySelector('.pagination');
+        if (existingPagination) existingPagination.remove();
+        var div = document.createElement('div');
+        div.className = 'pagination';
+        div.innerHTML = paginationHTML;
+        table.parentNode.appendChild(div);
+    }
+}
+
+function goToPage(tableId, page, itemsPerPage) {
+    currentPages[tableId] = page;
+    // Recharger la page courante
+    loadPage(window.currentAdminPage || 'fleets');
+}
