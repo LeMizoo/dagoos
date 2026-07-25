@@ -9,8 +9,8 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     var password = document.getElementById('password').value;
     var confirm = document.getElementById('confirmPassword').value;
     
-    if (password !== confirm) { msg.className = 'message error'; msg.textContent = '<i class="fas fa-times-circle"></i> Les mots de passe ne correspondent pas'; return; }
-    if (password.length < 6) { msg.className = 'message error'; msg.textContent = '<i class="fas fa-times-circle"></i> 6 caractères minimum'; return; }
+    if (password !== confirm) { msg.className = 'message error'; msg.textContent = '❌ Les mots de passe ne correspondent pas'; return; }
+    if (password.length < 6) { msg.className = 'message error'; msg.textContent = '❌ 6 caractères minimum'; return; }
     
     msg.className = 'message info'; msg.textContent = '<i class="fas fa-hourglass-half"></i> Création en cours...';
     
@@ -22,12 +22,12 @@ document.getElementById('registerForm').addEventListener('submit', async functio
         var data = await res.json();
         if (res.ok) {
             msg.className = 'message success';
-            msg.innerHTML = '<i class="fas fa-check-circle"></i> Compte créé ! <a href="index.html" style="color:#1A5276;font-weight:600;">Se connecter</a>';
+            msg.innerHTML = '✅ Compte créé ! <a href="index.html" style="color:#1A5276;font-weight:600;">Se connecter</a>';
             this.reset();
         } else {
-            msg.className = 'message error'; msg.textContent = '<i class="fas fa-times-circle"></i> ' + (data.error || 'Erreur');
+            msg.className = 'message error'; msg.textContent = '❌ ' + (data.error || 'Erreur');
         }
-    } catch (err) { msg.className = 'message error'; msg.textContent = '<i class="fas fa-times-circle"></i> Erreur réseau'; }
+    } catch (err) { msg.className = 'message error'; msg.textContent = '❌ Erreur réseau'; }
 });
 
 function togglePassword(id, icon) {

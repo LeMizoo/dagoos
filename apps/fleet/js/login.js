@@ -22,12 +22,12 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             }
             localStorage.setItem('dagoos_token', data.token);
             localStorage.setItem('dagoos_user', JSON.stringify(data.user));
-            msg.className = 'message success'; msg.textContent = '<i class="fas fa-check-circle"></i> Connexion réussie !';
+            msg.className = 'message success'; msg.textContent = '✅ Connexion réussie !';
             setTimeout(function() { window.location.href = DASHBOARD_URL; }, 1000);
         } else {
-            msg.className = 'message error'; msg.textContent = '<i class="fas fa-times-circle"></i> ' + (data.error || 'Email ou mot de passe incorrect');
+            msg.className = 'message error'; msg.textContent = '❌ ' + (data.error || 'Email ou mot de passe incorrect');
         }
-    } catch (err) { msg.className = 'message error'; msg.textContent = '<i class="fas fa-times-circle"></i> Erreur réseau'; }
+    } catch (err) { msg.className = 'message error'; msg.textContent = '❌ Erreur réseau'; }
 });
 
 function togglePassword(id, icon) {

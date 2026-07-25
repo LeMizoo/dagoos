@@ -45,7 +45,7 @@ loginForm.addEventListener('submit', async (e) => {
             if (data.user.role !== 'SUPER_ADMIN' && data.user.role !== 'ADMIN') {
                 showMessage('⛔ Accès réservé aux administrateurs', 'error');
                 loginBtn.disabled = false;
-                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Se connecter';
+                loginBtn.innerHTML = '🔑 Se connecter';
                 return;
             }
             localStorage.setItem('dagoos_token', data.token);
@@ -60,7 +60,7 @@ loginForm.addEventListener('submit', async (e) => {
     }
     
     loginBtn.disabled = false;
-    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Se connecter';
+    loginBtn.innerHTML = '🔑 Se connecter';
 });
 
 // Toggle password
