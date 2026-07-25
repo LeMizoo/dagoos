@@ -51,6 +51,10 @@ async function loadVehicles() {
     try {
         var res = await apiGet('/vehicles');
         allVehicles = res || [];
+        var user = JSON.parse(localStorage.getItem("dagoos_user") || "{}");
+        var orgs = await apiGet("/organizations");
+        var org = orgs.find(function(o) { return o.email === user.email; });
+        if (org) { allVehicles = allVehicles.filter(function(v) { return v.organizationId === org.id; }); }
         var drvRes = await apiGet('/drivers');
         allDriversData = drvRes || [];
         renderVehicles(allVehicles);
