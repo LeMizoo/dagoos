@@ -351,12 +351,75 @@ app.get("/api/proprietaires", authMiddleware, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 app.post("/api/proprietaires", authMiddleware, async (req, res) => {
+app.put("/api/proprietaires/:id", authMiddleware, async (req, res) => {
     try {
         const { PrismaClient } = require("@prisma/client");
         const prisma = new PrismaClient();
+        const { name, cin, phone, email, address, status } = req.body;
+        const p = await prisma.proprietaire.update({ where: { id: req.params.id }, data: { name, cin, phone, email, address, status } });
+        res.json(p);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+    try {
+app.put("/api/proprietaires/:id", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { name, cin, phone, email, address, status } = req.body;
+        const p = await prisma.proprietaire.update({ where: { id: req.params.id }, data: { name, cin, phone, email, address, status } });
+        res.json(p);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+        const { PrismaClient } = require("@prisma/client");
+app.put("/api/proprietaires/:id", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { name, cin, phone, email, address, status } = req.body;
+        const p = await prisma.proprietaire.update({ where: { id: req.params.id }, data: { name, cin, phone, email, address, status } });
+        res.json(p);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+        const prisma = new PrismaClient();
+app.put("/api/proprietaires/:id", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { name, cin, phone, email, address, status } = req.body;
+        const p = await prisma.proprietaire.update({ where: { id: req.params.id }, data: { name, cin, phone, email, address, status } });
+        res.json(p);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
         const { name, cin, phone, email, address, organizationId } = req.body;
+app.put("/api/proprietaires/:id", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { name, cin, phone, email, address, status } = req.body;
+        const p = await prisma.proprietaire.update({ where: { id: req.params.id }, data: { name, cin, phone, email, address, status } });
+        res.json(p);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
         const p = await prisma.proprietaire.create({ data: { name, cin, phone, email, address, organizationId } });
+app.put("/api/proprietaires/:id", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { name, cin, phone, email, address, status } = req.body;
+        const p = await prisma.proprietaire.update({ where: { id: req.params.id }, data: { name, cin, phone, email, address, status } });
+        res.json(p);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
         res.status(201).json(p);
+app.put("/api/proprietaires/:id", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { name, cin, phone, email, address, status } = req.body;
+        const p = await prisma.proprietaire.update({ where: { id: req.params.id }, data: { name, cin, phone, email, address, status } });
+        res.json(p);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
