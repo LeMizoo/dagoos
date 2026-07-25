@@ -154,7 +154,7 @@ app.get("/api/drivers", async (req, res) => {
         const drivers = await prisma.driver.findMany({
             include: {
                 user: { select: { id: true, name: true, email: true, phone: true } },
-                organization: { select: { id: true, name: true, code: true, type: true } }
+                organization: { select: { id: true, name: true, code: true, type: true, email: true } }
             },
             orderBy: { createdAt: "desc" }
         });
