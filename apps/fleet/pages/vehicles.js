@@ -55,6 +55,12 @@ async function loadVehicles() {
     var org = orgs.find(function(o) { return o.email === user.email; });
     if (org) { allVehicles = allVehicles.filter(function(v) { return v.organizationId === org.id; }); }
     renderVehicles(allVehicles);
+    return; // Temporaire : affiche tout
+    var user = JSON.parse(localStorage.getItem("dagoos_user") || "{}");
+    var orgs = await apiGet("/organizations");
+    var org = orgs.find(function(o) { return o.email === user.email; });
+    if (org) { allVehicles = allVehicles.filter(function(v) { return v.organizationId === org.id; }); }
+    renderVehicles(allVehicles);
     document.getElementById("vehicleCount").textContent = allVehicles.length + " vehicule(s)";
         allDriversData = drvRes || [];
         renderVehicles(allVehicles);
