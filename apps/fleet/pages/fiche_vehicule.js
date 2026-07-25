@@ -17,6 +17,10 @@ async function loadVehicleList() {
     var orgs = await apiGet("/organizations");
     var org = orgs.find(function(o) { return o.email === user.email; });
     if (org) { vehicles = vehicles.filter(function(v) { return v.organizationId === org.id; }); }
+    var user = JSON.parse(localStorage.getItem("dagoos_user") || "{}");
+    var orgs = await apiGet("/organizations");
+    var org = orgs.find(function(o) { return o.email === user.email; });
+    if (org) { vehicles = vehicles.filter(function(v) { return v.organizationId === org.id; }); }
     var sel = document.getElementById('selectVehicle');
     if (!vehicles.length) {
         sel.innerHTML = '<option value="">Aucune véhicule</option>';
@@ -38,6 +42,10 @@ async function loadVehicleDetail() {
     if (!id) { document.getElementById('vehicleDetail').innerHTML = ''; return; }
     currentVehicleId = id;
     var vehicles = await apiGet('/vehicles');
+    var user = JSON.parse(localStorage.getItem("dagoos_user") || "{}");
+    var orgs = await apiGet("/organizations");
+    var org = orgs.find(function(o) { return o.email === user.email; });
+    if (org) { vehicles = vehicles.filter(function(v) { return v.organizationId === org.id; }); }
     var user = JSON.parse(localStorage.getItem("dagoos_user") || "{}");
     var orgs = await apiGet("/organizations");
     var org = orgs.find(function(o) { return o.email === user.email; });
