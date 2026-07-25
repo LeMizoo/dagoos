@@ -3,22 +3,37 @@ function init_versements() {
     main.innerHTML = 
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
             '<h1><i class="fas fa-hand-holding-usd"></i> Versements</h1>' +
-            '<button class="btn btn-primary" onclick="alert(\'Fonction à venir\')"><i class="fas fa-check"></i> Valider les versements</button>' +
         '</div>' +
-        '<div class="card"><table><thead><tr><th>Chauffeur</th><th>Véhicule</th><th>CA brut</th><th>Commission</th><th>Dépenses</th><th>Net à verser</th></tr></thead><tbody id="versementsTable"><tr><td colspan="6">Chargement...</td></tr></tbody></table></div>';
+        '<div class="stats-grid" id="versStats" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px;"></div>' +
+        '<div class="card"><table><thead><tr><th>Code</th><th>Chauffeur</th><th>Courses</th><th>CA brut</th><th>Commission</th><th>Net à verser</th></tr></thead><tbody id="versementsTable"><tr><td colspan="6">Chargement...</td></tr></tbody></table></div>';
     loadVersements();
 }
 
 async function loadVersements() {
-    var drivers = await apiGet('/drivers');
-    var vehicles = await apiGet('/vehicles');
-    var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
-    var myDrivers = drivers.filter(function(d) { return d.organization && d.organization.email === user.email; });
-    
-    document.getElementById('versementsTable').innerHTML = myDrivers.map(function(d) {
-        var moto = vehicles.find(function(v) { return v.id === d.vehicleId; });
-        return '<tr><td><strong>' + (d.user ? d.user.name : 'N/A') + '</strong></td>' +
-            '<td>' + (moto ? moto.plate : 'Non assigné') + '</td>' +
-            '<td>0 Ar</td><td>0 Ar</td><td>0 Ar</td><td><strong>0 Ar</strong></td></tr>';
-    }).join('') || '<tr><td colspan="6">Aucun chauffeur</td></tr>';
+    try {
+        var data = await apiGet('/versements');
+        var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
+        var drivers = await apiGet('/drivers');
+        var myDrivers = drivers.filter(function(d) { return d.organization && d.organization.email === user.email; });
+        var myDriverIds = myDrivers.map(function(d) { return d.id; });
+        var myVersements = data.filter(function(v) { return myDriverIds.indexOf(v.driverId) !== -1; });
+        
+        var totalCA = myVersements.reduce(function(s, v) { return s + v.caBrut; }, 0);
+        var totalCommission = myVersements.reduce(function(s, v) { return s + v.commission; }, 0);
+        var totalNet = myVersements.reduce(function(s, v) { return s + v.net; }, 0);
+        
+        document.getElementById('versStats').innerHTML = 
+            '<div class="stat-card"><div class="stat-icon green"><i class="fas fa-coins"></i></div><div class="stat-info"><div class="stat-number">' + totalCA.toLocaleString() + ' Ar</div><div class="stat-label">CA brut total</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon red"><i class="fas fa-hand-holding-usd"></i></div><div class="stat-info"><div class="stat-number">' + totalCommission.toLocaleString() + ' Ar</div><div class="stat-label">Commissions</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon blue"><i class="fas fa-wallet"></i></div><div class="stat-info"><div class="stat-number">' + totalNet.toLocaleString() + ' Ar</div><div class="stat-label">Net à verser</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-users"></i></div><div class="stat-info"><div class="stat-number">' + myVersements.length + '</div><div class="stat-label">Chauffeurs actifs</div></div></div>';
+        
+        document.getElementById('versementsTable').innerHTML = myVersements.map(function(v) {
+            return '<tr><td><code>' + v.code + '</code></td><td><strong>' + v.name + '</strong></td>' +
+                '<td>' + v.nbCourses + '</td>' +
+                '<td>' + v.caBrut.toLocaleString() + ' Ar</td>' +
+                '<td>' + v.commission.toLocaleString() + ' Ar</td>' +
+                '<td><strong>' + v.net.toLocaleString() + ' Ar</strong></td></tr>';
+        }).join('') || '<tr><td colspan="6">Aucun versement aujourd\'hui</td></tr>';
+    } catch(e) { console.error(e); }
 }

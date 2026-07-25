@@ -456,6 +456,26 @@ app.post("/api/courses", authMiddleware, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ===== VERSEMENTS (calcul automatique) =====
+app.get("/api/versements", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const drivers = await prisma.driver.findMany({ include: { user: true } });
+        const courses = await prisma.course.findMany();
+        const today = new Date().toISOString().split("T")[0];
+        const result = drivers.map(d => {
+            const driverCourses = courses.filter(c => c.driverId === d.id);
+            const todayCourses = driverCourses.filter(c => c.date.toISOString().startsWith(today));
+            const caBrut = todayCourses.reduce((sum, c) => sum + (c.price || 0), 0);
+            const commission = todayCourses.reduce((sum, c) => sum + (c.commission || 0), 0);
+            const net = caBrut - commission;
+            return { driverId: d.id, name: d.user?.name || "N/A", code: d.driverCode, caBrut, commission, net, nbCourses: todayCourses.length };
+        });
+        res.json(result);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ===== DÉMARRAGE =====
 app.listen(port, () => {
   console.log(`<i class="fas fa-check-circle"></i> Dagoo's API lancée sur http://localhost:${port}`);
