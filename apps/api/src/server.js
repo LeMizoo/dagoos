@@ -423,6 +423,20 @@ app.put("/api/proprietaires/:id", authMiddleware, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.get("/api/finances/stats", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const today = new Date().toISOString().split("T")[0];
+        const caJour = await prisma.course.aggregate({ _sum: { price: true }, where: { date: { gte: new Date(today) } } });
+        const caSemaine = await prisma.course.aggregate({ _sum: { price: true }, where: { date: { gte: new Date(Date.now() - 7*24*60*60*1000) } } });
+        const caMois = await prisma.course.aggregate({ _sum: { price: true }, where: { date: { gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) } } });
+        const nbCoursesJour = await prisma.course.count({ where: { date: { gte: new Date(today) } } });
+        const commissionsJour = await prisma.course.aggregate({ _sum: { commission: true }, where: { date: { gte: new Date(today) } } });
+        res.json({ caJour: caJour._sum.price || 0, caSemaine: caSemaine._sum.price || 0, caMois: caMois._sum.price || 0, nbCoursesJour, commissionsJour: commissionsJour._sum.commission || 0 });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ===== DÉMARRAGE =====
 app.listen(port, () => {
   console.log(`<i class="fas fa-check-circle"></i> Dagoo's API lancée sur http://localhost:${port}`);
