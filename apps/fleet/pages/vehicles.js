@@ -187,7 +187,8 @@ function showAddVehicle() {
             vignetteDate: document.getElementById('addVignette').value
         };
         if (!data.plate) return alert('Immatriculation requise');
-        var user = JSON.parse(localStorage.getItem("dagoos_user") || "{}"); apiGet("/organizations").then(function(orgs) { var org = orgs.find(function(o) { return o.email === user.email; }); if (org && org.plan === "Freemium" && allVehicles.length >= 1) return alert("Plan Freemium limite a 1 vehicule."); if (org && org.plan === "Basic" && allVehicles.length >= 5) return alert("Plan Basic limite a 5 vehicules."); apiPost('/vehicles', data).then(function() { closeModal(); loadVehicles(); });
+        if (allVehicles.length >= 1) { alert("Limite de vehicules atteinte pour votre plan. Passez au plan superieur."); return; }
+        apiPost('/vehicles', data).then(function() { closeModal(); loadVehicles(); });
     });
 }
 
