@@ -8,6 +8,7 @@ var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
 if (!localStorage.getItem('dagoos_token') || user.role !== 'FLEET_MANAGER') { window.location.href = 'index.html'; }
 
 document.getElementById('sidebarUser').textContent = '🚛 ' + (user.name || user.email);
+    apiGet("/organizations").then(function(orgs) { var org = orgs.find(function(o) { return o.email === user.email; }); if (org) { document.getElementById("sidebarFleetName").innerHTML = org.name; if (org.logo) { document.getElementById("sidebarLogo").src = org.logo; } } });
     apiGet("/organizations").then(function(orgs) { var org = orgs.find(function(o) { return o.email === user.email; }); if (org) { var nameEl = document.getElementById("sidebarFleetName"); if (nameEl) nameEl.textContent = org.name; } });
 
 function logout() { localStorage.clear(); window.location.href = 'index.html'; }
