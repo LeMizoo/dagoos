@@ -437,6 +437,25 @@ app.get("/api/finances/stats", authMiddleware, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ===== COURSES =====
+app.get("/api/courses", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const courses = await prisma.course.findMany({ orderBy: { date: "desc" }, take: 100 });
+        res.json(courses);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.post("/api/courses", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { driverId, vehicleId, distanceKm, price, commission } = req.body;
+        const course = await prisma.course.create({ data: { driverId, vehicleId, distanceKm: parseFloat(distanceKm), price: parseFloat(price), commission: parseFloat(commission || 0) } });
+        res.status(201).json(course);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ===== DÉMARRAGE =====
 app.listen(port, () => {
   console.log(`<i class="fas fa-check-circle"></i> Dagoo's API lancée sur http://localhost:${port}`);

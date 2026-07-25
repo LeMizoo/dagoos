@@ -159,3 +159,14 @@ model Proprietaire {
   drivers        Driver[]
 }
 
+
+model Course {
+  id          String   @id @default(cuid())
+  driverId    String
+  vehicleId   String
+  distanceKm  Float    @default(0)
+  price       Float    @default(0)
+  commission  Float    @default(0)
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
