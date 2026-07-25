@@ -30,7 +30,7 @@ loginForm.addEventListener('submit', async (e) => {
     }
     
     loginBtn.disabled = true;
-    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connexion...';
+    loginBtn.innerHTML = '⏳ Connexion...';
     showMessage('Connexion en cours...', 'info');
     
     try {
@@ -50,13 +50,13 @@ loginForm.addEventListener('submit', async (e) => {
             }
             localStorage.setItem('dagoos_token', data.token);
             localStorage.setItem('dagoos_user', JSON.stringify(data.user));
-            showMessage('<i class="fas fa-check-circle"></i> Connexion réussie !', 'success');
+            showMessage('✅ Connexion réussie !', 'success');
             setTimeout(() => { window.location.href = DASHBOARD_URL; }, 1000);
         } else {
-            showMessage('<i class="fas fa-times-circle"></i> ' + (data.error || 'Email ou mot de passe incorrect'), 'error');
+            showMessage('❌ ' + (data.error || 'Email ou mot de passe incorrect'), 'error');
         }
     } catch (error) {
-        showMessage('<i class="fas fa-times-circle"></i> Erreur de connexion au serveur', 'error');
+        showMessage('❌ Erreur de connexion au serveur', 'error');
     }
     
     loginBtn.disabled = false;
