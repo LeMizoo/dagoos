@@ -44,7 +44,8 @@ function loadPage(page) {
     var script = document.createElement('script');
     script.src = 'pages/' + page + '.js';
     script.onload = function() {
-        if (typeof window['init_' + page] === 'function') window['init_' + page]();
+        var funcName = "init_" + page.replace(/-/g, "_");
+        if (typeof window[funcName] === 'function') window['init_' + page]();
     };
     document.querySelectorAll('.sidebar-nav a[data-page]').forEach(function(l) { l.classList.remove('active'); });
     var link = document.querySelector('[data-page="' + page + '"]');
