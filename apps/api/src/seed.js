@@ -158,6 +158,25 @@ async function seed() {
     }
   }
 
+  // === PROPRIÉTAIRES DE TEST ===
+  const proprietairesData = [
+    { orgEmail: "fleet-premium@test.mg", name: "Rakoto Jean", cin: "123456789012", phone: "0340000001", email: "rakoto.jean@test.mg", address: "Lot 123 Anosimasina", nif: "NIF001", stat: "STAT001" },
+    { orgEmail: "fleet-premium@test.mg", name: "Rabe Paul", cin: "987654321098", phone: "0340000002", email: "rabe.paul@test.mg", address: "Lot 456 Bemasoandro", nif: "NIF002", stat: "STAT002" },
+    { orgEmail: "fleet-premium@test.mg", name: "Rasoa Marie", cin: "456789123456", phone: "0340000003", email: "rasoa.marie@test.mg", address: "Lot 789 Andraharo", nif: "NIF003", stat: "STAT003" },
+    { orgEmail: "fleet-standard@test.mg", name: "Randria Paul", cin: "789123456789", phone: "0340000004", email: "randria.paul@test.mg", address: "Lot 012 Ambohibao", nif: "NIF004", stat: "STAT004" },
+    { orgEmail: "fleet-basic@test.mg", name: "Rakotondrabe Solo", cin: "321654987012", phone: "0340000005", email: "solo@test.mg", address: "Lot 345 Ivato", nif: "NIF005", stat: "STAT005" }
+  ];
+  for (const p of proprietairesData) {
+    const org = await prisma.organization.findUnique({ where: { email: p.orgEmail } });
+    if (org) {
+      const exists = await prisma.proprietaire.findFirst({ where: { email: p.email } });
+      if (!exists) {
+        await prisma.proprietaire.create({ data: { ...p, organizationId: org.id } });
+        console.log("✅ Propriétaire:", p.name, "-", p.orgEmail);
+      }
+    }
+  }
+
   console.log('✅ Seed terminé');
 }
 
