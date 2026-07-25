@@ -33,7 +33,8 @@ model Organization {
   status      String   @default("pending")
   createdAt   DateTime @default(now())
   drivers     Driver[]
-  messages    Message[]
+  messages     Message[]
+  proprietaires Proprietaire[]
 }
 
 model Driver {
