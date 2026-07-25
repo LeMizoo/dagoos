@@ -2,7 +2,7 @@
 // DAGO MOBILITY - LANDING PAGE
 // ========================================
 
-console.log('%c<i class="fas fa-rocket"></i> Dago Mobility', 'font-size: 32px; font-weight: bold; color: #1A5276;');
+console.log('%c🚀 Dago Mobility', 'font-size: 32px; font-weight: bold; color: #1A5276;');
 console.log('%cLa mobilité connectée... Chez les potes, ça roule.', 'font-size: 18px; color: #F39C12;');
 
 // ===== PROVERBES MALGACHES =====
@@ -128,7 +128,7 @@ async function loadPlans() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('<i class="fas fa-check-circle"></i> Landing page chargée');
+    console.log('✅ Landing page chargée');
     loadStats();
     loadPlans();
 });
