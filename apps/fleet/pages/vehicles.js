@@ -66,7 +66,7 @@ async function loadVehicles() {
         renderVehicles(allVehicles);
         document.getElementById('vehicleCount').textContent = allVehicles.length + ' véhicule(s)';
     } catch(e) {
-        document.getElementById('vehiclesTable').innerHTML = '<tr><td colspan="8">Erreur de chargement</td></tr>';
+        document.getElementById('vehiclesTable').innerHTML = '<tr><td colspan="8">Aucun véhicule dans votre flotte</td></tr>';
     }
 }
 
