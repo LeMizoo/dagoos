@@ -91,3 +91,4 @@ function editCurrentVehicle() {
     if (!currentVehicleId) return;
     editVehicle(currentVehicleId);
 }
+ 
