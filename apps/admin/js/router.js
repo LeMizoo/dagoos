@@ -103,3 +103,13 @@ function addOrg(type) {
 
 // ===== INIT =====
 loadPage('home');
+
+function loadPageScript(page) {
+    var main = document.getElementById('mainInner');
+    main.innerHTML = '<p style="text-align:center;padding:40px;">Chargement...</p>';
+    var script = document.createElement('script');
+    script.src = 'pages/' + page + '.js';
+    script.setAttribute('data-page', page);
+    script.onload = function() { if (typeof window['init_' + page.replace(/-/g, '_')] === 'function') window['init_' + page.replace(/-/g, '_')](); };
+    document.body.appendChild(script);
+}
