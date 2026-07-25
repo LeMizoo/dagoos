@@ -135,9 +135,6 @@ app.put("/api/vehicles/:id", authMiddleware, async (req, res) => {
         res.json(vehicle);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
-        res.json(vehicle);
-    } catch (e) { res.status(500).json({ error: e.message }); }
-});
 
 app.patch("/api/drivers/:id", authMiddleware, async (req, res) => {
     try {
