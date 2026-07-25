@@ -132,3 +132,26 @@ async function seed() {
   // === DONNÉES DE TEST PREMIUM (Fleet Premium Test) ===
   const premiumOrg = await prisma.organization.findUnique({ where: { email: "fleet-premium@test.mg" } });
   if (premiumOrg) {
+
+    // 5 chauffeurs premium
+    const chauffeurs = [
+      { name: "Rakoto Jean", email: "chauffeur001@premium.mg", pin: "12001", code: "FL-PREM001" },
+      { name: "Rabe Pierre", email: "chauffeur002@premium.mg", pin: "12002", code: "FL-PREM002" },
+      { name: "Rasoa Marie", email: "chauffeur003@premium.mg", pin: "12003", code: "FL-PREM003" },
+      { name: "Randria Paul", email: "chauffeur004@premium.mg", pin: "12004", code: "FL-PREM004" },
+      { name: "Rakotondrabe Solo", email: "chauffeur005@premium.mg", pin: "12005", code: "FL-PREM005" }
+    ];
+    for (const c of chauffeurs) {
+      const userExists = await prisma.user.findUnique({ where: { email: c.email } });
+      if (!userExists) {
+        const user = await prisma.user.create({ data: { email: c.email, password: await bcrypt.hash(c.pin, 10), name: c.name, role: "DRIVER" } });
+        await prisma.driver.create({ data: { userId: user.id, organizationId: premiumOrg.id, driverCode: c.code, pin: await bcrypt.hash(c.pin, 10), status: "active" } });
+        console.log("✅ Chauffeur:", c.code, c.name);
+      }
+    }
+  }
+
+  console.log("✅ Seed terminé");
+}
+
+seed().catch(e => { console.error(e); process.exit(1); });
