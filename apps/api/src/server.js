@@ -48,7 +48,12 @@ app.patch("/api/organizations/:id/status", authMiddleware, async (req, res) => {
     try {
         const { PrismaClient } = require("@prisma/client");
         const prisma = new PrismaClient();
-        const { status } = req.body;
+        const { status, proprietaireId, vehicleId } = req.body;
+        const data = {};
+        if (status) data.status = status;
+        if (proprietaireId !== undefined) data.proprietaireId = proprietaireId || null;
+        if (vehicleId !== undefined) data.vehicleId = vehicleId || null;
+        const driver = await prisma.driver.update({ where: { id: req.params.id }, data });
         const org = await prisma.organization.update({ where: { id: req.params.id }, data: { status } });
         res.json(org);
     } catch (error) { res.status(500).json({ error: error.message }); }
@@ -140,7 +145,12 @@ app.patch("/api/drivers/:id", authMiddleware, async (req, res) => {
     try {
         const { PrismaClient } = require("@prisma/client");
         const prisma = new PrismaClient();
-        const { status } = req.body;
+        const { status, proprietaireId, vehicleId } = req.body;
+        const data = {};
+        if (status) data.status = status;
+        if (proprietaireId !== undefined) data.proprietaireId = proprietaireId || null;
+        if (vehicleId !== undefined) data.vehicleId = vehicleId || null;
+        const driver = await prisma.driver.update({ where: { id: req.params.id }, data });
         const driver = await prisma.driver.update({ where: { id: req.params.id }, data: { status } });
         res.json(driver);
     } catch (e) { res.status(500).json({ error: e.message }); }
