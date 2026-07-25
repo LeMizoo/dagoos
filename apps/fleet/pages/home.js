@@ -112,7 +112,7 @@ async function loadHomeData() {
             '<div class="stat-card" onclick="loadPage(\'vehicles\')" style="cursor:pointer;"><div class="stat-icon blue"><i class="fas fa-motorcycle"></i></div><div class="stat-info"><div class="stat-number">' + myVehicles.length + '</div><div class="stat-label">Véhicules</div></div></div>' +
             '<div class="stat-card" onclick="loadPage(\'drivers\')" style="cursor:pointer;"><div class="stat-icon green"><i class="fas fa-users"></i></div><div class="stat-info"><div class="stat-number">' + myDrivers.length + '</div><div class="stat-label">Chauffeurs</div></div></div>' +
             '<div class="stat-card" onclick="loadPage(\'proprietaires\')" style="cursor:pointer;"><div class="stat-icon yellow"><i class="fas fa-building"></i></div><div class="stat-info"><div class="stat-number">' + (proprietaires.length || 0) + '</div><div class="stat-label">Propriétaires</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon red"><i class="fas fa-route"></i></div><div class="stat-info"><div class="stat-number">0</div><div class="stat-label">Courses aujourd\'hui</div></div></div>';
+            '<div class="stat-card"><div class="stat-icon red"><i class="fas fa-route"></i></div><div class="stat-info"><div class="stat-number" id="statCourses">-</div><div class="stat-label">Courses aujourd\'hui</div></div></div>';
         
         // Flotte & Personnel
         el = document.getElementById('fleetGrid');

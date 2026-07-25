@@ -21,7 +21,7 @@ function init_vehicles() {
         
         // LISTE véhiculeS
         '<div class="card">' +
-            '<div class="card-header"><h3><i class="fas fa-list"></i> Parc véhicule</h3><span style="font-size:11px;color:var(--text2);" id="vehicleCount">0 véhicule(s)</span></div>' +
+            '<div class="card-header"><h3><i class="fas fa-list"></i> Parc véhicule</h3><span style="font-size:11px;color:var(--text2);" id="vehicleCount">- véhicule(s)</span></div>' +
             '<div style="overflow-x:auto;">' +
                 '<table>' +
                     '<thead><tr><th>Immatriculation</th><th>Marque / Modèle</th><th>Chauffeur</th><th>Km actuels</th><th>Vidange</th><th>Assurance</th><th>Vignette</th><th>Actions</th></tr></thead>' +

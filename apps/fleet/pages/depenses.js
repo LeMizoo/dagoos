@@ -6,9 +6,9 @@ function init_depenses() {
             '<button class="btn btn-primary" onclick="showAddDepense()"><i class="fas fa-plus"></i> Nouvelle dépense</button>' +
         '</div>' +
         '<div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px;">' +
-            '<div class="stat-card"><div class="stat-info"><div class="stat-number">0 Ar</div><div class="stat-label">Aujourd\'hui</div></div></div>' +
-            '<div class="stat-card"><div class="stat-info"><div class="stat-number">0 Ar</div><div class="stat-label">Cette semaine</div></div></div>' +
-            '<div class="stat-card"><div class="stat-info"><div class="stat-number">0 Ar</div><div class="stat-label">Ce mois</div></div></div>' +
+            '<div class="stat-card"><div class="stat-info"><div class="stat-number" id="depAujourdhui">-</div><div class="stat-label">Aujourd\'hui</div></div></div>' +
+            '<div class="stat-card"><div class="stat-info"><div class="stat-number" id="depSemaine">-</div><div class="stat-label">Cette semaine</div></div></div>' +
+            '<div class="stat-card"><div class="stat-info"><div class="stat-number" id="depMois">-</div><div class="stat-label">Ce mois</div></div></div>' +
         '</div>' +
         '<div class="card"><div class="card-header"><h3><i class="fas fa-list"></i> Dépenses récentes</h3></div>' +
         '<table><thead><tr><th>Date</th><th>Catégorie</th><th>Description</th><th>Montant</th></tr></thead><tbody id="depensesTable"><tr><td colspan="4">Aucune dépense</td></tr></tbody></table></div>';
