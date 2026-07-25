@@ -132,6 +132,46 @@ async function seed() {
   // === DONNÉES DE TEST PREMIUM (Fleet Premium Test) ===
   const premiumOrg = await prisma.organization.findUnique({ where: { email: "fleet-premium@test.mg" } });
   if (premiumOrg) {
+  // 2 bus premium
+  const bus = [
+    { plate: "FL-BUS-100", model: "MERCEDES Sprinter 22 places", year: 2023, currentKm: 45000, nextMaintenanceKm: 50000, insuranceDate: "2027-12-31" },
+    { plate: "FL-BUS-200", model: "TOYOTA Coaster 30 places", year: 2024, currentKm: 28000, nextMaintenanceKm: 33000, insuranceDate: "2027-06-30" }
+  ];
+  for (const m of bus) {
+    const exists = await prisma.vehicle.findUnique({ where: { plate: m.plate } });
+    if (!exists) { await prisma.vehicle.create({ data: m }); console.log("🚌 Bus:", m.plate); }
+  }
+  
+  // 2 taxis premium
+  const taxis = [
+    { plate: "FL-TAX-100", model: "TOYOTA Prius 5 places", year: 2024, currentKm: 32000, nextMaintenanceKm: 37000, insuranceDate: "2027-12-31" },
+    { plate: "FL-TAX-200", model: "KIA Picanto 5 places", year: 2023, currentKm: 55000, nextMaintenanceKm: 60000, insuranceDate: "2026-09-15" }
+  ];
+  for (const m of taxis) {
+    const exists = await prisma.vehicle.findUnique({ where: { plate: m.plate } });
+    if (!exists) { await prisma.vehicle.create({ data: m }); console.log("🚕 Taxi:", m.plate); }
+  }
+
+  // 2 bus premium
+  const bus = [
+    { plate: "FL-BUS-100", model: "MERCEDES Sprinter 22 places", year: 2023, currentKm: 45000, nextMaintenanceKm: 50000, insuranceDate: "2027-12-31" },
+    { plate: "FL-BUS-200", model: "TOYOTA Coaster 30 places", year: 2024, currentKm: 28000, nextMaintenanceKm: 33000, insuranceDate: "2027-06-30" }
+  ];
+  for (const m of bus) {
+    const exists = await prisma.vehicle.findUnique({ where: { plate: m.plate } });
+    if (!exists) { await prisma.vehicle.create({ data: m }); console.log("🚌 Bus:", m.plate); }
+  }
+  
+  // 2 taxis premium
+  const taxis = [
+    { plate: "FL-TAX-100", model: "TOYOTA Prius 5 places", year: 2024, currentKm: 32000, nextMaintenanceKm: 37000, insuranceDate: "2027-12-31" },
+    { plate: "FL-TAX-200", model: "KIA Picanto 5 places", year: 2023, currentKm: 55000, nextMaintenanceKm: 60000, insuranceDate: "2026-09-15" }
+  ];
+  for (const m of taxis) {
+    const exists = await prisma.vehicle.findUnique({ where: { plate: m.plate } });
+    if (!exists) { await prisma.vehicle.create({ data: m }); console.log("🚕 Taxi:", m.plate); }
+  }
+
     // 5 motos premium
     const motos = [
       { plate: "FL-PREM-100", model: "YAMAHA Cygnus GRX 1", year: 2024, currentKm: 5000, nextMaintenanceKm: 8000, insuranceDate: "2027-12-31" },
