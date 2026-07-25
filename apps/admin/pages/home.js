@@ -118,6 +118,7 @@ async function loadHomeStats() {
         ['fleetCount','coopCount','driverCount'].forEach(function(id) {
             var e = document.getElementById(id);
             if (e) e.textContent = id === 'driverCount' ? drivers.length : (id === 'fleetCount' ? fleets.length : coops.length);
+    var av = document.getElementById("adminVehicles"); if (av) av.textContent = vehicles.length;
         });
         el = document.getElementById('totalOrgs');
         if (el) el.textContent = orgs.length + ' organisation' + (orgs.length > 1 ? 's' : '');
