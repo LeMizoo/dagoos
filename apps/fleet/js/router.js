@@ -51,3 +51,55 @@ function loadPageScript(page) {
     script.onload = function() { if (typeof window['init_' + page] === 'function') window['init_' + page](); };
     document.body.appendChild(script);
 }
+
+// ===== MODALS & ACTIONS =====
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+function showModal(title, content, callback) {
+    var html = '<h2>' + title + '</h2>' + content;
+    html += callback ? '<div class="btn-row"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" id="modalSaveBtn">Enregistrer</button></div>' : '<div class="btn-row"><button class="btn btn-primary" onclick="closeModal()">Fermer</button></div>';
+    document.getElementById('modalContent').innerHTML = html;
+    document.getElementById('modalOverlay').classList.add('show');
+    if (callback) document.getElementById('modalSaveBtn').onclick = callback;
+}
+
+function showAddVehicle() {
+    var h = '<div class="form-group"><label>Immatriculation *</label><input id="addPlate" required></div>';
+    h += '<div class="form-group"><label>Marque / Modèle</label><input id="addModel" placeholder="YAMAHA Cygnus"></div>';
+    h += '<div class="form-group"><label>Année</label><input type="number" id="addYear" value="2024"></div>';
+    h += '<div class="form-group"><label>Couleur</label><input id="addColor"></div>';
+    h += '<div class="form-group"><label>Km actuels</label><input type="number" id="addKm" value="0"></div>';
+    h += '<div class="form-group"><label>Prochaine vidange (km)</label><input type="number" id="addVidange" value="3000"></div>';
+    h += '<div class="form-group"><label>Date fin assurance</label><input type="date" id="addAssurance"></div>';
+    showModal('Nouvelle moto', h, function() {
+        var plate = document.getElementById('addPlate').value;
+        if (!plate) return alert('Immatriculation requise');
+        apiPost('/vehicles', {
+            plate: plate,
+            model: document.getElementById('addModel').value,
+            year: parseInt(document.getElementById('addYear').value) || 2024,
+            color: document.getElementById('addColor').value,
+            currentKm: parseInt(document.getElementById('addKm').value) || 0,
+            nextMaintenanceKm: parseInt(document.getElementById('addVidange').value) || 3000,
+            insuranceDate: document.getElementById('addAssurance').value
+        }).then(function() { closeModal(); loadPage('vehicles'); });
+    });
+}
+
+function editVehicle(id) {
+    apiGet('/vehicles').then(function(vehicles) {
+        var v = vehicles.find(function(x) { return x.id === id; });
+        if (!v) return;
+        var h = '<div class="form-group"><label>Km actuels</label><input type="number" id="editKm" value="' + (v.currentKm || 0) + '"></div>';
+        h += '<div class="form-group"><label>Prochaine vidange (km)</label><input type="number" id="editVidange" value="' + (v.nextMaintenanceKm || 3000) + '"></div>';
+        h += '<div class="form-group"><label>Date fin assurance</label><input type="date" id="editAssurance" value="' + (v.insuranceDate || '') + '"></div>';
+        h += '<div class="form-group"><label>Statut</label><select id="editStatus"><option ' + (v.status === 'active' ? 'selected' : '') + '>active</option><option ' + (v.status === 'maintenance' ? 'selected' : '') + '>maintenance</option></select></div>';
+        showModal('Modifier ' + v.plate, h, function() {
+            apiPut('/vehicles/' + id, {
+                currentKm: parseInt(document.getElementById('editKm').value) || 0,
+                nextMaintenanceKm: parseInt(document.getElementById('editVidange').value) || 3000,
+                insuranceDate: document.getElementById('editAssurance').value,
+                status: document.getElementById('editStatus').value
+            }).then(function() { closeModal(); loadPage('vehicles'); });
+        });
+    });
+}
