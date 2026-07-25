@@ -6,7 +6,7 @@ function init_proprietaires() {
             '<button class="btn btn-primary" onclick="showAddProprietaire()"><i class="fas fa-plus"></i> Nouveau propriétaire</button>' +
         '</div>' +
         '<div class="card"><table><thead><tr><th>Nom</th><th>CIN</th><th>Téléphone</th><th>Email</th><th>Véhicules</th><th>Contrat</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="propTable"><tr><td colspan="8">Chargement...</td></tr></tbody></table></div>';
-    loadProprietaires();
+    setTimeout(loadProprietaires, 100);
 }
 
 async function loadProprietaires() {
@@ -54,7 +54,7 @@ function showAddProprietaire() {
                 email: document.getElementById('addEmail').value,
                 address: document.getElementById('addAddress').value,
                 organizationId: org ? org.id : null
-            }).then(function() { closeModal(); loadProprietaires(); });
+            }).then(function() { closeModal(); setTimeout(loadProprietaires, 100); });
         });
     });
 }
@@ -92,7 +92,7 @@ function editProprietaire(id) {
                 phone: document.getElementById('editPhone').value,
                 email: document.getElementById('editEmail').value,
                 status: document.getElementById('editStatus').value
-            }).then(function() { closeModal(); loadProprietaires(); });
+            }).then(function() { closeModal(); setTimeout(loadProprietaires, 100); });
         });
     });
 }
@@ -103,7 +103,7 @@ function toggleProprietaire(id, status) {
     if (confirm(msg)) {
         apiPut('/proprietaires/' + id, { status: ns }).then(function() {
             alert('Contrat ' + (ns === 'expire' ? 'résilié' : 'réactivé') + '. Notification envoyée.');
-            loadProprietaires();
+            setTimeout(loadProprietaires, 100);
         });
     }
 }
