@@ -151,7 +151,6 @@ app.patch("/api/drivers/:id", authMiddleware, async (req, res) => {
         if (proprietaireId !== undefined) data.proprietaireId = proprietaireId || null;
         if (vehicleId !== undefined) data.vehicleId = vehicleId || null;
         const driver = await prisma.driver.update({ where: { id: req.params.id }, data });
-        const driver = await prisma.driver.update({ where: { id: req.params.id }, data: { status } });
         res.json(driver);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
