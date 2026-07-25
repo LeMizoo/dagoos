@@ -86,7 +86,7 @@ async function loadHomeStats() {
             var e = document.getElementById(id);
             if (e) e.textContent = id === 'driverCount' ? drivers.length : (id === 'fleetCount' ? fleets.length : coops.length);
         });
-        document.getElementById('totalOrgs').textContent = orgs.length + ' organisations';
+        var el = document.getElementById('totalOrgs'); if (el) el.textContent = orgs.length + ' organisations';
         
         // Graphique plans
         var plans = {};
