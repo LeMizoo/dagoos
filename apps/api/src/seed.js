@@ -129,6 +129,40 @@ async function seed() {
     }
   }
 
+  // === DONNÉES DE TEST PREMIUM (Fleet Premium Test) ===
+  const premiumOrg = await prisma.organization.findUnique({ where: { email: "fleet-premium@test.mg" } });
+  if (premiumOrg) {
+    // 5 motos premium
+    const motos = [
+      { plate: "FL-PREM-100", model: "YAMAHA Cygnus GRX 1", year: 2024, currentKm: 5000, nextMaintenanceKm: 8000, insuranceDate: "2027-12-31" },
+      { plate: "FL-PREM-200", model: "YAMAHA Cygnus GRX 2", year: 2024, currentKm: 10000, nextMaintenanceKm: 13000, insuranceDate: "2027-12-31" },
+      { plate: "FL-PREM-300", model: "YAMAHA Cygnus GRX 3", year: 2024, currentKm: 15000, nextMaintenanceKm: 18000, insuranceDate: "2027-06-30" },
+      { plate: "FL-PREM-400", model: "YAMAHA Cygnus GRX 4", year: 2024, currentKm: 20000, nextMaintenanceKm: 23000, insuranceDate: "2026-08-15" },
+      { plate: "FL-PREM-500", model: "YAMAHA Cygnus GRX 5", year: 2024, currentKm: 25000, nextMaintenanceKm: 27800, insuranceDate: "2026-07-01" }
+    ];
+    for (const m of motos) {
+      const exists = await prisma.vehicle.findUnique({ where: { plate: m.plate } });
+      if (!exists) { await prisma.vehicle.create({ data: m }); console.log("✅ Moto:", m.plate); }
+    }
+    
+    // 5 chauffeurs
+    const chauffeurs = [
+      { name: "Rakoto Jean", email: "chauffeur001@premium.mg", pin: "12001", code: "FL-PREM001" },
+      { name: "Rabe Pierre", email: "chauffeur002@premium.mg", pin: "12002", code: "FL-PREM002" },
+      { name: "Rasoa Marie", email: "chauffeur003@premium.mg", pin: "12003", code: "FL-PREM003" },
+      { name: "Randria Paul", email: "chauffeur004@premium.mg", pin: "12004", code: "FL-PREM004" },
+      { name: "Rakotondrabe Solo", email: "chauffeur005@premium.mg", pin: "12005", code: "FL-PREM005" }
+    ];
+    for (const c of chauffeurs) {
+      const userExists = await prisma.user.findUnique({ where: { email: c.email } });
+      if (!userExists) {
+        const user = await prisma.user.create({ data: { email: c.email, password: await bcrypt.hash(c.pin, 10), name: c.name, role: "DRIVER" } });
+        await prisma.driver.create({ data: { userId: user.id, organizationId: premiumOrg.id, driverCode: c.code, pin: await bcrypt.hash(c.pin, 10), status: "active" } });
+        console.log("✅ Chauffeur:", c.code, c.name);
+      }
+    }
+  }
+
   console.log('✅ Seed terminé');
 }
 
