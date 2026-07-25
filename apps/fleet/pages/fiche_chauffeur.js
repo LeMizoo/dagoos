@@ -13,8 +13,9 @@ var currentDriverId = null;
 
 async function loadChauffeurList() {
     var drivers = await apiGet('/drivers');
+    var myDrivers = myDrivers.filter(function(d) { return d.organization && d.organization.email === user.email; });
     var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
-    var myDrivers = drivers.filter(function(d) { return d.organization && d.organization.email === user.email; });
+    var myDrivers = myDrivers.filter(function(d) { return d.organization && d.organization.email === user.email; });
     var sel = document.getElementById('selectChauffeur');
     if (!myDrivers.length) {
         sel.innerHTML = '<option value="">Aucun chauffeur</option>';
@@ -35,8 +36,9 @@ async function loadChauffeurDetail() {
     if (!id) { document.getElementById('chauffeurDetail').innerHTML = ''; return; }
     currentDriverId = id;
     var drivers = await apiGet('/drivers');
+    var myDrivers = myDrivers.filter(function(d) { return d.organization && d.organization.email === user.email; });
     var vehicles = await apiGet('/vehicles');
-    var d = drivers.find(function(x) { return x.id === id; });
+    var d = myDrivers.find(function(x) { return x.id === id; });
     if (!d) return;
     var moto = vehicles.find(function(v) { return v.id === d.vehicleId; });
     

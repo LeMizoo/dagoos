@@ -13,9 +13,10 @@ function init_permutation() {
 
 async function loadPermutation() {
     var drivers = await apiGet('/drivers');
+    var myDrivers = myDrivers.filter(function(d) { return d.organization && d.organization.email === user.email; });
     var vehicles = await apiGet('/vehicles');
     var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
-    var myDrivers = drivers.filter(function(d) { return d.organization && d.organization.email === user.email; });
+    var myDrivers = myDrivers.filter(function(d) { return d.organization && d.organization.email === user.email; });
     
     // Remplir les selects
     var selC = document.getElementById('permChauffeur');

@@ -10,6 +10,7 @@ function init_codes() {
 
 async function loadCodes() {
     var drivers = await apiGet('/drivers');
+    var myDrivers = drivers.filter(function(d) { return d.organization && d.organization.email === user.email; });
     var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
     var myDrivers = drivers.filter(function(d) { return d.organization && d.organization.email === user.email; });
     document.getElementById('codesTable').innerHTML = myDrivers.map(function(d) {
