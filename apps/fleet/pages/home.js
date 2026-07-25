@@ -88,7 +88,8 @@ async function loadHomeData() {
         var orgs = await apiGet('/organizations');
         var drivers = await apiGet('/drivers');
         var vehicles = await apiGet('/vehicles');
-        var proprietaires = await apiGet('/proprietaires');
+        var proprietaires = await apiGet("/proprietaires");
+        var myProprietaires = proprietaires.filter(function(p) { return p.organizationId === (org ? org.id : null); });
         
         var org = orgs.find(function(o) { return o.email === user.email; });
         var myDrivers = drivers.filter(function(d) { return d.organization && d.organization.email === user.email; });
@@ -111,7 +112,7 @@ async function loadHomeData() {
         if (el) el.innerHTML = 
             '<div class="stat-card" onclick="loadPage(\'vehicles\')" style="cursor:pointer;"><div class="stat-icon blue"><i class="fas fa-motorcycle"></i></div><div class="stat-info"><div class="stat-number">' + myVehicles.length + '</div><div class="stat-label">Véhicules</div></div></div>' +
             '<div class="stat-card" onclick="loadPage(\'drivers\')" style="cursor:pointer;"><div class="stat-icon green"><i class="fas fa-users"></i></div><div class="stat-info"><div class="stat-number">' + myDrivers.length + '</div><div class="stat-label">Chauffeurs</div></div></div>' +
-            '<div class="stat-card" onclick="loadPage(\'proprietaires\')" style="cursor:pointer;"><div class="stat-icon yellow"><i class="fas fa-building"></i></div><div class="stat-info"><div class="stat-number">' + (proprietaires.length || 0) + '</div><div class="stat-label">Propriétaires</div></div></div>' +
+            '<div class="stat-card" onclick="loadPage(\'proprietaires\')" style="cursor:pointer;"><div class="stat-icon yellow"><i class="fas fa-building"></i></div><div class="stat-info"><div class="stat-number">' + (myProprietaires.length || 0) + '</div><div class="stat-label">Propriétaires</div></div></div>' +
             '<div class="stat-card"><div class="stat-icon red"><i class="fas fa-route"></i></div><div class="stat-info"><div class="stat-number" id="statCourses">-</div><div class="stat-label">Courses aujourd\'hui</div></div></div>';
         
         // Flotte & Personnel
@@ -127,7 +128,7 @@ async function loadHomeData() {
         document.getElementById('orgPlan').textContent = (org ? org.plan : 'Freemium');
         document.getElementById('driverCount').textContent = myDrivers.length;
     var vc = document.getElementById("vehicleCount"); if (vc) vc.textContent = myVehicles.length;
-    var pc = document.getElementById("propCount"); if (pc) pc.textContent = proprietaires.length;
+    var pc = document.getElementById("propCount"); if (pc) pc.textContent = myProprietaires.length;
         
         // Alertes
         el = document.getElementById('alertsGrid');
