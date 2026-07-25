@@ -19,9 +19,12 @@ async function loadVehicleList() {
     if (org) { vehicles = vehicles.filter(function(v) { return v.organizationId === org.id; }); }
     
     var sel = document.getElementById('selectVehicle');
-    sel.innerHTML = '<option value="">-- Sélectionner --</option>';
+    sel.innerHTML = '<option value="">-- Aucun vehicule --</option>';
     
-    if (!vehicles.length) { sel.innerHTML = "<option value="">-- Aucun vehicule --</option>"; document.getElementById("vehicleDetail").innerHTML = ""; return; }
+    if (!vehicles.length) {
+        document.getElementById('vehicleDetail').innerHTML = '<p style="text-align:center;padding:30px;color:var(--text2);">Aucun vehicule dans votre flotte</p>';
+        return;
+    }
     
     vehicles.forEach(function(v) {
         var opt = document.createElement('option');
@@ -67,7 +70,7 @@ async function loadVehicleDetail() {
     detail += '<input type="number" id="vidangeKm" value="' + (v.currentKm || 0) + '" style="padding:8px;border:1px solid var(--border);border-radius:6px;width:100px;">';
     detail += '<input type="date" id="vidangeDate" style="padding:8px;border:1px solid var(--border);border-radius:6px;">';
     detail += '<input type="number" id="vidangeNext" value="' + ((v.currentKm || 0) + 3000) + '" style="padding:8px;border:1px solid var(--border);border-radius:6px;width:100px;">';
-    detail += '<input type="number" id="vidangeCost" placeholder="Coût (Ar)" style="padding:8px;border:1px solid var(--border);border-radius:6px;width:100px;">';
+    detail += '<input type="number" id="vidangeCost" placeholder="Cout (Ar)" style="padding:8px;border:1px solid var(--border);border-radius:6px;width:100px;">';
     detail += '<button class="btn btn-primary" onclick="validerVidange()"><i class="fas fa-check"></i> Valider la vidange</button></div></div>';
     
     document.getElementById('vehicleDetail').innerHTML = detail;
@@ -79,7 +82,7 @@ function validerVidange() {
     var next = document.getElementById('vidangeNext').value;
     if (!km) return alert('Km actuels requis');
     apiPut('/vehicles/' + currentVehicleId, { currentKm: parseInt(km), nextMaintenanceKm: parseInt(next) }).then(function() {
-        alert('✅ Vidange validée !');
+        alert('Vidange validee !');
         loadVehicleDetail();
     });
 }
@@ -88,6 +91,3 @@ function editCurrentVehicle() {
     if (!currentVehicleId) return;
     editVehicle(currentVehicleId);
 }
- 
-// force deploy v2
-// FICHE VEHICULE V2 -  Sat, Jul 25, 2026 5:22:28 PM
