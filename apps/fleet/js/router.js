@@ -7,7 +7,7 @@ function apiPatch(e,d) { return fetch(API_URL+e,{method:"PATCH",headers:{"Conten
 var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
 if (!localStorage.getItem('dagoos_token') || user.role !== 'FLEET_MANAGER') { window.location.href = 'index.html'; }
 
-document.getElementById('sidebarUser').textContent = '<i class="fas fa-truck"></i> ' + (user.name || user.email);
+document.getElementById('sidebarUser').textContent = '🚛 ' + (user.name || user.email);
 
 function logout() { localStorage.clear(); window.location.href = 'index.html'; }
 
