@@ -172,6 +172,7 @@ model Course {
   id          String   @id @default(cuid())
   driverId    String
   vehicleId   String
+  type        String   @default("NORMALE")
   distanceKm  Float    @default(0)
   price       Float    @default(0)
   commission  Float    @default(0)

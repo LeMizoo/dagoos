@@ -198,33 +198,6 @@ function pointer(type) {
     updateStatusBar();
 }
 
-async function enregistrerCourse() {
-    if (currentStatus !== 'EN_SERVICE') return alert('Vous devez être EN SERVICE');
-    var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
-    var type = document.getElementById('typeCourse').value;
-    var data = { driverId: user.driverId, type: type };
-    
-    if (type === 'NORMALE') {
-        var d = parseFloat(document.getElementById('kmDepart').value) || 0;
-        var a = parseFloat(document.getElementById('kmArrivee').value) || 0;
-        if (a <= d) return alert('Km arrivée > Km départ');
-        data.distanceKm = a - d;
-        data.price = 2000 + data.distanceKm * 500;
-    } else if (type === 'ADY_VAROTRA' || type === 'FORFAIT') {
-        data.price = parseFloat(document.getElementById('montant').value) || 0;
-        if (!data.price) return alert('Montant requis');
-    } else if (type === 'LOCATION_JOURNALIERE') {
-        data.price = 15000;
-    }
-    
-    try {
-        await apiPost('/courses', data);
-        alert('✅ Course enregistrée !');
-        document.getElementById('kmDepart') && (document.getElementById('kmDepart').value = '');
-        document.getElementById('kmArrivee') && (document.getElementById('kmArrivee').value = '');
-        loadDriverStats();
-    } catch(e) { alert('❌ Erreur'); }
-}
 
 function addDepense(type) {
     var montant = prompt(type + ' (Ar):');
@@ -232,3 +205,48 @@ function addDepense(type) {
     alert('✅ ' + type + ' déclaré: ' + montant + ' Ar');
 }
 
+
+async function enregistrerCourse() {
+    if (currentStatus !== 'EN_SERVICE') return alert('Vous devez être EN SERVICE');
+    try {
+        var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
+        var drivers = await apiGet('/drivers');
+        if (!Array.isArray(drivers)) throw new Error('Impossible de récupérer les chauffeurs');
+        var driver = drivers.find(function(item) { return item.id === user.driverId || item.userId === user.id || item.driverCode === user.driverCode; });
+        if (!driver) throw new Error('Fiche chauffeur introuvable');
+        if (!driver.vehicleId) throw new Error('Aucun véhicule assigné. Contactez votre gestionnaire.');
+        
+        var type = document.getElementById('typeCourse').value;
+        var data = { driverId: driver.id, vehicleId: driver.vehicleId, distanceKm: 0, price: 0, commission: 0 };
+        
+        if (type === 'NORMALE') {
+            var d = parseFloat(document.getElementById('kmDepart').value) || 0;
+            var a = parseFloat(document.getElementById('kmArrivee').value) || 0;
+            if (a <= d) return alert('Km arrivée > Km départ');
+            data.distanceKm = Number((a - d).toFixed(1));
+            data.price = 2000 + data.distanceKm * 500;
+        } else if (type === 'ADY_VAROTRA' || type === 'FORFAIT') {
+            data.price = parseFloat(document.getElementById('montant').value) || 0;
+            if (data.price <= 0) return alert('Montant requis');
+        } else if (type === 'LOCATION_JOURNALIERE') {
+            data.price = 15000;
+        }
+        data.commission = Math.round(data.price * 0.10);
+        
+        console.log('Création course:', data);
+        var course = await apiPost('/courses', data);
+        console.log('Course créée:', course);
+        alert('✅ Course enregistrée !');
+        
+        var kmD = document.getElementById('kmDepart');
+        var kmA = document.getElementById('kmArrivee');
+        var montant = document.getElementById('montant');
+        if (kmD) kmD.value = '';
+        if (kmA) kmA.value = '';
+        if (montant) montant.value = '';
+        loadDriverStats();
+    } catch (error) {
+        console.error('Échec création course:', error);
+        alert('❌ ' + error.message);
+    }
+}
