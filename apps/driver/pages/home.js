@@ -1,77 +1,83 @@
+// ========================================
+// DRIVER - DASHBOARD COMPLET
+// ========================================
+
 function init_home() {
     var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
     var main = document.getElementById('mainContent');
+    
     main.innerHTML = 
         // HEADER
-        '<div style="background:linear-gradient(135deg,#F1C40F,#F39C12);color:#1A1A2E;padding:14px 16px;">' +
-            '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+        '<div style="background:#1E293B;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid #DAA520;">' +
+            '<div style="display:flex;align-items:center;gap:8px;">' +
+                '<img src="https://dago-mobility.pages.dev/assets/logo/b-trans.png" style="width:32px;height:32px;object-fit:contain;border-radius:8px;">' +
                 '<div>' +
-                    '<h1 style="font-size:16px;margin:0;">👋 ' + (user.name || 'Chauffeur') + '</h1>' +
-                    '<p style="font-size:11px;opacity:0.8;margin:2px 0;">' + (user.driverCode || '') + ' · ' + (user.organization || '') + '</p>' +
+                    '<div style="font-size:14px;font-weight:700;color:#DAA520;">' + (user.name || 'Chauffeur') + '</div>' +
+                    '<div style="font-size:10px;color:#94A3B8;display:flex;gap:4px;">' +
+                        '<span id="statusBadge" style="padding:1px 6px;border-radius:8px;font-size:9px;"></span>' +
+                        '<span>' + (user.driverCode || '') + '</span>' +
+                    '</div>' +
                 '</div>' +
-                '<div style="text-align:right;">' +
-                    '<div style="font-size:24px;font-weight:900;" id="currentTime"></div>' +
-                    '<div style="font-size:10px;" id="currentDate"></div>' +
-                '</div>' +
+            '</div>' +
+            '<div style="display:flex;gap:4px;">' +
+                '<button onclick="logout()" style="background:rgba(239,68,68,0.15);border:none;width:28px;height:28px;border-radius:50%;color:#F87171;cursor:pointer;font-size:14px;">⏻</button>' +
+                '<span id="onlineStatus" style="font-size:10px;"></span>' +
             '</div>' +
         '</div>' +
         
-        // STATUT
-        '<div id="statusBar" style="background:#1A1A2E;color:white;padding:8px 16px;font-size:12px;display:flex;justify-content:space-between;align-items:center;"></div>' +
-        
-        // BOUTONS SERVICE
-        '<div style="display:flex;gap:6px;padding:10px 12px;background:white;">' +
-            '<button onclick="pointer(\'ARRIVEE\')" class="driver-btn" style="flex:1;padding:12px;background:#27AE60;color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;">▶️ Début</button>' +
-            '<button onclick="pointer(\'PAUSE\')" class="driver-btn" style="flex:1;padding:12px;background:#F39C12;color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;">⏸️ Pause</button>' +
-            '<button onclick="pointer(\'FIN\')" class="driver-btn" style="flex:1;padding:12px;background:#E74C3C;color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;">⏹️ Fin</button>' +
-        '</div>' +
-        
-        // KM DÉPART
-        '<div id="kmDepartDiv" style="background:#FEF3C7;padding:8px 16px;font-size:12px;text-align:center;display:none;"></div>' +
-        
-        // STATS AUJOURD'HUI
-        '<div style="padding:12px;">' +
-            '<div class="card" style="background:white;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">' +
-                '<h3 style="font-size:13px;margin-bottom:10px;">📅 Aujourd\'hui</h3>' +
-                '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;">' +
-                    '<div><div style="font-size:18px;font-weight:800;" id="statCourses">0</div><div style="font-size:10px;color:#6C757D;">Courses</div></div>' +
-                    '<div><div style="font-size:18px;font-weight:800;color:#27AE60;" id="statCA">0 Ar</div><div style="font-size:10px;color:#6C757D;">CA</div></div>' +
-                    '<div><div style="font-size:18px;font-weight:800;color:#E74C3C;" id="statCommission">0 Ar</div><div style="font-size:10px;color:#6C757D;">Commission</div></div>' +
-                    '<div><div style="font-size:18px;font-weight:800;color:#1A5276;" id="statGain">0 Ar</div><div style="font-size:10px;color:#6C757D;">Gain net</div></div>' +
+        // STATS DU JOUR
+        '<div style="padding:12px;max-width:500px;margin:0 auto;">' +
+            '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:8px;">' +
+                '<h3 style="font-size:13px;color:#DAA520;margin-bottom:10px;">📅 Aujourd\'hui</h3>' +
+                '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;">' +
+                    '<div><div style="font-size:18px;font-weight:800;color:#fff;" id="statCourses">0</div><div style="font-size:9px;color:#94A3B8;">Courses</div></div>' +
+                    '<div><div style="font-size:18px;font-weight:800;color:#22C55E;" id="statCA">0 Ar</div><div style="font-size:9px;color:#94A3B8;">CA</div></div>' +
+                    '<div><div style="font-size:18px;font-weight:800;color:#EF4444;" id="statCommission">0 Ar</div><div style="font-size:9px;color:#94A3B8;">Commission</div></div>' +
+                    '<div><div style="font-size:18px;font-weight:800;color:#3B82F6;" id="statGain">0 Ar</div><div style="font-size:9px;color:#94A3B8;">Gain net</div></div>' +
                 '</div>' +
             '</div>' +
             
+            // BOUTONS SERVICE
+            '<div style="display:flex;gap:6px;margin-bottom:8px;">' +
+                '<button onclick="pointer(\'ARRIVEE\')" class="driver-btn" style="flex:1;padding:12px;background:#22C55E;color:white;border:none;border-radius:10px;font-weight:600;font-size:12px;cursor:pointer;">▶️ Début</button>' +
+                '<button onclick="pointer(\'PAUSE\')" class="driver-btn" style="flex:1;padding:12px;background:#EAB308;color:#1A1A2E;border:none;border-radius:10px;font-weight:600;font-size:12px;cursor:pointer;">⏸️ Pause</button>' +
+                '<button onclick="pointer(\'FIN\')" class="driver-btn" style="flex:1;padding:12px;background:#EF4444;color:white;border:none;border-radius:10px;font-weight:600;font-size:12px;cursor:pointer;">⏹️ Fin</button>' +
+            '</div>' +
+            
+            // KM DÉPART
+            '<div id="kmDepartDiv" style="background:rgba(218,165,32,0.1);border:1px solid #DAA520;border-radius:8px;padding:6px 10px;font-size:11px;text-align:center;color:#DAA520;margin-bottom:8px;display:none;"></div>' +
+            
             // NOUVELLE COURSE
-            '<div class="card" style="background:white;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">' +
-                '<h3 style="font-size:13px;margin-bottom:10px;">➕ Nouvelle course</h3>' +
-                '<select id="typeCourse" onchange="updateCourseForm()" style="width:100%;padding:10px;border:1px solid #E9ECEF;border-radius:8px;margin-bottom:8px;font-family:Inter,sans-serif;">' +
+            '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:8px;">' +
+                '<h3 style="font-size:13px;color:#DAA520;margin-bottom:8px;">➕ Nouvelle course</h3>' +
+                '<select id="typeCourse" onchange="updateCourseForm()" style="width:100%;padding:10px;background:#0F172A;border:1px solid #334155;border-radius:8px;color:#fff;margin-bottom:6px;font-family:Inter,sans-serif;font-size:12px;">' +
                     '<option value="NORMALE">🏍️ Course (km)</option>' +
                     '<option value="ADY_VAROTRA">🛺 Ady Varotra</option>' +
                     '<option value="LOCATION_JOURNALIERE">📅 Location journée</option>' +
                     '<option value="FORFAIT">💵 Forfait</option>' +
                 '</select>' +
                 '<div id="courseForm"></div>' +
-                '<button onclick="enregistrerCourse()" style="width:100%;padding:12px;background:#1A5276;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;margin-top:6px;">✅ Enregistrer</button>' +
+                '<button onclick="enregistrerCourse()" style="width:100%;padding:12px;background:#DAA520;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;margin-top:6px;font-size:13px;">✅ Enregistrer</button>' +
             '</div>' +
             
-            // DÉPENSES RAPIDES
-            '<div class="card" style="background:white;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">' +
-                '<h3 style="font-size:13px;margin-bottom:8px;">💸 Dépenses rapides</h3>' +
-                '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
-                    '<button onclick="addDepense(\'Carburant\')" style="padding:8px 12px;background:#FEE2E2;border:none;border-radius:20px;color:#991B1B;font-size:11px;cursor:pointer;">⛽ Carburant</button>' +
-                    '<button onclick="addDepense(\'Pneu\')" style="padding:8px 12px;background:#FEE2E2;border:none;border-radius:20px;color:#991B1B;font-size:11px;cursor:pointer;">🛞 Pneu</button>' +
-                    '<button onclick="addDepense(\'Réparation\')" style="padding:8px 12px;background:#FEE2E2;border:none;border-radius:20px;color:#991B1B;font-size:11px;cursor:pointer;">🔨 Réparation</button>' +
+            // DÉPENSES
+            '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:8px;">' +
+                '<h3 style="font-size:13px;color:#DAA520;margin-bottom:6px;">💸 Dépenses rapides</h3>' +
+                '<div style="display:flex;gap:4px;flex-wrap:wrap;">' +
+                    '<button onclick="addDepense(\'Carburant\')" style="padding:6px 10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:20px;color:#F87171;font-size:10px;cursor:pointer;">⛽ Carburant</button>' +
+                    '<button onclick="addDepense(\'Pneu\')" style="padding:6px 10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:20px;color:#F87171;font-size:10px;cursor:pointer;">🛞 Pneu</button>' +
+                    '<button onclick="addDepense(\'Réparation\')" style="padding:6px 10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:20px;color:#F87171;font-size:10px;cursor:pointer;">🔨 Réparation</button>' +
                 '</div>' +
             '</div>' +
             
             // SEMAINE
-            '<div class="card" style="background:white;border-radius:12px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">' +
-                '<h3 style="font-size:13px;margin-bottom:10px;">📆 Cette semaine</h3>' +
-                '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;">' +
-                    '<div><div style="font-size:16px;font-weight:800;" id="statSemCourses">0</div><div style="font-size:10px;color:#6C757D;">Courses</div></div>' +
-                    '<div><div style="font-size:16px;font-weight:800;" id="statSemCA">0 Ar</div><div style="font-size:10px;color:#6C757D;">CA</div></div>' +
-                    '<div><div style="font-size:16px;font-weight:800;" id="statSemCommission">0 Ar</div><div style="font-size:10px;color:#6C757D;">Comm.</div></div>' +
-                    '<div><div style="font-size:16px;font-weight:800;" id="statSemGain">0 Ar</div><div style="font-size:10px;color:#6C757D;">Gain</div></div>' +
+            '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:60px;">' +
+                '<h3 style="font-size:13px;color:#DAA520;margin-bottom:10px;">📆 Cette semaine</h3>' +
+                '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;">' +
+                    '<div><div style="font-size:16px;font-weight:800;color:#fff;" id="statSemCourses">0</div><div style="font-size:9px;color:#94A3B8;">Courses</div></div>' +
+                    '<div><div style="font-size:16px;font-weight:800;" id="statSemCA">0 Ar</div><div style="font-size:9px;color:#94A3B8;">CA</div></div>' +
+                    '<div><div style="font-size:16px;font-weight:800;" id="statSemCommission">0 Ar</div><div style="font-size:9px;color:#94A3B8;">Comm.</div></div>' +
+                    '<div><div style="font-size:16px;font-weight:800;" id="statSemGain">0 Ar</div><div style="font-size:9px;color:#94A3B8;">Gain</div></div>' +
                 '</div>' +
             '</div>' +
         '</div>';
@@ -81,6 +87,7 @@ function init_home() {
     updateCourseForm();
     loadDriverStats();
     setInterval(loadDriverStats, 30000);
+    updateStatusBar();
 }
 
 var currentStatus = 'HORS_SERVICE';
@@ -88,30 +95,48 @@ var kmDepart = localStorage.getItem('kmDepart') || '';
 
 function updateTime() {
     var now = new Date();
-    var timeEl = document.getElementById('currentTime');
-    var dateEl = document.getElementById('currentDate');
-    if (timeEl) timeEl.textContent = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    if (dateEl) dateEl.textContent = now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+    var onlineEl = document.getElementById('onlineStatus');
+    if (onlineEl) onlineEl.textContent = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function updateStatusBar() {
+    var badge = document.getElementById('statusBadge');
+    var statusInfo = {
+        EN_SERVICE: { color: '#22C55E', bg: 'rgba(34,197,94,0.2)', label: 'En service' },
+        EN_PAUSE: { color: '#EAB308', bg: 'rgba(234,179,8,0.2)', label: 'En pause' },
+        HORS_SERVICE: { color: '#EF4444', bg: 'rgba(239,68,68,0.2)', label: 'Hors service' }
+    };
+    var s = statusInfo[currentStatus] || statusInfo.HORS_SERVICE;
+    if (badge) {
+        badge.textContent = s.label;
+        badge.style.background = s.bg;
+        badge.style.color = s.color;
+    }
+    var kmDiv = document.getElementById('kmDepartDiv');
+    if (kmDiv) {
+        if (currentStatus === 'EN_SERVICE' && kmDepart) {
+            kmDiv.style.display = 'block';
+            kmDiv.innerHTML = '🏍️ KM départ: <strong>' + kmDepart + '</strong>';
+        } else {
+            kmDiv.style.display = 'none';
+        }
+    }
 }
 
 function updateCourseForm() {
     var type = document.getElementById('typeCourse').value;
     var form = document.getElementById('courseForm');
     if (type === 'NORMALE') {
-        form.innerHTML = '<div style="display:flex;gap:6px;">' +
-            '<input type="number" id="kmDepart" placeholder="Km départ" step="0.1" style="flex:1;padding:10px;border:1px solid #E9ECEF;border-radius:8px;">' +
-            '<input type="number" id="kmArrivee" placeholder="Km arrivée" step="0.1" style="flex:1;padding:10px;border:1px solid #E9ECEF;border-radius:8px;">' +
-            '</div><div id="distanceCalc" style="text-align:center;font-size:12px;margin-top:4px;color:#6C757D;"></div>';
-    } else if (type === 'ADY_VAROTRA' || type === 'FORFAIT') {
-        form.innerHTML = '<input type="number" id="montant" placeholder="Montant (Ar)" style="width:100%;padding:10px;border:1px solid #E9ECEF;border-radius:8px;">';
-    } else if (type === 'LOCATION_JOURNALIERE') {
-        form.innerHTML = '<div style="text-align:center;padding:10px;background:#F1F5F9;border-radius:8px;font-size:18px;font-weight:700;color:#27AE60;">15 000 Ar</div>';
-    }
-    
-    // Calcul distance en temps réel
-    if (type === 'NORMALE') {
+        form.innerHTML = '<div style="display:flex;gap:4px;">' +
+            '<input type="number" id="kmDepart" placeholder="Km départ" step="0.1" style="flex:1;padding:10px;background:#0F172A;border:1px solid #334155;border-radius:8px;color:#fff;font-size:12px;">' +
+            '<input type="number" id="kmArrivee" placeholder="Km arrivée" step="0.1" style="flex:1;padding:10px;background:#0F172A;border:1px solid #334155;border-radius:8px;color:#fff;font-size:12px;">' +
+            '</div><div id="distanceCalc" style="text-align:center;font-size:11px;margin-top:4px;color:#94A3B8;"></div>';
         document.getElementById('kmDepart').addEventListener('input', calcDistance);
         document.getElementById('kmArrivee').addEventListener('input', calcDistance);
+    } else if (type === 'ADY_VAROTRA' || type === 'FORFAIT') {
+        form.innerHTML = '<input type="number" id="montant" placeholder="Montant (Ar)" style="width:100%;padding:10px;background:#0F172A;border:1px solid #334155;border-radius:8px;color:#fff;font-size:12px;">';
+    } else if (type === 'LOCATION_JOURNALIERE') {
+        form.innerHTML = '<div style="text-align:center;padding:10px;background:rgba(34,197,94,0.1);border-radius:8px;font-size:18px;font-weight:700;color:#22C55E;">15 000 Ar</div>';
     }
 }
 
@@ -121,8 +146,7 @@ function calcDistance() {
     var dist = a - d;
     var calcEl = document.getElementById('distanceCalc');
     if (calcEl && dist > 0) {
-        var prix = 2000 + dist * 500;
-        calcEl.innerHTML = '📏 ' + dist.toFixed(1) + ' km · 💰 ~' + prix.toLocaleString() + ' Ar';
+        calcEl.innerHTML = '📏 ' + dist.toFixed(1) + ' km · 💰 ~' + (2000 + dist * 500).toLocaleString() + ' Ar';
     }
 }
 
@@ -131,13 +155,11 @@ async function loadDriverStats() {
         var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
         var courses = await apiGet('/courses');
         var myCourses = courses.filter(function(c) { return c.driverId === user.driverId; });
-        
         var today = new Date().toISOString().split('T')[0];
         var todayCourses = myCourses.filter(function(c) { return c.date && c.date.startsWith(today); });
         var weekCourses = myCourses.filter(function(c) {
             var d = new Date(c.date);
-            var now = new Date();
-            var weekAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+            var weekAgo = new Date(Date.now() - 7*24*60*60*1000);
             return d >= weekAgo;
         });
         
@@ -150,24 +172,11 @@ async function loadDriverStats() {
         document.getElementById('statCA').textContent = caToday.toLocaleString() + ' Ar';
         document.getElementById('statCommission').textContent = commToday.toLocaleString() + ' Ar';
         document.getElementById('statGain').textContent = (caToday - commToday).toLocaleString() + ' Ar';
-        
         document.getElementById('statSemCourses').textContent = weekCourses.length;
         document.getElementById('statSemCA').textContent = caWeek.toLocaleString() + ' Ar';
         document.getElementById('statSemCommission').textContent = commWeek.toLocaleString() + ' Ar';
         document.getElementById('statSemGain').textContent = (caWeek - commWeek).toLocaleString() + ' Ar';
-        
-        // Statut
-        updateStatusBar();
-    } catch(e) { console.error(e); }
-}
-
-function updateStatusBar() {
-    var bar = document.getElementById('statusBar');
-    var colors = { EN_SERVICE: '#27AE60', EN_PAUSE: '#F39C12', HORS_SERVICE: '#6C757D' };
-    var labels = { EN_SERVICE: '🟢 En service', EN_PAUSE: '🟠 En pause', HORS_SERVICE: '⚫ Hors service' };
-    bar.innerHTML = '<span>' + (labels[currentStatus] || labels.HORS_SERVICE) + '</span>' +
-        '<span style="font-size:10px;">' + (kmDepart ? '🏍️ Km départ: ' + kmDepart : '') + '</span>';
-    bar.style.background = colors[currentStatus] || colors.HORS_SERVICE;
+    } catch(e) {}
 }
 
 function pointer(type) {
@@ -178,20 +187,15 @@ function pointer(type) {
         kmDepart = km;
         localStorage.setItem('kmDepart', km);
         currentStatus = 'EN_SERVICE';
-        updateStatusBar();
-        document.getElementById('kmDepartDiv').style.display = 'block';
-        document.getElementById('kmDepartDiv').innerHTML = '🏍️ KM départ: <strong>' + kmDepart + '</strong>';
     } else if (type === 'PAUSE') {
         currentStatus = currentStatus === 'EN_PAUSE' ? 'EN_SERVICE' : 'EN_PAUSE';
-        updateStatusBar();
     } else if (type === 'FIN') {
-        if (!confirm('Terminer le service ?')) return;
+        if (!confirm('Terminer le service ? Distance parcourue depuis ' + kmDepart + ' km ?')) return;
         currentStatus = 'HORS_SERVICE';
         kmDepart = '';
         localStorage.removeItem('kmDepart');
-        updateStatusBar();
-        document.getElementById('kmDepartDiv').style.display = 'none';
     }
+    updateStatusBar();
 }
 
 async function enregistrerCourse() {
@@ -216,6 +220,8 @@ async function enregistrerCourse() {
     try {
         await apiPost('/courses', data);
         alert('✅ Course enregistrée !');
+        document.getElementById('kmDepart') && (document.getElementById('kmDepart').value = '');
+        document.getElementById('kmArrivee') && (document.getElementById('kmArrivee').value = '');
         loadDriverStats();
     } catch(e) { alert('❌ Erreur'); }
 }
@@ -223,5 +229,10 @@ async function enregistrerCourse() {
 function addDepense(type) {
     var montant = prompt(type + ' (Ar):');
     if (!montant || parseFloat(montant) <= 0) return;
-    alert('✅ ' + type + ' déclaré: ' + montant + ' Ar (simulation)');
+    alert('✅ ' + type + ' déclaré: ' + montant + ' Ar');
+}
+
+function logout() {
+    localStorage.clear();
+    window.location.href = 'https://dago-mobility.pages.dev';
 }
