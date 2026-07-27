@@ -24,8 +24,9 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     } catch (err) { msg.className = 'message error'; msg.textContent = '❌ Erreur réseau'; }
 });
 
-function togglePassword(id, icon) {
-    var inp = document.getElementById(id);
+function togglePassword() {
+    var inp = document.getElementById('password');
+    var icon = document.querySelector('.toggle-password');
     if (inp.type === 'password') { inp.type = 'text'; icon.classList.replace('fa-eye', 'fa-eye-slash'); }
     else { inp.type = 'password'; icon.classList.replace('fa-eye-slash', 'fa-eye'); }
 }
