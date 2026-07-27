@@ -495,6 +495,34 @@ app.get("/api/versements", authMiddleware, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ===== SOCIETES =====
+app.get("/api/societes", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const societes = await prisma.societe.findMany({ include: { vehicles: true, drivers: true } });
+        res.json(societes);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.post("/api/societes", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { name, activite, adresse, nif, stat, email, phone, organizationId } = req.body;
+        const societe = await prisma.societe.create({ data: { name, activite, adresse, nif, stat, email, phone, organizationId } });
+        res.status(201).json(societe);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.put("/api/societes/:id", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { name, activite, adresse, nif, stat, email, phone, status } = req.body;
+        const societe = await prisma.societe.update({ where: { id: req.params.id }, data: { name, activite, adresse, nif, stat, email, phone, status } });
+        res.json(societe);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ===== DÉMARRAGE =====
 app.listen(port, () => {
   console.log(`<i class="fas fa-check-circle"></i> Dagoo's API lancée sur http://localhost:${port}`);

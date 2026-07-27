@@ -6,55 +6,50 @@ function init_societes() {
             '<button class="btn btn-primary" onclick="showAddSociete()"><i class="fas fa-plus"></i> Nouvelle société</button>' +
         '</div>' +
         '<div class="stats-grid" id="societeStats" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px;"></div>' +
-        '<div class="card"><table><thead><tr><th>Nom</th><th>Activité</th><th>Véhicules</th><th>Chauffeurs/Livreurs</th><th>Contrats</th><th>CA</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="societesTable"><tr><td colspan="8">Chargement...</td></tr></tbody></table></div>';
+        '<div class="card"><table><thead><tr><th>Nom</th><th>Activité</th><th>Véhicules</th><th>Chauffeurs</th><th>NIF</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="societesTable"><tr><td colspan="7">Chargement...</td></tr></tbody></table></div>';
     loadSocietes();
 }
 
 async function loadSocietes() {
+    var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
+    var orgs = await apiGet('/organizations');
+    var org = orgs.find(function(o) { return o.email === user.email; });
+    
     try {
-        var orgs = await apiGet('/organizations');
-        var vehicles = await apiGet('/vehicles');
-        var drivers = await apiGet('/drivers');
-        var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
-        var org = orgs.find(function(o) { return o.email === user.email; });
+        var societes = await apiGet('/societes');
+        var mySocietes = societes.filter(function(s) { return s.organizationId === org.id; });
         
-        var myVehicles = org ? vehicles.filter(function(v) { return v.organizationId === org.id; }) : [];
-        var myDrivers = org ? drivers.filter(function(d) { return d.organization && d.organization.email === user.email; }) : [];
-        
-        // Pour l'instant, la coopérative elle-même est la "société principale"
-        var societes = org ? [{
-            id: org.id,
-            name: org.name,
-            activite: 'Transport & Logistique',
-            vehicules: myVehicles.length,
-            chauffeurs: myDrivers.length,
-            contrats: 0,
-            ca: 0,
-            status: org.status
-        }] : [];
+        var totalVehicules = 0, totalChauffeurs = 0, actives = 0;
+        mySocietes.forEach(function(s) {
+            totalVehicules += (s.vehicles || []).length;
+            totalChauffeurs += (s.drivers || []).length;
+            if (s.status === 'active') actives++;
+        });
         
         document.getElementById('societeStats').innerHTML = 
-            '<div class="stat-card"><div class="stat-icon green"><i class="fas fa-building"></i></div><div class="stat-info"><div class="stat-number">' + societes.length + '</div><div class="stat-label">Sociétés</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon blue"><i class="fas fa-motorcycle"></i></div><div class="stat-info"><div class="stat-number">' + myVehicles.length + '</div><div class="stat-label">Véhicules</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-users"></i></div><div class="stat-info"><div class="stat-number">' + myDrivers.length + '</div><div class="stat-label">Chauffeurs/Livreurs</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon red"><i class="fas fa-file-contract"></i></div><div class="stat-info"><div class="stat-number">0</div><div class="stat-label">Contrats</div></div></div>';
+            '<div class="stat-card"><div class="stat-icon green"><i class="fas fa-building"></i></div><div class="stat-info"><div class="stat-number">' + mySocietes.length + '</div><div class="stat-label">Sociétés</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon blue"><i class="fas fa-motorcycle"></i></div><div class="stat-info"><div class="stat-number">' + totalVehicules + '</div><div class="stat-label">Véhicules</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-users"></i></div><div class="stat-info"><div class="stat-number">' + totalChauffeurs + '</div><div class="stat-label">Chauffeurs</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon red"><i class="fas fa-check-circle"></i></div><div class="stat-info"><div class="stat-number">' + actives + '</div><div class="stat-label">Actives</div></div></div>';
         
-        document.getElementById('societesTable').innerHTML = societes.length ? societes.map(function(s) {
-            var statusBadge = s.status === 'active' ? 'badge-success' : 'badge-warning';
+        document.getElementById('societesTable').innerHTML = mySocietes.length ? mySocietes.map(function(s) {
+            var nbV = (s.vehicles || []).length;
+            var nbD = (s.drivers || []).length;
+            var statusBadge = s.status === 'active' ? 'badge-success' : s.status === 'inactive' ? 'badge-danger' : 'badge-warning';
             return '<tr><td><strong>' + s.name + '</strong></td>' +
-                '<td>' + s.activite + '</td>' +
-                '<td><span class="badge badge-info">' + s.vehicules + '</span></td>' +
-                '<td><span class="badge badge-info">' + s.chauffeurs + '</span></td>' +
-                '<td><span class="badge badge-info">' + s.contrats + '</span></td>' +
-                '<td>' + s.ca.toLocaleString() + ' Ar</td>' +
+                '<td>' + (s.activite || 'Transport') + '</td>' +
+                '<td><span class="badge badge-info">' + nbV + '</span></td>' +
+                '<td><span class="badge badge-info">' + nbD + '</span></td>' +
+                '<td>' + (s.nif || 'N/A') + '</td>' +
                 '<td><span class="badge ' + statusBadge + '">' + s.status + '</span></td>' +
                 '<td class="action-btns">' +
                     '<button class="btn-sm btn-view" onclick="viewSociete(\'' + s.id + '\')"><i class="fas fa-eye"></i></button>' +
                     '<button class="btn-sm btn-edit" onclick="editSociete(\'' + s.id + '\')"><i class="fas fa-edit"></i></button>' +
+                    '<button class="btn-sm ' + (s.status === 'active' ? 'btn-suspend' : 'btn-success') + '" onclick="toggleSociete(\'' + s.id + '\',\'' + s.status + '\')"><i class="fas fa-' + (s.status === 'active' ? 'ban' : 'check') + '"></i></button>' +
                 '</td></tr>';
-        }).join('') : '<tr><td colspan="8">Aucune société</td></tr>';
+        }).join('') : '<tr><td colspan="7">Aucune société. Créez votre première société.</td></tr>';
         
-        document.getElementById('societeCount').textContent = societes.length;
+        document.getElementById('societeCount').textContent = mySocietes.length;
     } catch(e) { console.error(e); }
 }
 
@@ -64,13 +59,65 @@ function showAddSociete() {
     h += '<div class="form-group"><label>Adresse</label><input id="addAdresse"></div>';
     h += '<div class="form-group"><label>NIF</label><input id="addNif"></div>';
     h += '<div class="form-group"><label>STAT</label><input id="addStat"></div>';
+    h += '<div class="form-group"><label>Email</label><input id="addEmail"></div>';
+    h += '<div class="form-group"><label>Téléphone</label><input id="addPhone"></div>';
     showModal('Nouvelle société', h, function() {
         var name = document.getElementById('addSocieteName').value;
         if (!name) return alert('Nom requis');
-        alert('Société créée ! (API à implémenter)');
-        closeModal(); loadSocietes();
+        apiGet('/organizations').then(function(orgs) {
+            var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
+            var org = orgs.find(function(o) { return o.email === user.email; });
+            apiPost('/societes', {
+                name: name,
+                activite: document.getElementById('addActivite').value,
+                adresse: document.getElementById('addAdresse').value,
+                nif: document.getElementById('addNif').value,
+                stat: document.getElementById('addStat').value,
+                email: document.getElementById('addEmail').value,
+                phone: document.getElementById('addPhone').value,
+                organizationId: org.id
+            }).then(function() { closeModal(); loadSocietes(); });
+        });
     });
 }
 
-function viewSociete(id) { alert('Détail société (à implémenter)'); }
-function editSociete(id) { alert('Modifier société (à implémenter)'); }
+function viewSociete(id) {
+    apiGet('/societes').then(function(societes) {
+        var s = societes.find(function(x) { return x.id === id; });
+        if (!s) return;
+        var info = '<p><strong>Nom:</strong> ' + s.name + '</p>';
+        info += '<p><strong>Activité:</strong> ' + (s.activite || 'N/A') + '</p>';
+        info += '<p><strong>NIF:</strong> ' + (s.nif || 'N/A') + '</p>';
+        info += '<p><strong>STAT:</strong> ' + (s.stat || 'N/A') + '</p>';
+        info += '<p><strong>Véhicules:</strong> ' + (s.vehicles || []).length + '</p>';
+        info += '<p><strong>Chauffeurs:</strong> ' + (s.drivers || []).length + '</p>';
+        info += '<p><strong>Statut:</strong> ' + s.status + '</p>';
+        showModal(s.name, info);
+    });
+}
+
+function editSociete(id) {
+    apiGet('/societes').then(function(societes) {
+        var s = societes.find(function(x) { return x.id === id; });
+        if (!s) return;
+        var h = '<div class="form-group"><label>Nom</label><input id="editName" value="' + s.name + '"></div>';
+        h += '<div class="form-group"><label>Activité</label><select id="editActivite"><option ' + (s.activite === 'Transport urbain' ? 'selected' : '') + '>Transport urbain</option><option ' + (s.activite === 'Transport régional' ? 'selected' : '') + '>Transport régional</option><option ' + (s.activite === 'Livraison colis' ? 'selected' : '') + '>Livraison colis</option><option ' + (s.activite === 'Livraison plats' ? 'selected' : '') + '>Livraison plats</option><option ' + (s.activite === 'Logistique' ? 'selected' : '') + '>Logistique</option><option ' + (s.activite === 'Mixte' ? 'selected' : '') + '>Mixte</option></select></div>';
+        h += '<div class="form-group"><label>NIF</label><input id="editNif" value="' + (s.nif || '') + '"></div>';
+        h += '<div class="form-group"><label>Statut</label><select id="editStatus"><option ' + (s.status === 'active' ? 'selected' : '') + '>active</option><option ' + (s.status === 'inactive' ? 'selected' : '') + '>inactive</option></select></div>';
+        showModal('Modifier ' + s.name, h, function() {
+            apiPut('/societes/' + id, {
+                name: document.getElementById('editName').value,
+                activite: document.getElementById('editActivite').value,
+                nif: document.getElementById('editNif').value,
+                status: document.getElementById('editStatus').value
+            }).then(function() { closeModal(); loadSocietes(); });
+        });
+    });
+}
+
+function toggleSociete(id, status) {
+    var ns = status === 'active' ? 'inactive' : 'active';
+    if (confirm('Changer le statut en ' + ns + ' ?')) {
+        apiPut('/societes/' + id, { status: ns }).then(function() { loadSocietes(); });
+    }
+}

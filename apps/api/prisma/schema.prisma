@@ -35,6 +35,7 @@ model Organization {
   drivers     Driver[]
   messages     Message[]
   proprietaires Proprietaire[]
+  societes      Societe[]
   vehicles     Vehicle[]
 }
 
@@ -49,6 +50,8 @@ model Driver {
   license        String?
   vehicleId       String?
   proprietaireId  String?
+  societeId       String?
+  societe         Societe?       @relation(fields: [societeId], references: [id])
   proprietaire    Proprietaire? @relation(fields: [proprietaireId], references: [id])
   status         String       @default("active")
   createdAt      DateTime     @default(now())
@@ -71,6 +74,8 @@ model Message {
 
 model Vehicle {
   organizationId  String?
+  societeId       String?
+  societe         Societe?       @relation(fields: [societeId], references: [id])
   organization    Organization? @relation(fields: [organizationId], references: [id])
   proprietaireId   String?
   proprietaire     Proprietaire? @relation(fields: [proprietaireId], references: [id])
@@ -173,3 +178,22 @@ model Course {
   date        DateTime @default(now())
   createdAt   DateTime @default(now())
 }
+
+model Societe {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  activite       String       @default("Transport")
+  adresse        String?
+  nif            String?
+  stat           String?
+  email          String?
+  phone          String?
+  status         String       @default("active")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  vehicles       Vehicle[]
+  drivers        Driver[]
+}
+
