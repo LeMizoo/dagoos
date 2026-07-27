@@ -10,63 +10,32 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #27AE60 0%, #1E8449 50%, #145A32 100%);
-            min-height: 100vh;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .login-container {
-            background: white; border-radius: 16px; padding: 48px 40px;
-            width: 100%; max-width: 440px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #27AE60 0%, #1E8449 50%, #145A32 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-container { background: white; border-radius: 20px; padding: 48px 40px; width: 100%; max-width: 440px; box-shadow: 0 25px 80px rgba(0,0,0,0.4); }
         .login-header { text-align: center; margin-bottom: 36px; }
-        .login-logo {
-            width: 64px; height: 64px; background: #F1C40F; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 16px; font-size: 32px;
-        }
+        .login-logo { width: 72px; height: 72px; margin: 0 auto 16px; background: linear-gradient(135deg, #F1C40F, #F39C12); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; }
         .login-header h1 { font-size: 24px; color: #1A1A2E; margin-bottom: 4px; }
         .login-header p { color: #6C757D; font-size: 14px; }
-        .badge {
-            display: inline-block; background: #27AE60; color: white;
-            padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 600; margin-top: 8px;
-        }
+        .badge { display: inline-block; background: #27AE60; color: white; padding: 6px 14px; border-radius: 50px; font-size: 12px; font-weight: 600; margin-top: 10px; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-size: 14px; font-weight: 500; color: #1A1A2E; margin-bottom: 6px; }
-        .form-group .input-icon { position: relative; }
-        .form-group .input-icon i {
-            position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #6C757D;
-        }
-        .form-group input {
-            width: 100%; padding: 14px 14px 14px 42px; border: 2px solid #E9ECEF;
-            border-radius: 8px; font-size: 15px; font-family: 'Inter', sans-serif; transition: border-color 0.3s;
-        }
-        .form-group input:focus { outline: none; border-color: #27AE60; }
-        .btn-login {
-            width: 100%; padding: 14px; background: #27AE60; color: white;
-            border: none; border-radius: 8px; font-size: 16px; font-weight: 600;
-            cursor: pointer; transition: background 0.3s; font-family: 'Inter', sans-serif;
-        }
-        .btn-login:hover { background: #1E8449; }
-        .btn-login:disabled { background: #6C757D; cursor: not-allowed; }
-        .message {
-            text-align: center; margin-top: 16px; padding: 10px; border-radius: 8px;
-            font-size: 14px; display: none;
-        }
+        .input-wrapper { position: relative; }
+        .input-wrapper i.left-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #6C757D; }
+        .input-wrapper i.toggle-password { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #6C757D; z-index: 2; }
+        .input-wrapper i.toggle-password:hover { color: #27AE60; }
+        .input-wrapper input { width: 100%; padding: 14px 40px 14px 44px; border: 2px solid #E9ECEF; border-radius: 10px; font-size: 15px; font-family: 'Inter', sans-serif; transition: 0.3s; }
+        .input-wrapper input:focus { outline: none; border-color: #27AE60; box-shadow: 0 0 0 3px rgba(39,174,96,0.1); }
+        .btn-login { width: 100%; padding: 14px; background: #27AE60; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; font-family: 'Inter', sans-serif; }
+        .btn-login:hover { background: #1E8449; transform: translateY(-1px); }
+        .btn-login:disabled { background: #6C757D; cursor: not-allowed; transform: none; }
+        .message { text-align: center; margin-top: 14px; padding: 10px; border-radius: 8px; font-size: 14px; display: none; }
         .message.error { background: #FDE8E8; color: #C0392B; display: block; }
         .message.success { background: #D5F5E3; color: #27AE60; display: block; }
         .message.info { background: #D6EAF8; color: #1A5276; display: block; }
-        .links { text-align: center; margin-top: 24px; }
+        .links { text-align: center; margin-top: 20px; }
         .links a { color: #6C757D; text-decoration: none; font-size: 14px; }
         .links a:hover { color: #27AE60; }
         .links span { color: #6C757D; margin: 0 8px; }
-        .loader {
-            display: none; width: 20px; height: 20px; border: 2px solid white;
-            border-top: 2px solid transparent; border-radius: 50%;
-            animation: spin 0.8s linear infinite; margin: 0 auto;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -77,29 +46,25 @@
             <p>Espace Coopérative</p>
             <span class="badge">Transport & Logistique</span>
         </div>
-        
         <form id="loginForm">
             <div class="form-group">
                 <label for="email">Email</label>
-                <div class="input-icon">
-                    <i class="fas fa-envelope"></i>
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope left-icon"></i>
                     <input type="email" id="email" placeholder="votre@email.com" required>
                 </div>
             </div>
             <div class="form-group">
                 <label for="password">Mot de passe</label>
-                <div class="input-icon">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" id="password" placeholder="Votre mot de passe" required><i class="fas fa-eye toggle-password" id="togglePassword" onclick="togglePassword("password","togglePassword")" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;color:#6C757D;z-index:2;"></i>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock left-icon"></i>
+                    <input type="password" id="password" placeholder="Votre mot de passe" required>
+                    <i class="fas fa-eye toggle-password" id="togglePassword" onclick="togglePassword('password','togglePassword')"></i>
                 </div>
             </div>
             <div id="message" class="message"></div>
-            <button type="submit" class="btn-login" id="loginBtn">
-                <span id="btnText"><i class="fas fa-sign-in-alt"></i> Se connecter</span>
-                <span class="loader" id="loader"></span>
-            </button>
+            <button type="submit" class="btn-login"><i class="fas fa-sign-in-alt"></i> Se connecter</button>
         </form>
-        
         <div class="links">
             <a href="register.html">Créer un compte</a>
             <span>|</span>
@@ -109,5 +74,3 @@
     <script src="js/login.js"></script>
 </body>
 </html>
- 
- 
