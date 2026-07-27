@@ -12,6 +12,7 @@ document.getElementById('sidebarUser').textContent = '🏢 ' + (user.name || use
 apiGet("/organizations").then(function(orgs) { var org = orgs.find(function(o) { return o.email === user.email; }); if (org) { document.getElementById("sidebarCoopName").innerHTML = org.name; if (org.logo) { document.getElementById("sidebarLogo").src = org.logo; } } });
 
 function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+function toggleSidebar() { document.getElementById("sidebar").classList.toggle("open"); document.getElementById("sidebarOverlay").classList.toggle("show"); }
 
 function loadPage(page) {
     var main = document.getElementById('mainContent');
