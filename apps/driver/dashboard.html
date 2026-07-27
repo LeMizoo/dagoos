@@ -91,3 +91,25 @@
 .bottom-nav button i { font-size: 18px; }
 .bottom-nav button.main i { font-size: 24px; }
 </style>
+<style>
+@media (max-width: 380px) {
+    .bottom-nav button { font-size: 8px; min-width: 45px; padding: 4px 6px; }
+    .bottom-nav button i { font-size: 14px !important; }
+    .bottom-nav button.main .icon-circle { width: 40px; height: 40px; font-size: 18px; }
+    .bottom-nav button.main { margin-top: -16px; }
+    .bottom-nav button.main i { font-size: 20px !important; }
+    h1 { font-size: 16px !important; }
+    .stat-info .stat-number { font-size: 16px !important; }
+    .card { padding: 10px !important; }
+    select, input, button { font-size: 11px !important; }
+}
+@media (min-width: 381px) and (max-width: 480px) {
+    .bottom-nav button { font-size: 9px; min-width: 50px; }
+    .bottom-nav button i { font-size: 16px !important; }
+    .bottom-nav button.main .icon-circle { width: 46px; height: 46px; }
+    h1 { font-size: 18px !important; }
+}
+@media (min-width: 481px) {
+    .bottom-nav button { font-size: 11px; }
+}
+</style>
