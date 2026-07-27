@@ -177,6 +177,27 @@ async function seed() {
     }
   }
 
+  // === CRÉER LANDING CONTENT POUR CHAQUE ORGANISATION ===
+  const allOrgs = await prisma.organization.findMany();
+  for (const org of allOrgs) {
+    const existingContent = await prisma.landingContent.findFirst({ where: { section: "hero-" + org.slug } });
+    if (!existingContent && (org.plan === "Standard" || org.plan === "Premium")) {
+      const sections = ["hero", "apps", "features", "about", "cta", "footer"];
+      const defaults = {
+        hero: { title: org.name, subtitle: "Service de transport à Madagascar", body: "Bienvenue sur la page de " + org.name },
+        apps: { title: "Nos services", subtitle: "Découvrez ce que nous proposons" },
+        features: { title: "Pourquoi nous choisir", subtitle: "Qualité et confiance" },
+        about: { title: "À propos de " + org.name, subtitle: "Notre histoire" },
+        cta: { title: "Contactez-nous", subtitle: "Une question ?" },
+        footer: { title: org.name, subtitle: "© 2026 - Tous droits réservés" }
+      };
+      for (const sec of sections) {
+        await prisma.landingContent.create({ data: { section: sec + "-" + org.slug, title: defaults[sec].title, subtitle: defaults[sec].subtitle, body: defaults[sec].body || "", active: true } });
+      }
+      console.log("✅ Landing page créée pour:", org.name);
+    }
+  }
+
   console.log('✅ Seed terminé');
 }
 

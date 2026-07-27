@@ -10,48 +10,53 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #1A5276, #154360); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .card { background: white; border-radius: 20px; padding: 48px; max-width: 500px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-        .card img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 16px; background: #F1F5F9; }
-        .card h1 { font-size: 24px; color: #1A1A2E; margin-bottom: 4px; }
-        .card .badge { display: inline-block; background: #1A5276; color: white; padding: 4px 12px; border-radius: 50px; font-size: 12px; margin-bottom: 16px; }
-        .card p { color: #6C757D; line-height: 1.6; margin-bottom: 20px; }
-        .card .info { display: flex; gap: 20px; justify-content: center; margin-bottom: 24px; }
-        .card .info div { text-align: center; }
-        .card .info strong { display: block; font-size: 20px; color: #1A5276; }
-        .card .info span { font-size: 11px; color: #6C757D; }
-        .btn { display: inline-block; padding: 12px 24px; background: #1A5276; color: white; border-radius: 10px; text-decoration: none; font-weight: 600; transition: 0.3s; }
-        .btn:hover { background: #154360; }
-        .footer { margin-top: 20px; font-size: 11px; color: #AAA; }
-        .footer a { color: #1A5276; }
+        body { font-family: 'Inter', sans-serif; }
+        .hero { background: linear-gradient(135deg, #1A5276, #154360); color: white; padding: 80px 20px; text-align: center; }
+        .hero h1 { font-size: 36px; margin-bottom: 10px; }
+        .hero p { font-size: 18px; opacity: 0.9; }
+        .section { padding: 60px 20px; max-width: 900px; margin: 0 auto; }
+        .section h2 { font-size: 28px; color: #1A5276; margin-bottom: 10px; }
+        .section p { color: #6C757D; line-height: 1.6; }
+        .section:nth-child(even) { background: #F8F9FA; }
+        footer { background: #1A1A2E; color: white; text-align: center; padding: 30px; }
+        footer a { color: #F1C40F; }
     </style>
 </head>
 <body>
-    <div class="card" id="app"></div>
+    <div id="app"></div>
     <script>
         var slug = window.location.pathname.replace('/', '').replace('.html', '');
-        if (!slug) { document.getElementById('app').innerHTML = '<h1>Page non trouvee</h1>'; }
+        if (!slug) slug = 'flotte-alasora';
         
-        fetch('https://dagoos-api.onrender.com/api/organizations')
+        fetch('https://dagoos-api.onrender.com/api/landing-content')
             .then(function(r) { return r.json(); })
-            .then(function(orgs) {
-                var org = orgs.find(function(o) { return o.slug === slug; });
-                if (!org) { document.getElementById('app').innerHTML = '<h1><i class="fas fa-truck"></i> Flotte non trouvee</h1><p>Cette page vitrine n existe pas.</p>'; return; }
-                document.title = org.name + ' - Dago Mobility';
-                document.getElementById('app').innerHTML = 
-                    '<img src="' + (org.logo || 'https://dago-mobility.pages.dev/assets/logo/b-trans.png') + '" alt="' + org.name + '">' +
-                    '<h1>' + org.name + '</h1>' +
-                    '<span class="badge"><i class="fas fa-truck"></i> Flotte Dago Mobility</span>' +
-                    '<p>' + (org.description || 'Service de transport a Madagascar.') + '</p>' +
-                    '<div class="info">' +
-                        '<div><strong>' + (org.driversCount || 0) + '</strong><span>Chauffeurs</span></div>' +
-                        '<div><strong>' + (org.plan || 'Freemium') + '</strong><span>Plan</span></div>' +
-                    '</div>' +
-                    '<p style="font-size:13px;">📞 ' + (org.phone || 'Non renseigne') + ' | ✉️ ' + (org.email || '') + '</p>' +
-                    '<a href="https://dago-fleet.pages.dev" class="btn">Se connecter</a>' +
-                    '<div class="footer">Propulse par <a href="https://dago-mobility.pages.dev">Dago Mobility</a></div>';
+            .then(function(data) {
+                var myContent = data.filter(function(c) { return c.section && c.section.endsWith('-' + slug); });
+                var getContent = function(key) {
+                    var found = myContent.find(function(c) { return c.section === key + '-' + slug; });
+                    return found || { title: 'Dago Fleet', subtitle: 'Service de transport' };
+                };
+                var hero = getContent('hero');
+                var apps = getContent('apps');
+                var features = getContent('features');
+                var about = getContent('about');
+                var cta = getContent('cta');
+                var footer = getContent('footer');
+                
+                var html = '';
+                html += '<div class="hero"><h1>' + hero.title + '</h1><p>' + (hero.subtitle || '') + '</p></div>';
+                html += '<div class="section"><h2>' + apps.title + '</h2><p>' + (apps.subtitle || '') + '</p></div>';
+                html += '<div class="section"><h2>' + features.title + '</h2><p>' + (features.subtitle || '') + '</p></div>';
+                html += '<div class="section"><h2>' + about.title + '</h2><p>' + (about.subtitle || '') + '</p></div>';
+                html += '<div class="section"><h2>' + cta.title + '</h2><p>' + (cta.subtitle || '') + '</p></div>';
+                html += '<footer><p>' + (footer.title || '') + '</p><p>' + (footer.subtitle || '') + '</p><a href="https://dago-fleet.pages.dev">Se connecter</a></footer>';
+                
+                document.getElementById('app').innerHTML = html;
+                document.title = hero.title + ' - Dago Fleet';
             })
-            .catch(function() { document.getElementById('app').innerHTML = '<h1>Erreur</h1>'; });
+            .catch(function() {
+                document.getElementById('app').innerHTML = '<div class="hero"><h1>Page non disponible</h1></div>';
+            });
     </script>
 </body>
 </html>
