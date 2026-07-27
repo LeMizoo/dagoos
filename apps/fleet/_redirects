@@ -1,0 +1,10 @@
+/js/*    /js/*    200
+/css/*   /css/*   200
+/pages/* /pages/* 200
+/assets/* /assets/* 200
+/favicon.ico /favicon.ico 200
+/index.html    /index.html    200
+/dashboard.html /dashboard.html 200
+/register.html /register.html 200
+/vitrine.html /vitrine.html 200
+/*    /vitrine.html    200
