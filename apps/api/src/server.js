@@ -551,6 +551,34 @@ app.put("/api/contrats/:id", authMiddleware, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ===== LIVRAISONS =====
+app.get("/api/livraisons", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const livraisons = await prisma.livraison.findMany({ orderBy: { createdAt: "desc" }, take: 100 });
+        res.json(livraisons);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.post("/api/livraisons", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { societeId, driverId, vehicleId, type, description, adresseDepart, adresseArrivee, prix, commission } = req.body;
+        const livraison = await prisma.livraison.create({ data: { societeId, driverId, vehicleId, type, description, adresseDepart, adresseArrivee, prix: parseFloat(prix), commission: parseFloat(commission || 0) } });
+        res.status(201).json(livraison);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.put("/api/livraisons/:id", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { statut, preuve } = req.body;
+        const livraison = await prisma.livraison.update({ where: { id: req.params.id }, data: { statut, preuve } });
+        res.json(livraison);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ===== DÉMARRAGE =====
 app.listen(port, () => {
   console.log(`<i class="fas fa-check-circle"></i> Dagoo's API lancée sur http://localhost:${port}`);

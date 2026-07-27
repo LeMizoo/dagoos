@@ -211,3 +211,20 @@ model Contrat {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model Livraison {
+  id            String   @id @default(cuid())
+  societeId     String
+  driverId      String?
+  vehicleId     String?
+  type          String   @default("colis")
+  description   String?
+  adresseDepart String?
+  adresseArrivee String?
+  prix          Float    @default(0)
+  commission    Float    @default(0)
+  statut        String   @default("en_attente")
+  preuve        String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
