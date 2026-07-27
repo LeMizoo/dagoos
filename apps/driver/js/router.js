@@ -10,9 +10,6 @@ function loadPage(page) {
     script.onload = function() {
         if (typeof window['init_' + page] === 'function') window['init_' + page]();
     };
-    var oldScript = document.querySelector('script[data-page]');
-    if (oldScript) oldScript.remove();
-    script.setAttribute('data-page', page);
     document.body.appendChild(script);
 }
 

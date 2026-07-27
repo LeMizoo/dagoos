@@ -12,90 +12,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #1A1A2E; color: white; min-height: 100vh; }
-        .topbar {
-            background: #2C2C44; padding: 16px 24px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .topbar h1 { font-size: 18px; color: #F1C40F; }
-        .topbar button {
-            background: #E74C3C; color: white; border: none;
-            padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: 'Inter', sans-serif;
-        }
-        .status-bar {
-            background: #F1C40F; color: #1A1A2E; padding: 12px 24px;
-            display: flex; justify-content: space-between; align-items: center; font-weight: 600;
-        }
-        .content { padding: 24px; }
-        .card {
-            background: #2C2C44; border-radius: 12px; padding: 24px; margin-bottom: 16px;
-        }
-        .card h3 { color: #F1C40F; margin-bottom: 12px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
-        .stat-box {
-            background: #2C2C44; border-radius: 12px; padding: 20px; text-align: center;
-        }
-        .stat-box .number { font-size: 28px; font-weight: 800; color: #F1C40F; }
-        .stat-box .label { font-size: 12px; color: #AAA; margin-top: 4px; }
-        .empty-state { text-align: center; padding: 48px; color: #AAA; }
-        .empty-state i { font-size: 48px; color: #F1C40F; margin-bottom: 16px; }
+        body { font-family: 'Inter', sans-serif; background: #F1F5F9; min-height: 100vh; }
+        .stats-grid { display: grid; gap: 10px; }
+        .stat-card { padding: 16px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+        .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 14px; overflow: hidden; }
+        .card-header { padding: 12px 16px; border-bottom: 1px solid #F1F5F9; }
+        .card-header h3 { font-size: 14px; }
     </style>
 </head>
 <body>
-    <div class="topbar">
-        <h1><i class="fas fa-motorcycle"></i> Dagoo's Driver</h1>
-        <div>
-            <span id="userName" style="margin-right: 16px; color: #AAA;"></span>
-            <button onclick="logout()">🚪</button>
-        </div>
-    </div>
-    <div class="status-bar">
-        <span>🟢 En ligne</span>
-        <span id="currentTime"></span>
-    </div>
-    <div class="content">
-        <div class="stats-grid">
-            <div class="stat-box">
-                <div class="number" id="todayTrips">0</div>
-                <div class="label">Courses aujourd'hui</div>
-            </div>
-            <div class="stat-box">
-                <div class="number" id="todayRevenue">0 Ar</div>
-                <div class="label">Revenus du jour</div>
-            </div>
-            <div class="stat-box">
-                <div class="number" id="rating">—</div>
-                <div class="label">Note moyenne</div>
-            </div>
-        </div>
-        
-        <div class="card">
-            <h3><i class="fas fa-map-marker-alt"></i> Courses récentes</h3>
-            <div class="empty-state">
-                <i class="fas fa-inbox"></i>
-                <p>Aucune course pour le moment</p>
-                <p style="font-size:12px;">Les nouvelles courses apparaîtront ici</p>
-            </div>
-        </div>
-    </div>
+    <main id="mainContent"></main>
     <script>
-        const user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
-        if (!localStorage.getItem('dagoos_token') || user.role !== 'DRIVER') {
-            window.location.href = 'index.html';
-        }
-        document.getElementById('userName').textContent = '👋 ' + (user.name || user.email);
-        
-        function updateTime() {
-            const now = new Date();
-            document.getElementById('currentTime').textContent = now.toLocaleTimeString('fr-FR');
-        }
-        updateTime();
-        setInterval(updateTime, 30000);
-        
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'https://dago-mobility.pages.dev';
-        }
+        var API_URL = 'https://dagoos-api.onrender.com/api';
+        var token = localStorage.getItem('dagoos_token');
+        var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
+        if (!token || user.role !== 'DRIVER') { window.location.href = 'index.html'; }
+        function apiGet(e) { return fetch(API_URL+e,{headers:{Authorization:'Bearer '+token}}).then(function(r){return r.json()}); }
     </script>
+    <script src="js/router.js"></script>
 </body>
 </html>
