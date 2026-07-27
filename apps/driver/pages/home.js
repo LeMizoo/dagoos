@@ -88,13 +88,6 @@ function init_home() {
     loadDriverStats();
     setInterval(loadDriverStats, 30000);
     updateStatusBar();
-    // Ajouter la bottom nav après le rendu
-    setTimeout(function() {
-        var nav = document.createElement("div");
-        nav.className = "bottom-nav";
-        nav.innerHTML = '<button onclick="navigate(\'courses\')"><i class="fas fa-history"></i> Courses</button><button onclick="navigate(\'stats\')"><i class="fas fa-chart-bar"></i> Stats</button><button onclick="navigate(\'home\')" class="main active"><span class="icon-circle"><i class="fas fa-home"></i></span> Accueil</button><button onclick="navigate(\'versements\')"><i class="fas fa-coins"></i> Versements</button><button onclick="navigate(\'profil\')"><i class="fas fa-user"></i> Profil</button>';
-        document.body.appendChild(nav);
-    }, 100);
 }
 
 var currentStatus = 'HORS_SERVICE';
@@ -203,13 +196,6 @@ function pointer(type) {
         localStorage.removeItem('kmDepart');
     }
     updateStatusBar();
-    // Ajouter la bottom nav après le rendu
-    setTimeout(function() {
-        var nav = document.createElement("div");
-        nav.className = "bottom-nav";
-        nav.innerHTML = '<button onclick="navigate(\'courses\')"><i class="fas fa-history"></i> Courses</button><button onclick="navigate(\'stats\')"><i class="fas fa-chart-bar"></i> Stats</button><button onclick="navigate(\'home\')" class="main active"><span class="icon-circle"><i class="fas fa-home"></i></span> Accueil</button><button onclick="navigate(\'versements\')"><i class="fas fa-coins"></i> Versements</button><button onclick="navigate(\'profil\')"><i class="fas fa-user"></i> Profil</button>';
-        document.body.appendChild(nav);
-    }, 100);
 }
 
 async function enregistrerCourse() {
@@ -246,8 +232,3 @@ function addDepense(type) {
     alert('✅ ' + type + ' déclaré: ' + montant + ' Ar');
 }
 
-function logout() {
-function navigate(page) { alert("Navigation vers " + page + " (à implémenter)"); }
-    localStorage.clear();
-    window.location.href = 'https://dago-mobility.pages.dev';
-}
