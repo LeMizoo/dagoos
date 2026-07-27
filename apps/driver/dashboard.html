@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Apple PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Dagoo's Driver">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
     <title>Dagoo's Driver - Dashboard</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1A1A2E">
@@ -19,6 +24,13 @@
         .card-header { padding: 12px 16px; border-bottom: 1px solid #F1F5F9; }
         .card-header h3 { font-size: 14px; }
     </style>
+    <script>
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("/sw.js")
+                .then(reg => console.log("SW enregistré !", reg))
+                .catch(err => console.error("Erreur SW:", err));
+        }
+    </script>
 </head>
 <body>
     <main id="mainContent"></main>
