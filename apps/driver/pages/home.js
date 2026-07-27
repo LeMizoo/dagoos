@@ -3,26 +3,9 @@
 // ========================================
 
 function init_home() {
-    var driverId = await getDriverId();
-    console.log("DEBUG USER:", user);
-    console.log("USER KEYS:", Object.keys(user));
+        var user = JSON.parse(localStorage.getItem("dagoos_user") || "{}");
+        var driverId = localStorage.getItem("current_driverId") || user.id;
     var main = document.getElementById('mainContent');
-    currentStatus = localStorage.getItem('driverStatus') || 'HORS_SERVICE';
-    
-    // Récupérer le driverId une fois pour toutes
-    fetch("/api/drivers")
-        .then(r => r.json())
-        .then(drivers => {
-            var driver = drivers.find(d => d.userId === user.id || d.driverCode === user.driverCode);
-        localStorage.setItem("current_driverId", driver.id);
-            if (driver) {
-                currentDriverId = driver.id;
-                localStorage.setItem("driverId", driver.id);
-                console.log("Driver ID chargé:", currentDriverId);
-                loadDriverStats();
-            }
-        })
-        .catch(e => console.error("Erreur chargement driver:", e));
     
     main.innerHTML = 
         // HEADER
@@ -104,14 +87,11 @@ function init_home() {
     setInterval(updateTime, 30000);
     updateCourseForm();
     loadDriverStats();
-        setTimeout(function() { loadDriverStats(); }, 500);
-        setTimeout(function() { loadDriverStats(); }, 1000);
     setInterval(loadDriverStats, 30000);
     updateStatusBar();
 }
 
-var currentStatus = "HORS_SERVICE";
-var currentDriverId = null;
+var currentStatus = 'HORS_SERVICE';
 var kmDepart = localStorage.getItem('kmDepart') || '';
 
 function updateTime() {
@@ -171,34 +151,8 @@ async function loadDriverStats() {
     try {
         var user = JSON.parse(localStorage.getItem("dagoos_user") || "{}");
         var driverId = localStorage.getItem("current_driverId") || user.id;
-    var cached = localStorage.getItem('cached_driverId');
-    if (cached) return cached;
-    
-    try {
-        var drivers = await apiGet('/drivers');
-        var driver = drivers.find(function(d) { 
-        localStorage.setItem("current_driverId", driver.id);
-            return d.userId === user.id || d.driverCode === user.driverCode; 
-        });
-        if (driver) {
-            localStorage.setItem('cached_driverId', driver.id);
-            return driver.id;
-        }
-    } catch(e) {
-        console.error("Erreur getDriverId:", e);
-    }
-    return user.id; // fallback
-}
-
-    try {
-        var driverId = await getDriverId();
-    console.log("DEBUG USER:", user);
-    console.log("USER KEYS:", Object.keys(user));
         var courses = await apiGet('/courses');
-        console.log("DEBUG courses:", courses.slice(0, 2));
         var myCourses = courses.filter(function(c) { return c.driverId === driverId; });
-        console.log("DEBUG: total courses:", courses.length, "myCourses:", myCourses.length, "userId:", user.driverId);
-        console.log("DEBUG: first course sample:", courses[0]);
         var today = new Date().toISOString().split('T')[0];
         var todayCourses = myCourses.filter(function(c) { return c.date && c.date.startsWith(today); });
         var weekCourses = myCourses.filter(function(c) {
@@ -231,16 +185,13 @@ function pointer(type) {
         kmDepart = km;
         localStorage.setItem('kmDepart', km);
         currentStatus = 'EN_SERVICE';
-        localStorage.setItem('driverStatus', 'EN_SERVICE');
     } else if (type === 'PAUSE') {
         currentStatus = currentStatus === 'EN_PAUSE' ? 'EN_SERVICE' : 'EN_PAUSE';
-        localStorage.setItem('driverStatus', currentStatus);
     } else if (type === 'FIN') {
         if (!confirm('Terminer le service ? Distance parcourue depuis ' + kmDepart + ' km ?')) return;
         currentStatus = 'HORS_SERVICE';
         kmDepart = '';
         localStorage.removeItem('kmDepart');
-        localStorage.removeItem('driverStatus');
     }
     updateStatusBar();
 }
@@ -256,14 +207,12 @@ function addDepense(type) {
 async function enregistrerCourse() {
     if (currentStatus !== 'EN_SERVICE') return alert('Vous devez être EN SERVICE');
     try {
-        var driverId = await getDriverId();
-    console.log("DEBUG USER:", user);
-    console.log("USER KEYS:", Object.keys(user));
+        var user = JSON.parse(localStorage.getItem("dagoos_user") || "{}");
+        var driverId = localStorage.getItem("current_driverId") || user.id;
         var drivers = await apiGet('/drivers');
         if (!Array.isArray(drivers)) throw new Error('Impossible de récupérer les chauffeurs');
-        var driver = drivers.find(function(item) { return item.id === user.id || item.userId === user.id || item.driverCode === user.driverCode; });
+        var driver = drivers.find(function(item) { return item.id === user.driverId || item.userId === user.id || item.driverCode === user.driverCode; });
         localStorage.setItem("current_driverId", driver.id);
-        console.log("DEBUG driver trouvé:", driver);
         if (!driver) throw new Error('Fiche chauffeur introuvable');
         if (!driver.vehicleId) throw new Error('Aucun véhicule assigné. Contactez votre gestionnaire.');
         
@@ -296,8 +245,6 @@ async function enregistrerCourse() {
         if (kmA) kmA.value = '';
         if (montant) montant.value = '';
         loadDriverStats();
-        setTimeout(function() { loadDriverStats(); }, 500);
-        setTimeout(function() { loadDriverStats(); }, 1000);
     } catch (error) {
         console.error('Échec création course:', error);
         alert('❌ ' + error.message);
