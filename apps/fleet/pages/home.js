@@ -95,6 +95,11 @@ async function loadHomeData() {
         var myDrivers = drivers.filter(function(d) { return d.organization && d.organization.email === user.email; });
         var myVehicles = vehicles.filter(function(v) { return v.organizationId === (org ? org.id : null); });
         
+        var courses = await apiGet("/courses");
+        var myCourses = courses.filter(function(c) { return myDrivers.find(function(d) { return d.id === c.driverId; }); });
+        var today = new Date().toISOString().split("T")[0];
+        var todayCourses = myCourses.filter(function(c) { return c.date && c.date.startsWith(today); });
+        var todayCA = todayCourses.reduce(function(s, c) { return s + (c.price || 0); }, 0);
         // Barre de statut
         var statusBar = document.getElementById('orgStatusBar');
         if (statusBar && org) {
