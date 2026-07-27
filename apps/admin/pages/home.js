@@ -3,16 +3,16 @@ function init_home() {
     main.innerHTML = 
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">' +
             '<div>' +
-                '<h1 style="font-size:20px;margin-bottom:2px;"><i class="fas fa-tachometer-alt"></i> Tableau de bord</h1>' +
+                '<h1 style="font-size:20px;margin-bottom:2px;">📊 Tableau de bord</h1>' +
                 '<p style="color:var(--text2);font-size:12px;" id="currentDate"></p>' +
                 '<p style="color:#1A5276;font-size:11px;margin-top:2px;" id="greeting"></p>' +
             '</div>' +
             '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' +
                 '<span id="apiStatus" style="font-size:10px;padding:3px 8px;border-radius:50px;"></span>' +
-                '<button class="btn btn-sm btn-primary" onclick="loadPage(\'fleets\')"><i class="fas fa-truck"></i> Flottes</button>' +
-                '<button class="btn btn-sm" style="background:#27AE60;color:white;" onclick="loadPage(\'drivers\')"><i class="fas fa-users"></i> Chauffeurs</button>' +
-                '<button class="btn btn-sm" style="background:#3498DB;color:white;" onclick="loadPage(\'payments\')"><i class="fas fa-coins"></i> Finances</button>' +
-                '<button class="btn btn-sm" style="background:var(--border);" onclick="loadHomeStats()"><i class="fas fa-sync-alt"></i></button>' +
+                '<button class="btn btn-sm btn-primary" onclick="loadPage(\'fleets\')">🚛 Flottes</button>' +
+                '<button class="btn btn-sm" style="background:#27AE60;color:white;" onclick="loadPage(\'drivers\')">👥 Chauffeurs</button>' +
+                '<button class="btn btn-sm" style="background:#3498DB;color:white;" onclick="loadPage(\'payments\')">💰 Finances</button>' +
+                '<button class="btn btn-sm" style="background:var(--border);" onclick="loadHomeStats()">🔄</button>' +
             '</div>' +
         '</div>' +
         
@@ -24,7 +24,7 @@ function init_home() {
         
         '<div style="background:rgba(39,174,96,0.05);padding:8px 14px;border-radius:10px;border-left:3px solid #27AE60;margin-bottom:14px;display:flex;align-items:center;gap:8px;">' +
             '<i class="fas fa-building" style="color:#27AE60;"></i><span style="font-weight:600;font-size:13px;color:#27AE60;">Flottes & Coopératives</span>' +
-            '<a href="#" onclick="loadPage(\'fleets\')" style="margin-left:auto;font-size:11px;color:#1A5276;">Voir tout <i class="fas fa-arrow-right"></i></a>' +
+            '<a href="#" onclick="loadPage(\'fleets\')" style="margin-left:auto;font-size:11px;color:#1A5276;">Voir tout →</a>' +
         '</div>' +
         '<div class="stats-grid" id="orgsGrid" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px;"></div>' +
         
@@ -34,11 +34,11 @@ function init_home() {
         '<div class="stats-grid" id="alertsGrid" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px;"></div>' +
         
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">' +
-            '<div class="card"><div class="card-header"><h3><i class="fas fa-chart-bar"></i> Répartition des plans</h3></div><div id="planChart" style="padding:16px;"></div></div>' +
-            '<div class="card"><div class="card-header"><h3><i class="fas fa-chart-pie"></i> Flottes vs Coopératives</h3></div><div id="typeChart" style="padding:16px;"></div></div>' +
+            '<div class="card"><div class="card-header"><h3>📊 Répartition des plans</h3></div><div id="planChart" style="padding:16px;"></div></div>' +
+            '<div class="card"><div class="card-header"><h3>📊 Flottes vs Coopératives</h3></div><div id="typeChart" style="padding:16px;"></div></div>' +
         '</div>' +
         
-        '<div class="card"><div class="card-header"><h3><i class="fas fa-clock"></i> Dernières inscriptions</h3><a href="#" onclick="loadPage(\'fleets\')" style="font-size:11px;color:#1A5276;">Voir tout <i class="fas fa-arrow-right"></i></a></div>' +
+        '<div class="card"><div class="card-header"><h3>🕐 Dernières inscriptions</h3><a href="#" onclick="loadPage(\'fleets\')" style="font-size:11px;color:#1A5276;">Voir tout →</a></div>' +
         '<div style="overflow-x:auto;"><table><thead><tr><th>Date</th><th>Nom</th><th>Email</th><th>Type</th><th>Plan</th><th>Statut</th></tr></thead><tbody id="recentOrgs"></tbody></table></div></div>' +
         
         '<div style="text-align:center;padding:8px;font-size:10px;color:var(--text2);">Dashboard Admin · Mis à jour à <span id="lastUpdate"></span></div>';
@@ -95,24 +95,24 @@ async function loadHomeStats() {
         // Stats générales
         el = document.getElementById('statsGrid');
         if (el) el.innerHTML = 
-            '<div class="stat-card" onclick="loadPage(\'fleets\')" style="cursor:pointer;"><div class="stat-icon green"><i class="fas fa-check-circle"></i></div><div class="stat-info"><div class="stat-number">' + active.length + '</div><div class="stat-label">Actives</div></div></div>' +
-            '<div class="stat-card" onclick="loadPage(\'fleets\')" style="cursor:pointer;"><div class="stat-icon yellow"><i class="fas fa-clock"></i></div><div class="stat-info"><div class="stat-number">' + pending.length + '</div><div class="stat-label">En attente</div></div></div>' +
-            '<div class="stat-card" onclick="loadPage(\'drivers\')" style="cursor:pointer;"><div class="stat-icon blue"><i class="fas fa-users"></i></div><div class="stat-info"><div class="stat-number">' + drivers.length + '</div><div class="stat-label">Chauffeurs</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon red"><i class="fas fa-globe"></i></div><div class="stat-info"><div class="stat-number">' + users.length + '</div><div class="stat-label">Utilisateurs</div></div></div>';
+            '<div class="stat-card" onclick="loadPage(\'fleets\')" style="cursor:pointer;"><div class="stat-icon green">✅</div><div class="stat-info"><div class="stat-number">' + active.length + '</div><div class="stat-label">Actives</div></div></div>' +
+            '<div class="stat-card" onclick="loadPage(\'fleets\')" style="cursor:pointer;"><div class="stat-icon yellow">🕐</div><div class="stat-info"><div class="stat-number">' + pending.length + '</div><div class="stat-label">En attente</div></div></div>' +
+            '<div class="stat-card" onclick="loadPage(\'drivers\')" style="cursor:pointer;"><div class="stat-icon blue">👥</div><div class="stat-info"><div class="stat-number">' + drivers.length + '</div><div class="stat-label">Chauffeurs</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon red">🌐</div><div class="stat-info"><div class="stat-number">' + users.length + '</div><div class="stat-label">Utilisateurs</div></div></div>';
         
         // Flottes & Coops
         el = document.getElementById('orgsGrid');
         if (el) el.innerHTML = 
             '<div class="stat-card" onclick="loadPage(\'fleets\')" style="cursor:pointer;"><div class="stat-icon" style="font-size:20px;">🚛</div><div class="stat-info"><div class="stat-number">' + fleets.length + '</div><div class="stat-label">Flottes</div></div></div>' +
             '<div class="stat-card" onclick="loadPage(\'coops\')" style="cursor:pointer;"><div class="stat-icon" style="font-size:20px;">🏢</div><div class="stat-info"><div class="stat-number">' + coops.length + '</div><div class="stat-label">Coopératives</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon red"><i class="fas fa-ban"></i></div><div class="stat-info"><div class="stat-number">' + suspended.length + '</div><div class="stat-label">Suspendues</div></div></div>';
+            '<div class="stat-card"><div class="stat-icon red">🚫</div><div class="stat-info"><div class="stat-number">' + suspended.length + '</div><div class="stat-label">Suspendues</div></div></div>';
         
         // Alertes
         el = document.getElementById('alertsGrid');
         if (el) el.innerHTML = 
             '<div class="stat-card" onclick="loadPage(\'fleets\')" style="cursor:pointer;border-left:3px solid ' + (pending.length > 0 ? '#F39C12' : '#27AE60') + ';"><div class="stat-icon ' + (pending.length > 0 ? 'yellow' : 'green') + '"><i class="fas fa-' + (pending.length > 0 ? 'exclamation-triangle' : 'check-circle') + '"></i></div><div class="stat-info"><div class="stat-number" style="color:' + (pending.length > 0 ? '#F39C12' : '#27AE60') + ';">' + pending.length + '</div><div class="stat-label">' + (pending.length > 0 ? 'À valider' : 'Tout validé') + '</div></div></div>' +
-            '<div class="stat-card" style="border-left:3px solid #E74C3C;"><div class="stat-icon red"><i class="fas fa-times-circle"></i></div><div class="stat-info"><div class="stat-number">' + rejected.length + '</div><div class="stat-label">Rejetées</div></div></div>' +
-            '<div class="stat-card" onclick="loadPage(\'messages\')" style="cursor:pointer;"><div class="stat-icon blue"><i class="fas fa-envelope"></i></div><div class="stat-info"><div class="stat-number" id="unreadMsgs">0</div><div class="stat-label">Messages non lus</div></div></div>';
+            '<div class="stat-card" style="border-left:3px solid #E74C3C;"><div class="stat-icon red">❌</div><div class="stat-info"><div class="stat-number">' + rejected.length + '</div><div class="stat-label">Rejetées</div></div></div>' +
+            '<div class="stat-card" onclick="loadPage(\'messages\')" style="cursor:pointer;"><div class="stat-icon blue">📧</div><div class="stat-info"><div class="stat-number" id="unreadMsgs">0</div><div class="stat-label">Messages non lus</div></div></div>';
         
         // Sidebar counters
         ['fleetCount','coopCount','driverCount'].forEach(function(id) {

@@ -4,13 +4,13 @@ function init_home() {
     main.innerHTML = 
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">' +
             '<div>' +
-                '<h1 style="font-size:20px;margin-bottom:2px;"><i class="fas fa-tachometer-alt"></i> Tableau de bord</h1>' +
+                '<h1 style="font-size:20px;margin-bottom:2px;">📊 Tableau de bord</h1>' +
                 '<p style="color:var(--text2);font-size:12px;" id="currentDate"></p>' +
                 '<p style="color:#1A5276;font-size:11px;margin-top:2px;" id="greeting"></p>' +
             '</div>' +
             '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' +
                 '<span id="apiStatus" style="font-size:10px;padding:3px 8px;border-radius:50px;"></span>' +
-                '<button class="btn btn-sm" style="background:var(--border);" onclick="loadHomeData()"><i class="fas fa-sync-alt"></i></button>' +
+                '<button class="btn btn-sm" style="background:var(--border);" onclick="loadHomeData()">🔄</button>' +
             '</div>' +
         '</div>' +
         
@@ -49,7 +49,7 @@ function init_home() {
         '<div id="alertsGrid" style="margin-bottom:14px;"></div>' +
         
         // DERNIERS CHAUFFEURS
-        '<div class="card"><div class="card-header"><h3><i class="fas fa-users"></i> Derniers chauffeurs</h3><a href="#" onclick="loadPage(\'drivers\')" style="font-size:11px;color:#1A5276;">Voir tout <i class="fas fa-arrow-right"></i></a></div>' +
+        '<div class="card"><div class="card-header"><h3>👥 Derniers chauffeurs</h3><a href="#" onclick="loadPage(\'drivers\')" style="font-size:11px;color:#1A5276;">Voir tout →</a></div>' +
         '<div style="overflow-x:auto;"><table><thead><tr><th>Code</th><th>Nom</th><th>Véhicule</th><th>Propriétaire</th><th>Statut</th></tr></thead><tbody id="recentDrivers"></tbody></table></div></div>' +
         
         '<div style="text-align:center;padding:8px;font-size:10px;color:var(--text2);">Dashboard Fleet · Mis à jour à <span id="lastUpdate"></span></div>';
@@ -110,10 +110,10 @@ async function loadHomeData() {
         // Stats principales
         var el = document.getElementById('statsGrid');
         if (el) el.innerHTML = 
-            '<div class="stat-card" onclick="loadPage(\'vehicles\')" style="cursor:pointer;"><div class="stat-icon blue"><i class="fas fa-motorcycle"></i></div><div class="stat-info"><div class="stat-number">' + myVehicles.length + '</div><div class="stat-label">Véhicules</div></div></div>' +
-            '<div class="stat-card" onclick="loadPage(\'drivers\')" style="cursor:pointer;"><div class="stat-icon green"><i class="fas fa-users"></i></div><div class="stat-info"><div class="stat-number">' + myDrivers.length + '</div><div class="stat-label">Chauffeurs</div></div></div>' +
-            '<div class="stat-card" onclick="loadPage(\'proprietaires\')" style="cursor:pointer;"><div class="stat-icon yellow"><i class="fas fa-building"></i></div><div class="stat-info"><div class="stat-number">' + (myProprietaires.length || 0) + '</div><div class="stat-label">Propriétaires</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon red"><i class="fas fa-route"></i></div><div class="stat-info"><div class="stat-number" id="statCourses">-</div><div class="stat-label">Courses aujourd\'hui</div></div></div>';
+            '<div class="stat-card" onclick="loadPage(\'vehicles\')" style="cursor:pointer;"><div class="stat-icon blue">🏍️</div><div class="stat-info"><div class="stat-number">' + myVehicles.length + '</div><div class="stat-label">Véhicules</div></div></div>' +
+            '<div class="stat-card" onclick="loadPage(\'drivers\')" style="cursor:pointer;"><div class="stat-icon green">👥</div><div class="stat-info"><div class="stat-number">' + myDrivers.length + '</div><div class="stat-label">Chauffeurs</div></div></div>' +
+            '<div class="stat-card" onclick="loadPage(\'proprietaires\')" style="cursor:pointer;"><div class="stat-icon yellow">🏢</div><div class="stat-info"><div class="stat-number">' + (myProprietaires.length || 0) + '</div><div class="stat-label">Propriétaires</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon red">🛣️</div><div class="stat-info"><div class="stat-number" id="statCourses">-</div><div class="stat-label">Courses aujourd\'hui</div></div></div>';
         
         // Flotte & Personnel
         el = document.getElementById('fleetGrid');

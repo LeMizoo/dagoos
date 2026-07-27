@@ -20,7 +20,7 @@ async function loadOrganizations() {
                 const option = document.createElement('option');
                 option.value = org.id;
                 const typePrefix = org.type === 'COOPERATIVE' ? 'CO' : 'FL';
-                option.textContent = `${org.type === 'COOPERATIVE' ? '<i class="fas fa-building"></i>' : '<i class="fas fa-truck"></i>'} ${org.name}`;
+                option.textContent = `${org.type === 'COOPERATIVE' ? '🏢' : '🚛'} ${org.name}`;
                 option.dataset.prefix = `${typePrefix}-${org.code}`;
                 option.dataset.type = typePrefix;
                 orgSelect.appendChild(option);
@@ -101,7 +101,7 @@ loginForm.addEventListener('submit', async (e) => {
     const fullCode = getFullCode();
     
     loginBtn.disabled = true;
-    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connexion...';
+    loginBtn.innerHTML = '⏳ Connexion...';
     showMessage(`Vérification de ${fullCode}...`, 'info');
     
     try {
@@ -115,17 +115,17 @@ loginForm.addEventListener('submit', async (e) => {
         if (response.ok) {
             localStorage.setItem('dagoos_token', data.token);
             localStorage.setItem('dagoos_user', JSON.stringify(data.user));
-            showMessage('<i class="fas fa-check-circle"></i> Bienvenue ' + (data.user.name || fullCode) + ' !', 'success');
+            showMessage('✅ Bienvenue ' + (data.user.name || fullCode) + ' !', 'success');
             setTimeout(() => { window.location.href = DASHBOARD_URL; }, 1000);
         } else {
-            showMessage('<i class="fas fa-times-circle"></i> ' + (data.error || 'Code ou PIN incorrect'), 'error');
+            showMessage('❌ ' + (data.error || 'Code ou PIN incorrect'), 'error');
         }
     } catch (error) {
-        showMessage('<i class="fas fa-times-circle"></i> Erreur de connexion', 'error');
+        showMessage('❌ Erreur de connexion', 'error');
     }
     
     loginBtn.disabled = false;
-    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Se connecter';
+    loginBtn.innerHTML = '🔑 Se connecter';
 });
 
 function showMessage(text, type) {

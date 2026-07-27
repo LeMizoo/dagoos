@@ -1,7 +1,7 @@
 function init_codes() {
     document.getElementById('mainContent').innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
-        '<h1><i class="fas fa-key"></i> Codes d\'accès chauffeurs</h1>' +
-        '<button class="btn btn-primary" onclick="renouvelerCodes()"><i class="fas fa-sync-alt"></i> Renouveler tous les codes</button></div>' +
+        '<h1>🔑 Codes d\'accès chauffeurs</h1>' +
+        '<button class="btn btn-primary" onclick="renouvelerCodes()">🔄 Renouveler tous les codes</button></div>' +
         '<div class="card"><table><thead><tr><th>Nom</th><th>Téléphone</th><th>Code</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="codesTable"><tr><td colspan="5">Chargement...</td></tr></tbody></table></div>';
     setTimeout(loadCodes, 100);
 }

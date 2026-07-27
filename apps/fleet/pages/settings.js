@@ -1,14 +1,14 @@
 function init_settings() {
     var main = document.getElementById('mainContent');
     main.innerHTML = 
-        '<div class="topbar"><h1><i class="fas fa-cog"></i> Paramètres</h1></div>' +
+        '<div class="topbar"><h1>⚙️ Paramètres</h1></div>' +
         '<div style="display:flex;gap:0;margin-bottom:24px;background:var(--card);border-radius:14px;overflow:hidden;">' +
             '<button class="settings-tab active" id="tab-PROFIL" onclick="switchSettingsTab(\'PROFIL\')" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">Profil</button>' +
             '<button class="settings-tab" id="tab-PLANS" onclick="switchSettingsTab(\'PLANS\')" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">Plans</button>' +
             '<button class="settings-tab" id="tab-LANDING" onclick="switchSettingsTab(\'LANDING\')" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">Contenu Landing</button>' +
         '</div>' +
         '<div id="settingsContent" style="padding:20px;">Chargement...</div>' +
-        '<button onclick="saveAllSettings()" style="width:100%;padding:16px;background:#1A5276;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:24px;"><i class="fas fa-save"></i> Enregistrer</button>' +
+        '<button onclick="saveAllSettings()" style="width:100%;padding:16px;background:#1A5276;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:24px;">💾 Enregistrer</button>' +
         '<style>.settings-tab.active{background:#1A5276!important;color:white!important;}.settings-tab:not(.active):hover{background:var(--border);}</style>';
     switchSettingsTab('PROFIL');
 }

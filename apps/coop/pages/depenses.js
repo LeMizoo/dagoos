@@ -2,15 +2,15 @@ function init_depenses() {
     var main = document.getElementById('mainContent');
     main.innerHTML = 
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
-            '<h1><i class="fas fa-receipt"></i> Dépenses</h1>' +
-            '<button class="btn btn-primary" onclick="showAddDepense()"><i class="fas fa-plus"></i> Nouvelle dépense</button>' +
+            '<h1>🧾 Dépenses</h1>' +
+            '<button class="btn btn-primary" onclick="showAddDepense()">➕ Nouvelle dépense</button>' +
         '</div>' +
         '<div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px;">' +
             '<div class="stat-card"><div class="stat-info"><div class="stat-number" id="depAujourdhui">-</div><div class="stat-label">Aujourd\'hui</div></div></div>' +
             '<div class="stat-card"><div class="stat-info"><div class="stat-number" id="depSemaine">-</div><div class="stat-label">Cette semaine</div></div></div>' +
             '<div class="stat-card"><div class="stat-info"><div class="stat-number" id="depMois">-</div><div class="stat-label">Ce mois</div></div></div>' +
         '</div>' +
-        '<div class="card"><div class="card-header"><h3><i class="fas fa-list"></i> Dépenses récentes</h3></div>' +
+        '<div class="card"><div class="card-header"><h3>📋 Dépenses récentes</h3></div>' +
         '<table><thead><tr><th>Date</th><th>Catégorie</th><th>Description</th><th>Montant</th></tr></thead><tbody id="depensesTable"><tr><td colspan="4">Aucune dépense</td></tr></tbody></table></div>';
 }
 

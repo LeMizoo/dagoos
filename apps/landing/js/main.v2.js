@@ -32,11 +32,11 @@ var heroSection = document.querySelector('.hero');
 if (heroSection && totalSlides > 1) {
     var prevBtn = document.createElement('button');
     prevBtn.className = 'hero-nav prev';
-    prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+    prevBtn.innerHTML = '◀';
     prevBtn.onclick = prevSlide;
     var nextBtn = document.createElement('button');
     nextBtn.className = 'hero-nav next';
-    nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+    nextBtn.innerHTML = '▶';
     nextBtn.onclick = nextSlide;
     heroSection.appendChild(prevBtn);
     heroSection.appendChild(nextBtn);
@@ -119,10 +119,10 @@ async function loadPlans() {
         var fleetEl = document.getElementById('fleetPlans');
         var coopEl = document.getElementById('coopPlans');
         if (fleetEl) fleetEl.innerHTML = fleetPlans.map(function(p) {
-            return '<div style="display:flex;justify-content:space-between;font-size:12px;"><span><i class="fas fa-circle"></i> ' + p.name + '</span><span><strong>' + p.price.toLocaleString() + ' Ar</strong> ' + plural(p.vehiclesMax, 'véhicule') + ' · ' + plural(p.driversMax, 'chauffeur') + ' ' + (p.name === 'Premium' ? ' <span style="background:#F1C40F;color:#1A1A2E;padding:2px 6px;border-radius:50px;font-size:10px;font-weight:600;"><i class="fas fa-lightbulb"></i></span>' : '') + '</span></div>';
+            return '<div style="display:flex;justify-content:space-between;font-size:12px;"><span>🟢 ' + p.name + '</span><span><strong>' + p.price.toLocaleString() + ' Ar</strong> ' + plural(p.vehiclesMax, 'véhicule') + ' · ' + plural(p.driversMax, 'chauffeur') + ' ' + (p.name === 'Premium' ? ' <span style="background:#F1C40F;color:#1A1A2E;padding:2px 6px;border-radius:50px;font-size:10px;font-weight:600;">💡</span>' : '') + '</span></div>';
         }).join('');
         if (coopEl) coopEl.innerHTML = coopPlans.map(function(p) {
-            return '<div style="display:flex;justify-content:space-between;font-size:12px;"><span><i class="fas fa-circle"></i> ' + p.name + '</span><span><strong>' + p.price.toLocaleString() + ' Ar</strong> ' + plural(p.vehiclesMax, 'véhicule') + ' · ' + plural(p.driversMax, 'livreur') + ' ' + (p.name === 'Premium' ? ' <span style="background:#F1C40F;color:#1A1A2E;padding:2px 6px;border-radius:50px;font-size:10px;font-weight:600;"><i class="fas fa-lightbulb"></i></span>' : '') + '</span></div>';
+            return '<div style="display:flex;justify-content:space-between;font-size:12px;"><span>🟢 ' + p.name + '</span><span><strong>' + p.price.toLocaleString() + ' Ar</strong> ' + plural(p.vehiclesMax, 'véhicule') + ' · ' + plural(p.driversMax, 'livreur') + ' ' + (p.name === 'Premium' ? ' <span style="background:#F1C40F;color:#1A1A2E;padding:2px 6px;border-radius:50px;font-size:10px;font-weight:600;">💡</span>' : '') + '</span></div>';
         }).join('');
     } catch (e) {}
 }

@@ -12,7 +12,7 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     if (password !== confirm) { msg.className = 'message error'; msg.textContent = '❌ Les mots de passe ne correspondent pas'; return; }
     if (password.length < 6) { msg.className = 'message error'; msg.textContent = '❌ 6 caractères minimum'; return; }
     
-    msg.className = 'message info'; msg.textContent = '<i class="fas fa-hourglass-half"></i> Création en cours...';
+    msg.className = 'message info'; msg.textContent = '⏳ Création en cours...';
     
     try {
         var res = await fetch(API_URL + '/auth/register', {

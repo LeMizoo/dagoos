@@ -1,6 +1,6 @@
 function init_messages() {
     var main = document.getElementById('mainInner');
-    main.innerHTML = '<div class="topbar"><h1><i class="fas fa-envelope"></i> Messages</h1></div><div class="card"><table><thead><tr><th>De</th><th>Sujet</th><th>Date</th></tr></thead><tbody id="messagesTable"></tbody></table></div>';
+    main.innerHTML = '<div class="topbar"><h1>📧 Messages</h1></div><div class="card"><table><thead><tr><th>De</th><th>Sujet</th><th>Date</th></tr></thead><tbody id="messagesTable"></tbody></table></div>';
     loadMessages();
 }
 

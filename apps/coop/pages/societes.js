@@ -2,8 +2,8 @@ function init_societes() {
     var main = document.getElementById('mainContent');
     main.innerHTML = 
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
-            '<h1><i class="fas fa-building"></i> Sociétés</h1>' +
-            '<button class="btn btn-primary" onclick="showAddSociete()"><i class="fas fa-plus"></i> Nouvelle société</button>' +
+            '<h1>🏢 Sociétés</h1>' +
+            '<button class="btn btn-primary" onclick="showAddSociete()">➕ Nouvelle société</button>' +
         '</div>' +
         '<div class="stats-grid" id="societeStats" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px;"></div>' +
         '<div class="card"><table><thead><tr><th>Nom</th><th>Activité</th><th>Véhicules</th><th>Chauffeurs</th><th>NIF</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="societesTable"><tr><td colspan="7">Chargement...</td></tr></tbody></table></div>';
@@ -27,10 +27,10 @@ async function loadSocietes() {
         });
         
         document.getElementById('societeStats').innerHTML = 
-            '<div class="stat-card"><div class="stat-icon green"><i class="fas fa-building"></i></div><div class="stat-info"><div class="stat-number">' + mySocietes.length + '</div><div class="stat-label">Sociétés</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon blue"><i class="fas fa-motorcycle"></i></div><div class="stat-info"><div class="stat-number">' + totalVehicules + '</div><div class="stat-label">Véhicules</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-users"></i></div><div class="stat-info"><div class="stat-number">' + totalChauffeurs + '</div><div class="stat-label">Chauffeurs</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon red"><i class="fas fa-check-circle"></i></div><div class="stat-info"><div class="stat-number">' + actives + '</div><div class="stat-label">Actives</div></div></div>';
+            '<div class="stat-card"><div class="stat-icon green">🏢</div><div class="stat-info"><div class="stat-number">' + mySocietes.length + '</div><div class="stat-label">Sociétés</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon blue">🏍️</div><div class="stat-info"><div class="stat-number">' + totalVehicules + '</div><div class="stat-label">Véhicules</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon yellow">👥</div><div class="stat-info"><div class="stat-number">' + totalChauffeurs + '</div><div class="stat-label">Chauffeurs</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon red">✅</div><div class="stat-info"><div class="stat-number">' + actives + '</div><div class="stat-label">Actives</div></div></div>';
         
         document.getElementById('societesTable').innerHTML = mySocietes.length ? mySocietes.map(function(s) {
             var nbV = (s.vehicles || []).length;
@@ -43,8 +43,8 @@ async function loadSocietes() {
                 '<td>' + (s.nif || 'N/A') + '</td>' +
                 '<td><span class="badge ' + statusBadge + '">' + s.status + '</span></td>' +
                 '<td class="action-btns">' +
-                    '<button class="btn-sm btn-view" onclick="viewSociete(\'' + s.id + '\')"><i class="fas fa-eye"></i></button>' +
-                    '<button class="btn-sm btn-edit" onclick="editSociete(\'' + s.id + '\')"><i class="fas fa-edit"></i></button>' +
+                    '<button class="btn-sm btn-view" onclick="viewSociete(\'' + s.id + '\')">👁</button>' +
+                    '<button class="btn-sm btn-edit" onclick="editSociete(\'' + s.id + '\')">✏️</button>' +
                     '<button class="btn-sm ' + (s.status === 'active' ? 'btn-suspend' : 'btn-success') + '" onclick="toggleSociete(\'' + s.id + '\',\'' + s.status + '\')"><i class="fas fa-' + (s.status === 'active' ? 'ban' : 'check') + '"></i></button>' +
                 '</td></tr>';
         }).join('') : '<tr><td colspan="7">Aucune société. Créez votre première société.</td></tr>';

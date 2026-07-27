@@ -2,7 +2,7 @@ function init_versements() {
     var main = document.getElementById('mainContent');
     main.innerHTML = 
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
-            '<h1><i class="fas fa-hand-holding-usd"></i> Versements</h1>' +
+            '<h1>💵 Versements</h1>' +
         '</div>' +
         '<div class="stats-grid" id="versStats" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px;"></div>' +
         '<div class="card"><table><thead><tr><th>Code</th><th>Chauffeur</th><th>Courses</th><th>CA brut</th><th>Commission</th><th>Net à verser</th></tr></thead><tbody id="versementsTable"><tr><td colspan="6">Chargement...</td></tr></tbody></table></div>';
@@ -23,10 +23,10 @@ async function loadVersements() {
         var totalNet = myVersements.reduce(function(s, v) { return s + v.net; }, 0);
         
         document.getElementById('versStats').innerHTML = 
-            '<div class="stat-card"><div class="stat-icon green"><i class="fas fa-coins"></i></div><div class="stat-info"><div class="stat-number">' + totalCA.toLocaleString() + ' Ar</div><div class="stat-label">CA brut total</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon red"><i class="fas fa-hand-holding-usd"></i></div><div class="stat-info"><div class="stat-number">' + totalCommission.toLocaleString() + ' Ar</div><div class="stat-label">Commissions</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon blue"><i class="fas fa-wallet"></i></div><div class="stat-info"><div class="stat-number">' + totalNet.toLocaleString() + ' Ar</div><div class="stat-label">Net à verser</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-users"></i></div><div class="stat-info"><div class="stat-number">' + myVersements.length + '</div><div class="stat-label">Chauffeurs actifs</div></div></div>';
+            '<div class="stat-card"><div class="stat-icon green">💰</div><div class="stat-info"><div class="stat-number">' + totalCA.toLocaleString() + ' Ar</div><div class="stat-label">CA brut total</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon red">💵</div><div class="stat-info"><div class="stat-number">' + totalCommission.toLocaleString() + ' Ar</div><div class="stat-label">Commissions</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon blue">👛</div><div class="stat-info"><div class="stat-number">' + totalNet.toLocaleString() + ' Ar</div><div class="stat-label">Net à verser</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon yellow">👥</div><div class="stat-info"><div class="stat-number">' + myVersements.length + '</div><div class="stat-label">Chauffeurs actifs</div></div></div>';
         
         document.getElementById('versementsTable').innerHTML = myVersements.map(function(v) {
             return '<tr><td><code>' + v.code + '</code></td><td><strong>' + v.name + '</strong></td>' +

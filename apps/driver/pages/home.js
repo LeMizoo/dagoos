@@ -4,7 +4,7 @@ function init_home() {
     main.innerHTML = 
         '<div style="background:linear-gradient(135deg,#F1C40F,#F39C12);color:#1A1A2E;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">' +
             '<div>' +
-                '<h1 style="font-size:18px;"><i class="fas fa-motorcycle"></i> Bonjour, ' + (user.name || 'Chauffeur') + '</h1>' +
+                '<h1 style="font-size:18px;">🏍️ Bonjour, ' + (user.name || 'Chauffeur') + '</h1>' +
                 '<p style="font-size:12px;opacity:0.8;">' + (user.driverCode || '') + ' | ' + (user.organization || '') + '</p>' +
             '</div>' +
             '<div style="text-align:right;">' +
@@ -38,7 +38,7 @@ function init_home() {
             
             // DERNIÈRES COURSES
             '<div class="card">' +
-                '<div class="card-header"><h3><i class="fas fa-history"></i> Dernières courses</h3></div>' +
+                '<div class="card-header"><h3>📋 Dernières courses</h3></div>' +
                 '<div id="recentCourses" style="padding:0 16px 16px;max-height:300px;overflow-y:auto;">' +
                     '<p style="text-align:center;color:#6C757D;padding:20px;">Aucune course aujourd\'hui</p>' +
                 '</div>' +
@@ -47,10 +47,10 @@ function init_home() {
             // ACTIONS RAPIDES
             '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;">' +
                 '<button class="action-card" style="background:#E74C3C;padding:16px;border:none;border-radius:12px;color:white;cursor:pointer;font-family:Inter,sans-serif;font-weight:600;" onclick="alert(\'Signalement envoyé\')">' +
-                    '<i class="fas fa-exclamation-triangle"></i> Signaler un problème' +
+                    '⚠️ Signaler un problème' +
                 '</button>' +
                 '<button class="action-card" style="background:#3498DB;padding:16px;border:none;border-radius:12px;color:white;cursor:pointer;font-family:Inter,sans-serif;font-weight:600;" onclick="alert(\'Assistance demandée\')">' +
-                    '<i class="fas fa-headset"></i> Demander assistance' +
+                    '🎧 Demander assistance' +
                 '</button>' +
             '</div>' +
         '</div>';

@@ -2,14 +2,14 @@ function init_contrats() {
     var main = document.getElementById('mainContent');
     main.innerHTML = 
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
-            '<h1><i class="fas fa-file-contract"></i> Contrats</h1>' +
-            '<button class="btn btn-primary" onclick="showAddContrat()"><i class="fas fa-plus"></i> Nouveau contrat</button>' +
+            '<h1>📝 Contrats</h1>' +
+            '<button class="btn btn-primary" onclick="showAddContrat()">➕ Nouveau contrat</button>' +
         '</div>' +
         '<div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px;">' +
-            '<div class="stat-card"><div class="stat-icon green"><i class="fas fa-check-circle"></i></div><div class="stat-info"><div class="stat-number" id="statActifs">0</div><div class="stat-label">Actifs</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-clock"></i></div><div class="stat-info"><div class="stat-number" id="statExpire">0</div><div class="stat-label">Expire bientôt</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon red"><i class="fas fa-ban"></i></div><div class="stat-info"><div class="stat-number" id="statResilies">0</div><div class="stat-label">Résiliés</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon blue"><i class="fas fa-coins"></i></div><div class="stat-info"><div class="stat-number" id="statCA">0 Ar</div><div class="stat-label">CA contrats</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon green">✅</div><div class="stat-info"><div class="stat-number" id="statActifs">0</div><div class="stat-label">Actifs</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon yellow">🕐</div><div class="stat-info"><div class="stat-number" id="statExpire">0</div><div class="stat-label">Expire bientôt</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon red">🚫</div><div class="stat-info"><div class="stat-number" id="statResilies">0</div><div class="stat-label">Résiliés</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon blue">💰</div><div class="stat-info"><div class="stat-number" id="statCA">0 Ar</div><div class="stat-label">CA contrats</div></div></div>' +
         '</div>' +
         '<div class="card"><table><thead><tr><th>Client</th><th>Type</th><th>Début</th><th>Fin</th><th>Montant</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="contratsTable"><tr><td colspan="7">Chargement...</td></tr></tbody></table></div>';
     loadContrats();
@@ -42,9 +42,9 @@ async function loadContrats() {
                 '<td><strong>' + (c.montant || 0).toLocaleString() + ' Ar</strong></td>' +
                 '<td><span class="badge ' + statutBadge + '">' + statutLabel + '</span></td>' +
                 '<td class="action-btns">' +
-                    '<button class="btn-sm btn-view" onclick="viewContrat(\'' + c.id + '\')"><i class="fas fa-eye"></i></button>' +
-                    '<button class="btn-sm btn-edit" onclick="editContrat(\'' + c.id + '\')"><i class="fas fa-edit"></i></button>' +
-                    '<button class="btn-sm btn-suspend" onclick="resilierContrat(\'' + c.id + '\')"><i class="fas fa-ban"></i></button>' +
+                    '<button class="btn-sm btn-view" onclick="viewContrat(\'' + c.id + '\')">👁</button>' +
+                    '<button class="btn-sm btn-edit" onclick="editContrat(\'' + c.id + '\')">✏️</button>' +
+                    '<button class="btn-sm btn-suspend" onclick="resilierContrat(\'' + c.id + '\')">🚫</button>' +
                 '</td></tr>';
         }).join('') : '<tr><td colspan="7">Aucun contrat</td></tr>';
     } catch(e) { console.error(e); }

@@ -1,5 +1,5 @@
 function init_coops_vehicules() {
-    document.getElementById('mainInner').innerHTML = '<div class="topbar"><h1><i class="fas fa-building"></i> Véhicules des Coopératives</h1></div>' +
+    document.getElementById('mainInner').innerHTML = '<div class="topbar"><h1>🏢 Véhicules des Coopératives</h1></div>' +
         '<div class="card"><table><thead><tr><th>Immatriculation</th><th>Modèle</th><th>Coopérative</th><th>Km</th><th>Statut</th></tr></thead><tbody id="cvTable"><tr><td colspan="5">Chargement...</td></tr></tbody></table></div>';
     loadCV();
 }

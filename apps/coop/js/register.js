@@ -27,7 +27,7 @@ registerForm.addEventListener('submit', async (e) => {
         return;
     }
     
-    showMessage('<i class="fas fa-hourglass-half"></i> Création du compte en cours...', 'info');
+    showMessage('⏳ Création du compte en cours...', 'info');
     
     try {
         const response = await fetch(`${API_URL}/auth/register`, {

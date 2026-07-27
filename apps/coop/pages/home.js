@@ -4,13 +4,13 @@ function init_home() {
     main.innerHTML = 
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">' +
             '<div>' +
-                '<h1 style="font-size:20px;"><i class="fas fa-chart-pie"></i> Tableau de bord</h1>' +
+                '<h1 style="font-size:20px;">📊 Tableau de bord</h1>' +
                 '<p style="color:var(--text2);font-size:12px;" id="currentDate"></p>' +
                 '<p style="color:#27AE60;font-size:11px;" id="greeting"></p>' +
             '</div>' +
             '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' +
                 '<span id="apiStatus" style="font-size:10px;padding:3px 8px;border-radius:50px;"></span>' +
-                '<button class="btn btn-sm" style="background:var(--border);" onclick="loadHomeData()"><i class="fas fa-sync-alt"></i></button>' +
+                '<button class="btn btn-sm" style="background:var(--border);" onclick="loadHomeData()">🔄</button>' +
             '</div>' +
         '</div>' +
         
@@ -26,17 +26,17 @@ function init_home() {
         // SOCIÉTÉS
         '<div style="background:rgba(26,82,118,0.05);padding:8px 14px;border-radius:10px;border-left:3px solid #27AE60;margin-bottom:14px;display:flex;align-items:center;gap:8px;">' +
             '<i class="fas fa-building" style="color:#27AE60;"></i><span style="font-weight:600;font-size:13px;color:#27AE60;">Sociétés</span>' +
-            '<a href="#" onclick="loadPage(\'societes\')" style="margin-left:auto;font-size:11px;color:#27AE60;">Gérer <i class="fas fa-arrow-right"></i></a>' +
+            '<a href="#" onclick="loadPage(\'societes\')" style="margin-left:auto;font-size:11px;color:#27AE60;">Gérer →</a>' +
         '</div>' +
         '<div class="stats-grid" id="societesGrid" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px;"></div>' +
         
         // CA PAR SOCIÉTÉ
-        '<div class="card"><div class="card-header"><h3><i class="fas fa-chart-bar"></i> CA par société (ce mois)</h3></div><div id="caSocietes" style="padding:16px;"></div></div>' +
+        '<div class="card"><div class="card-header"><h3>📊 CA par société (ce mois)</h3></div><div id="caSocietes" style="padding:16px;"></div></div>' +
         
         // DERNIÈRES ACTIVITÉS
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;">' +
-            '<div class="card"><div class="card-header"><h3><i class="fas fa-clock"></i> Dernières livraisons</h3></div><div id="recentLivraisons" style="padding:0 16px 14px;max-height:250px;overflow-y:auto;"></div></div>' +
-            '<div class="card"><div class="card-header"><h3><i class="fas fa-file-contract"></i> Contrats actifs</h3></div><div id="recentContrats" style="padding:0 16px 14px;max-height:250px;overflow-y:auto;"></div></div>' +
+            '<div class="card"><div class="card-header"><h3>🕐 Dernières livraisons</h3></div><div id="recentLivraisons" style="padding:0 16px 14px;max-height:250px;overflow-y:auto;"></div></div>' +
+            '<div class="card"><div class="card-header"><h3>📝 Contrats actifs</h3></div><div id="recentContrats" style="padding:0 16px 14px;max-height:250px;overflow-y:auto;"></div></div>' +
         '</div>' +
         
         '<div style="text-align:center;padding:8px;font-size:10px;color:var(--text2);">Dashboard Coop · Mis à jour à <span id="lastUpdate"></span></div>';
@@ -92,10 +92,10 @@ async function loadHomeData() {
         
         // Stats globales
         document.getElementById('statsGrid').innerHTML = 
-            '<div class="stat-card" onclick="loadPage(\'societes\')" style="cursor:pointer;"><div class="stat-icon green"><i class="fas fa-building"></i></div><div class="stat-info"><div class="stat-number">' + mySocietes.length + '</div><div class="stat-label">Sociétés</div></div></div>' +
-            '<div class="stat-card" onclick="loadPage(\'vehicles\')" style="cursor:pointer;"><div class="stat-icon blue"><i class="fas fa-motorcycle"></i></div><div class="stat-info"><div class="stat-number">' + myVehicles.length + '</div><div class="stat-label">Véhicules</div></div></div>' +
-            '<div class="stat-card" onclick="loadPage(\'drivers\')" style="cursor:pointer;"><div class="stat-icon yellow"><i class="fas fa-users"></i></div><div class="stat-info"><div class="stat-number">' + myDrivers.length + '</div><div class="stat-label">Chauffeurs/Livreurs</div></div></div>' +
-            '<div class="stat-card" onclick="loadPage(\'contrats\')" style="cursor:pointer;"><div class="stat-icon red"><i class="fas fa-file-contract"></i></div><div class="stat-info"><div class="stat-number">' + myContrats.filter(function(c){return c.statut==='actif';}).length + '</div><div class="stat-label">Contrats actifs</div></div></div>';
+            '<div class="stat-card" onclick="loadPage(\'societes\')" style="cursor:pointer;"><div class="stat-icon green">🏢</div><div class="stat-info"><div class="stat-number">' + mySocietes.length + '</div><div class="stat-label">Sociétés</div></div></div>' +
+            '<div class="stat-card" onclick="loadPage(\'vehicles\')" style="cursor:pointer;"><div class="stat-icon blue">🏍️</div><div class="stat-info"><div class="stat-number">' + myVehicles.length + '</div><div class="stat-label">Véhicules</div></div></div>' +
+            '<div class="stat-card" onclick="loadPage(\'drivers\')" style="cursor:pointer;"><div class="stat-icon yellow">👥</div><div class="stat-info"><div class="stat-number">' + myDrivers.length + '</div><div class="stat-label">Chauffeurs/Livreurs</div></div></div>' +
+            '<div class="stat-card" onclick="loadPage(\'contrats\')" style="cursor:pointer;"><div class="stat-icon red">📝</div><div class="stat-info"><div class="stat-number">' + myContrats.filter(function(c){return c.statut==='actif';}).length + '</div><div class="stat-label">Contrats actifs</div></div></div>';
         
         // Sociétés
         document.getElementById('societesGrid').innerHTML = mySocietes.length ? mySocietes.map(function(s) {

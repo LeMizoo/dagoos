@@ -1,11 +1,11 @@
 function init_notifications() {
     document.getElementById('mainInner').innerHTML = 
-        '<div class="topbar"><h1><i class="fas fa-bell"></i> Notifications</h1>' +
+        '<div class="topbar"><h1>🔔 Notifications</h1>' +
         '<button class="btn btn-sm btn-primary" onclick="marquerToutLu()"><i class="fas fa-check-double"></i> Tout marquer comme lu</button></div>' +
         
         '<div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px;">' +
-            '<div class="stat-card"><div class="stat-icon red"><i class="fas fa-bell"></i></div><div class="stat-info"><div class="stat-number" id="statNonLu">0</div><div class="stat-label">Non lues</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon green"><i class="fas fa-check-circle"></i></div><div class="stat-info"><div class="stat-number" id="statLu">0</div><div class="stat-label">Lues</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon red">🔔</div><div class="stat-info"><div class="stat-number" id="statNonLu">0</div><div class="stat-label">Non lues</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon green">✅</div><div class="stat-info"><div class="stat-number" id="statLu">0</div><div class="stat-label">Lues</div></div></div>' +
             '<div class="stat-card"><div class="stat-icon blue"><i class="fas fa-archive"></i></div><div class="stat-info"><div class="stat-number" id="statTotal">0</div><div class="stat-label">Total</div></div></div>' +
             
         '<div class="card"><div id="notificationsList" style="padding:0 16px;max-height:500px;overflow-y:auto;"></div></div>';
@@ -97,7 +97,7 @@ function renderNotifications() {
                 '<div style="font-size:11px;color:var(--text2);">' + n.detail + '</div>' +
                 '<div style="font-size:10px;color:var(--text2);">' + new Date(n.date).toLocaleString('fr-FR') + '</div>' +
             '</div>' +
-            (!n.read ? '<button class="btn-sm btn-view" onclick="marquerLu(\'' + n.id + '\')"><i class="fas fa-check"></i></button>' : '') +
+            (!n.read ? '<button class="btn-sm btn-view" onclick="marquerLu(\'' + n.id + '\')">✅</button>' : '') +
         '</div>';
     });
     

@@ -1,15 +1,15 @@
 function init_finances() {
     document.getElementById('mainInner').innerHTML = 
-        '<div class="topbar"><h1><i class="fas fa-coins"></i> Finances globales</h1></div>' +
+        '<div class="topbar"><h1>💰 Finances globales</h1></div>' +
         
         '<div class="stats-grid" id="globalStats" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px;"></div>' +
         
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">' +
-            '<div class="card"><div class="card-header"><h3><i class="fas fa-chart-bar"></i> CA par type</h3></div><div id="caChart" style="padding:16px;"></div></div>' +
-            '<div class="card"><div class="card-header"><h3><i class="fas fa-chart-pie"></i> Répartition Flottes vs Coops</h3></div><div id="typeChart" style="padding:16px;"></div></div>' +
+            '<div class="card"><div class="card-header"><h3>📊 CA par type</h3></div><div id="caChart" style="padding:16px;"></div></div>' +
+            '<div class="card"><div class="card-header"><h3>📊 Répartition Flottes vs Coops</h3></div><div id="typeChart" style="padding:16px;"></div></div>' +
         '</div>' +
         
-        '<div class="card"><div class="card-header"><h3><i class="fas fa-list"></i> Dernières transactions</h3></div>' +
+        '<div class="card"><div class="card-header"><h3>📋 Dernières transactions</h3></div>' +
         '<table><thead><tr><th>Date</th><th>Organisation</th><th>Type</th><th>Montant</th></tr></thead><tbody id="allTx"><tr><td colspan="4">Chargement...</td></tr></tbody></table></div>';
     loadGlobalFinances();
 }
@@ -23,10 +23,10 @@ async function loadGlobalFinances() {
         
         // Stats
         document.getElementById('globalStats').innerHTML = 
-            '<div class="stat-card"><div class="stat-icon green"><i class="fas fa-coins"></i></div><div class="stat-info"><div class="stat-number">' + (stats.caJour || 0).toLocaleString() + ' Ar</div><div class="stat-label">CA aujourd\'hui</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon blue"><i class="fas fa-calendar-week"></i></div><div class="stat-info"><div class="stat-number">' + (stats.caSemaine || 0).toLocaleString() + ' Ar</div><div class="stat-label">CA cette semaine</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-calendar-alt"></i></div><div class="stat-info"><div class="stat-number">' + (stats.caMois || 0).toLocaleString() + ' Ar</div><div class="stat-label">CA ce mois</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon red"><i class="fas fa-building"></i></div><div class="stat-info"><div class="stat-number">' + orgs.length + '</div><div class="stat-label">Organisations</div></div></div>';
+            '<div class="stat-card"><div class="stat-icon green">💰</div><div class="stat-info"><div class="stat-number">' + (stats.caJour || 0).toLocaleString() + ' Ar</div><div class="stat-label">CA aujourd\'hui</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon blue">📅</div><div class="stat-info"><div class="stat-number">' + (stats.caSemaine || 0).toLocaleString() + ' Ar</div><div class="stat-label">CA cette semaine</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon yellow">📅</div><div class="stat-info"><div class="stat-number">' + (stats.caMois || 0).toLocaleString() + ' Ar</div><div class="stat-label">CA ce mois</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon red">🏢</div><div class="stat-info"><div class="stat-number">' + orgs.length + '</div><div class="stat-label">Organisations</div></div></div>';
         
         // Graphique CA par type (Flotte vs Coop)
         var fleetCourses = courses.filter(function(c) { return c.organizationType === 'FLEET_MANAGER'; });

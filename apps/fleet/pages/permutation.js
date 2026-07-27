@@ -1,6 +1,6 @@
 function init_permutation() {
     document.getElementById('mainContent').innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
-        '<h1><i class="fas fa-exchange-alt"></i> Permutation Véhicule</h1></div>' +
+        '<h1>🔄 Permutation Véhicule</h1></div>' +
         '<div class="card" style="padding:20px;margin-bottom:14px;"><h3>Assigner une moto</h3>' +
         '<div style="display:flex;gap:10px;flex-wrap:wrap;"><select id="permChauffeur" style="padding:8px;border:1px solid var(--border);border-radius:6px;"><option value="">-- Chauffeur --</option></select>' +
         '<select id="permMoto" style="padding:8px;border:1px solid var(--border);border-radius:6px;"><option value="">-- Moto --</option></select>' +

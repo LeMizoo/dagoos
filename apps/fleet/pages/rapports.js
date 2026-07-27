@@ -2,7 +2,7 @@ function init_rapports() {
     var main = document.getElementById('mainContent');
     main.innerHTML = 
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
-            '<h1><i class="fas fa-chart-bar"></i> Rapports</h1>' +
+            '<h1>📊 Rapports</h1>' +
         '</div>' +
         
         '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;">' +

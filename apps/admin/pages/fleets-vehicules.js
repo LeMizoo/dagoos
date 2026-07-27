@@ -1,5 +1,5 @@
 function init_fleets_vehicules() {
-    document.getElementById('mainInner').innerHTML = '<div class="topbar"><h1><i class="fas fa-truck"></i> Véhicules des Flottes</h1></div>' +
+    document.getElementById('mainInner').innerHTML = '<div class="topbar"><h1>🚛 Véhicules des Flottes</h1></div>' +
         '<div class="card"><table><thead><tr><th>Immatriculation</th><th>Modèle</th><th>Flotte</th><th>Km</th><th>Vidange</th><th>Assurance</th><th>Statut</th></tr></thead><tbody id="fvTable"><tr><td colspan="7">Chargement...</td></tr></tbody></table></div>';
     loadFV();
 }

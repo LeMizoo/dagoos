@@ -2,8 +2,8 @@ function init_messages() {
     var main = document.getElementById('mainContent');
     main.innerHTML = 
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
-            '<h1><i class="fas fa-envelope"></i> Messages</h1>' +
-            '<button class="btn btn-primary" onclick="showNewMessage()"><i class="fas fa-plus"></i> Nouveau message</button>' +
+            '<h1>📧 Messages</h1>' +
+            '<button class="btn btn-primary" onclick="showNewMessage()">➕ Nouveau message</button>' +
         '</div>' +
         '<div class="card"><table><thead><tr><th>Date</th><th>Sujet</th><th>Message</th><th>Réponse</th><th>Statut</th></tr></thead><tbody id="messagesTable"><tr><td colspan="5">Chargement...</td></tr></tbody></table></div>';
     loadMessages();

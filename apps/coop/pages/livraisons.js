@@ -2,15 +2,15 @@ function init_livraisons() {
     var main = document.getElementById('mainContent');
     main.innerHTML = 
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
-            '<h1><i class="fas fa-box"></i> Livraisons</h1>' +
-            '<button class="btn btn-primary" onclick="showAddLivraison()"><i class="fas fa-plus"></i> Nouvelle livraison</button>' +
+            '<h1>📦 Livraisons</h1>' +
+            '<button class="btn btn-primary" onclick="showAddLivraison()">➕ Nouvelle livraison</button>' +
         '</div>' +
         '<div class="stats-grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:14px;">' +
-            '<div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-clock"></i></div><div class="stat-info"><div class="stat-number" id="statAttente">0</div><div class="stat-label">En attente</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon blue"><i class="fas fa-truck"></i></div><div class="stat-info"><div class="stat-number" id="statCours">0</div><div class="stat-label">En cours</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon green"><i class="fas fa-check-circle"></i></div><div class="stat-info"><div class="stat-number" id="statLivrees">0</div><div class="stat-label">Livrées</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon red"><i class="fas fa-times-circle"></i></div><div class="stat-info"><div class="stat-number" id="statAnnulees">0</div><div class="stat-label">Annulées</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon"><i class="fas fa-coins"></i></div><div class="stat-info"><div class="stat-number" id="statCA">0 Ar</div><div class="stat-label">CA livraisons</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon yellow">🕐</div><div class="stat-info"><div class="stat-number" id="statAttente">0</div><div class="stat-label">En attente</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon blue">🚛</div><div class="stat-info"><div class="stat-number" id="statCours">0</div><div class="stat-label">En cours</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon green">✅</div><div class="stat-info"><div class="stat-number" id="statLivrees">0</div><div class="stat-label">Livrées</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon red">❌</div><div class="stat-info"><div class="stat-number" id="statAnnulees">0</div><div class="stat-label">Annulées</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon">💰</div><div class="stat-info"><div class="stat-number" id="statCA">0 Ar</div><div class="stat-label">CA livraisons</div></div></div>' +
         '</div>' +
         '<div class="card"><table><thead><tr><th>N°</th><th>Type</th><th>Départ</th><th>Arrivée</th><th>Livreur</th><th>Prix</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="livraisonsTable"><tr><td colspan="8">Chargement...</td></tr></tbody></table></div>';
     loadLivraisons();

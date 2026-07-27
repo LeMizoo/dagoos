@@ -1,8 +1,8 @@
 function init_fiche_chauffeur() {
     document.getElementById('mainContent').innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
-        '<h1><i class="fas fa-id-card"></i> Fiche Chauffeur</h1>' +
-        '<div style="display:flex;gap:8px;"><button class="btn btn-edit" onclick="editCurrentDriver()"><i class="fas fa-edit"></i> Modifier</button>' +
-        '<button class="btn btn-primary" onclick="alert(\'Contrat généré !\')"><i class="fas fa-file-contract"></i> Générer contrat</button></div></div>' +
+        '<h1>🪪 Fiche Chauffeur</h1>' +
+        '<div style="display:flex;gap:8px;"><button class="btn btn-edit" onclick="editCurrentDriver()">✏️ Modifier</button>' +
+        '<button class="btn btn-primary" onclick="alert(\'Contrat généré !\')">📝 Générer contrat</button></div></div>' +
         '<div class="card" style="padding:20px;"><div class="form-group"><label>Sélectionner un chauffeur</label><select id="selectChauffeur" onchange="loadChauffeurDetail()" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;"><option value="">-- Sélectionner --</option></select></div>' +
         '<div id="chauffeurDetail" style="margin-top:16px;"></div></div>';
     setTimeout(loadChauffeurList, 100);

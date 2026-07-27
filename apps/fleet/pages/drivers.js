@@ -1,7 +1,7 @@
 function init_drivers() {
     var main = document.getElementById('mainContent');
-    main.innerHTML = '<div class="topbar"><h1><i class="fas fa-users"></i> Chauffeurs</h1>' +
-        '<button class="btn btn-primary" onclick="showAddDriver()"><i class="fas fa-plus"></i> Ajouter</button></div>' +
+    main.innerHTML = '<div class="topbar"><h1>👥 Chauffeurs</h1>' +
+        '<button class="btn btn-primary" onclick="showAddDriver()">➕ Ajouter</button></div>' +
         '<div class="card"><div class="card-header"><h3>Filtres</h3></div>' +
         '<div style="padding:12px;display:flex;gap:10px;"><select id="filterStatus" style="padding:8px;border:1px solid var(--border);border-radius:6px;"><option value="">Tous</option><option value="active">Actif</option><option value="inactive">Inactif</option></select><button class="btn btn-sm btn-primary" onclick="filterDrivers()">Filtrer</button></div></div>' +
         '<div class="card"><table><thead><tr><th>Code</th><th>Nom</th><th>Email</th><th>Propriétaire</th><th>Véhicule</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="driversTable"></tbody></table></div>';
@@ -34,8 +34,8 @@ function renderDrivers(data) {
             '<td>' + vehicleName + '</td>' +
             '<td><span class="badge ' + (d.status === 'active' ? 'badge-success' : 'badge-danger') + '">' + d.status + '</span></td>' +
             '<td class="action-btns">' +
-                '<button class="btn-sm btn-view" onclick="viewDriver(\'' + d.id + '\')"><i class="fas fa-eye"></i></button>' +
-                '<button class="btn-sm btn-edit" onclick="assignDriver(\'' + d.id + '\')"><i class="fas fa-user-plus"></i> Assigner</button>' +
+                '<button class="btn-sm btn-view" onclick="viewDriver(\'' + d.id + '\')">👁</button>' +
+                '<button class="btn-sm btn-edit" onclick="assignDriver(\'' + d.id + '\')">👤 Assigner</button>' +
                 '<button class="btn-sm ' + (d.status === 'active' ? 'btn-suspend' : 'btn-success') + '" onclick="toggleDriver(\'' + d.id + '\',\'' + d.status + '\')"><i class="fas fa-' + (d.status === 'active' ? 'ban' : 'check') + '"></i></button>' +
             '</td></tr>';
     }).join('') : '<tr><td colspan="7">Aucun chauffeur</td></tr>';

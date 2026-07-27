@@ -1,6 +1,6 @@
 function init_payments() {
     var h = '';
-    h += '<div class="topbar"><h1><i class="fas fa-coins"></i> Paiements</h1></div>';
+    h += '<div class="topbar"><h1>💰 Paiements</h1></div>';
     
     // Stats
     h += '<div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px;">';
@@ -11,7 +11,7 @@ function init_payments() {
     h += '</div>';
     
     // Configuration
-    h += '<div class="card" style="padding:24px;"><h3><i class="fas fa-cog"></i> Configuration des paiements</h3>';
+    h += '<div class="card" style="padding:24px;"><h3>⚙️ Configuration des paiements</h3>';
     h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">';
     
     var methods = [
@@ -27,7 +27,7 @@ function init_payments() {
         h += '<div class="form-group"><label>Actif</label><select id="' + m.id + '_actif" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"><option>Oui</option><option>Non</option></select></div>';
         h += '<div class="form-group"><label>Numero marchand</label><input id="' + m.id + '_num" value="0340000000" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"></div>';
         h += '<div class="form-group"><label>Frais (%)</label><input id="' + m.id + '_frais" value="1" style="width:80px;padding:8px;border:1px solid var(--border);border-radius:6px;"></div>';
-        h += '<div style="display:flex;gap:8px;margin-top:8px;"><button class="btn-sm btn-success" onclick="savePayment(\'' + m.id + '\')"><i class="fas fa-save"></i> Enregistrer</button></div>';
+        h += '<div style="display:flex;gap:8px;margin-top:8px;"><button class="btn-sm btn-success" onclick="savePayment(\'' + m.id + '\')">💾 Enregistrer</button></div>';
         h += '</div>';
     });
     
@@ -39,13 +39,13 @@ function init_payments() {
     h += '<div class="form-group"><label>Numero de recu</label><input id="cash_recu" placeholder="N recu" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"></div>';
     h += '<div class="form-group"><label>Motifs</label><input id="cash_motif" placeholder="Motif du paiement" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"></div>';
     h += '<div class="form-group"><label>Montant TTC (Ar)</label><input type="number" id="cash_montant" placeholder="0" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"></div>';
-    h += '<div style="display:flex;gap:8px;margin-top:8px;"><button class="btn-sm btn-success" onclick="savePayment(\'cash\')"><i class="fas fa-save"></i> Enregistrer</button></div>';
+    h += '<div style="display:flex;gap:8px;margin-top:8px;"><button class="btn-sm btn-success" onclick="savePayment(\'cash\')">💾 Enregistrer</button></div>';
     h += '</div>';
     
     h += '</div></div>';
     
     // Journal des transactions
-    h += '<div class="card" style="padding:24px;margin-top:20px;"><h3><i class="fas fa-history"></i> Journal des transactions</h3>';
+    h += '<div class="card" style="padding:24px;margin-top:20px;"><h3>📋 Journal des transactions</h3>';
     h += '<table><thead><tr><th>Date</th><th>Organisation</th><th>Montant</th><th>Methode</th><th>Actions</th></tr></thead><tbody id="transactionsTable">';
     h += '<tr><td colspan="5" style="text-align:center;color:var(--text2);">Chargement...</td></tr>';
     h += '</tbody></table></div>';
@@ -111,7 +111,7 @@ async function loadTransactions() {
                 var org = details.organisation || 'Systeme';
                 var methode = t.action.replace('PAYMENT_', '');
                 var badgeColor = methode === 'cash' ? 'badge-success' : 'badge-info';
-                return '<tr><td>' + new Date(t.createdAt).toLocaleString('fr') + '</td><td>' + org + '</td><td>' + montant + ' Ar</td><td><span class="badge ' + badgeColor + '">' + methode + '</span></td><td><button class="btn-sm btn-view" onclick="viewTransaction(\'' + t.id + '\')"><i class="fas fa-eye"></i></button></td></tr>';
+                return '<tr><td>' + new Date(t.createdAt).toLocaleString('fr') + '</td><td>' + org + '</td><td>' + montant + ' Ar</td><td><span class="badge ' + badgeColor + '">' + methode + '</span></td><td><button class="btn-sm btn-view" onclick="viewTransaction(\'' + t.id + '\')">👁</button></td></tr>';
             }).join('');
         } else {
             table.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text2);">Aucune transaction</td></tr>';

@@ -1,5 +1,5 @@
 function init_coops_chauffeurs() {
-    document.getElementById('mainInner').innerHTML = '<div class="topbar"><h1><i class="fas fa-users"></i> Chauffeurs des Coopératives</h1></div>' +
+    document.getElementById('mainInner').innerHTML = '<div class="topbar"><h1>👥 Chauffeurs des Coopératives</h1></div>' +
         '<div class="card"><table><thead><tr><th>Code</th><th>Nom</th><th>Coopérative</th><th>Statut</th></tr></thead><tbody id="ccTable"><tr><td colspan="4">Chargement...</td></tr></tbody></table></div>';
     loadCC();
 }

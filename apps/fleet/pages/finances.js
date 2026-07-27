@@ -2,9 +2,9 @@ function init_finances() {
     var main = document.getElementById('mainContent');
     main.innerHTML = 
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
-            '<h1><i class="fas fa-coins"></i> Finances</h1>' +
+            '<h1>💰 Finances</h1>' +
             '<div style="display:flex;gap:6px;">' +
-                '<button class="btn btn-primary" onclick="showAddCourse()"><i class="fas fa-plus"></i> Course</button>' +
+                '<button class="btn btn-primary" onclick="showAddCourse()">➕ Course</button>' +
                 '<button class="btn btn-sm" style="background:#E74C3C;color:white;" onclick="showAddDepense()"><i class="fas fa-minus"></i> Dépense</button>' +
             '</div>' +
         '</div>' +
@@ -21,7 +21,7 @@ function init_finances() {
         '</div>' +
         
         // DERNIÈRES TRANSACTIONS
-        '<div class="card"><div class="card-header"><h3><i class="fas fa-history"></i> Dernières transactions</h3></div>' +
+        '<div class="card"><div class="card-header"><h3>📋 Dernières transactions</h3></div>' +
         '<table><thead><tr><th>Date</th><th>Type</th><th>Détail</th><th>Montant</th></tr></thead><tbody id="txTable"><tr><td colspan="4">Chargement...</td></tr></tbody></table></div>';
     loadFinances();
 }
@@ -47,10 +47,10 @@ async function loadFinances() {
         }, 0);
         
         document.getElementById('financeStats').innerHTML = 
-            '<div class="stat-card"><div class="stat-icon green"><i class="fas fa-coins"></i></div><div class="stat-info"><div class="stat-number">' + caJour.toLocaleString() + ' Ar</div><div class="stat-label">CA aujourd\'hui</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon red"><i class="fas fa-hand-holding-usd"></i></div><div class="stat-info"><div class="stat-number">' + commissionsJour.toLocaleString() + ' Ar</div><div class="stat-label">Commissions</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon blue"><i class="fas fa-wallet"></i></div><div class="stat-info"><div class="stat-number">' + netJour.toLocaleString() + ' Ar</div><div class="stat-label">Net aujourd\'hui</div></div></div>' +
-            '<div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-calendar-alt"></i></div><div class="stat-info"><div class="stat-number">' + (stats.caMois || 0).toLocaleString() + ' Ar</div><div class="stat-label">CA ce mois</div></div></div>';
+            '<div class="stat-card"><div class="stat-icon green">💰</div><div class="stat-info"><div class="stat-number">' + caJour.toLocaleString() + ' Ar</div><div class="stat-label">CA aujourd\'hui</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon red">💵</div><div class="stat-info"><div class="stat-number">' + commissionsJour.toLocaleString() + ' Ar</div><div class="stat-label">Commissions</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon blue">👛</div><div class="stat-info"><div class="stat-number">' + netJour.toLocaleString() + ' Ar</div><div class="stat-label">Net aujourd\'hui</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon yellow">📅</div><div class="stat-info"><div class="stat-number">' + (stats.caMois || 0).toLocaleString() + ' Ar</div><div class="stat-label">CA ce mois</div></div></div>';
         
         // Entrées (CA courses)
         document.getElementById('entreesTable').innerHTML = 

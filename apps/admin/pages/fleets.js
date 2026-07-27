@@ -1,5 +1,5 @@
 function init_fleets() {
-    document.getElementById('mainInner').innerHTML = '<div class="topbar"><h1><i class="fas fa-truck"></i> Flottes</h1><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="addOrg(\'FLEET_MANAGER\')"><i class="fas fa-plus"></i> Ajouter</button><button class="btn btn-sm" style="background:var(--border);" onclick="exportCSV(\'fleets\')"><i class="fas fa-download"></i> CSV</button></div></div><div class="card"><table><thead><tr><th>Nom</th><th>Code</th><th>Email</th><th>Plan</th><th>Véhicules</th><th>Chauffeurs</th><th>Propriétaires</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="fleetsTable"></tbody></table></div>';
+    document.getElementById('mainInner').innerHTML = '<div class="topbar"><h1>🚛 Flottes</h1><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="addOrg(\'FLEET_MANAGER\')">➕ Ajouter</button><button class="btn btn-sm" style="background:var(--border);" onclick="exportCSV(\'fleets\')"><i class="fas fa-download"></i> CSV</button></div></div><div class="card"><table><thead><tr><th>Nom</th><th>Code</th><th>Email</th><th>Plan</th><th>Véhicules</th><th>Chauffeurs</th><th>Propriétaires</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="fleetsTable"></tbody></table></div>';
     loadFleets();
 }
 
@@ -24,8 +24,8 @@ async function loadFleets() {
         });
         statusSelect += '</select>';
         
-        var actions = '<button class="btn-sm btn-view" onclick="viewOrgDetail(\'' + o.id + '\')"><i class="fas fa-eye"></i> Détail</button>';
-        actions += '<button class="btn-sm btn-edit" onclick="editOrg(\'' + o.id + '\')"><i class="fas fa-edit"></i></button>';
+        var actions = '<button class="btn-sm btn-view" onclick="viewOrgDetail(\'' + o.id + '\')">👁 Détail</button>';
+        actions += '<button class="btn-sm btn-edit" onclick="editOrg(\'' + o.id + '\')">✏️</button>';
         
         return '<tr><td><strong>' + o.name + '</strong></td><td><code>FL-' + o.code + '</code></td><td>' + (o.email || 'N/A') + '</td><td>' + (o.plan || 'Freemium') + '</td><td><span class="badge badge-info">' + nbVehicles + '</span></td><td><span class="badge badge-info">' + nbDrivers + '</span></td><td><span class="badge badge-info">' + nbProps + '</span></td><td>' + statusSelect + '</td><td class="action-btns">' + actions + '</td></tr>';
     }).join('') || '<tr><td colspan="9">Aucune flotte</td></tr>';

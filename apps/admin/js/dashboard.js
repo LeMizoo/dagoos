@@ -14,7 +14,7 @@ var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
 
 if (!token || (user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN')) { window.location.href = LOGIN_URL; }
 
-document.getElementById('sidebarUser').textContent = '<i class="fas fa-crown"></i> ' + (user.name || user.email);
+document.getElementById('sidebarUser').textContent = '👑 ' + (user.name || user.email);
 document.getElementById('sidebarAvatar').textContent = (user.name || 'A')[0].toUpperCase();
 
 function logout() { localStorage.clear(); window.location.href = LANDING_URL; }
@@ -75,17 +75,17 @@ function loadPage(page) {
 function getTableHTML(type, title, showAdd) {
     var cols = (type === 'flottes' || type === 'coops') ? '<th>Nom</th><th>Code</th><th>Email</th><th>Chauffeurs</th><th>Plan</th><th>Statut</th><th>Actions</th>' : '<th>Date</th><th>Utilisateur</th><th>Action</th><th>Details</th>';
     if (type === 'drivers') cols = '<th>Code</th><th>Nom</th><th>Organisation</th><th>Statut</th><th>Actions</th>';
-    var addBtn = showAdd ? '<button class="btn btn-primary btn-sm" onclick="addOrg(\'' + (type === 'flottes' ? 'FLEET_MANAGER' : 'COOPERATIVE') + '\')"><i class="fas fa-plus"></i> Ajouter</button>' : '';
+    var addBtn = showAdd ? '<button class="btn btn-primary btn-sm" onclick="addOrg(\'' + (type === 'flottes' ? 'FLEET_MANAGER' : 'COOPERATIVE') + '\')">➕ Ajouter</button>' : '';
     return '<div class="topbar"><h1>' + title + '</h1><div style="display:flex;gap:8px;">' + addBtn + '<button class="btn btn-sm" style="background:var(--border);" onclick="exportCSV(\'' + type + '\')"><i class="fas fa-download"></i> CSV</button></div></div><div class="card"><table><thead><tr>' + cols + '</tr></thead><tbody id="' + type + 'Table"></tbody></table></div>';
 }
 
 function getMessagesHTML() {
-    return '<div class="topbar"><h1>Messages</h1><button class="btn btn-primary btn-sm" onclick="newMessage()"><i class="fas fa-plus"></i> Nouveau message</button></div><div class="card"><table><thead><tr><th>De</th><th>Sujet</th><th>Message</th><th>Type</th><th>Date</th><th>Actions</th></tr></thead><tbody id="messagesTable"></tbody></table></div>';
+    return '<div class="topbar"><h1>Messages</h1><button class="btn btn-primary btn-sm" onclick="newMessage()">➕ Nouveau message</button></div><div class="card"><table><thead><tr><th>De</th><th>Sujet</th><th>Message</th><th>Type</th><th>Date</th><th>Actions</th></tr></thead><tbody id="messagesTable"></tbody></table></div>';
 }
 
 // ===== DASHBOARD =====
 function getDashboardHTML() {
-    return '<div class="topbar"><div><h1>Tableau de bord</h1><p id="currentDate" style="color:var(--text2);font-size:13px;"></p></div><div style="display:flex;align-items:center;gap:12px;"><span id="apiStatus" style="font-size:12px;padding:4px 10px;border-radius:50px;"></span><button onclick="loadDashboardStats()" style="padding:8px;background:var(--border);border:none;border-radius:8px;cursor:pointer;"><i class="fas fa-sync-alt"></i></button><span id="lastRefresh" style="font-size:11px;color:var(--text2);"></span></div></div><div class="stats-grid" id="statsGrid"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;"><div class="card"><div class="card-header"><h3>Activites</h3></div><div style="padding:0 18px 14px;max-height:280px;overflow-y:auto;" id="recentActivities"></div></div><div class="card"><div class="card-header"><h3>Inscriptions</h3></div><div style="padding:0 18px 14px;max-height:280px;overflow-y:auto;" id="recentUsers"></div></div></div>';
+    return '<div class="topbar"><div><h1>Tableau de bord</h1><p id="currentDate" style="color:var(--text2);font-size:13px;"></p></div><div style="display:flex;align-items:center;gap:12px;"><span id="apiStatus" style="font-size:12px;padding:4px 10px;border-radius:50px;"></span><button onclick="loadDashboardStats()" style="padding:8px;background:var(--border);border:none;border-radius:8px;cursor:pointer;">🔄</button><span id="lastRefresh" style="font-size:11px;color:var(--text2);"></span></div></div><div class="stats-grid" id="statsGrid"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;"><div class="card"><div class="card-header"><h3>Activites</h3></div><div style="padding:0 18px 14px;max-height:280px;overflow-y:auto;" id="recentActivities"></div></div><div class="card"><div class="card-header"><h3>Inscriptions</h3></div><div style="padding:0 18px 14px;max-height:280px;overflow-y:auto;" id="recentUsers"></div></div></div>';
 }
 
 async function loadDashboardStats() {
@@ -103,7 +103,7 @@ async function loadDashboardStats() {
         driversData = res[2].ok ? await res[2].json() : [];
         var fleets = orgsData.filter(function(o) { return o.type === 'FLEET_MANAGER'; }).length;
         var coops = orgsData.filter(function(o) { return o.type === 'COOPERATIVE'; }).length;
-        if (el('statsGrid')) el('statsGrid').innerHTML = '<div class="stat-card"><div class="stat-icon blue"><i class="fas fa-dollar-sign"></i></div><div class="stat-info"><div class="stat-number" id="adminRevenus">-</div><div class="stat-label">Revenus</div></div></div><div class="stat-card"><div class="stat-icon green"><i class="fas fa-shopping-cart"></i></div><div class="stat-info"><div class="stat-number" id="adminCourses">-</div><div class="stat-label">Courses</div></div></div><div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-users"></i></div><div class="stat-info"><div class="stat-number">' + driversData.length + '</div><div class="stat-label">Chauffeurs</div></div></div><div class="stat-card"><div class="stat-icon red"><i class="fas fa-building"></i></div><div class="stat-info"><div class="stat-number">' + fleets + ' / ' + coops + '</div><div class="stat-label">Flottes & Coops</div></div></div>';
+        if (el('statsGrid')) el('statsGrid').innerHTML = '<div class="stat-card"><div class="stat-icon blue">💲</div><div class="stat-info"><div class="stat-number" id="adminRevenus">-</div><div class="stat-label">Revenus</div></div></div><div class="stat-card"><div class="stat-icon green"><i class="fas fa-shopping-cart"></i></div><div class="stat-info"><div class="stat-number" id="adminCourses">-</div><div class="stat-label">Courses</div></div></div><div class="stat-card"><div class="stat-icon yellow">👥</div><div class="stat-info"><div class="stat-number">' + driversData.length + '</div><div class="stat-label">Chauffeurs</div></div></div><div class="stat-card"><div class="stat-icon red">🏢</div><div class="stat-info"><div class="stat-number">' + fleets + ' / ' + coops + '</div><div class="stat-label">Flottes & Coops</div></div></div>';
         ['fleetCount','coopCount','driverCount'].forEach(function(id) { var e = el(id); if (e) e.textContent = id === 'driverCount' ? driversData.length : (id === 'fleetCount' ? fleets : coops); });
         if (el('apiStatus')) { el('apiStatus').innerHTML = 'API Online'; el('apiStatus').style.background = '#D1FAE5'; el('apiStatus').style.color = '#065F46'; }
     } catch (e) { if (el('apiStatus')) { el('apiStatus').innerHTML = 'API Offline'; el('apiStatus').style.background = '#FEE2E2'; el('apiStatus').style.color = '#991B1B'; } }
@@ -125,15 +125,15 @@ async function loadOrgs(type, orgType) {
         items.forEach(function(o) {
             var count = driversData.filter(function(d) { return d.organization && d.organization.code === o.code; }).length;
             var statusBadge = o.status === 'active' ? 'badge-success' : o.status === 'pending' ? 'badge-warning' : 'badge-danger';
-            var actions = '<button class="btn-sm btn-view" onclick="viewOrg(\'' + o.id + '\')"><i class="fas fa-eye"></i></button>';
-            actions += '<button class="btn-sm btn-edit" onclick="editOrg(\'' + o.id + '\')"><i class="fas fa-edit"></i></button>';
+            var actions = '<button class="btn-sm btn-view" onclick="viewOrg(\'' + o.id + '\')">👁</button>';
+            actions += '<button class="btn-sm btn-edit" onclick="editOrg(\'' + o.id + '\')">✏️</button>';
             if (o.status === 'pending') {
-                actions += '<button class="btn-sm btn-success" onclick="validateOrg(\'' + o.id + '\')"><i class="fas fa-check"></i></button>';
-                actions += '<button class="btn-sm btn-suspend" onclick="rejectOrg(\'' + o.id + '\')"><i class="fas fa-times"></i></button>';
+                actions += '<button class="btn-sm btn-success" onclick="validateOrg(\'' + o.id + '\')">✅</button>';
+                actions += '<button class="btn-sm btn-suspend" onclick="rejectOrg(\'' + o.id + '\')">❌</button>';
             } else if (o.status === 'active') {
-                actions += '<button class="btn-sm btn-suspend" onclick="toggleOrgStatus(\'' + o.id + '\',\'active\')"><i class="fas fa-ban"></i></button>';
+                actions += '<button class="btn-sm btn-suspend" onclick="toggleOrgStatus(\'' + o.id + '\',\'active\')">🚫</button>';
             } else if (o.status === 'suspended') {
-                actions += '<button class="btn-sm btn-success" onclick="toggleOrgStatus(\'' + o.id + '\',\'suspended\')"><i class="fas fa-check"></i></button>';
+                actions += '<button class="btn-sm btn-success" onclick="toggleOrgStatus(\'' + o.id + '\',\'suspended\')">✅</button>';
             }
             html += '<tr><td><img src="' + (o.logo || 'assets/logo/b-trans.png') + '" class="logo-cell" style="vertical-align:middle;margin-right:8px;"><strong>' + o.name + '</strong></td><td><code>' + (orgType === 'FLEET_MANAGER' ? 'FL-' : 'CO-') + o.code + '</code></td><td>' + (o.email || 'N/A') + '</td><td>' + count + '</td><td><span class="badge badge-info">' + (o.plan || 'Freemium') + '</span></td><td><span class="badge ' + statusBadge + '">' + o.status + '</span></td><td class="action-btns">' + actions + '</td></tr>';
         });

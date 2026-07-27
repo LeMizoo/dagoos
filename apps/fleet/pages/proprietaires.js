@@ -2,8 +2,8 @@ function init_proprietaires() {
     var main = document.getElementById('mainContent');
     main.innerHTML = 
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
-            '<h1><i class="fas fa-building"></i> Propriétaires</h1>' +
-            '<button class="btn btn-primary" onclick="showAddProprietaire()"><i class="fas fa-plus"></i> Nouveau propriétaire</button>' +
+            '<h1>🏢 Propriétaires</h1>' +
+            '<button class="btn btn-primary" onclick="showAddProprietaire()">➕ Nouveau propriétaire</button>' +
         '</div>' +
         '<div class="card"><table><thead><tr><th>Nom</th><th>CIN</th><th>Téléphone</th><th>Email</th><th>Véhicules</th><th>Contrat</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="propTable"><tr><td colspan="8">Chargement...</td></tr></tbody></table></div>';
     setTimeout(loadProprietaires, 100);
@@ -25,8 +25,8 @@ async function loadProprietaires() {
             '<td><span class="badge ' + contratBadge + '">' + contratLabel + '</span></td>' +
             '<td><span class="badge ' + (p.status === 'active' ? 'badge-success' : 'badge-danger') + '">' + p.status + '</span></td>' +
             '<td class="action-btns">' +
-                '<button class="btn-sm btn-view" onclick="viewProprietaire(\'' + p.id + '\')"><i class="fas fa-eye"></i></button>' +
-                '<button class="btn-sm btn-edit" onclick="editProprietaire(\'' + p.id + '\')"><i class="fas fa-edit"></i></button>' +
+                '<button class="btn-sm btn-view" onclick="viewProprietaire(\'' + p.id + '\')">👁</button>' +
+                '<button class="btn-sm btn-edit" onclick="editProprietaire(\'' + p.id + '\')">✏️</button>' +
                 '<button class="btn-sm btn-suspend" onclick="toggleProprietaire(\'' + p.id + '\',\'' + p.status + '\')"><i class="fas fa-' + (p.status === 'active' ? 'ban' : 'check') + '"></i></button>' +
             '</td></tr>';
     }).join('') : '<tr><td colspan="8">Aucun propriétaire</td></tr>';

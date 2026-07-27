@@ -2,26 +2,26 @@ function init_vehicles() {
     var main = document.getElementById('mainContent');
     main.innerHTML = 
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">' +
-            '<h1 style="font-size:20px;"><i class="fas fa-véhiculercycle"></i> Gestion des véhicules</h1>' +
-            '<button class="btn btn-primary" onclick="showAddVehicle()"><i class="fas fa-plus"></i> Nouvelle véhicule</button>' +
+            '<h1 style="font-size:20px;"><i class="fas fa-motorcycle"></i> Gestion des véhicules</h1>' +
+            '<button class="btn btn-primary" onclick="showAddVehicle()">➕ Nouvelle véhicule</button>' +
         '</div>' +
         
         // FILTRES
         '<div class="card" style="margin-bottom:14px;">' +
-            '<div class="card-header"><h3><i class="fas fa-filter"></i> Filtres</h3></div>' +
+            '<div class="card-header"><h3>🔍 Filtres</h3></div>' +
             '<div style="padding:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">' +
                 '<div><label style="font-size:11px;display:block;margin-bottom:2px;">Statut assurance</label><select id="filterAssurance" style="padding:8px;border:1px solid var(--border);border-radius:6px;"><option value="">Tous</option><option value="ok">Valide</option><option value="expire">Expirée</option><option value="bientot">Expire bientôt</option></select></div>' +
                 '<div><label style="font-size:11px;display:block;margin-bottom:2px;">Statut vignette</label><select id="filterVignette" style="padding:8px;border:1px solid var(--border);border-radius:6px;"><option value="">Tous</option><option value="ok">Valide</option><option value="expire">Expirée</option><option value="bientot">Expire bientôt</option></select></div>' +
                 '<div><label style="font-size:11px;display:block;margin-bottom:2px;">Vidange</label><select id="filterVidange" style="padding:8px;border:1px solid var(--border);border-radius:6px;"><option value="">Tous</option><option value="ok">OK</option><option value="bientot">À venir (<500 km)</option><option value="urgent">Urgente (dépassée)</option></select></div>' +
                 '<div><label style="font-size:11px;display:block;margin-bottom:2px;">Recherche</label><input type="text" id="searchVehicle" placeholder="Immatriculation, marque..." style="padding:8px;border:1px solid var(--border);border-radius:6px;width:200px;"></div>' +
-                '<button class="btn btn-sm btn-primary" onclick="filterVehicles()"><i class="fas fa-search"></i> Filtrer</button>' +
-                '<button class="btn btn-sm" style="background:var(--border);" onclick="resetFilters()"><i class="fas fa-undo"></i> Réinitialiser</button>' +
+                '<button class="btn btn-sm btn-primary" onclick="filterVehicles()">🔍 Filtrer</button>' +
+                '<button class="btn btn-sm" style="background:var(--border);" onclick="resetFilters()">↩️ Réinitialiser</button>' +
             '</div>' +
         '</div>' +
         
         // LISTE véhiculeS
         '<div class="card">' +
-            '<div class="card-header"><h3><i class="fas fa-list"></i> Parc véhicule</h3><span style="font-size:11px;color:var(--text2);" id="vehicleCount">- véhicule(s)</span></div>' +
+            '<div class="card-header"><h3>📋 Parc véhicule</h3><span style="font-size:11px;color:var(--text2);" id="vehicleCount">- véhicule(s)</span></div>' +
             '<div style="overflow-x:auto;">' +
                 '<table>' +
                     '<thead><tr><th>Immatriculation</th><th>Marque / Modèle</th><th>Chauffeur</th><th>Km actuels</th><th>Vidange</th><th>Assurance</th><th>Vignette</th><th>Actions</th></tr></thead>' +
@@ -32,7 +32,7 @@ function init_vehicles() {
         
         // LÉGENDE
         '<div class="card" style="margin-top:14px;padding:14px;">' +
-            '<h4 style="font-size:13px;margin-bottom:8px;"><i class="fas fa-info-circle"></i> Légende des statuts</h4>' +
+            '<h4 style="font-size:13px;margin-bottom:8px;">ℹ️ Légende des statuts</h4>' +
             '<div style="display:flex;gap:15px;flex-wrap:wrap;font-size:11px;">' +
                 '<div><span class="badge badge-success">✅ Valide</span> = En règle</div>' +
                 '<div><span class="badge badge-warning">⚠️ Bientôt</span> = Expire dans moins de 30 jours</div>' +
@@ -123,7 +123,7 @@ function renderVehicles(data) {
         if (driver && driver.user) driverName = driver.user.name;
         
         html += '<tr>' +
-            '<td><a href="#" onclick="viewVehicle(\'' + v.id + '\')" style="color:#27AE60;font-weight:600;text-decoration:none;"><i class="fas fa-véhiculercycle"></i> ' + (v.plate || 'N/A') + '</a></td>' +
+            '<td><a href="#" onclick="viewVehicle(\'' + v.id + '\')" style="color:#27AE60;font-weight:600;text-decoration:none;"><i class="fas fa-motorcycle"></i> ' + (v.plate || 'N/A') + '</a></td>' +
             '<td>' + (v.model || 'N/A') + '</td>' +
             '<td>' + (driverName !== 'Non assignée' ? '<i class="fas fa-user"></i> ' + driverName : '<span style="color:#E74C3C;">' + driverName + '</span>') + '</td>' +
             '<td style="font-weight:600;">' + (v.currentKm || 0).toLocaleString() + ' km</td>' +
@@ -131,9 +131,9 @@ function renderVehicles(data) {
             '<td><span class="badge ' + assuranceBadge + '" style="' + assuranceStyle + '">' + assuranceText + '</span></td>' +
             '<td><span class="badge ' + vignetteBadge + '" style="' + vignetteStyle + '">' + vignetteText + '</span></td>' +
             '<td class="action-btns">' +
-                '<button class="btn-sm btn-view" onclick="viewVehicle(\'' + v.id + '\')"><i class="fas fa-eye"></i> Voir</button>' +
-                '<button class="btn-sm btn-edit" onclick="editVehicle(\'' + v.id + '\')"><i class="fas fa-edit"></i> Modifier</button>' +
-                (driverName === 'Non assignée' ? '<button class="btn-sm btn-success" onclick="assignVehicle(\'' + v.id + '\')"><i class="fas fa-user-plus"></i> Assigner</button>' : '<button class="btn-sm btn-suspend" onclick="unassignVehicle(\'' + v.id + '\')"><i class="fas fa-user-slash"></i> Désassigner</button>') +
+                '<button class="btn-sm btn-view" onclick="viewVehicle(\'' + v.id + '\')">👁 Voir</button>' +
+                '<button class="btn-sm btn-edit" onclick="editVehicle(\'' + v.id + '\')">✏️ Modifier</button>' +
+                (driverName === 'Non assignée' ? '<button class="btn-sm btn-success" onclick="assignVehicle(\'' + v.id + '\')">👤 Assigner</button>' : '<button class="btn-sm btn-suspend" onclick="unassignVehicle(\'' + v.id + '\')"><i class="fas fa-user-slash"></i> Désassigner</button>') +
             '</td></tr>';
     });
     

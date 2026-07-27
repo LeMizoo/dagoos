@@ -13,9 +13,9 @@ app.use(express.json());
 // ===== ROUTES =====
 app.get('/', (req, res) => {
   res.json({
-    message: '<i class="fas fa-rocket"></i> Dagoo\'s API - La mobilité connectée... Chez les potes, ça roule.',
+    message: '🚀 Dagoo\'s API - La mobilité connectée... Chez les potes, ça roule.',
     version: '1.0.0',
-    status: 'Dago ready ! <i class="fas fa-flag"></i>'
+    status: 'Dago ready ! 🇲🇬'
   });
 });
 
@@ -581,7 +581,7 @@ app.put("/api/livraisons/:id", authMiddleware, async (req, res) => {
 
 // ===== DÉMARRAGE =====
 app.listen(port, () => {
-  console.log(`<i class="fas fa-check-circle"></i> Dagoo's API lancée sur http://localhost:${port}`);
-  console.log(`<i class="fas fa-flag"></i>  Salama Dago !`);
+  console.log(`✅ Dagoo's API lancée sur http://localhost:${port}`);
+  console.log("🇲🇬 Salama Dago !");
 }); 
  

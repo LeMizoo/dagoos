@@ -1,9 +1,9 @@
 function init_fiche_vehicule() {
     var main = document.getElementById('mainContent');
     main.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
-        '<h1><i class="fas fa-file-alt"></i> Fiche Véhicule</h1>' +
-        '<div style="display:flex;gap:8px;"><button class="btn btn-edit" onclick="editCurrentVehicle()"><i class="fas fa-edit"></i> Modifier</button>' +
-        '<button class="btn btn-primary" onclick="showAddVehicle()"><i class="fas fa-plus"></i> Nouveau véhicule</button></div></div>' +
+        '<h1>📄 Fiche Véhicule</h1>' +
+        '<div style="display:flex;gap:8px;"><button class="btn btn-edit" onclick="editCurrentVehicle()">✏️ Modifier</button>' +
+        '<button class="btn btn-primary" onclick="showAddVehicle()">➕ Nouveau véhicule</button></div></div>' +
         '<div class="card" style="padding:20px;"><div class="form-group"><label>Sélectionner un véhicule</label><select id="selectVehicle" onchange="loadVehicleDetail()" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;"><option value="">-- Sélectionner --</option></select></div>' +
         '<div id="vehicleDetail" style="margin-top:16px;"></div></div>';
     loadVehicleList();
@@ -71,7 +71,7 @@ async function loadVehicleDetail() {
     detail += '<input type="date" id="vidangeDate" style="padding:8px;border:1px solid var(--border);border-radius:6px;">';
     detail += '<input type="number" id="vidangeNext" value="' + ((v.currentKm || 0) + 3000) + '" style="padding:8px;border:1px solid var(--border);border-radius:6px;width:100px;">';
     detail += '<input type="number" id="vidangeCost" placeholder="Cout (Ar)" style="padding:8px;border:1px solid var(--border);border-radius:6px;width:100px;">';
-    detail += '<button class="btn btn-primary" onclick="validerVidange()"><i class="fas fa-check"></i> Valider la vidange</button></div></div>';
+    detail += '<button class="btn btn-primary" onclick="validerVidange()">✅ Valider la vidange</button></div></div>';
     
     document.getElementById('vehicleDetail').innerHTML = detail;
 }

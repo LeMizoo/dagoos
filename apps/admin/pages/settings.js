@@ -1,13 +1,13 @@
 function init_settings() {
     var main = document.getElementById('mainInner');
-    main.innerHTML = '<div class="topbar"><h1><i class="fas fa-cog"></i> Parametres</h1></div>' +
+    main.innerHTML = '<div class="topbar"><h1>⚙️ Parametres</h1></div>' +
         '<div style="display:flex;gap:0;margin-bottom:24px;background:var(--card);border-radius:14px;overflow:hidden;">' +
             '<button class="settings-tab active" id="tab-FLOTTE" onclick="switchSettingsTab(\'FLOTTE\')" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">Plans Flotte</button>' +
             '<button class="settings-tab" id="tab-COOP" onclick="switchSettingsTab(\'COOP\')" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">Plans Coop</button>' +
             '<button class="settings-tab" id="tab-LANDING" onclick="switchSettingsTab(\'LANDING\')" style="flex:1;padding:16px;border:none;cursor:pointer;font-weight:600;">Contenu Landing</button>' +
         '</div>' +
         '<div id="settingsContent" style="padding:20px;">Chargement...</div>' +
-        '<button onclick="saveSettings()" style="width:100%;padding:16px;background:#1A5276;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:24px;"><i class="fas fa-save"></i> Enregistrer</button>' +
+        '<button onclick="saveSettings()" style="width:100%;padding:16px;background:#1A5276;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:24px;">💾 Enregistrer</button>' +
         '<div class="card" style="padding:24px;margin-top:24px;"><h3>General</h3>' +
             '<div style="margin-top:16px;"><label>Monnaie</label><select id="monnaie" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;"><option>Ar (Ariary)</option><option>EUR</option><option>USD</option></select></div>' +
             '<div style="margin-top:16px;"><label>Langue</label><select id="langue" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;"><option>Francais</option><option>Malagasy</option><option>English</option></select></div>' +
