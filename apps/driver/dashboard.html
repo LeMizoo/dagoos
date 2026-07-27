@@ -29,6 +29,13 @@
         if (!token || user.role !== 'DRIVER') { window.location.href = 'index.html'; }
         function apiGet(e) { return fetch(API_URL+e,{headers:{Authorization:'Bearer '+token}}).then(function(r){return r.json()}); }
     </script>
+    <div class="bottom-nav">
+        <button onclick="navigate('courses')"><i class="fas fa-history"></i> Courses</button>
+        <button onclick="navigate('stats')"><i class="fas fa-chart-bar"></i> Stats</button>
+        <button onclick="navigate('home')" class="main active"><span class="icon-circle"><i class="fas fa-home"></i></span> Accueil</button>
+        <button onclick="navigate('versements')"><i class="fas fa-coins"></i> Versements</button>
+        <button onclick="navigate('profil')"><i class="fas fa-user"></i> Profil</button>
+    </div>
     <script src="js/router.js"></script>
 </body>
 </html>
