@@ -21,7 +21,7 @@ function init_home() {
             '</div>' +
             '<div style="display:flex;gap:4px;">' +
                 '<button onclick="logout()" style="background:rgba(239,68,68,0.15);border:none;width:28px;height:28px;border-radius:50%;color:#F87171;cursor:pointer;font-size:14px;">⏻</button>' +
-                '<span id="statusDot" style="font-size:10px;"></span>' +
+                '<span id="statusDot" style="font-size:10px;"></span><span id="onlineStatus" style="font-size:10px;color:#94A3B8;"></span>' +
             '</div>' +
         '</div>' +
         
@@ -95,32 +95,27 @@ var kmDepart = localStorage.getItem('kmDepart') || '';
 
 function updateTime() {
     var now = new Date();
-    updateStatusBar();
-    if (onlineEl) onlineEl.textContent = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    var onlineEl = document.getElementById("onlineStatus");
+    if (onlineEl) onlineEl.textContent = now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 }
 
 function updateStatusBar() {
-    var badge = document.getElementById('statusBadge');
+    var badge = document.getElementById("statusBadge");
+    var dot = document.getElementById("statusDot");
+    var kmDiv = document.getElementById("kmDepartDiv");
     var statusInfo = {
-        EN_SERVICE: { color: '#22C55E', bg: 'rgba(34,197,94,0.2)', label: 'En service' },
-        EN_PAUSE: { color: '#EAB308', bg: 'rgba(234,179,8,0.2)', label: 'En pause' },
-        HORS_SERVICE: { color: '#EF4444', bg: 'rgba(239,68,68,0.2)', label: 'Hors service' }
+        EN_SERVICE: { icon: "🟢", color: "#22C55E", bg: "rgba(34,197,94,0.2)", label: "En service" },
+        EN_PAUSE: { icon: "🟡", color: "#EAB308", bg: "rgba(234,179,8,0.2)", label: "En pause" },
+        HORS_SERVICE: { icon: "🔴", color: "#EF4444", bg: "rgba(239,68,68,0.2)", label: "Hors service" }
     };
     var s = statusInfo[currentStatus] || statusInfo.HORS_SERVICE;
-    if (badge) {
-        badge.textContent = s.label;
-        badge.style.background = s.bg;
-        badge.style.color = s.color;
-    var dot = document.getElementById("statusDot"); if (dot) { dot.textContent = s.icon + " " + s.label; dot.style.color = s.color; }
-    }
-    var kmDiv = document.getElementById('kmDepartDiv');
+    if (badge) { badge.textContent = s.label; badge.style.background = s.bg; badge.style.color = s.color; }
+    if (dot) { dot.textContent = s.icon; dot.title = s.label; }
     if (kmDiv) {
-        if (currentStatus === 'EN_SERVICE' && kmDepart) {
-            kmDiv.style.display = 'block';
-            kmDiv.innerHTML = '🏍️ KM départ: <strong>' + kmDepart + '</strong>';
-        } else {
-            kmDiv.style.display = 'none';
-        }
+        if (currentStatus === "EN_SERVICE" && kmDepart) {
+            kmDiv.style.display = "block";
+            kmDiv.innerHTML = "🏍️ KM départ: <strong>" + kmDepart + "</strong>";
+        } else { kmDiv.style.display = "none"; }
     }
 }
 
