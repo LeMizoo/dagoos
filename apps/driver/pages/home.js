@@ -5,6 +5,7 @@
 function init_home() {
     var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
     var main = document.getElementById('mainContent');
+    currentStatus = localStorage.getItem('driverStatus') || 'HORS_SERVICE';
     
     main.innerHTML = 
         // HEADER
@@ -183,13 +184,16 @@ function pointer(type) {
         kmDepart = km;
         localStorage.setItem('kmDepart', km);
         currentStatus = 'EN_SERVICE';
+        localStorage.setItem('driverStatus', 'EN_SERVICE');
     } else if (type === 'PAUSE') {
         currentStatus = currentStatus === 'EN_PAUSE' ? 'EN_SERVICE' : 'EN_PAUSE';
+        localStorage.setItem('driverStatus', currentStatus);
     } else if (type === 'FIN') {
         if (!confirm('Terminer le service ? Distance parcourue depuis ' + kmDepart + ' km ?')) return;
         currentStatus = 'HORS_SERVICE';
         kmDepart = '';
         localStorage.removeItem('kmDepart');
+        localStorage.removeItem('driverStatus');
     }
     updateStatusBar();
 }
