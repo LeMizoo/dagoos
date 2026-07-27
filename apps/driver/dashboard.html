@@ -32,3 +32,55 @@
     <script src="js/router.js"></script>
 </body>
 </html>
+<style>
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #1E293B;
+    border-top: 2px solid #DAA520;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 6px 8px 10px;
+    z-index: 1000;
+}
+.bottom-nav button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    background: none;
+    border: none;
+    color: #64748B;
+    font-size: 10px;
+    cursor: pointer;
+    padding: 6px 10px;
+    transition: 0.3s;
+    font-family: 'Inter', sans-serif;
+    min-width: 55px;
+}
+.bottom-nav button.active {
+    color: #DAA520;
+    font-weight: 600;
+}
+.bottom-nav button.main {
+    color: #DAA520;
+    margin-top: -20px;
+}
+.bottom-nav button.main .icon-circle {
+    width: 50px;
+    height: 50px;
+    background: #DAA520;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: #1A1A2E;
+    box-shadow: 0 4px 15px rgba(218,165,32,0.4);
+}
+.bottom-nav button i { font-size: 18px; }
+.bottom-nav button.main i { font-size: 24px; }
+</style>
