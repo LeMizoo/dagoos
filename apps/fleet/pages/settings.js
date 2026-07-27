@@ -50,7 +50,6 @@ async function loadProfilSettings() {
             '<p style="font-size:20px;">🌐</p><h4>Page vitrine active</h4>' +
             '<a href="' + vitrineUrl + '" target="_blank" style="color:#1A5276;font-weight:600;">' + vitrineUrl + '</a></div>';
     } else {
-        html += '<div style="background:#FEF3C7;border-radius:12px;padding:16px;margin-top:16px;text-align:center;">' +
 html += '<div style="background:#FEF3C7;border-radius:12px;padding:16px;margin-top:16px;text-align:center;"><p>🔒 Page vitrine disponible en Standard ou Premium</p><button class="btn btn-primary" onclick="switchSettingsTab(\'LANDING\')">Créer ma page vitrine</button></div>';
     }
     html += '</div>';
