@@ -9,7 +9,6 @@ if (!localStorage.getItem('dagoos_token') || user.role !== 'FLEET_MANAGER') { wi
 
 document.getElementById('sidebarUser').textContent = '🚛 ' + (user.name || user.email);
     apiGet("/organizations").then(function(orgs) { var org = orgs.find(function(o) { return o.email === user.email; }); if (org) { document.getElementById("sidebarFleetName").innerHTML = org.name; if (org.logo) { document.getElementById("sidebarLogo").src = org.logo; } } });
-    apiGet("/organizations").then(function(orgs) { var org = orgs.find(function(o) { return o.email === user.email; }); if (org) { var nameEl = document.getElementById("sidebarFleetName"); if (nameEl) nameEl.textContent = org.name; } });
 
 function logout() { localStorage.clear(); window.location.href = 'index.html'; }
 
@@ -55,10 +54,6 @@ function loadPageScript(page) {
 }
 
 // ===== MODALS & ACTIONS =====
-function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
-function showModal(title, content, callback) {
-    var html = '<h2>' + title + '</h2>' + content;
-    html += callback ? '<div class="btn-row"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" id="modalSaveBtn">Enregistrer</button></div>' : '<div class="btn-row"><button class="btn btn-primary" onclick="closeModal()">Fermer</button></div>';
     document.getElementById('modalContent').innerHTML = html;
     document.getElementById('modalOverlay').classList.add('show');
     if (callback) document.getElementById('modalSaveBtn').onclick = callback;
