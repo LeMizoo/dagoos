@@ -21,7 +21,7 @@ function init_home() {
             '</div>' +
             '<div style="display:flex;gap:4px;">' +
                 '<button onclick="logout()" style="background:rgba(239,68,68,0.15);border:none;width:28px;height:28px;border-radius:50%;color:#F87171;cursor:pointer;font-size:14px;">⏻</button>' +
-                '<span id="onlineStatus" style="font-size:10px;"></span>' +
+                '<span id="statusDot" style="font-size:10px;"></span>' +
             '</div>' +
         '</div>' +
         
@@ -95,7 +95,7 @@ var kmDepart = localStorage.getItem('kmDepart') || '';
 
 function updateTime() {
     var now = new Date();
-    var onlineEl = document.getElementById('onlineStatus');
+    updateStatusBar();
     if (onlineEl) onlineEl.textContent = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 }
 
@@ -111,6 +111,7 @@ function updateStatusBar() {
         badge.textContent = s.label;
         badge.style.background = s.bg;
         badge.style.color = s.color;
+    var dot = document.getElementById("statusDot"); if (dot) { dot.textContent = s.icon + " " + s.label; dot.style.color = s.color; }
     }
     var kmDiv = document.getElementById('kmDepartDiv');
     if (kmDiv) {
