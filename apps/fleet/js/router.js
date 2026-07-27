@@ -53,12 +53,6 @@ function loadPageScript(page) {
     document.body.appendChild(script);
 }
 
-// ===== MODALS & ACTIONS =====
-    document.getElementById('modalContent').innerHTML = html;
-    document.getElementById('modalOverlay').classList.add('show');
-    if (callback) document.getElementById('modalSaveBtn').onclick = callback;
-}
-
 function showAddVehicle() {
     var h = '<div class="form-group"><label>Immatriculation *</label><input id="addPlate" required></div>';
     h += '<div class="form-group"><label>Marque / Modèle</label><input id="addModel" placeholder="YAMAHA Cygnus"></div>';
