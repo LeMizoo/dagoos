@@ -15,7 +15,6 @@ function init_home() {
         .then(drivers => {
             var driver = drivers.find(d => d.userId === user.id || d.driverCode === user.driverCode);
         localStorage.setItem("current_driverId", driver.id);
-        localStorage.setItem("current_driverId", driver.id);
             if (driver) {
                 currentDriverId = driver.id;
                 localStorage.setItem("driverId", driver.id);
@@ -169,15 +168,15 @@ function calcDistance() {
 }
 
 async function loadDriverStats() {
-async function getDriverId() {
-    var driverId = await getDriverId();
+    try {
+        var user = JSON.parse(localStorage.getItem("dagoos_user") || "{}");
+        var driverId = localStorage.getItem("current_driverId") || user.id;
     var cached = localStorage.getItem('cached_driverId');
     if (cached) return cached;
     
     try {
         var drivers = await apiGet('/drivers');
         var driver = drivers.find(function(d) { 
-        localStorage.setItem("current_driverId", driver.id);
         localStorage.setItem("current_driverId", driver.id);
             return d.userId === user.id || d.driverCode === user.driverCode; 
         });
@@ -263,7 +262,6 @@ async function enregistrerCourse() {
         var drivers = await apiGet('/drivers');
         if (!Array.isArray(drivers)) throw new Error('Impossible de récupérer les chauffeurs');
         var driver = drivers.find(function(item) { return item.id === user.id || item.userId === user.id || item.driverCode === user.driverCode; });
-        localStorage.setItem("current_driverId", driver.id);
         localStorage.setItem("current_driverId", driver.id);
         console.log("DEBUG driver trouvé:", driver);
         if (!driver) throw new Error('Fiche chauffeur introuvable');
