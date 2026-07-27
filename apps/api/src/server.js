@@ -31,6 +31,21 @@ const authController = require('./modules/auth/auth.controller');
 app.post('/api/auth/register', authController.register);
 app.post('/api/auth/login', authController.login);
 app.post('/api/auth/driver-login', authController.driverLogin);
+app.put("/api/auth/profile", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const bcrypt = require("bcryptjs");
+        const prisma = new PrismaClient();
+        const { name, phone, password } = req.body;
+        const data = {};
+        if (name) data.name = name;
+        if (phone) data.phone = phone;
+        if (password) data.password = await bcrypt.hash(password, 10);
+        const user = await prisma.user.update({ where: { id: req.user.id }, data, select: { id: true, name: true, email: true, phone: true, role: true } });
+        res.json(user);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get('/api/auth/profile', authMiddleware, authController.profile);
 
 // ===== ROUTES ORGANISATIONS =====
