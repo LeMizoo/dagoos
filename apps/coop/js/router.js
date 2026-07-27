@@ -33,7 +33,9 @@ function loadPage(page) {
 }
 
 document.querySelectorAll('.sidebar-nav a[data-page]').forEach(function(link) {
-    link.addEventListener('click', function(e) { e.preventDefault(); loadPage(link.dataset.page); });
+    link.addEventListener('click', function(e) { e.preventDefault(); loadPage(link.dataset.page);
+            document.getElementById("sidebar").classList.remove("open");
+            document.getElementById("sidebarOverlay").classList.remove("show"); });
 });
 
 function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
