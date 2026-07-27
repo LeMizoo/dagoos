@@ -198,6 +198,19 @@ async function seed() {
     }
   }
 
+  // === ASSIGNER VÉHICULES AUX CHAUFFEURS ===
+  const allVehicles = await prisma.vehicle.findMany();
+  const allDrivers = await prisma.driver.findMany();
+  
+  // Assigner un véhicule à chaque chauffeur qui n'en a pas
+  for (let i = 0; i < allDrivers.length; i++) {
+    const driver = allDrivers[i];
+    if (!driver.vehicleId && allVehicles[i % allVehicles.length]) {
+      await prisma.driver.update({ where: { id: driver.id }, data: { vehicleId: allVehicles[i % allVehicles.length].id } });
+      console.log("✅ Assigné:", driver.driverCode, "->", allVehicles[i % allVehicles.length].plate);
+    }
+  }
+
   console.log('✅ Seed terminé');
 }
 
