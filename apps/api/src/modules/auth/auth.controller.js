@@ -12,7 +12,7 @@ const DEFAULT_LOGO = 'https://dago-mobility.pages.dev/assets/logo/b-trans.png';
 // ===== INSCRIPTION =====
 exports.register = async (req, res) => {
   try {
-    const { name, email, phone, password, role, logo } = req.body;
+    const { name, email, phone, password, role, logo, plan } = req.body;
 
     if (role && !ALLOWED_REGISTRATION_ROLES.includes(role)) {
       return res.status(403).json({ error: 'Rôle non autorisé.', allowedRoles: ALLOWED_REGISTRATION_ROLES });
@@ -36,10 +36,26 @@ exports.register = async (req, res) => {
       data: {
         name, code, slug, type, email, phone,
         logo: logo || DEFAULT_LOGO,
-        plan: 'Freemium',
+        plan: plan || 'Freemium',
         status: 'pending'
       }
     });
+
+    // Créer automatiquement la landing page si plan Standard ou Premium
+    if (plan === 'Standard' || plan === 'Premium') {
+      const sections = ['hero', 'apps', 'features', 'about', 'cta', 'footer'];
+      const defaults = {
+        hero: { title: name, subtitle: 'Service de transport a Madagascar' },
+        apps: { title: 'Nos services' },
+        features: { title: 'Pourquoi nous choisir' },
+        about: { title: 'A propos de ' + name },
+        cta: { title: 'Contactez-nous' },
+        footer: { title: name, subtitle: '(c) 2026' }
+      };
+      for (const sec of sections) {
+        await prisma.landingContent.create({ data: { section: sec + '-' + slug, title: defaults[sec].title, subtitle: defaults[sec].subtitle, body: '', active: true } });
+      }
+    }
 
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 
