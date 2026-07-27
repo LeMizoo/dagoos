@@ -198,7 +198,6 @@ async function getDriverId() {
         var courses = await apiGet('/courses');
         console.log("DEBUG courses:", courses.slice(0, 2));
         var myCourses = courses.filter(function(c) { return c.driverId === driverId; });
-        console.log("Stats filtrées - driverId:", driverId, "courses trouvées:", myCourses.length);
         console.log("DEBUG: total courses:", courses.length, "myCourses:", myCourses.length, "userId:", user.driverId);
         console.log("DEBUG: first course sample:", courses[0]);
         var today = new Date().toISOString().split('T')[0];
