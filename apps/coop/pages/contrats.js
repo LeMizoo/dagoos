@@ -6,93 +6,112 @@ function init_contrats() {
             '<button class="btn btn-primary" onclick="showAddContrat()"><i class="fas fa-plus"></i> Nouveau contrat</button>' +
         '</div>' +
         '<div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px;">' +
-            '<div class="stat-card"><div class="stat-icon green"><i class="fas fa-check-circle"></i></div><div class="stat-info"><div class="stat-number" id="statActifs">0</div><div class="stat-label">Contrats actifs</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon green"><i class="fas fa-check-circle"></i></div><div class="stat-info"><div class="stat-number" id="statActifs">0</div><div class="stat-label">Actifs</div></div></div>' +
             '<div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-clock"></i></div><div class="stat-info"><div class="stat-number" id="statExpire">0</div><div class="stat-label">Expire bientôt</div></div></div>' +
             '<div class="stat-card"><div class="stat-icon red"><i class="fas fa-ban"></i></div><div class="stat-info"><div class="stat-number" id="statResilies">0</div><div class="stat-label">Résiliés</div></div></div>' +
             '<div class="stat-card"><div class="stat-icon blue"><i class="fas fa-coins"></i></div><div class="stat-info"><div class="stat-number" id="statCA">0 Ar</div><div class="stat-label">CA contrats</div></div></div>' +
         '</div>' +
-        '<div class="card"><div class="card-header"><h3><i class="fas fa-list"></i> Liste des contrats</h3></div>' +
-        '<table><thead><tr><th>N°</th><th>Client</th><th>Société</th><th>Type</th><th>Début</th><th>Fin</th><th>Montant</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="contratsTable"><tr><td colspan="9">Chargement...</td></tr></tbody></table></div>';
+        '<div class="card"><table><thead><tr><th>Client</th><th>Type</th><th>Début</th><th>Fin</th><th>Montant</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="contratsTable"><tr><td colspan="7">Chargement...</td></tr></tbody></table></div>';
     loadContrats();
 }
 
-var contratsData = [];
-
 async function loadContrats() {
     try {
-        var res = await apiGet('/contrats');
-        contratsData = res || [];
-        renderContrats();
-    } catch(e) {
-        // Données de démonstration en attendant l'API
-        contratsData = [
-            { id: '1', client: 'École Les Flamboyants', societe: 'Coop Tana', type: 'Transport scolaire', dateDebut: '2026-01-01', dateFin: '2026-12-31', montant: 1200000, statut: 'actif' },
-            { id: '2', client: 'Restaurant Le Gourmet', societe: 'Coop Tana', type: 'Livraison plats', dateDebut: '2026-03-01', dateFin: '2026-08-31', montant: 600000, statut: 'actif' },
-            { id: '3', client: 'Société Logistique Express', societe: 'Coop Tana', type: 'Logistique', dateDebut: '2026-06-01', dateFin: '2027-06-01', montant: 2400000, statut: 'expire_bientot' }
-        ];
-        renderContrats();
-    }
-}
-
-function renderContrats() {
-    var html = '';
-    var actifs = 0, expire = 0, resilies = 0, totalCA = 0;
-    
-    contratsData.forEach(function(c) {
-        if (c.statut === 'actif') actifs++;
-        else if (c.statut === 'expire_bientot') expire++;
-        else if (c.statut === 'resilie') resilies++;
-        totalCA += c.montant || 0;
+        var contrats = await apiGet('/contrats');
+        var actifs = 0, expire = 0, resilies = 0, totalCA = 0;
         
-        var statutBadge = c.statut === 'actif' ? 'badge-success' : c.statut === 'expire_bientot' ? 'badge-warning' : 'badge-danger';
-        var statutLabel = c.statut === 'actif' ? 'Actif' : c.statut === 'expire_bientot' ? 'Expire bientôt' : 'Résilié';
+        contrats.forEach(function(c) {
+            if (c.statut === 'actif') actifs++;
+            else if (c.statut === 'expire_bientot') expire++;
+            else if (c.statut === 'resilie') resilies++;
+            totalCA += c.montant || 0;
+        });
         
-        html += '<tr>' +
-            '<td><code>#' + c.id + '</code></td>' +
-            '<td><strong>' + c.client + '</strong></td>' +
-            '<td>' + c.societe + '</td>' +
-            '<td>' + c.type + '</td>' +
-            '<td>' + new Date(c.dateDebut).toLocaleDateString('fr-FR') + '</td>' +
-            '<td>' + new Date(c.dateFin).toLocaleDateString('fr-FR') + '</td>' +
-            '<td><strong>' + (c.montant || 0).toLocaleString() + ' Ar</strong></td>' +
-            '<td><span class="badge ' + statutBadge + '">' + statutLabel + '</span></td>' +
-            '<td class="action-btns">' +
-                '<button class="btn-sm btn-view" onclick="viewContrat(\'' + c.id + '\')"><i class="fas fa-eye"></i></button>' +
-                '<button class="btn-sm btn-edit" onclick="editContrat(\'' + c.id + '\')"><i class="fas fa-edit"></i></button>' +
-            '</td></tr>';
-    });
-    
-    document.getElementById('contratsTable').innerHTML = html || '<tr><td colspan="9">Aucun contrat</td></tr>';
-    document.getElementById('statActifs').textContent = actifs;
-    document.getElementById('statExpire').textContent = expire;
-    document.getElementById('statResilies').textContent = resilies;
-    document.getElementById('statCA').textContent = totalCA.toLocaleString() + ' Ar';
+        document.getElementById('statActifs').textContent = actifs;
+        document.getElementById('statExpire').textContent = expire;
+        document.getElementById('statResilies').textContent = resilies;
+        document.getElementById('statCA').textContent = totalCA.toLocaleString() + ' Ar';
+        
+        document.getElementById('contratsTable').innerHTML = contrats.length ? contrats.map(function(c) {
+            var statutBadge = c.statut === 'actif' ? 'badge-success' : c.statut === 'expire_bientot' ? 'badge-warning' : 'badge-danger';
+            var statutLabel = c.statut === 'actif' ? 'Actif' : c.statut === 'expire_bientot' ? 'Expire bientôt' : 'Résilié';
+            return '<tr><td><strong>' + c.client + '</strong></td>' +
+                '<td>' + c.type + '</td>' +
+                '<td>' + (c.dateDebut ? new Date(c.dateDebut).toLocaleDateString('fr-FR') : 'N/A') + '</td>' +
+                '<td>' + (c.dateFin ? new Date(c.dateFin).toLocaleDateString('fr-FR') : 'N/A') + '</td>' +
+                '<td><strong>' + (c.montant || 0).toLocaleString() + ' Ar</strong></td>' +
+                '<td><span class="badge ' + statutBadge + '">' + statutLabel + '</span></td>' +
+                '<td class="action-btns">' +
+                    '<button class="btn-sm btn-view" onclick="viewContrat(\'' + c.id + '\')"><i class="fas fa-eye"></i></button>' +
+                    '<button class="btn-sm btn-edit" onclick="editContrat(\'' + c.id + '\')"><i class="fas fa-edit"></i></button>' +
+                    '<button class="btn-sm btn-suspend" onclick="resilierContrat(\'' + c.id + '\')"><i class="fas fa-ban"></i></button>' +
+                '</td></tr>';
+        }).join('') : '<tr><td colspan="7">Aucun contrat</td></tr>';
+    } catch(e) { console.error(e); }
 }
 
 function showAddContrat() {
-    var h = '<div class="form-group"><label>Client *</label><input id="addClient"></div>';
-    h += '<div class="form-group"><label>Type de contrat</label><select id="addType"><option>Transport scolaire</option><option>Transport régulier</option><option>Livraison plats</option><option>Livraison colis</option><option>Logistique</option><option>Événementiel</option></select></div>';
-    h += '<div class="form-group"><label>Date début</label><input type="date" id="addDebut"></div>';
-    h += '<div class="form-group"><label>Date fin</label><input type="date" id="addFin"></div>';
-    h += '<div class="form-group"><label>Montant mensuel (Ar)</label><input type="number" id="addMontant" value="0"></div>';
-    h += '<div class="form-group"><label>Description</label><textarea id="addDesc" rows="2" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"></textarea></div>';
-    showModal('Nouveau contrat', h, function() {
-        var client = document.getElementById('addClient').value;
-        if (!client) return alert('Client requis');
-        alert('Contrat créé ! (API à implémenter)');
-        closeModal(); loadContrats();
+    apiGet('/societes').then(function(societes) {
+        var h = '<div class="form-group"><label>Société</label><select id="addSocieteId">';
+        societes.forEach(function(s) { h += '<option value="' + s.id + '">' + s.name + '</option>'; });
+        h += '</select></div>';
+        h += '<div class="form-group"><label>Client *</label><input id="addClient"></div>';
+        h += '<div class="form-group"><label>Type</label><select id="addType"><option>Transport scolaire</option><option>Transport régulier</option><option>Livraison plats</option><option>Livraison colis</option><option>Logistique</option><option>Événementiel</option></select></div>';
+        h += '<div class="form-group"><label>Date début</label><input type="date" id="addDebut"></div>';
+        h += '<div class="form-group"><label>Date fin</label><input type="date" id="addFin"></div>';
+        h += '<div class="form-group"><label>Montant (Ar)</label><input type="number" id="addMontant" value="0"></div>';
+        h += '<div class="form-group"><label>Description</label><textarea id="addDesc" rows="2" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"></textarea></div>';
+        showModal('Nouveau contrat', h, function() {
+            var client = document.getElementById('addClient').value;
+            if (!client) return alert('Client requis');
+            apiPost('/contrats', {
+                societeId: document.getElementById('addSocieteId').value,
+                client: client,
+                type: document.getElementById('addType').value,
+                description: document.getElementById('addDesc').value,
+                dateDebut: document.getElementById('addDebut').value,
+                dateFin: document.getElementById('addFin').value,
+                montant: document.getElementById('addMontant').value
+            }).then(function() { closeModal(); loadContrats(); });
+        });
     });
 }
 
 function viewContrat(id) {
-    var c = contratsData.find(function(x) { return x.id === id; });
-    if (!c) return;
-    showModal('Contrat #' + c.id,
-        '<p><strong>Client:</strong> ' + c.client + '</p>' +
-        '<p><strong>Type:</strong> ' + c.type + '</p>' +
-        '<p><strong>Période:</strong> ' + new Date(c.dateDebut).toLocaleDateString('fr-FR') + ' - ' + new Date(c.dateFin).toLocaleDateString('fr-FR') + '</p>' +
-        '<p><strong>Montant:</strong> ' + (c.montant || 0).toLocaleString() + ' Ar</p>' +
-        '<p><strong>Statut:</strong> ' + c.statut + '</p>');
+    apiGet('/contrats').then(function(contrats) {
+        var c = contrats.find(function(x) { return x.id === id; });
+        if (!c) return;
+        showModal('Contrat ' + c.client,
+            '<p><strong>Client:</strong> ' + c.client + '</p>' +
+            '<p><strong>Type:</strong> ' + c.type + '</p>' +
+            '<p><strong>Période:</strong> ' + new Date(c.dateDebut).toLocaleDateString('fr-FR') + ' - ' + new Date(c.dateFin).toLocaleDateString('fr-FR') + '</p>' +
+            '<p><strong>Montant:</strong> ' + (c.montant || 0).toLocaleString() + ' Ar</p>' +
+            '<p><strong>Statut:</strong> ' + c.statut + '</p>' +
+            '<p><strong>Description:</strong> ' + (c.description || 'N/A') + '</p>');
+    });
 }
 
-function editContrat(id) { alert('Modifier contrat (à implémenter)'); }
+function editContrat(id) {
+    apiGet('/contrats').then(function(contrats) {
+        var c = contrats.find(function(x) { return x.id === id; });
+        if (!c) return;
+        var h = '<div class="form-group"><label>Client</label><input id="editClient" value="' + c.client + '"></div>';
+        h += '<div class="form-group"><label>Montant</label><input type="number" id="editMontant" value="' + (c.montant || 0) + '"></div>';
+        h += '<div class="form-group"><label>Date fin</label><input type="date" id="editFin" value="' + (c.dateFin || '') + '"></div>';
+        h += '<div class="form-group"><label>Statut</label><select id="editStatut"><option ' + (c.statut === 'actif' ? 'selected' : '') + '>actif</option><option ' + (c.statut === 'expire_bientot' ? 'selected' : '') + '>expire_bientot</option><option ' + (c.statut === 'resilie' ? 'selected' : '') + '>resilie</option></select></div>';
+        showModal('Modifier contrat', h, function() {
+            apiPut('/contrats/' + id, {
+                client: document.getElementById('editClient').value,
+                montant: document.getElementById('editMontant').value,
+                dateFin: document.getElementById('editFin').value,
+                statut: document.getElementById('editStatut').value
+            }).then(function() { closeModal(); loadContrats(); });
+        });
+    });
+}
+
+function resilierContrat(id) {
+    if (confirm('Résilier ce contrat ?')) {
+        apiPut('/contrats/' + id, { statut: 'resilie' }).then(function() { loadContrats(); });
+    }
+}

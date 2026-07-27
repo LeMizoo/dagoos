@@ -197,3 +197,17 @@ model Societe {
   drivers        Driver[]
 }
 
+
+model Contrat {
+  id          String   @id @default(cuid())
+  societeId   String
+  client      String
+  type        String
+  description String?
+  dateDebut   String
+  dateFin     String
+  montant     Float    @default(0)
+  statut      String   @default("actif")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

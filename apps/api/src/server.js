@@ -523,6 +523,34 @@ app.put("/api/societes/:id", authMiddleware, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ===== CONTRATS =====
+app.get("/api/contrats", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const contrats = await prisma.contrat.findMany({ orderBy: { createdAt: "desc" } });
+        res.json(contrats);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.post("/api/contrats", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { societeId, client, type, description, dateDebut, dateFin, montant } = req.body;
+        const contrat = await prisma.contrat.create({ data: { societeId, client, type, description, dateDebut, dateFin, montant: parseFloat(montant) } });
+        res.status(201).json(contrat);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.put("/api/contrats/:id", authMiddleware, async (req, res) => {
+    try {
+        const { PrismaClient } = require("@prisma/client");
+        const prisma = new PrismaClient();
+        const { client, type, description, dateDebut, dateFin, montant, statut } = req.body;
+        const contrat = await prisma.contrat.update({ where: { id: req.params.id }, data: { client, type, description, dateDebut, dateFin, montant, statut } });
+        res.json(contrat);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ===== DÉMARRAGE =====
 app.listen(port, () => {
   console.log(`<i class="fas fa-check-circle"></i> Dagoo's API lancée sur http://localhost:${port}`);
