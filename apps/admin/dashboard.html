@@ -145,3 +145,16 @@
     <script src="js/router.js"></script>
 </body>
 </html>
+<style>
+@media (max-width: 768px) {
+    .mobile-menu-btn { display: flex !important; align-items: center; justify-content: center; }
+    .sidebar { transform: translateX(-100%); position: fixed; z-index: 1000; transition: 0.3s; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-overlay.show { display: block; }
+    .main-content { margin-left: 0 !important; }
+    .main-content-inner { padding: 10px; padding-top: 50px; }
+    .stats-grid { grid-template-columns: 1fr !important; }
+    table { display: block; overflow-x: auto; }
+    .topbar { flex-direction: column; gap: 8px; }
+}
+</style>
