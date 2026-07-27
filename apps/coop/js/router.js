@@ -9,6 +9,8 @@ function apiPut(e,d) { return fetch(API_URL+e,{method:'PUT',headers:{'Content-Ty
 function apiPatch(e,d) { return fetch(API_URL+e,{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(d)}).then(function(r){return r.json()}); }
 
 document.getElementById('sidebarUser').textContent = '🏢 ' + (user.name || user.email);
+apiGet("/organizations").then(function(orgs) { var org = orgs.find(function(o) { return o.email === user.email; }); if (org) { document.getElementById("sidebarCoopName").innerHTML = org.name; if (org.logo) { document.getElementById("sidebarLogo").src = org.logo; } } });
+
 function logout() { localStorage.clear(); window.location.href = 'index.html'; }
 
 function loadPage(page) {
@@ -18,7 +20,10 @@ function loadPage(page) {
     var script = document.createElement('script');
     script.src = 'pages/' + page + '.js';
     script.setAttribute('data-page', page);
-    script.onload = function() { if (typeof window['init_' + page] === 'function') window['init_' + page](); };
+    script.onload = function() {
+        var funcName = 'init_' + page.replace(/-/g, '_');
+        if (typeof window[funcName] === 'function') window[funcName]();
+    };
     document.querySelectorAll('.sidebar-nav a[data-page]').forEach(function(l) { l.classList.remove('active'); });
     var link = document.querySelector('[data-page="' + page + '"]');
     if (link) link.classList.add('active');
