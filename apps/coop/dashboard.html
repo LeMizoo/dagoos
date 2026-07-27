@@ -11,24 +11,23 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #F1F5F9; display: flex; min-height: 100vh; }
-        .sidebar { width: 240px; background: linear-gradient(180deg, #27AE60, #1E8449); color: white; padding: 20px 0; position: fixed; top: 0; left: 0; bottom: 0; display: flex; flex-direction: column; }
+        .sidebar { width: 240px; background: linear-gradient(180deg, #27AE60, #1E8449); color: white; padding: 20px 0; position: fixed; top: 0; left: 0; bottom: 0; display: flex; flex-direction: column; z-index: 100; transition: transform 0.3s; }
         .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .sidebar-logo img { width: 36px; height: 36px; border-radius: 50%; background: #F1C40F; padding: 3px; }
         .sidebar-logo h2 { font-size: 16px; } .sidebar-logo h2 span { color: #F1C40F; }
-        .sidebar-nav { flex: 1; padding: 10px 0; }
+        .sidebar-nav { flex: 1; padding: 10px 0; overflow-y: auto; }
         .sidebar-nav a { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 13px; transition: 0.3s; border-left: 3px solid transparent; }
         .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.08); color: white; border-left-color: #F1C40F; }
         .sidebar-nav .badge { background: #E74C3C; color: white; font-size: 10px; padding: 2px 7px; border-radius: 50px; margin-left: auto; }
+        .sidebar-nav .nav-section { padding: 10px 20px 4px; font-size: 9px; text-transform: uppercase; color: rgba(255,255,255,0.4); letter-spacing: 1px; font-weight: 700; }
         .sidebar-footer { padding: 14px 20px; border-top: 1px solid rgba(255,255,255,0.1); }
         .sidebar-footer button { width: 100%; padding: 10px; background: rgba(255,255,255,0.08); color: #E74C3C; border: none; border-radius: 8px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 13px; }
         .main-content { margin-left: 240px; flex: 1; padding: 24px; }
         .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
         .topbar h1 { font-size: 22px; color: #1A1A2E; }
-        .user-info { display: flex; align-items: center; gap: 10px; }
-        .user-avatar { width: 36px; height: 36px; background: #27AE60; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; }
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
         .stat-card { background: white; padding: 18px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.3s; }
-        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .stat-card:hover { transform: translateY(-2px); }
         .stat-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
         .stat-icon.blue { background: #DBEAFE; color: #27AE60; }
         .stat-icon.green { background: #D1FAE5; color: #27AE60; }
@@ -45,26 +44,51 @@
         .btn { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
         .btn-primary { background: #27AE60; color: white; } .btn-primary:hover { background: #1E8449; }
         .btn-sm { padding: 5px 10px; font-size: 11px; }
+        .btn-view { background: #DBEAFE; color: #27AE60; }
+        .btn-edit { background: #FEF3C7; color: #92400E; }
+        .btn-suspend { background: #FEE2E2; color: #991B1B; }
+        .btn-success { background: #D1FAE5; color: #065F46; }
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; padding: 10px 20px; font-size: 11px; text-transform: uppercase; color: #6C757D; }
         td { padding: 10px 20px; font-size: 13px; border-top: 1px solid #F1F5F9; }
         .badge { display: inline-block; padding: 3px 8px; border-radius: 50px; font-size: 10px; font-weight: 600; }
         .badge-success { background: #D1FAE5; color: #065F46; }
         .badge-warning { background: #FEF3C7; color: #92400E; }
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
+        .badge-danger { background: #FEE2E2; color: #991B1B; }
+        .badge-info { background: #DBEAFE; color: #1E40AF; }
+        .action-btns { display: flex; gap: 2px; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300; align-items: center; justify-content: center; }
         .modal-overlay.show { display: flex; }
-        .modal { background: white; border-radius: 14px; padding: 24px; max-width: 440px; width: 90%; }
+        .modal { background: white; border-radius: 14px; padding: 24px; max-width: 460px; width: 90%; max-height: 75vh; overflow-y: auto; }
         .modal h2 { margin-bottom: 16px; font-size: 18px; }
         .form-group { margin-bottom: 14px; }
         .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 4px; }
-        .form-group input { width: 100%; padding: 10px; border: 1px solid #E9ECEF; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 13px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #E9ECEF; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 13px; }
         .btn-row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
         .btn-secondary { background: #E9ECEF; color: #1A1A2E; }
-        @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; } .stats-grid { grid-template-columns: repeat(2, 1fr); } .grid-2 { grid-template-columns: 1fr; } }
+        
+        /* RESPONSIVE */
+        .mobile-menu-btn { display: none; position: fixed; top: 12px; left: 12px; z-index: 1001; background: #27AE60; color: white; border: none; width: 44px; height: 44px; border-radius: 10px; font-size: 20px; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; }
+        
+        @media (max-width: 768px) {
+            .mobile-menu-btn { display: flex !important; align-items: center; justify-content: center; }
+            .sidebar { transform: translateX(-100%); position: fixed; z-index: 1000; }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .main-content { margin-left: 0 !important; padding: 12px; padding-top: 56px; }
+            .stats-grid { grid-template-columns: 1fr !important; }
+            .grid-2 { grid-template-columns: 1fr !important; }
+            .topbar { flex-direction: column; gap: 8px; align-items: flex-start; }
+            table { display: block; overflow-x: auto; white-space: nowrap; }
+        }
     </style>
 </head>
 <body>
-    <aside class="sidebar">
+    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    
+    <aside class="sidebar" id="sidebar">
         <div class="sidebar-logo">
             <img id="sidebarLogo" src="https://dago-mobility.pages.dev/assets/logo/b-trans.png" alt="Logo">
             <h2 id="sidebarCoopName">COOP <span>DAGO</span></h2>
@@ -76,10 +100,9 @@
             <a href="#" data-page="fiche_vehicule"><i class="fas fa-file-alt"></i> Fiche Véhicule</a>
             <a href="#" data-page="drivers"><i class="fas fa-users"></i> Chauffeurs/Livreurs <span class="badge" id="driverCount">0</span></a>
             <a href="#" data-page="fiche_chauffeur"><i class="fas fa-id-card"></i> Fiche Chauffeur</a>
-            <a href="#" data-page="codes"><i class="fas fa-key"></i> Codes Chauffeurs</a>
-            <a href="#" data-page="permutation"><i class="fas fa-exchange-alt"></i> Permutation Véhicule</a>
+            <a href="#" data-page="codes"><i class="fas fa-key"></i> Codes</a>
+            <a href="#" data-page="permutation"><i class="fas fa-exchange-alt"></i> Permutation</a>
             <div class="nav-section">💰 Finances</div>
-            <a href="#" data-page="messages"><i class="fas fa-envelope"></i> Messages</a>
             <a href="#" data-page="finances"><i class="fas fa-coins"></i> Finances</a>
             <a href="#" data-page="depenses"><i class="fas fa-receipt"></i> Dépenses</a>
             <a href="#" data-page="versements"><i class="fas fa-hand-holding-usd"></i> Versements</a>
@@ -99,13 +122,3 @@
     <script src="js/router.js"></script>
 </body>
 </html>
-
-<style>
-@media (max-width: 768px) {
-    .sidebar { display: none; }
-    .main-content { margin-left: 0 !important; padding: 12px; }
-    .stats-grid { grid-template-columns: 1fr !important; }
-    .grid-2 { grid-template-columns: 1fr !important; }
-    .topbar { flex-direction: column; }
-}
-</style>
