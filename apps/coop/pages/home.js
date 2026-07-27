@@ -24,8 +24,8 @@ function init_home() {
         '<div class="stats-grid" id="statsGrid" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px;"></div>' +
         
         // SOCIÉTÉS
-        '<div style="background:rgba(26,82,118,0.05);padding:8px 14px;border-radius:10px;border-left:3px solid #1A5276;margin-bottom:14px;display:flex;align-items:center;gap:8px;">' +
-            '<i class="fas fa-building" style="color:#1A5276;"></i><span style="font-weight:600;font-size:13px;color:#1A5276;">Sociétés</span>' +
+        '<div style="background:rgba(26,82,118,0.05);padding:8px 14px;border-radius:10px;border-left:3px solid #27AE60;margin-bottom:14px;display:flex;align-items:center;gap:8px;">' +
+            '<i class="fas fa-building" style="color:#27AE60;"></i><span style="font-weight:600;font-size:13px;color:#27AE60;">Sociétés</span>' +
             '<a href="#" onclick="loadPage(\'societes\')" style="margin-left:auto;font-size:11px;color:#27AE60;">Gérer <i class="fas fa-arrow-right"></i></a>' +
         '</div>' +
         '<div class="stats-grid" id="societesGrid" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px;"></div>' +
