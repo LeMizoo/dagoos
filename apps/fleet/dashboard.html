@@ -9,6 +9,58 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #F1F5F9; display: flex; min-height: 100vh; }
+        .sidebar { width: 240px; background: linear-gradient(180deg, #1A5276, #154360); color: white; padding: 20px 0; position: fixed; top: 0; left: 0; bottom: 0; display: flex; flex-direction: column; }
+        .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-logo img { width: 36px; height: 36px; border-radius: 50%; background: #F1C40F; padding: 3px; }
+        .sidebar-logo h2 { font-size: 16px; } .sidebar-logo h2 span { color: #F1C40F; }
+        .sidebar-nav { flex: 1; padding: 10px 0; }
+        .sidebar-nav a { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 13px; transition: 0.3s; border-left: 3px solid transparent; }
+        .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.08); color: white; border-left-color: #F1C40F; }
+        .sidebar-nav .badge { background: #E74C3C; color: white; font-size: 10px; padding: 2px 7px; border-radius: 50px; margin-left: auto; }
+        .sidebar-footer { padding: 14px 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-footer button { width: 100%; padding: 10px; background: rgba(255,255,255,0.08); color: #E74C3C; border: none; border-radius: 8px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 13px; }
+        .main-content { margin-left: 240px; flex: 1; padding: 24px; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .topbar h1 { font-size: 22px; color: #1A1A2E; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-avatar { width: 36px; height: 36px; background: #1A5276; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+        .stat-card { background: white; padding: 18px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.3s; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .stat-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .stat-icon.blue { background: #DBEAFE; color: #1A5276; }
+        .stat-icon.green { background: #D1FAE5; color: #27AE60; }
+        .stat-icon.yellow { background: #FEF3C7; color: #F39C12; }
+        .stat-icon.red { background: #FEE2E2; color: #E74C3C; }
+        .stat-info .number { font-size: 22px; font-weight: 800; }
+        .stat-info .label { font-size: 11px; color: #6C757D; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .action-card { border: none; border-radius: 16px; padding: 24px; color: white; cursor: pointer; text-align: left; transition: 0.3s; display: flex; flex-direction: column; font-family: 'Inter', sans-serif; }
+        .action-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+        .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 20px; overflow: hidden; }
+        .card-header { padding: 14px 20px; border-bottom: 1px solid #F1F5F9; display: flex; justify-content: space-between; align-items: center; }
+        .card-header h3 { font-size: 15px; }
+        .btn { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
+        .btn-primary { background: #1A5276; color: white; } .btn-primary:hover { background: #154360; }
+        .btn-sm { padding: 5px 10px; font-size: 11px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 10px 20px; font-size: 11px; text-transform: uppercase; color: #6C757D; }
+        td { padding: 10px 20px; font-size: 13px; border-top: 1px solid #F1F5F9; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 50px; font-size: 10px; font-weight: 600; }
+        .badge-success { background: #D1FAE5; color: #065F46; }
+        .badge-warning { background: #FEF3C7; color: #92400E; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: white; border-radius: 14px; padding: 24px; max-width: 440px; width: 90%; }
+        .modal h2 { margin-bottom: 16px; font-size: 18px; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #E9ECEF; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 13px; }
+        .btn-row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+        .btn-secondary { background: #E9ECEF; color: #1A1A2E; }
+        @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; } .stats-grid { grid-template-columns: repeat(2, 1fr); } .grid-2 { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -47,6 +99,20 @@
 </html>
 
 <style>
+@media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main-content { margin-left: 0 !important; padding: 12px; }
+    .stats-grid { grid-template-columns: 1fr !important; }
+    .grid-2 { grid-template-columns: 1fr !important; }
+    .topbar { flex-direction: column; }
+}
 </style>
 <style>
+@media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main-content { margin-left: 0 !important; padding: 12px; }
+    .stats-grid { grid-template-columns: 1fr !important; }
+    .grid-2 { grid-template-columns: 1fr !important; }
+    .topbar { flex-direction: column; }
+}
 </style>
