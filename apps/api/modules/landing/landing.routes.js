@@ -1,0 +1,23 @@
+const express = require('express');
+const prisma = require('../../lib/prisma');
+const router = express.Router();
+
+router.get('/stats', async (req, res) => {
+  try {
+    const [orgCount, driverCount, vehicleCount] = await Promise.all([
+      prisma.organization.count(),
+      prisma.driver.count(),
+      prisma.vehicle.count()
+    ]);
+    res.json({ organizations: orgCount, drivers: driverCount, vehicles: vehicleCount });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+router.get('/content', async (req, res) => {
+  try {
+    const content = await prisma.landingContent.findMany({ where: { active: true } });
+    res.json(content);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+module.exports = router;
