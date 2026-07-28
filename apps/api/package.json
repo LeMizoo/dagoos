@@ -2,10 +2,10 @@
   "name": "dagoos-backend",
   "version": "1.0.0",
   "description": "Dagoo's API - La mobilit\u00c3\u00a9 connect\u00c3\u00a9e",
-  "main": "src/server.js",
+  "main": "server.js",
   "scripts": {
     "dev": "nodemon src/server.js",
-    "start": "npx prisma db push --accept-data-loss && npx prisma generate && node src/seed.js 2>/dev/null; node src/server.js",
+    "start": "npx prisma db push --accept-data-loss && npx prisma generate && node server.js",
     "build": "npm install && npx prisma generate"
   },
   "dependencies": {
