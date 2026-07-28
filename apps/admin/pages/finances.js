@@ -175,7 +175,7 @@ function changePlan(orgId, currentPlan, type) {
     h += '</select><button class="btn btn-primary" onclick="savePlan(\''+orgId+'\')">💾 Enregistrer</button>';
     showModal('Changer plan', h);
 }
-async function savePlan(orgId) { try { await apiPatch('/organizations/'+orgId, { plan: document.getElementById('newPlan').value }); closeModal(); loadFinances(); } catch(e) {} }
+async function savePlan(orgId) { try { await apiPut('/organizations/'+orgId, { plan: document.getElementById('newPlan').value }); closeModal(); loadFinances(); } catch(e) {} }
 async function renewSub(orgId) { if (!confirm('Renouveler 30 jours ?')) return; try { await apiPost('/organizations/'+orgId+'/renew', {}); loadFinances(); } catch(e) {} }
 async function activateOrg(orgId) { if (!confirm('Activer cette organisation ?')) return; try { await apiPatch('/organizations/'+orgId+'/status', { status: 'active' }); loadFinances(); } catch(e) {} }
 async function suspendOrg(orgId) { if (!confirm('Suspendre ?')) return; try { await apiPatch('/organizations/'+orgId+'/status', { status: 'suspended' }); loadFinances(); } catch(e) {} }
