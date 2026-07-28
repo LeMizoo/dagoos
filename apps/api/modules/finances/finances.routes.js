@@ -16,11 +16,24 @@ router.get('/courses', authMiddleware, async (req, res) => {
 
 router.post('/courses', authMiddleware, async (req, res) => {
   try {
-    const { driverId, vehicleId, type, distanceKm, price, commission } = req.body;
-    const course = await prisma.course.create({
-      data: { driverId, vehicleId, type, distanceKm, price, commission }
-    });
+    const course = await prisma.course.create({ data: req.body });
     res.status(201).json(course);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Transactions (tous les paiements)
+router.get('/transactions', authMiddleware, async (req, res) => {
+  try {
+    const payments = await prisma.payment.findMany({ orderBy: { date: 'desc' }, take: 200 });
+    res.json(payments);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Versements
+router.get('/versements', authMiddleware, async (req, res) => {
+  try {
+    const versements = await prisma.versement.findMany({ orderBy: { createdAt: 'desc' } });
+    res.json(versements);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

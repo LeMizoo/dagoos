@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 
 const app = express();
 app.use(cors());
@@ -12,12 +11,18 @@ app.use('/api/users', require('./modules/users/users.routes'));
 app.use('/api/organizations', require('./modules/organizations/organizations.routes'));
 app.use('/api/drivers', require('./modules/drivers/drivers.routes'));
 app.use('/api/vehicles', require('./modules/vehicles/vehicles.routes'));
+app.use('/api/maintenance', require('./modules/maintenance/maintenance.routes'));
+app.use('/api/proprietaires', require('./modules/proprietaires/proprietaires.routes'));
+app.use('/api/societes', require('./modules/societes/societes.routes'));
+app.use('/api/contrats', require('./modules/contrats/contrats.routes'));
+app.use('/api/livraisons', require('./modules/livraisons/livraisons.routes'));
 app.use('/api/plans', require('./modules/plans/plans.routes'));
 app.use('/api/messages', require('./modules/messages/messages.routes'));
+app.use('/api/notifications', require('./modules/notifications/notifications.routes'));
+app.use('/api/logs', require('./modules/logs.routes'));
 app.use('/api', require('./modules/finances/finances.routes'));
 app.use('/api', require('./modules/landing/landing.routes'));
 
-// Route de santé
 app.get('/api', (req, res) => {
   res.json({ message: "🚀 Dagoo's API - La mobilité connectée", status: 'online' });
 });
