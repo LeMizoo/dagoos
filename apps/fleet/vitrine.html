@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <script src="/config.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chargement...</title>
@@ -28,7 +29,7 @@
         var slug = window.location.pathname.replace('/', '').replace('.html', '');
         if (!slug) slug = 'flotte-alasora';
         
-        fetch('DAGOOS_CONFIG.apiUrl/landing-content')
+        fetch(DAGOOS_CONFIG.apiUrl + '/landing-content')
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 var myContent = data.filter(function(c) { return c.section && c.section.endsWith('-' + slug); });
