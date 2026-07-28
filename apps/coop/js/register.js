@@ -33,7 +33,7 @@ registerForm.addEventListener('submit', async (e) => {
         const response = await fetch(`${API_URL}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, phone, password, role: 'COOPERATIVE' })
+            body: JSON.stringify({ name, email, phone, password, role: "COOPERATIVE", plan: document.querySelector("input[name=plan]:checked").value })
         });
         const data = await response.json();
         

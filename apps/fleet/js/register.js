@@ -17,7 +17,7 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     try {
         var res = await fetch(API_URL + '/auth/register', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: name, email: email, phone: phone, password: password, role: 'FLEET_MANAGER' })
+            body: JSON.stringify({ name: name, email: email, phone: phone, password: password, role: "FLEET_MANAGER", plan: document.querySelector("input[name=plan]:checked").value })
         });
         var data = await res.json();
         if (res.ok) {

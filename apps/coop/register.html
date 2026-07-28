@@ -72,6 +72,51 @@
             <span class="badge">🆓 Gratuit</span>
         </div>
         
+        <!-- Sélection du plan -->
+        <div class="plan-section" style="margin-bottom:24px;">
+            <h3 style="font-size:15px;color:#1A1A2E;margin-bottom:4px;text-align:center;">📦 Choisissez votre plan</h3>
+            <p style="font-size:12px;color:#6C757D;margin-bottom:14px;text-align:center;">Adapté à votre coopérative</p>
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
+                <label class="plan-option">
+                    <input type="radio" name="plan" value="Freemium" checked style="display:none;">
+                    <div style="border:2px solid #E9ECEF;border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;transition:0.2s;">
+                        <div style="font-size:11px;font-weight:700;color:#1A1A2E;">🆓 Freemium</div>
+                        <div style="font-size:10px;color:#6C757D;">10 chauffeurs</div>
+                        <div style="font-size:13px;font-weight:700;color:#27AE60;">Gratuit</div>
+                    </div>
+                </label>
+                <label class="plan-option">
+                    <input type="radio" name="plan" value="Basic" style="display:none;">
+                    <div style="border:2px solid #E9ECEF;border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;transition:0.2s;">
+                        <div style="font-size:11px;font-weight:700;color:#1A1A2E;">🏍️ Basic</div>
+                        <div style="font-size:10px;color:#6C757D;">30 chauffeurs</div>
+                        <div style="font-size:13px;font-weight:700;color:#27AE60;">49 000 Ar</div>
+                    </div>
+                </label>
+                <label class="plan-option">
+                    <input type="radio" name="plan" value="Standard" style="display:none;">
+                    <div style="border:2px solid #E9ECEF;border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;transition:0.2s;">
+                        <div style="font-size:11px;font-weight:700;color:#1A1A2E;">🛺 Standard</div>
+                        <div style="font-size:10px;color:#6C757D;">100 chauffeurs</div>
+                        <div style="font-size:13px;font-weight:700;color:#27AE60;">79 000 Ar</div>
+                    </div>
+                </label>
+                <label class="plan-option">
+                    <input type="radio" name="plan" value="Premium" style="display:none;">
+                    <div style="border:2px solid #E9ECEF;border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;transition:0.2s;">
+                        <div style="font-size:11px;font-weight:700;color:#1A1A2E;">👑 Premium</div>
+                        <div style="font-size:10px;color:#6C757D;">Illimité</div>
+                        <div style="font-size:13px;font-weight:700;color:#27AE60;">149 000 Ar</div>
+                    </div>
+                </label>
+            </div>
+        </div>
+        <style>
+            .plan-option input:checked + div {
+                border-color: #27AE60 !important;
+                background: #EAFAF1;
+            }
+        </style>
         <form id="registerForm">
             <div class="form-row">
                 <div class="form-group">
