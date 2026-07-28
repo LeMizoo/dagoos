@@ -1,8 +1,6 @@
-// ========================================
 // DAGOO'S - CONFIGURATION GLOBALE
-// ========================================
-const DAGOOS_CONFIG = {
-    apiUrl: DAGOOS_CONFIG.apiUrl,
+var DAGOOS_CONFIG = {
+    apiUrl: 'https://dagoos-api.onrender.com/api',
     landingUrl: 'https://dago-mobility.pages.dev',
     logoUrl: 'https://dago-mobility.pages.dev/assets/logo/b-trans.svg',
     
