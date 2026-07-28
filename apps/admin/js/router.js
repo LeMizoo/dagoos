@@ -2,6 +2,7 @@
 var API_URL = DAGOOS_CONFIG.apiUrl;
 var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
 var token = localStorage.getItem('dagoos_token');
+var currentPage = 'home';
 
 if (!token || (user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN')) { 
   window.location.replace('index.html'); 
@@ -19,34 +20,18 @@ function apiPost(e,d) { return fetch(API_URL+e,{method:'POST',headers:{'Content-
 function apiPut(e,d) { return fetch(API_URL+e,{method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(d)}).then(function(r){return r.json()}); }
 function apiPatch(e,d) { return fetch(API_URL+e,{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(d)}).then(function(r){return r.json()}); }
 
-// Navigation par rechargement
-document.addEventListener('DOMContentLoaded', function() {
-  var path = window.location.pathname;
-  var page = 'home';
-  
-  if (path.includes('/flottes/vehicules')) page = 'fleets-vehicules';
-  else if (path.includes('/flottes/chauffeurs')) page = 'fleets-chauffeurs';
-  else if (path.includes('/flottes')) page = 'fleets';
-  else if (path.includes('/cooperatives/vehicules')) page = 'coops-vehicules';
-  else if (path.includes('/cooperatives/chauffeurs')) page = 'coops-chauffeurs';
-  else if (path.includes('/cooperatives')) page = 'coops';
-  else if (path.includes('/chauffeurs')) page = 'drivers';
-  else if (path.includes('/messages')) page = 'messages';
-  else if (path.includes('/notifications')) page = 'notifications';
-  else if (path.includes('/finances')) page = 'finances';
-  else if (path.includes('/paiements')) page = 'payments';
-  else if (path.includes('/logs')) page = 'logs';
-  else if (path.includes('/parametres')) page = 'settings';
-  
-  loadPageDirect(page);
-});
-
-function loadPageDirect(page) {
+// Navigation
+function loadPage(page) {
+  currentPage = page;
   var main = document.getElementById('mainInner');
   main.innerHTML = '<div style="text-align:center;padding:40px;">⏳ Chargement...</div>';
   
+  // Nettoyer les anciens scripts de page
+  document.querySelectorAll('script[data-page]').forEach(function(s) { s.remove(); });
+  
   var script = document.createElement('script');
   script.src = 'pages/' + page + '.js';
+  script.setAttribute('data-page', page);
   script.onload = function() {
     var funcName = 'init_' + page.replace(/-/g, '_');
     if (typeof window[funcName] === 'function') {
@@ -54,15 +39,41 @@ function loadPageDirect(page) {
     }
   };
   script.onerror = function() {
-    main.innerHTML = '<div style="text-align:center;padding:40px;">❌ Page introuvable : ' + page + '</div>';
+    main.innerHTML = '<div style="text-align:center;padding:40px;">❌ Page introuvable</div>';
   };
   document.body.appendChild(script);
   
-  // Sidebar
+  // Sidebar actif
   document.querySelectorAll('.sidebar-link').forEach(function(l) { l.classList.remove('active'); });
   var link = document.querySelector('[data-page="' + page + '"]');
   if (link) link.classList.add('active');
 }
+
+// Clics sidebar
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.sidebar-link').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      var page = this.dataset.page;
+      if (page) {
+        var urlMap = {
+          'home': '/dashboard', 'fleets': '/dashboard/flottes',
+          'fleets-vehicules': '/dashboard/flottes/vehicules', 'fleets-chauffeurs': '/dashboard/flottes/chauffeurs',
+          'coops': '/dashboard/cooperatives', 'coops-vehicules': '/dashboard/cooperatives/vehicules',
+          'coops-chauffeurs': '/dashboard/cooperatives/chauffeurs', 'drivers': '/dashboard/chauffeurs',
+          'messages': '/dashboard/messages', 'notifications': '/dashboard/notifications',
+          'finances': '/dashboard/finances', 'payments': '/dashboard/paiements',
+          'logs': '/dashboard/logs', 'settings': '/dashboard/parametres'
+        };
+        history.pushState(null, '', urlMap[page] || '/dashboard');
+        loadPage(page);
+      }
+    });
+  });
+  
+  // Charger la page initiale
+  loadPage('home');
+});
 
 // Modal
 function showModal(title, content) {
