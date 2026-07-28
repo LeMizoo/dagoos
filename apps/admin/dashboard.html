@@ -101,26 +101,31 @@
     
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-logo">
-            <img src="assets/logo/b-trans.png" alt="Dagoo's">
+            <img src="assets/logo/b-trans.svg" alt="Dagoo's">
             <h2>DAG<span>OO'S</span></h2>
         </div>
         <nav class="sidebar-nav">
-            <a href="#" data-page="home" class="active"><i class="fas fa-home"></i> Tableau de bord</a>
+            <div class="nav-section">Principal</div>
+            <a href="#" data-page="home" class="active"><i class="fas fa-th-large"></i> Tableau de bord</a>
+            
             <div class="nav-section">Opérations</div>
             <a href="#" data-page="fleets"><i class="fas fa-truck"></i> Flottes <span class="badge-count" id="fleetCount">0</span></a>
-            <a href="#" data-page="fleets-vehicules" style="padding-left:32px;font-size:11px;"><i class="fas fa-motorcycle"></i> Véhicules</a>
-            <a href="#" data-page="fleets-chauffeurs" style="padding-left:32px;font-size:11px;"><i class="fas fa-users"></i> Chauffeurs</a>
+            <a href="#" data-page="fleets-vehicules" style="padding-left:32px;font-size:11px;"><i class="fas fa-car"></i> Véhicules</a>
+            <a href="#" data-page="fleets-chauffeurs" style="padding-left:32px;font-size:11px;"><i class="fas fa-user"></i> Chauffeurs</a>
             <a href="#" data-page="coops"><i class="fas fa-building"></i> Coopératives <span class="badge-count" id="coopCount">0</span></a>
-            <a href="#" data-page="coops-vehicules" style="padding-left:32px;font-size:11px;"><i class="fas fa-motorcycle"></i> Véhicules</a>
-            <a href="#" data-page="coops-chauffeurs" style="padding-left:32px;font-size:11px;"><i class="fas fa-users"></i> Chauffeurs</a>
-            <a href="#" data-page="drivers"><i class="fas fa-users"></i> Chauffeurs <span class="badge-count" id="driverCount">0</span></a>
+            <a href="#" data-page="coops-vehicules" style="padding-left:32px;font-size:11px;"><i class="fas fa-car"></i> Véhicules</a>
+            <a href="#" data-page="coops-chauffeurs" style="padding-left:32px;font-size:11px;"><i class="fas fa-user"></i> Chauffeurs</a>
+            <a href="#" data-page="drivers"><i class="fas fa-motorcycle"></i> Chauffeurs <span class="badge-count" id="driverCount">0</span></a>
+            
             <div class="nav-section">Communication</div>
-                <a href="#" data-page="finances" class="sidebar-link"><i class="fas fa-credit-card"></i> <span>Finances</span></a>
             <a href="#" data-page="messages"><i class="fas fa-envelope"></i> Messages</a>
+            <a href="#" data-page="notifications"><i class="fas fa-bell"></i> Alertes <span class="badge-count" id="msgCount">0</span></a>
+            
             <div class="nav-section">Finances</div>
-            <a href="#" data-page="payments"><i class="fas fa-credit-card"></i> Paiements</a>
+            <a href="#" data-page="finances"><i class="fas fa-credit-card"></i> Abonnements</a>
+            <a href="#" data-page="payments"><i class="fas fa-money-bill-wave"></i> Paiements</a>
+            
             <div class="nav-section">Système</div>
-            <a href="#" data-page="notifications"><i class="fas fa-bell"></i> Notifications <span class="badge-count" id="msgCount">0</span></a>
             <a href="#" data-page="logs"><i class="fas fa-history"></i> Logs</a>
             <a href="#" data-page="settings"><i class="fas fa-cog"></i> Paramètres</a>
         </nav>
@@ -133,9 +138,9 @@
                 </div>
             </div>
             <div class="theme-btns">
-                <button onclick="setTheme('light')" id="theme-light" class="active">☀️</button>
-                <button onclick="setTheme('dark')" id="theme-dark">🌙</button>
-                <button onclick="setTheme('system')" id="theme-system">💻</button>
+                <button onclick="setTheme("light")" id="theme-light" class="active">☀️</button>
+                <button onclick="setTheme("dark")" id="theme-dark">🌙</button>
+                <button onclick="setTheme("system")" id="theme-system">💻</button>
             </div>
             <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
         </div>
