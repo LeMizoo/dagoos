@@ -157,7 +157,7 @@ async function confirmPayment(orgId, amount) {
     if (!received || parseInt(received) < amount) return alert('Le montant reçu doit être au moins égal au montant dû');
     
     try {
-        await apiPatch('/organizations/'+orgId, { 
+        await apiPut('/organizations/'+orgId, { 
             paymentStatus: 'paid', 
             paymentRef: ref, 
             paymentAmount: parseInt(received),
@@ -177,8 +177,8 @@ function changePlan(orgId, currentPlan, type) {
 }
 async function savePlan(orgId) { try { await apiPut('/organizations/'+orgId, { plan: document.getElementById('newPlan').value }); closeModal(); loadFinances(); } catch(e) {} }
 async function renewSub(orgId) { if (!confirm('Renouveler 30 jours ?')) return; try { await apiPost('/organizations/'+orgId+'/renew', {}); loadFinances(); } catch(e) {} }
-async function activateOrg(orgId) { if (!confirm('Activer cette organisation ?')) return; try { await apiPatch('/organizations/'+orgId+'/status', { status: 'active' }); loadFinances(); } catch(e) {} }
-async function suspendOrg(orgId) { if (!confirm('Suspendre ?')) return; try { await apiPatch('/organizations/'+orgId+'/status', { status: 'suspended' }); loadFinances(); } catch(e) {} }
+async function activateOrg(orgId) { if (!confirm('Activer cette organisation ?')) return; try { await apiPut('/organizations/'+orgId+'/status', { status: 'active' }); loadFinances(); } catch(e) {} }
+async function suspendOrg(orgId) { if (!confirm('Suspendre ?')) return; try { await apiPut('/organizations/'+orgId+'/status', { status: 'suspended' }); loadFinances(); } catch(e) {} }
 function exportFinances() {
     var rows = document.querySelectorAll('#financesTable tr');
     var csv = 'Organisation,Type,Plan,Prix,Début,Échéance,Jours,Statut,Paiement\n';
