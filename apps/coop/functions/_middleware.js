@@ -4,7 +4,7 @@ export async function onRequest(context) {
   
   // Fichiers statiques et pages existantes : ne pas toucher
   const staticPaths = ['/js/', '/css/', '/pages/', '/assets/', '/favicon.ico'];
-  const existingPages = ['/', '/index.html', '/dashboard.html', '/register.html', '/vitrine.html', '/dashboard'];
+  const existingPages = ['/', '/index.html', '/dashboard.html', '/register', '/register.html', '/vitrine.html', '/dashboard'];
   
   for (const p of staticPaths) {
     if (path.startsWith(p)) return context.next();
