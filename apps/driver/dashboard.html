@@ -34,6 +34,11 @@
     </script>
 </head>
 <body>
+    <script>
+        if (!localStorage.getItem("dagoos_token")) {
+            window.location.replace("/index.html");
+        }
+    </script>
     <main id="mainContent"></main>
     <script>
         var API_URL = DAGOOS_CONFIG.apiUrl;

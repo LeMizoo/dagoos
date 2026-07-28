@@ -91,6 +91,11 @@
     </style>
 </head>
 <body>
+    <script>
+        if (!localStorage.getItem("dagoos_token")) {
+            window.location.replace("/index.html");
+        }
+    </script>
     <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     
