@@ -30,7 +30,7 @@ function loadPage(page) {
   document.querySelectorAll('script[data-page]').forEach(function(s) { s.remove(); });
   
   var script = document.createElement('script');
-  script.src = 'pages/' + page + '.js';
+  script.src = '/pages/' + page + '.js';
   script.setAttribute('data-page', page);
   script.onload = function() {
     var funcName = 'init_' + page.replace(/-/g, '_');
