@@ -95,7 +95,7 @@ document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
 // ===== CHARGER LES STATS =====
 async function loadStats() {
     try {
-        var res = await fetch('DAGOOS_CONFIG.apiUrl/stats');
+        var res = await fetch(DAGOOS_CONFIG.apiUrl + '/stats');
         var data = res.ok ? await res.json() : { fleets: 0, coops: 0, drivers: 0 };
         var elF = document.getElementById('statFleets');
         var elD = document.getElementById('statDrivers');
@@ -111,7 +111,7 @@ function plural(n, s) { return n + ' ' + (n <= 1 ? s : s + 's'); }
 
 async function loadPlans() {
     try {
-        var res = await fetch('DAGOOS_CONFIG.apiUrl/plans');
+        var res = await fetch(DAGOOS_CONFIG.apiUrl + '/plans');
         if (!res.ok) return;
         var plans = await res.json();
         var fleetPlans = plans.filter(function(p) { return p.type === 'FLEET_MANAGER'; });
