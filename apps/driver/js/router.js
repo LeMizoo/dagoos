@@ -22,7 +22,7 @@ async function apiPost(endpoint, data) {
     return result;
 }
 
-function logout() { localStorage.clear(); window.location.href = DAGOOS_CONFIG.landingUrl; }
+function logout() { localStorage.clear(); window.location.replace(DAGOOS_CONFIG.landingUrl; }
 
 function loadPage(page) {
     var main = document.getElementById('mainContent');

@@ -11,7 +11,7 @@ function apiPatch(e,d) { return fetch(API_URL+e,{method:'PATCH',headers:{'Conten
 document.getElementById('sidebarUser').textContent = '🏢 ' + (user.name || user.email);
 apiGet("/organizations").then(function(orgs) { var org = orgs.find(function(o) { return o.email === user.email; }); if (org) { document.getElementById("sidebarCoopName").innerHTML = org.name; if (org.logo) { document.getElementById("sidebarLogo").src = org.logo; } } });
 
-function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+function logout() { localStorage.clear(); window.location.replace('index.html'; }
 function toggleSidebar() { document.getElementById("sidebar").classList.toggle("open"); document.getElementById("sidebarOverlay").classList.toggle("show"); }
 
 function loadPage(page) {

@@ -11,7 +11,7 @@ if (!token || (user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN')) { window.l
 document.getElementById('sidebarUser').textContent = (user.name || user.email);
 document.getElementById('sidebarAvatar').textContent = (user.name || 'A')[0].toUpperCase();
 
-function logout() { localStorage.clear(); window.location.href = DAGOOS_CONFIG.landingUrl; }
+function logout() { localStorage.clear(); window.location.replace(DAGOOS_CONFIG.landingUrl; }
 function toggleSidebar() { document.getElementById("sidebar").classList.toggle("open"); document.getElementById("sidebarOverlay").classList.toggle("show"); }
 
 function setTheme(t) {
