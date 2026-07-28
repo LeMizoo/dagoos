@@ -84,21 +84,20 @@ async function loadFinances() {
             var statusIcon = autoStatus === 'active' ? '🟢' : autoStatus === 'pending' ? '🟡' : '🔴';
             var statusLabel = autoStatus === 'active' ? 'Actif' : autoStatus === 'pending' ? 'En attente' : autoStatus === 'suspended' ? 'Suspendu' : autoStatus;
             var paidIcon = o.paymentStatus === 'paid' ? '✅ Payé' : '❌ Impayé';
+            var refTxt = o.paymentRef ? '<br><small style="color:#6C757D;">Réf: '+o.paymentRef+'</small>' : '';
             
-            // Actions toujours visibles
             var actions = '';
             actions += '<button class="btn-sm btn-edit" onclick="changePlan(\''+o.id+'\',\''+(o.plan||'Freemium')+'\',\''+o.type+'\')" title="Plan">✏️</button>';
             if (autoStatus === 'active') {
                 actions += '<button class="btn-sm" onclick="renewSub(\''+o.id+'\')" title="Renouveler">🔄</button>';
-                actions += '<button class="btn-sm btn-view" onclick="markPaid(\''+o.id+'\')" title="Payer">💵</button>';
+                actions += '<button class="btn-sm btn-view" onclick="validatePayment(\''+o.id+'\','+price+',\''+(o.plan||'Freemium')+'\',\''+o.name+'\')" title="Valider paiement">💵</button>';
                 actions += '<button class="btn-sm" onclick="suspendOrg(\''+o.id+'\')" title="Suspendre">⏸️</button>';
             } else if (autoStatus === 'pending') {
                 actions += '<button class="btn-sm btn-view" onclick="activateOrg(\''+o.id+'\')" title="Activer">✅</button>';
                 actions += '<button class="btn-sm" onclick="suspendOrg(\''+o.id+'\')" title="Suspendre">⏸️</button>';
             } else if (autoStatus === 'suspended') {
+                actions += '<button class="btn-sm btn-view" onclick="validatePayment(\''+o.id+'\','+price+',\''+(o.plan||'Freemium')+'\',\''+o.name+'\')" title="Payer pour réactiver">💵</button>';
                 actions += '<button class="btn-sm btn-view" onclick="activateOrg(\''+o.id+'\')" title="Réactiver">✅</button>';
-                actions += '<button class="btn-sm" onclick="markPaid(\''+o.id+'\')" title="Payer">💵</button>';
-                actions += '<button class="btn-sm btn-view" onclick="renewSub(\''+o.id+'\')" title="Renouveler">🔄</button>';
             }
             
             return '<tr>' +
@@ -110,7 +109,7 @@ async function loadFinances() {
                 '<td>' + echStr + '</td>' +
                 '<td>' + daysStr + '</td>' +
                 '<td>' + statusIcon + ' ' + statusLabel + '</td>' +
-                '<td>' + paidIcon + '</td>' +
+                '<td>' + paidIcon + refTxt + '</td>' +
                 '<td class="action-btns">' + actions + '</td>' +
             '</tr>';
         }).filter(Boolean).join('') : '<tr><td colspan="10">Aucune donnée</td></tr>';
@@ -123,6 +122,52 @@ async function loadFinances() {
     } catch(e) { document.getElementById('financesTable').innerHTML = '<tr><td colspan="10">❌ Erreur</td></tr>'; }
 }
 
+function validatePayment(orgId, amount, plan, name) {
+    var h = '<h4>💵 Valider le paiement</h4>';
+    h += '<p style="margin-bottom:8px;"><strong>'+name+'</strong> - Plan '+plan+'</p>';
+    h += '<p style="font-size:18px;font-weight:700;color:#1A5276;margin-bottom:16px;">Montant dû : <span id="payAmount">'+amount.toLocaleString()+' Ar</span></p>';
+    h += '<label style="font-size:13px;font-weight:500;display:block;margin-bottom:4px;">Montant reçu (Ar)</label>';
+    h += '<input id="payReceived" type="number" value="'+amount+'" style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--border);margin-bottom:10px;" oninput="updatePayDiff('+amount+')">';
+    h += '<div id="payDiff" style="margin-bottom:10px;font-size:13px;"></div>';
+    h += '<label style="font-size:13px;font-weight:500;display:block;margin-bottom:4px;">Référence de paiement</label>';
+    h += '<input id="payRef" placeholder="ex: MVola 034XXXXXXX, Orange Money, référence bancaire..." style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--border);margin-bottom:12px;">';
+    h += '<div style="display:flex;gap:8px;">';
+    h += '<button class="btn" onclick="closeModal()" style="flex:1;background:var(--border);">Annuler</button>';
+    h += '<button class="btn btn-primary" onclick="confirmPayment(\''+orgId+'\','+amount+')" style="flex:1;">✅ Valider le paiement</button>';
+    h += '</div>';
+    showModal('Valider paiement', h);
+    setTimeout(function(){ updatePayDiff(amount); }, 100);
+}
+
+function updatePayDiff(amount) {
+    var received = parseInt(document.getElementById('payReceived')?.value) || 0;
+    var diff = received - amount;
+    var el = document.getElementById('payDiff');
+    if (el) {
+        if (diff === 0) el.innerHTML = '<span style="color:#27AE60;">✅ Montant exact</span>';
+        else if (diff > 0) el.innerHTML = '<span style="color:#F39C12;">⚠️ Trop perçu : +'+diff.toLocaleString()+' Ar</span>';
+        else el.innerHTML = '<span style="color:#E74C3C;">❌ Manque : '+Math.abs(diff).toLocaleString()+' Ar</span>';
+    }
+}
+
+async function confirmPayment(orgId, amount) {
+    var received = document.getElementById('payReceived')?.value;
+    var ref = document.getElementById('payRef')?.value.trim();
+    if (!ref) return alert('La référence de paiement est obligatoire');
+    if (!received || parseInt(received) < amount) return alert('Le montant reçu doit être au moins égal au montant dû');
+    
+    try {
+        await apiPatch('/organizations/'+orgId, { 
+            paymentStatus: 'paid', 
+            paymentRef: ref, 
+            paymentAmount: parseInt(received),
+            status: 'active'
+        });
+        closeModal();
+        loadFinances();
+    } catch(e) { alert('❌ Erreur'); }
+}
+
 function changePlan(orgId, currentPlan, type) {
     var plans = ['Freemium','Basic','Standard','Premium'];
     var h = '<h4>Changer le plan</h4><select id="newPlan" style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--border);margin-bottom:8px;">';
@@ -132,7 +177,6 @@ function changePlan(orgId, currentPlan, type) {
 }
 async function savePlan(orgId) { try { await apiPatch('/organizations/'+orgId, { plan: document.getElementById('newPlan').value }); closeModal(); loadFinances(); } catch(e) {} }
 async function renewSub(orgId) { if (!confirm('Renouveler 30 jours ?')) return; try { await apiPost('/organizations/'+orgId+'/renew', {}); loadFinances(); } catch(e) {} }
-async function markPaid(orgId) { if (!confirm('Marquer comme payé ?')) return; try { await apiPatch('/organizations/'+orgId, { paymentStatus: 'paid' }); loadFinances(); } catch(e) {} }
 async function activateOrg(orgId) { if (!confirm('Activer cette organisation ?')) return; try { await apiPatch('/organizations/'+orgId+'/status', { status: 'active' }); loadFinances(); } catch(e) {} }
 async function suspendOrg(orgId) { if (!confirm('Suspendre ?')) return; try { await apiPatch('/organizations/'+orgId+'/status', { status: 'suspended' }); loadFinances(); } catch(e) {} }
 function exportFinances() {
