@@ -11,10 +11,6 @@ model User {
   id        String   @id @default(cuid())
   email     String   @unique
   password  String
-  name      String?
-  phone     String?
-  role      String   @default("DRIVER")
-  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   driver    Driver?
 }
@@ -30,6 +26,10 @@ model Organization {
   logo        String?
   description String?
   plan        String   @default("Freemium")
+  paymentStatus String?  @default("unpaid")
+  paymentRef    String?
+  paymentAmount Int?
+  subscriptionEnd DateTime?
   status      String   @default("pending")
   createdAt   DateTime @default(now())
   drivers     Driver[]
@@ -58,9 +58,6 @@ model Driver {
 }
 
 model Message {
-  id             String       @id @default(cuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
   subject        String
   content        String
   reply          String?
@@ -69,13 +66,10 @@ model Message {
   type           String       @default("info")
   read           Boolean      @default(false)
   replied        Boolean      @default(false)
-  createdAt      DateTime     @default(now())
 }
 
 model Vehicle {
   organizationId  String?
-  societeId       String?
-  societe         Societe?       @relation(fields: [societeId], references: [id])
   organization    Organization? @relation(fields: [organizationId], references: [id])
   proprietaireId   String?
   proprietaire     Proprietaire? @relation(fields: [proprietaireId], references: [id])
@@ -99,7 +93,6 @@ model Vehicle {
 }
 
 model Trip {
-  id        String   @id @default(cuid())
   driverId  String
   vehicleId String
   status    String   @default("pending")
@@ -109,21 +102,16 @@ model Trip {
 }
 
 model Payment {
-  id        String   @id @default(cuid())
   tripId    String
   amount    Float
   method    String
-  status    String   @default("pending")
-  createdAt DateTime @default(now())
 }
 
 model Log {
-  id        String   @id @default(cuid())
   userId    String?
   action    String
   details   String?
   ip        String?
-  createdAt DateTime @default(now())
 }
 
 model Plan {
@@ -139,20 +127,15 @@ model Plan {
 }
 
 model LandingContent {
-  id        String   @id @default(cuid())
   section   String   @unique
   title     String?
   subtitle  String?
   body      String?
   imageUrl  String?
   active    Boolean  @default(true)
-  updatedAt DateTime @updatedAt
 }
 
 model Proprietaire {
-  id             String       @id @default(cuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
   name           String
   cin            String?
   phone          String?
@@ -160,8 +143,6 @@ model Proprietaire {
   address        String?
   nif            String?
   stat           String?
-  status         String       @default("active")
-  createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   vehicles       Vehicle[]
   drivers        Driver[]
@@ -169,7 +150,6 @@ model Proprietaire {
 
 
 model Course {
-  id          String   @id @default(cuid())
   driverId    String
   vehicleId   String
   type        String   @default("NORMALE")
@@ -177,44 +157,25 @@ model Course {
   price       Float    @default(0)
   commission  Float    @default(0)
   date        DateTime @default(now())
-  createdAt   DateTime @default(now())
 }
 
 model Societe {
-  id             String       @id @default(cuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  name           String
   activite       String       @default("Transport")
   adresse        String?
-  nif            String?
-  stat           String?
-  email          String?
-  phone          String?
-  status         String       @default("active")
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  vehicles       Vehicle[]
-  drivers        Driver[]
 }
 
 
 model Contrat {
-  id          String   @id @default(cuid())
   societeId   String
   client      String
-  type        String
-  description String?
   dateDebut   String
   dateFin     String
   montant     Float    @default(0)
   statut      String   @default("actif")
-  createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
 model Livraison {
-  id            String   @id @default(cuid())
   societeId     String
   driverId      String?
   vehicleId     String?
@@ -226,6 +187,4 @@ model Livraison {
   commission    Float    @default(0)
   statut        String   @default("en_attente")
   preuve        String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
 }
