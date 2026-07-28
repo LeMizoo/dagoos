@@ -58,14 +58,19 @@ model Driver {
 }
 
 model Message {
+  id             String   @id @default(cuid())
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
   subject        String
   content        String
+  sender         String   @default("Admin")
   reply          String?
   repliedAt      DateTime?
   repliedBy      String?
   type           String       @default("info")
   read           Boolean      @default(false)
   replied        Boolean      @default(false)
+  createdAt      DateTime @default(now())
 }
 
 model Vehicle {
@@ -136,6 +141,7 @@ model LandingContent {
 }
 
 model Proprietaire {
+  id            String   @id @default(cuid())
   name           String
   cin            String?
   phone          String?
@@ -160,6 +166,7 @@ model Course {
 }
 
 model Societe {
+  id            String   @id @default(cuid())
   activite       String       @default("Transport")
   adresse        String?
 }
