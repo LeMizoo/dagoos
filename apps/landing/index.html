@@ -251,5 +251,18 @@
     </footer>
 
     <script src="js/main.v2.js?v=4"></script>
+<script>
+// Charger les plans dynamiquement depuis l'API
+fetch(DAGOOS_CONFIG.apiUrl + "'/plans'")
+    .then(r => r.json())
+    .then(plans => {
+        // Mettre à jour les prix dans la landing
+        plans.forEach(plan => {
+            var el = document.getElementById("price-" + plan.name.toLowerCase());
+            if (el) el.textContent = plan.price === 0 ? "Gratuit" : plan.price.toLocaleString() + " Ar";
+        });
+    })
+    .catch(() => console.log("Plans chargés depuis le cache"));
+</script>
 </body>
 </html>

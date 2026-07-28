@@ -7,7 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dagoos_super_secret_key_2026';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 const ALLOWED_REGISTRATION_ROLES = ['COOPERATIVE', 'FLEET_MANAGER'];
-const DEFAULT_LOGO = 'https://dago-mobility.pages.dev/assets/logo/b-trans.png';
+const DEFAULT_LOGO = 'DAGOOS_CONFIG.landingUrl/assets/logo/b-trans.png';
 
 // ===== INSCRIPTION =====
 exports.register = async (req, res) => {
