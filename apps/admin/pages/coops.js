@@ -1,6 +1,6 @@
 function init_coops() {
     document.getElementById('mainInner').innerHTML = '<div class="topbar"><h1>🏢 Cooperatives</h1><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="addOrg(\'COOPERATIVE\')">➕ Ajouter</button><button class="btn btn-sm" style="background:var(--border);" onclick="exportCSV(\'coops\')"><i class="fas fa-download"></i> CSV</button></div></div><div class="card"><table><thead><tr><th>Nom</th><th>Code</th><th>Email</th><th>Plan</th><th>Véhicules</th><th>Chauffeurs</th><th>Propriétaires</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="coopsTable"></tbody></table></div>';
-    loadCoops();
+    setTimeout(loadCoops, 100);
 }
 
 async function loadCoops() {
@@ -34,7 +34,7 @@ async function loadCoops() {
 function changeCoopStatus(id, newStatus) {
     if (confirm('Changer le statut en ' + newStatus + ' ?')) {
         apiPatch('/organizations/' + id + '/status', { status: newStatus })
-            .then(function() { loadCoops(); });
+            .then(function() { setTimeout(loadCoops, 100); });
     }
 }
 

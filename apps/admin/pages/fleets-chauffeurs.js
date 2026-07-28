@@ -1,7 +1,7 @@
 function init_fleets_chauffeurs() {
     document.getElementById('mainInner').innerHTML = '<div class="topbar"><h1>👥 Chauffeurs des Flottes</h1></div>' +
         '<div class="card"><table><thead><tr><th>Code</th><th>Nom</th><th>Flotte</th><th>Véhicule</th><th>Propriétaire</th><th>Statut</th></tr></thead><tbody id="fcTable"><tr><td colspan="6">Chargement...</td></tr></tbody></table></div>';
-    loadFC();
+    setTimeout(loadFC, 100);
 }
 
 async function loadFC() {

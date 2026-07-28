@@ -32,7 +32,7 @@ function init_finances() {
                 <th>Début</th><th>Échéance</th><th>Jours</th><th>Statut</th><th>Paiement</th><th>Actions</th>
             </tr></thead><tbody id="financesTable"></tbody></table>
         </div>`;
-    loadFinances();
+    setTimeout(loadFinances, 100);
 }
 
 async function loadFinances() {
@@ -164,7 +164,7 @@ async function confirmPayment(orgId, amount) {
             status: 'active'
         });
         closeModal();
-        loadFinances();
+        setTimeout(loadFinances, 100);
     } catch(e) { alert('❌ Erreur'); }
 }
 
@@ -175,10 +175,10 @@ function changePlan(orgId, currentPlan, type) {
     h += '</select><button class="btn btn-primary" onclick="savePlan(\''+orgId+'\')">💾 Enregistrer</button>';
     showModal('Changer plan', h);
 }
-async function savePlan(orgId) { try { await apiPut('/organizations/'+orgId, { plan: document.getElementById('newPlan').value }); closeModal(); loadFinances(); } catch(e) {} }
-async function renewSub(orgId) { if (!confirm('Renouveler 30 jours ?')) return; try { await apiPost('/organizations/'+orgId+'/renew', {}); loadFinances(); } catch(e) {} }
-async function activateOrg(orgId) { if (!confirm('Activer cette organisation ?')) return; try { await apiPatch('/organizations/'+orgId+'/status', { status: 'active' }); loadFinances(); } catch(e) {} }
-async function suspendOrg(orgId) { if (!confirm('Suspendre ?')) return; try { await apiPatch('/organizations/'+orgId+'/status', { status: 'suspended' }); loadFinances(); } catch(e) {} }
+async function savePlan(orgId) { try { await apiPut('/organizations/'+orgId, { plan: document.getElementById('newPlan').value }); closeModal(); setTimeout(loadFinances, 100); } catch(e) {} }
+async function renewSub(orgId) { if (!confirm('Renouveler 30 jours ?')) return; try { await apiPost('/organizations/'+orgId+'/renew', {}); setTimeout(loadFinances, 100); } catch(e) {} }
+async function activateOrg(orgId) { if (!confirm('Activer cette organisation ?')) return; try { await apiPatch('/organizations/'+orgId+'/status', { status: 'active' }); setTimeout(loadFinances, 100); } catch(e) {} }
+async function suspendOrg(orgId) { if (!confirm('Suspendre ?')) return; try { await apiPatch('/organizations/'+orgId+'/status', { status: 'suspended' }); setTimeout(loadFinances, 100); } catch(e) {} }
 function exportFinances() {
     var rows = document.querySelectorAll('#financesTable tr');
     var csv = 'Organisation,Type,Plan,Prix,Début,Échéance,Jours,Statut,Paiement\n';
