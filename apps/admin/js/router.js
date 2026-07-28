@@ -2,7 +2,7 @@
 // DAGO ADMIN - ROUTER + API
 // ========================================
 
-var API_URL = 'https://dagoos-api.onrender.com/api';
+var API_URL = DAGOOS_CONFIG.apiUrl;
 var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
 var token = localStorage.getItem('dagoos_token');
 
@@ -11,7 +11,7 @@ if (!token || (user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN')) { window.l
 document.getElementById('sidebarUser').textContent = (user.name || user.email);
 document.getElementById('sidebarAvatar').textContent = (user.name || 'A')[0].toUpperCase();
 
-function logout() { localStorage.clear(); window.location.href = 'https://dago-mobility.pages.dev'; }
+function logout() { localStorage.clear(); window.location.href = DAGOOS_CONFIG.landingUrl; }
 function toggleSidebar() { document.getElementById("sidebar").classList.toggle("open"); document.getElementById("sidebarOverlay").classList.toggle("show"); }
 
 function setTheme(t) {

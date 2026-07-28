@@ -1,4 +1,4 @@
-var API_URL = "https://dagoos-api.onrender.com/api";
+var API_URL = "DAGOOS_CONFIG.apiUrl";
 function apiGet(e) { return fetch(API_URL+e,{headers:{Authorization:"Bearer "+localStorage.getItem("dagoos_token")}}).then(function(r){return r.json()}); }
 function apiPost(e,d) { return fetch(API_URL+e,{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+localStorage.getItem("dagoos_token")},body:JSON.stringify(d)}).then(function(r){return r.json()}); }
 function apiPut(e,d) { return fetch(API_URL+e,{method:"PUT",headers:{"Content-Type":"application/json",Authorization:"Bearer "+localStorage.getItem("dagoos_token")},body:JSON.stringify(d)}).then(function(r){return r.json()}); }

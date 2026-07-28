@@ -1,4 +1,4 @@
-var API_URL = 'https://dagoos-api.onrender.com/api';
+var API_URL = DAGOOS_CONFIG.apiUrl;
 var DASHBOARD_URL = 'dashboard.html';
 
 document.getElementById('loginForm').addEventListener('submit', async function(e) {

@@ -2,10 +2,10 @@ var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
 var token = localStorage.getItem('dagoos_token');
 if (!token || user.role !== 'DRIVER') { window.location.href = 'index.html'; }
 
-function apiGet(e) { return fetch('https://dagoos-api.onrender.com/api'+e,{headers:{Authorization:'Bearer '+token}}).then(function(r){return r.json()}); }
+function apiGet(e) { return fetch(DAGOOS_CONFIG.apiUrl+e,{headers:{Authorization:'Bearer '+token}}).then(function(r){return r.json()}); }
 
 async function apiPost(endpoint, data) {
-    var response = await fetch('https://dagoos-api.onrender.com/api' + endpoint, {
+    var response = await fetch(DAGOOS_CONFIG.apiUrl + endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
         body: JSON.stringify(data)
@@ -22,7 +22,7 @@ async function apiPost(endpoint, data) {
     return result;
 }
 
-function logout() { localStorage.clear(); window.location.href = 'https://dago-mobility.pages.dev'; }
+function logout() { localStorage.clear(); window.location.href = DAGOOS_CONFIG.landingUrl; }
 
 function loadPage(page) {
     var main = document.getElementById('mainContent');

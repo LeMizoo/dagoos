@@ -28,7 +28,7 @@
         var slug = window.location.pathname.replace('/', '').replace('.html', '');
         if (!slug) slug = 'flotte-alasora';
         
-        fetch('https://dagoos-api.onrender.com/api/landing-content')
+        fetch('DAGOOS_CONFIG.apiUrl/landing-content')
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 var myContent = data.filter(function(c) { return c.section && c.section.endsWith('-' + slug); });

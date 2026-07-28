@@ -35,7 +35,7 @@ async function loadProfilTab() {
     
     var html = '<div class="card" style="padding:24px;"><h3>Profil de la flotte</h3>';
     html += '<div style="display:flex;align-items:center;gap:16px;margin:16px 0;">' +
-        '<img src="' + (org.logo || 'https://dago-mobility.pages.dev/assets/logo/b-trans.png') + '" style="width:64px;height:64px;border-radius:14px;object-fit:cover;" id="logoPreview">' +
+        '<img src="' + (org.logo || 'DAGOOS_CONFIG.landingUrl/assets/logo/b-trans.png') + '" style="width:64px;height:64px;border-radius:14px;object-fit:cover;" id="logoPreview">' +
         '<div><strong>' + org.name + '</strong><br><span style="color:var(--text2);">Code: ' + org.code + ' | Plan: ' + (org.plan || 'Freemium') + '</span></div></div>';
     html += '<div class="form-group"><label>Nom</label><input id="editName" value="' + org.name + '"></div>';
     html += '<div class="form-group"><label>Email</label><input id="editEmail" value="' + (org.email || '') + '"></div>';

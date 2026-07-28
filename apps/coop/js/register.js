@@ -1,4 +1,4 @@
-const API_URL = 'https://dagoos-api.onrender.com/api';
+const API_URL = DAGOOS_CONFIG.apiUrl;
 const LOGIN_URL = 'index.html';
 
 const registerForm = document.getElementById('registerForm');

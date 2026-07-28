@@ -11,7 +11,7 @@ function init_home() {
         // HEADER
         '<div style="background:#1E293B;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid #DAA520;">' +
             '<div style="display:flex;align-items:center;gap:8px;">' +
-                '<img src="https://dago-mobility.pages.dev/assets/logo/b-trans.png" style="width:32px;height:32px;object-fit:contain;border-radius:8px;">' +
+                '<img src="DAGOOS_CONFIG.landingUrl/assets/logo/b-trans.png" style="width:32px;height:32px;object-fit:contain;border-radius:8px;">' +
                 '<div>' +
                     '<div style="font-size:14px;font-weight:700;color:#DAA520;">' + (user.name || 'Chauffeur') + '</div>' +
                     '<div style="font-size:10px;color:#94A3B8;display:flex;gap:4px;">' +
@@ -224,14 +224,14 @@ async function enregistrerCourse() {
             var a = parseFloat(document.getElementById('kmArrivee').value) || 0;
             if (a <= d) return alert('Km arrivée > Km départ');
             data.distanceKm = Number((a - d).toFixed(1));
-            data.price = 2000 + data.distanceKm * 500;
+            data.price = DAGOOS_CONFIG.pricing.baseFare + data.distanceKm * DAGOOS_CONFIG.pricing.pricePerKm;
         } else if (type === 'ADY_VAROTRA' || type === 'FORFAIT') {
             data.price = parseFloat(document.getElementById('montant').value) || 0;
             if (data.price <= 0) return alert('Montant requis');
         } else if (type === 'LOCATION_JOURNALIERE') {
-            data.price = 15000;
+            data.price = DAGOOS_CONFIG.pricing.dailyRental;
         }
-        data.commission = Math.round(data.price * 0.10);
+        data.commission = Math.round(data.price * DAGOOS_CONFIG.pricing.commissionRate);
         
         console.log('Création course:', data);
         var course = await apiPost('/courses', data);

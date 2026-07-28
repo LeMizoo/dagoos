@@ -2,8 +2,8 @@
 // DAGO ADMIN - DASHBOARD FINAL
 // ========================================
 
-var API_URL = 'https://dagoos-api.onrender.com/api';
-var LANDING_URL = 'https://dago-mobility.pages.dev';
+var API_URL = DAGOOS_CONFIG.apiUrl;
+var LANDING_URL = DAGOOS_CONFIG.landingUrl;
 var LOGIN_URL = 'index.html';
 var currentPage = 'dashboard';
 var refreshInterval;

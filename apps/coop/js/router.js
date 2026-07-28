@@ -1,4 +1,4 @@
-var API_URL = 'https://dagoos-api.onrender.com/api';
+var API_URL = DAGOOS_CONFIG.apiUrl;
 var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
 var token = localStorage.getItem('dagoos_token');
 if (!token || user.role !== 'COOPERATIVE') { window.location.href = 'index.html'; }

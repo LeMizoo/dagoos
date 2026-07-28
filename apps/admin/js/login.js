@@ -1,6 +1,6 @@
-const API_URL = 'https://dagoos-api.onrender.com/api';
+const API_URL = DAGOOS_CONFIG.apiUrl;
 const DASHBOARD_URL = 'dashboard.html';
-const LANDING_URL = 'https://dago-mobility.pages.dev';
+const LANDING_URL = DAGOOS_CONFIG.landingUrl;
 
 const loginForm = document.getElementById('loginForm');
 const messageDiv = document.getElementById('message');

@@ -2,7 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
-const DEFAULT_LOGO = 'https://dago-mobility.pages.dev/assets/logo/b-trans.png';
+const DEFAULT_LOGO = 'DAGOOS_CONFIG.landingUrl/assets/logo/b-trans.png';
 
 async function seed() {
   console.log('🌱 Seed: initialisation...');

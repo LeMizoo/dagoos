@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <script src="/shared/config.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Apple PWA -->
@@ -35,7 +36,7 @@
 <body>
     <main id="mainContent"></main>
     <script>
-        var API_URL = 'https://dagoos-api.onrender.com/api';
+        var API_URL = DAGOOS_CONFIG.apiUrl;
         var token = localStorage.getItem('dagoos_token');
         var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
         if (!token || user.role !== 'DRIVER') { window.location.href = 'index.html'; }

@@ -2,8 +2,8 @@
 // DAGOO'S - ADMIN DASHBOARD (v2)
 // ========================================
 
-const API_URL = 'https://dagoos-api.onrender.com/api';
-const LANDING_URL = "https://dago-mobility.pages.dev";
+const API_URL = DAGOOS_CONFIG.apiUrl;
+const LANDING_URL = "DAGOOS_CONFIG.landingUrl";
 
 console.log('🚀 Dashboard Dagoos v2 chargé');
 

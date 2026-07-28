@@ -1,4 +1,4 @@
-const API_URL = 'https://dagoos-api.onrender.com/api';
+const API_URL = DAGOOS_CONFIG.apiUrl;
 const DASHBOARD_URL = 'dashboard.html';
 
 const loginForm = document.getElementById('loginForm');
