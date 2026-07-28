@@ -268,6 +268,7 @@ model Versement {
 // PLAN D'ABONNEMENT
 // ========================================
 model Plan {
+  @@unique([type, name])
   id          String   @id @default(cuid())
   type        String   // FLEET_MANAGER, COOPERATIVE
   name        String   // Freemium, Basic, Standard, Premium
