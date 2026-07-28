@@ -64,43 +64,29 @@ async function loadMessages() {
     } catch(e) { document.getElementById('messagesTable').innerHTML = '<tr><td colspan="7">❌ Erreur</td></tr>'; }
 }
 
-async function newMessage() {
-    // Charger les organisations
-    var orgs = [];
-    try { orgs = await apiGet('/organizations'); } catch(e) {}
-    
-    var h = '<h4>➕ Nouveau message</h4>';
-    
-    // Destinataire
-    h += '<label style="font-size:13px;font-weight:500;margin-bottom:4px;display:block;">Destinataire</label>';
-    h += '<select id="newRecipient" style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--border);margin-bottom:10px;">';
-    h += '<option value="all">📢 Toutes les organisations</option>';
-    h += '<optgroup label="🚛 Flottes">';
-    orgs.filter(function(o){return o.type==='FLEET_MANAGER'}).forEach(function(o){
-        h += '<option value="'+o.id+'">'+o.name+' ('+(o.plan||'Freemium')+')</option>';
-    });
-    h += '</optgroup>';
-    h += '<optgroup label="🏢 Coopératives">';
-    orgs.filter(function(o){return o.type==='COOPERATIVE'}).forEach(function(o){
-        h += '<option value="'+o.id+'">'+o.name+' ('+(o.plan||'Freemium')+')</option>';
-    });
-    h += '</optgroup>';
-    h += '</select>';
-    
-    // Type de message
-    h += '<label style="font-size:13px;font-weight:500;margin-bottom:4px;display:block;">Type</label>';
-    h += '<select id="newType" style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--border);margin-bottom:10px;">';
-    h += '<option value="info">ℹ️ Information</option>';
-    h += '<option value="warning">⚠️ Avertissement</option>';
-    h += '<option value="success">✅ Succès</option>';
-    h += '<option value="error">❌ Urgent</option>';
-    h += '</select>';
-    
-    h += '<input id="newSubject" placeholder="Sujet du message" style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--border);margin-bottom:10px;">';
-    h += '<textarea id="newContent" rows="5" placeholder="Contenu du message..." style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--border);margin-bottom:10px;"></textarea>';
-    h += '<button class="btn btn-primary" onclick="sendMsg()" style="width:100%;">📤 Envoyer le message</button>';
-    
-    showModal('Nouveau message', h);
+function newMessage() {
+    var h = "";
+    h += "<label style="font-size:13px;font-weight:500;margin-bottom:4px;display:block;">Destinataire</label>";
+    h += "<select id="newRecipient" style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--border);margin-bottom:10px;">";
+    h += "<option value="all">📢 Toutes les organisations</option>";
+    h += "<option value="FLEET_MANAGER">🚛 Flotte</option>";
+    h += "<option value="COOPERATIVE">🏢 Coop</option>";
+    h += "<option value="DRIVER">🛵 Chauffeur</option>";
+    h += "</select>";
+    h += "<label style="font-size:13px;font-weight:500;margin-bottom:4px;display:block;">Type</label>";
+    h += "<select id="newType" style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--border);margin-bottom:10px;">";
+    h += "<option value="info">ℹ️ Information</option>";
+    h += "<option value="warning">⚠️ Avertissement</option>";
+    h += "<option value="success">✅ Succès</option>";
+    h += "<option value="error">❌ Urgent</option>";
+    h += "</select>";
+    h += "<input id="newSubject" placeholder="Sujet du message" style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--border);margin-bottom:10px;">";
+    h += "<textarea id="newContent" rows="5" placeholder="Contenu du message..." style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--border);margin-bottom:10px;"></textarea>";
+    h += "<div style="display:flex;gap:8px;">";
+    h += "<button class="btn" onclick="closeModal()" style="flex:1;background:var(--border);">Annuler</button>";
+    h += "<button class="btn btn-primary" onclick="sendMsg()" style="flex:1;">📤 Envoyer le message</button>";
+    h += "</div>";
+    showModal("Nouveau message", h);
 }
 
 async function sendMsg() {
