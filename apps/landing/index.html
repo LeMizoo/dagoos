@@ -253,7 +253,7 @@
     <script src="js/main.v2.js?v=4"></script>
 <script>
 // Charger les plans dynamiquement depuis l'API
-fetch(DAGOOS_CONFIG.apiUrl + "'/plans'")
+fetch(DAGOOS_CONFIG.apiUrl + '/plans')
     .then(r => r.json())
     .then(plans => {
         // Mettre à jour les prix dans la landing
