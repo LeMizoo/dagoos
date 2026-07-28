@@ -34,13 +34,11 @@ async function loadMessages() {
         var msgs = await apiGet('/messages');
         if (!Array.isArray(msgs)) msgs = [];
         
-        // Marquer la direction
         msgs = msgs.map(function(m) {
             m._direction = m.sender === 'Admin' ? '📤 Envoyé' : '📥 Reçu';
             return m;
         });
         
-        // Filtres
         if (dir === 'received') msgs = msgs.filter(function(m) { return m._direction === '📥 Reçu'; });
         if (dir === 'sent') msgs = msgs.filter(function(m) { return m._direction === '📤 Envoyé'; });
         if (filter === 'unread') msgs = msgs.filter(function(m) { return !m.read; });
@@ -56,7 +54,7 @@ async function loadMessages() {
         document.getElementById('messagesTable').innerHTML = msgs.length ? msgs.map(function(m) {
             var d = new Date(m.createdAt).toLocaleString('fr-FR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
             var icon = m.read ? '✅' : '🔵';
-            var label = m.organizationId ? 'Org' : 'Admin';
+            var label = m.organization ? m.organization.name : 'Tous';
             var style = m.read ? '' : 'style="font-weight:600;"';
             var act = '<button class="btn-sm btn-view" onclick="viewMsg(\''+m.id+'\')">👁</button>';
             if (!m.read) act += '<button class="btn-sm" onclick="markRead(\''+m.id+'\')">✅</button>';
@@ -66,20 +64,58 @@ async function loadMessages() {
     } catch(e) { document.getElementById('messagesTable').innerHTML = '<tr><td colspan="7">❌ Erreur</td></tr>'; }
 }
 
-function newMessage() {
+async function newMessage() {
+    // Charger les organisations
+    var orgs = [];
+    try { orgs = await apiGet('/organizations'); } catch(e) {}
+    
     var h = '<h4>➕ Nouveau message</h4>';
-    h += '<input id="newSubject" placeholder="Sujet" style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--border);margin-bottom:8px;">';
-    h += '<textarea id="newContent" rows="5" placeholder="Message..." style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--border);margin-bottom:8px;"></textarea>';
-    h += '<button class="btn btn-primary" onclick="sendMsg()">📤 Envoyer</button>';
+    
+    // Destinataire
+    h += '<label style="font-size:13px;font-weight:500;margin-bottom:4px;display:block;">Destinataire</label>';
+    h += '<select id="newRecipient" style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--border);margin-bottom:10px;">';
+    h += '<option value="all">📢 Toutes les organisations</option>';
+    h += '<optgroup label="🚛 Flottes">';
+    orgs.filter(function(o){return o.type==='FLEET_MANAGER'}).forEach(function(o){
+        h += '<option value="'+o.id+'">'+o.name+' ('+(o.plan||'Freemium')+')</option>';
+    });
+    h += '</optgroup>';
+    h += '<optgroup label="🏢 Coopératives">';
+    orgs.filter(function(o){return o.type==='COOPERATIVE'}).forEach(function(o){
+        h += '<option value="'+o.id+'">'+o.name+' ('+(o.plan||'Freemium')+')</option>';
+    });
+    h += '</optgroup>';
+    h += '</select>';
+    
+    // Type de message
+    h += '<label style="font-size:13px;font-weight:500;margin-bottom:4px;display:block;">Type</label>';
+    h += '<select id="newType" style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--border);margin-bottom:10px;">';
+    h += '<option value="info">ℹ️ Information</option>';
+    h += '<option value="warning">⚠️ Avertissement</option>';
+    h += '<option value="success">✅ Succès</option>';
+    h += '<option value="error">❌ Urgent</option>';
+    h += '</select>';
+    
+    h += '<input id="newSubject" placeholder="Sujet du message" style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--border);margin-bottom:10px;">';
+    h += '<textarea id="newContent" rows="5" placeholder="Contenu du message..." style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--border);margin-bottom:10px;"></textarea>';
+    h += '<button class="btn btn-primary" onclick="sendMsg()" style="width:100%;">📤 Envoyer le message</button>';
+    
     showModal('Nouveau message', h);
 }
 
 async function sendMsg() {
+    var recipientId = document.getElementById('newRecipient').value;
+    var type = document.getElementById('newType').value;
     var s = document.getElementById('newSubject').value.trim();
     var c = document.getElementById('newContent').value.trim();
     if (!s || !c) return alert('Sujet et message requis');
     try { 
-        await apiPost('/messages', { organizationId: null, subject: s, content: c, type: 'info' }); 
+        await apiPost('/messages', { 
+            organizationId: recipientId === 'all' ? null : recipientId, 
+            subject: s, 
+            content: c, 
+            type: type 
+        }); 
         closeModal(); 
         loadMessages(); 
     } catch(e) { alert('❌ Erreur: ' + e.message); }
@@ -108,6 +144,7 @@ async function viewMsg(id) {
         if (!m.read) markRead(id);
         showModal(m.subject || 'Message', 
             '<p><strong>De:</strong> '+(m.sender||'Système')+'</p>' +
+            '<p><strong>Pour:</strong> '+(m.organization ? m.organization.name : 'Tous')+'</p>' +
             '<p><strong>Date:</strong> '+new Date(m.createdAt).toLocaleString('fr-FR')+'</p>' +
             '<hr><p>'+(m.content||'')+'</p>');
     } catch(e) {}
