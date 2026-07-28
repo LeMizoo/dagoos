@@ -9,34 +9,35 @@ datasource db {
 
 model User {
   id        String   @id @default(cuid())
+  name      String?
   email     String   @unique
   password  String
+  role      String   @default("USER")
+  phone     String?
   updatedAt DateTime @updatedAt
   driver    Driver?
 }
 
 model Organization {
-  id          String   @id @default(cuid())
-  name        String
-  code        String   @unique
-  slug        String   @unique
-  type        String
-  email       String   @unique
-  phone       String?
-  logo        String?
-  description String?
-  plan        String   @default("Freemium")
-  paymentStatus String?  @default("unpaid")
-  paymentRef    String?
-  paymentAmount Int?
+  id              String          @id @default(cuid())
+  name            String
+  code            String          @unique
+  slug            String          @unique
+  type            String
+  email           String          @unique
+  phone           String?
+  logo            String?
+  description     String?
+  plan            String          @default("Freemium")
+  paymentStatus   String?         @default("unpaid")
+  paymentRef      String?
+  paymentAmount   Int?
   subscriptionEnd DateTime?
-  status      String   @default("pending")
-  createdAt   DateTime @default(now())
-  drivers     Driver[]
-  messages     Message[]
-  proprietaires Proprietaire[]
-  societes      Societe[]
-  vehicles     Vehicle[]
+  status          String          @default("pending")
+  createdAt       DateTime        @default(now())
+  drivers         Driver[]
+  messages        Message[]
+  vehicles        Vehicle[]
 }
 
 model Driver {
@@ -48,56 +49,40 @@ model Driver {
   driverCode     String       @unique
   pin            String
   license        String?
-  vehicleId       String?
-  proprietaireId  String?
-  societeId       String?
-  societe         Societe?       @relation(fields: [societeId], references: [id])
-  proprietaire    Proprietaire? @relation(fields: [proprietaireId], references: [id])
+  vehicleId      String?
   status         String       @default("active")
   createdAt      DateTime     @default(now())
 }
 
 model Message {
-  id             String   @id @default(cuid())
+  id             String        @id @default(cuid())
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id])
   subject        String
   content        String
-  sender         String   @default("Admin")
-  reply          String?
-  repliedAt      DateTime?
-  repliedBy      String?
-  type           String       @default("info")
-  read           Boolean      @default(false)
-  replied        Boolean      @default(false)
-  createdAt      DateTime @default(now())
+  sender         String        @default("Admin")
+  type           String        @default("info")
+  read           Boolean       @default(false)
+  replied        Boolean       @default(false)
+  createdAt      DateTime      @default(now())
 }
 
 model Vehicle {
-  organizationId  String?
-  organization    Organization? @relation(fields: [organizationId], references: [id])
-  proprietaireId   String?
-  proprietaire     Proprietaire? @relation(fields: [proprietaireId], references: [id])
-  id                String   @id @default(cuid())
-  plate             String   @unique
+  id                String        @id @default(cuid())
+  organizationId    String?
+  organization      Organization? @relation(fields: [organizationId], references: [id])
+  plate             String        @unique
   model             String?
   year              Int?
-  cc                String?
-  color             String?
-  engineNo          String?
-  chassisNo         String?
-  currentKm         Int      @default(0)
-  nextMaintenanceKm Int      @default(3000)
-  insuranceDate     String?
-  vignetteDate      String?
-  purchasePrice     Float?
-  purchaseDate      String?
-  status            String   @default("active")
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  currentKm         Int           @default(0)
+  nextMaintenanceKm Int           @default(3000)
+  status            String        @default("active")
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 }
 
 model Trip {
+  id        String   @id @default(cuid())
   driverId  String
   vehicleId String
   status    String   @default("pending")
@@ -107,91 +92,50 @@ model Trip {
 }
 
 model Payment {
-  tripId    String
-  amount    Float
-  method    String
-}
-
-model Log {
-  userId    String?
-  action    String
-  details   String?
-  ip        String?
+  id     String @id @default(cuid())
+  tripId String
+  amount Float
+  method String
 }
 
 model Plan {
-  id            String   @id @default(cuid())
-  type          String
-  name          String
-  price         Float    @default(0)
-  vehiclesMax   Int      @default(1)
-  driversMax    Int      @default(1)
-  active        Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-}
-
-model LandingContent {
-  section   String   @unique
-  title     String?
-  subtitle  String?
-  body      String?
-  imageUrl  String?
-  active    Boolean  @default(true)
-}
-
-model Proprietaire {
-  id            String   @id @default(cuid())
-  name           String
-  cin            String?
-  phone          String?
-  email          String?
-  address        String?
-  nif            String?
-  stat           String?
-  updatedAt      DateTime     @updatedAt
-  vehicles       Vehicle[]
-  drivers        Driver[]
-}
-
-
-model Course {
-  driverId    String
-  vehicleId   String
-  type        String   @default("NORMALE")
-  distanceKm  Float    @default(0)
+  id          String   @id @default(cuid())
+  type        String
+  name        String
   price       Float    @default(0)
-  commission  Float    @default(0)
-  date        DateTime @default(now())
-}
-
-model Societe {
-  id            String   @id @default(cuid())
-  activite       String       @default("Transport")
-  adresse        String?
-}
-
-
-model Contrat {
-  societeId   String
-  client      String
-  dateDebut   String
-  dateFin     String
-  montant     Float    @default(0)
-  statut      String   @default("actif")
+  vehiclesMax Int      @default(1)
+  driversMax  Int      @default(1)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
-model Livraison {
-  societeId     String
-  driverId      String?
-  vehicleId     String?
-  type          String   @default("colis")
-  description   String?
-  adresseDepart String?
-  adresseArrivee String?
-  prix          Float    @default(0)
-  commission    Float    @default(0)
-  statut        String   @default("en_attente")
-  preuve        String?
+model Course {
+  id         String   @id @default(cuid())
+  driverId   String
+  vehicleId  String
+  type       String   @default("NORMALE")
+  distanceKm Float    @default(0)
+  price      Float    @default(0)
+  commission Float    @default(0)
+  date       DateTime @default(now())
+}
+
+model Log {
+  id      String   @id @default(cuid())
+  userId  String?
+  action  String
+  details String?
+  ip      String?
+  createdAt DateTime @default(now())
+}
+
+model LandingContent {
+  id       String  @id @default(cuid())
+  section  String  @unique
+  title    String?
+  subtitle String?
+  body     String?
+  imageUrl String?
+  active   Boolean @default(true)
 }
