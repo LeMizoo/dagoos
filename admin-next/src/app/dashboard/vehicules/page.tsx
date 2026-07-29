@@ -50,7 +50,7 @@ export default function VehiclesPage() {
   // Application des filtres
   const filtered = vehicles.filter(v => {
     const matchSearch = (v.plate || '').toLowerCase().includes(search.toLowerCase()) || (v.model || '').toLowerCase().includes(search.toLowerCase());
-    const matchAssurance = !filterAssurance || (v.insuranceDate && filterAssurance === 'ok' ? true : filterAssurance === 'expire' ? new Date(v.insuranceDate) < new Date() : false);
+    const matchAssurance = !filterAssurance || (v.insuranceDate && filterAssurance === 'ok' ? true : filterAssurance === 'expire' ? new Date(v.insuranceDate || '') < new Date() : false);
     const matchVidange = !filterVidange || (v.nextMaintenanceKm && filterVidange === 'ok' ? (v.nextMaintenanceKm - v.currentKm) > 500 : filterVidange === 'bientot' ? (v.nextMaintenanceKm - v.currentKm) <= 500 && (v.nextMaintenanceKm - v.currentKm) > 0 : filterVidange === 'urgent' ? v.currentKm >= (v.nextMaintenanceKm || 0) : true);
     return matchSearch;
   });
