@@ -46,7 +46,7 @@ const menu = [
   {
     section: 'Système',
     items: [
-      { href: '/dashboard/logs', icon: ScrollText, label: 'Logs' },
+      { href: '/dashboard/system-logs', icon: ScrollText, label: 'Logs' },
       { href: '/dashboard/settings', icon: Settings, label: 'Paramètres' },
     ],
   },
