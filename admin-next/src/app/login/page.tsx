@@ -33,7 +33,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-dark to-blue-900">
       <div className="bg-white rounded-2xl p-10 w-full max-w-md shadow-2xl">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-800">Dagoo Admin</h1>
+          <h1 className="text-2xl font-bold text-gray-800">DAGOO
+Chez les potes, ça roule.</h1>
           <p className="text-gray-500 text-sm mt-1">Plateforme d&apos;administration</p>
           <span className="inline-block bg-primary text-white text-xs px-3 py-1 rounded-full mt-3">🔒 Réservé aux administrateurs</span>
         </div>
