@@ -4,7 +4,7 @@ import { jwtVerify } from 'jose';
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'dagoos-secret-key');
 
-const publicPaths = ['/login', '/fleet/login', '/coop/login'];
+const publicPaths = ['/login', '/fleet-login', '/coop-login'];
 
 export async function middleware(req: NextRequest) {
   const token = req.cookies.get('dagoos_token')?.value;
@@ -18,8 +18,8 @@ export async function middleware(req: NextRequest) {
   // Pas de token → rediriger vers le login approprié
   if (!token) {
     let loginPath = '/login';
-    if (pathname.startsWith('/fleet')) loginPath = '/fleet/login';
-    else if (pathname.startsWith('/coop')) loginPath = '/coop/login';
+    if (pathname.startsWith('/fleet')) loginPath = '/fleet-login';
+    else if (pathname.startsWith('/coop')) loginPath = '/coop-login';
     
     const loginUrl = new URL(loginPath, req.url);
     loginUrl.searchParams.set('redirect', pathname);
@@ -40,8 +40,8 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   } catch {
     let loginPath = '/login';
-    if (pathname.startsWith('/fleet')) loginPath = '/fleet/login';
-    else if (pathname.startsWith('/coop')) loginPath = '/coop/login';
+    if (pathname.startsWith('/fleet')) loginPath = '/fleet-login';
+    else if (pathname.startsWith('/coop')) loginPath = '/coop-login';
     
     const loginUrl = new URL(loginPath, req.url);
     loginUrl.searchParams.set('redirect', pathname);
