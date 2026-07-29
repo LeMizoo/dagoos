@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 'use client';
 import { useState } from 'react';
 import { Settings, User, Shield, Palette, Bell, Globe, Save } from 'lucide-react';

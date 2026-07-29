@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 'use client';
 import { useState, useEffect } from 'react';
 import { Bell, BellOff, UserPlus, CreditCard, Wrench, AlertCircle, CheckCheck } from 'lucide-react';
