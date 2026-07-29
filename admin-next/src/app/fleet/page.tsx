@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Users, Car, DollarSign, MessageSquare } from 'lucide-react';
 import StatCard from '@/components/dashboard/StatCard';
+import Greeting from '@/components/dashboard/Greeting';
 
 export default function FleetHome() {
   const [stats, setStats] = useState({ drivers: 0, vehicles: 0, revenus: 0, messages: 0 });
@@ -28,7 +29,7 @@ export default function FleetHome() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">📊 Tableau de bord Flotte</h1>
+      <Greeting />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard icon={Users} label="Chauffeurs" value={loading ? 0 : stats.drivers} color="blue" />
         <StatCard icon={Car} label="Véhicules" value={loading ? 0 : stats.vehicles} color="green" />
