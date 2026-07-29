@@ -1,1 +1,1 @@
-{"version":1,"functions":{"/dashboard/logs":{},"/dashboard/entretien":{},"/dashboard/messages":{},"/dashboard/finances":{},"/dashboard/missions":{},"/dashboard/notifications":{},"/dashboard/settings":{},"/dashboard/vehicules":{},"/dashboard/paiements":{},"/dashboard/chauffeurs":{}}}
+{"version":1,"functions":{"/dashboard/chauffeurs":{},"/dashboard/entretien":{},"/dashboard/finances":{},"/dashboard/notifications":{},"/dashboard/missions":{},"/dashboard/messages":{},"/dashboard/paiements":{},"/dashboard/vehicules":{},"/dashboard/settings":{}}}
