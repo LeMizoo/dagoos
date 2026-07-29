@@ -5,7 +5,6 @@ export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json();
     
-    // Appeler l'API Render pour l'authentification
     const apiRes = await fetch('https://dagoos-api.onrender.com/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -19,7 +18,6 @@ export async function POST(req: NextRequest) {
 
     const data = await apiRes.json();
     
-    // Stocker le token de l'API Render dans un cookie
     const res = apiSuccess({ user: data.user || data });
     res.cookies.set('dagoos_token', data.token, {
       httpOnly: true,
