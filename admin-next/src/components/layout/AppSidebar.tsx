@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
-  LayoutDashboard, Car, Wrench, Users, DollarSign, MessageSquare, 
+  LayoutDashboard, Car, Users, DollarSign, MessageSquare, 
   Settings, LogOut, FileText, ArrowRightLeft, Receipt, 
   User, QrCode, Building2, FileCheck, Truck 
 } from 'lucide-react';
@@ -75,7 +75,7 @@ export default function AppSidebar({ app }: AppSidebarProps) {
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/login');
+    router.push(`/${app}/login`);
     router.refresh();
   }
 
