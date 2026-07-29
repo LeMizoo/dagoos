@@ -21,8 +21,14 @@ export default function Sidebar() {
   return (
     <aside className="w-60 bg-dark text-white fixed h-full flex flex-col">
       <div className="p-4 border-b border-gray-700">
-        <h2 className="text-lg font-bold">DAG<span className="text-secondary">OO</span></h2>
-        <p className="text-xs text-gray-400">Admin</p>
+        <div className="flex items-center gap-3 mb-1">
+          <div className="w-8 h-8 bg-secondary rounded-lg flex items-center justify-center">
+            <span className="text-dark font-bold text-sm">D</span>
+          </div>
+          <h2 className="text-lg font-bold">DAGOO</h2>
+        </div>
+        <p className="text-xs text-gray-400">Chez les potes, ça roule.</p>
+        <span className="inline-block bg-primary/50 text-white text-[10px] px-2 py-0.5 rounded-full mt-2">Admin</span>
       </div>
       <nav className="flex-1 p-3 overflow-y-auto">
         {menu.map(s => (
