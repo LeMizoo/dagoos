@@ -1,4 +1,7 @@
 import AppSidebar from '@/components/layout/AppSidebar';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = { title: 'Dagoo Coop - Gestion de coopérative' };
 
 export default function CoopLayout({ children }: { children: React.ReactNode }) {
   return (
