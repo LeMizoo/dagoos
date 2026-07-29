@@ -1,0 +1,23 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/auth/logout/route": "app/api/auth/logout/route.js",
+  "/api/drivers/route": "app/api/drivers/route.js",
+  "/api/auth/me/route": "app/api/auth/me/route.js",
+  "/api/health/route": "app/api/health/route.js",
+  "/api/vehicles/route": "app/api/vehicles/route.js",
+  "/api/auth/login/route": "app/api/auth/login/route.js",
+  "/login/page": "app/login/page.js",
+  "/api/dashboard/stats/route": "app/api/dashboard/stats/route.js",
+  "/api/proxy/[...path]/route": "app/api/proxy/[...path]/route.js",
+  "/dashboard/finances/page": "app/dashboard/finances/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/missions/page": "app/dashboard/missions/page.js",
+  "/dashboard/messages/page": "app/dashboard/messages/page.js",
+  "/dashboard/notifications/page": "app/dashboard/notifications/page.js",
+  "/dashboard/chauffeurs/page": "app/dashboard/chauffeurs/page.js",
+  "/dashboard/logs/page": "app/dashboard/logs/page.js",
+  "/dashboard/settings/page": "app/dashboard/settings/page.js",
+  "/dashboard/entretien/page": "app/dashboard/entretien/page.js",
+  "/dashboard/paiements/page": "app/dashboard/paiements/page.js",
+  "/dashboard/vehicules/page": "app/dashboard/vehicules/page.js"
+}
