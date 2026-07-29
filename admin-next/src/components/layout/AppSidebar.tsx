@@ -83,9 +83,7 @@ export default function AppSidebar({ app }: AppSidebarProps) {
     <aside className="w-60 bg-dark text-white fixed h-full flex flex-col">
       <div className="p-4 border-b border-gray-700">
         <div className="flex items-center gap-3 mb-1">
-          <div className="w-8 h-8 bg-secondary rounded-lg flex items-center justify-center">
-            <span className="text-dark font-bold text-sm">D</span>
-          </div>
+          <img src="/logo.svg" alt="Dagoo" className="h-8 w-auto" />
           <h2 className="text-lg font-bold">DAGOO&apos;S</h2>
         </div>
         <p className="text-xs text-gray-400">Chez les potes, ça roule.</p>

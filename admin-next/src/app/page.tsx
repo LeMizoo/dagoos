@@ -21,9 +21,7 @@ export default async function LandingPage() {
       <header className="fixed top-0 w-full z-50 bg-dark/90 backdrop-blur-sm border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-secondary rounded-xl flex items-center justify-center">
-              <span className="text-dark font-bold text-lg">D</span>
-            </div>
+            <img src="/logo.svg" alt="Dagoo Mobility" className="h-10 w-auto" />
             <span className="text-white font-bold text-lg">DAGOO MOBILITY</span>
           </div>
           <nav className="hidden md:flex items-center gap-6">
