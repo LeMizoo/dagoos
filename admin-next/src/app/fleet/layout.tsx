@@ -1,4 +1,7 @@
 import AppSidebar from '@/components/layout/AppSidebar';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = { title: 'Dagoo Fleet - Gestion de flotte' };
 
 export default function FleetLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -1,4 +1,7 @@
 import Sidebar from '@/components/layout/Sidebar';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = { title: 'Dagoo Admin - Tableau de bord' };
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
