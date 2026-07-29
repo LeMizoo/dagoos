@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 'use client';
 import { useState, useEffect } from 'react';
 import { Search, Plus, Wrench, Calendar, DollarSign, Car, Edit, Trash2 } from 'lucide-react';
