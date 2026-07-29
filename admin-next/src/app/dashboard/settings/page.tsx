@@ -1,5 +1,5 @@
-export const dynamic = 'force-dynamic';
 'use client';
+export const dynamic = 'force-dynamic';
 import { useState } from 'react';
 import { Settings, User, Shield, Palette, Bell, Globe, Save } from 'lucide-react';
 

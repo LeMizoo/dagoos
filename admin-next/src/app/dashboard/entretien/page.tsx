@@ -1,5 +1,5 @@
-export const dynamic = 'force-dynamic';
 'use client';
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { Search, Plus, Wrench, Calendar, DollarSign, Car, Edit, Trash2 } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
