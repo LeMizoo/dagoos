@@ -13,4 +13,25 @@ router.get('/', authMiddleware, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+router.post('/', authMiddleware, async (req, res) => {
+  try {
+    const driver = await prisma.driver.create({ data: req.body });
+    res.status(201).json(driver);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+router.put('/:id', authMiddleware, async (req, res) => {
+  try {
+    const driver = await prisma.driver.update({ where: { id: req.params.id }, data: req.body });
+    res.json(driver);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+router.delete('/:id', authMiddleware, async (req, res) => {
+  try {
+    await prisma.driver.delete({ where: { id: req.params.id } });
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 module.exports = router;
