@@ -1,8 +1,8 @@
-// File: D:\Dagoos\admin-next\src\app\coop\[slug]\layout.tsx
-import * as entry from '../../../../../src/app/coop/[slug]/layout.js'
+// File: D:\Dagoos\admin-next\src\app\(landing)\coop\[slug]\page.tsx
+import * as entry from '../../../../../../src/app/(landing)/coop/[slug]/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
-type TEntry = typeof import('../../../../../src/app/coop/[slug]/layout.js')
+type TEntry = typeof import('../../../../../../src/app/(landing)/coop/[slug]/page.js')
 
 // Check that the entry is a valid entry
 checkFields<Diff<{
@@ -25,17 +25,17 @@ checkFields<Diff<{
 }, TEntry, ''>>()
 
 // Check the prop type of the entry function
-checkFields<Diff<LayoutProps, FirstArg<TEntry['default']>, 'default'>>()
+checkFields<Diff<PageProps, FirstArg<TEntry['default']>, 'default'>>()
 
 // Check the arguments and return type of the generateMetadata function
 if ('generateMetadata' in entry) {
-  checkFields<Diff<LayoutProps, FirstArg<MaybeField<TEntry, 'generateMetadata'>>, 'generateMetadata'>>()
+  checkFields<Diff<PageProps, FirstArg<MaybeField<TEntry, 'generateMetadata'>>, 'generateMetadata'>>()
   checkFields<Diff<ResolvingMetadata, SecondArg<MaybeField<TEntry, 'generateMetadata'>>, 'generateMetadata'>>()
 }
 
 // Check the arguments and return type of the generateViewport function
 if ('generateViewport' in entry) {
-  checkFields<Diff<LayoutProps, FirstArg<MaybeField<TEntry, 'generateViewport'>>, 'generateViewport'>>()
+  checkFields<Diff<PageProps, FirstArg<MaybeField<TEntry, 'generateViewport'>>, 'generateViewport'>>()
   checkFields<Diff<ResolvingViewport, SecondArg<MaybeField<TEntry, 'generateViewport'>>, 'generateViewport'>>()
 }
 

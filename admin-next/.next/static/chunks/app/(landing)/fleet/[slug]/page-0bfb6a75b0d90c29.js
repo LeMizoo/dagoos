@@ -1,4 +1,4 @@
-(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[8360,9765],{875:function(e,t,r){Promise.resolve().then(r.bind(r,8309)),Promise.resolve().then(r.t.bind(r,231,23))},8309:function(e,t,r){"use strict";r.d(t,{default:function(){return a}});var n=r(2265),i={xmlns:"http://www.w3.org/2000/svg",width:24,height:24,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round"};/**
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[2517,1925],{875:function(e,t,r){Promise.resolve().then(r.bind(r,8309)),Promise.resolve().then(r.t.bind(r,231,23))},8309:function(e,t,r){"use strict";r.d(t,{default:function(){return a}});var n=r(2265),i={xmlns:"http://www.w3.org/2000/svg",width:24,height:24,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round"};/**
  * @license lucide-react v1.27.0 - ISC
  *
  * This source code is licensed under the ISC license.
