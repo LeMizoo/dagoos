@@ -11,16 +11,16 @@
       "page": "/",
       "matchers": [
         {
-          "regexp": "^(?:\\/(_next\\/data\\/[^/]{1,}))?(?:\\/((?!_next\\/static|_next\\/image|favicon.ico|assets).*))(.json)?[\\/#\\?]?$",
-          "originalSource": "/((?!_next/static|_next/image|favicon.ico|assets).*)"
+          "regexp": "^(?:\\/(_next\\/data\\/[^/]{1,}))?(?:\\/((?!_next\\/static|_next\\/image|favicon.ico|b-trans.svg|b-trans.png).*))(.json)?[\\/#\\?]?$",
+          "originalSource": "/((?!_next/static|_next/image|favicon.ico|b-trans.svg|b-trans.png).*)"
         }
       ],
       "wasm": [],
       "assets": [],
       "environments": {
-        "previewModeId": "3d6ad8905f7dc96654d56f641c01897f",
-        "previewModeSigningKey": "d945ce2c977c88e7135d18e1b19bbe7fe3ba09b9c73a0bd76f06792ddc3b1f0c",
-        "previewModeEncryptionKey": "ab902f772dc2725216a7065c5b67bf4a5bd063a3aea62b28a220596283ee1737"
+        "previewModeId": "9f36c272e30d44c818d459dae41fcde4",
+        "previewModeSigningKey": "8fe68b31c45f94c02d76d38c298524caf508a49d3f706d5cb4ae60521e3d2dfd",
+        "previewModeEncryptionKey": "ee240490468d6852da603e908ccd96a678c447c27b097c06de6b69b66f642f21"
       }
     }
   },
