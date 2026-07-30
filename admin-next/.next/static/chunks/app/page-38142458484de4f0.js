@@ -1,0 +1,16 @@
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[1931],{504:function(e,t,n){Promise.resolve().then(n.bind(n,8309)),Promise.resolve().then(n.t.bind(n,231,23)),Promise.resolve().then(n.bind(n,4453))},4453:function(e,t,n){"use strict";n.d(t,{default:function(){return s}});var r=n(7437),l=n(2265);let i=["/images/slide/S0001.jpg","/images/slide/S0002.jpg","/images/slide/S0003.jpg","/images/slide/flotte-04.png","/images/slide/flotte-05.png","/images/slide/flotte-06.png"];function s(){let[e,t]=(0,l.useState)(0);return(0,l.useEffect)(()=>{let e=setInterval(()=>{t(e=>(e+1)%i.length)},5e3);return()=>clearInterval(e)},[]),(0,r.jsxs)(r.Fragment,{children:[i.map((t,n)=>(0,r.jsx)("div",{className:"absolute inset-0 bg-cover bg-center transition-opacity duration-1000",style:{backgroundImage:"url(".concat(t,")"),opacity:n===e?.25:0}},t)),(0,r.jsx)("div",{className:"absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20",children:i.map((n,l)=>(0,r.jsx)("button",{onClick:()=>t(l),className:"w-2.5 h-2.5 rounded-full transition-all ".concat(l===e?"bg-secondary w-6":"bg-white/50 hover:bg-white/80")},l))})]})}},8309:function(e,t,n){"use strict";n.d(t,{default:function(){return u}});var r=n(2265),l={xmlns:"http://www.w3.org/2000/svg",width:24,height:24,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round"};/**
+ * @license lucide-react v1.27.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let i=e=>{for(let t in e)if(t.startsWith("aria-")||"role"===t||"title"===t)return!0;return!1};var s=n(103);/**
+ * @license lucide-react v1.27.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let o=(0,r.createContext)({}),a=()=>(0,r.useContext)(o),u=(0,r.forwardRef)((e,t)=>{var n,o,u;let{color:c,size:d,strokeWidth:f,absoluteStrokeWidth:h,className:g="",children:m,iconNode:v,...b}=e,{size:p=24,strokeWidth:w=2,absoluteStrokeWidth:k=!1,color:x="currentColor",className:N=""}=null!==(n=a())&&void 0!==n?n:{},j=(null!=h?h:k)?24*Number(null!=f?f:w)/Number(null!=d?d:p):null!=f?f:w;return(0,r.createElement)("svg",{ref:t,...l,width:null!==(o=null!=d?d:p)&&void 0!==o?o:l.width,height:null!==(u=null!=d?d:p)&&void 0!==u?u:l.height,stroke:null!=c?c:x,strokeWidth:j,className:(0,s.z)("lucide",N,g),...!m&&!i(b)&&{"aria-hidden":"true"},...b},[...v.map(e=>{let[t,n]=e;return(0,r.createElement)(t,n)}),...Array.isArray(m)?m:[m]])})},103:function(e,t,n){"use strict";n.d(t,{z:function(){return r}});/**
+ * @license lucide-react v1.27.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let r=function(){for(var e=arguments.length,t=Array(e),n=0;n<e;n++)t[n]=arguments[n];return t.filter((e,t,n)=>!!e&&""!==e.trim()&&n.indexOf(e)===t).join(" ").trim()}}},function(e){e.O(0,[231,2971,7023,1744],function(){return e(e.s=504)}),_N_E=e.O()}]);
