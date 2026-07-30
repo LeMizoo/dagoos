@@ -1,32 +1,131 @@
 const express = require('express');
-const prisma = require('../../lib/prisma');
-const { authMiddleware } = require('../../middleware/auth');
 const router = express.Router();
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
-router.get('/', authMiddleware, async (req, res) => {
+// Routes existantes
+router.get('/', async (req, res) => {
   try {
-    const orgs = await prisma.organization.findMany({ orderBy: { createdAt: 'desc' } });
-    res.json(orgs);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    const organizations = await prisma.organization.findMany();
+    res.json(organizations);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-router.put('/:id', authMiddleware, async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
-    const { name, email, plan, status, paymentStatus, paymentRef, paymentAmount, subscriptionEnd } = req.body;
-    const org = await prisma.organization.update({
-      where: { id: req.params.id },
-      data: { name, email, plan, status, paymentStatus, paymentRef, paymentAmount, subscriptionEnd }
+    const { id } = req.params;
+    const organization = await prisma.organization.findUnique({
+      where: { id }
     });
-    res.json(org);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    if (!organization) {
+      return res.status(404).json({ error: 'Organization not found' });
+    }
+    res.json(organization);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-router.patch('/:id/status', authMiddleware, async (req, res) => {
+// 🚛 Route pour les landing pages des flottes
+router.get('/fleet/:slug', async (req, res) => {
   try {
-    const { status } = req.body;
-    const org = await prisma.organization.update({ where: { id: req.params.id }, data: { status } });
-    res.json(org);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    const { slug } = req.params;
+    
+    console.log('🔍 Recherche flotte:', slug);
+    
+    const fleet = await prisma.organization.findFirst({
+      where: {
+        slug: slug,
+        type: 'FLEET_MANAGER',
+        status: 'active',
+      },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+        vehicles: {
+          where: { status: 'active' },
+          take: 6,
+        },
+        drivers: {
+          where: { status: 'active' },
+          take: 6,
+        },
+        _count: {
+          select: {
+            vehicles: true,
+            drivers: true,
+          },
+        },
+      },
+    });
+    
+    if (!fleet) {
+      console.log('❌ Flotte non trouvée:', slug);
+      return res.status(404).json({ error: 'Fleet not found' });
+    }
+    
+    console.log('✅ Flotte trouvée:', fleet.name);
+    res.json(fleet);
+  } catch (error) {
+    console.error('Error fetching fleet:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// 🏢 Route pour les landing pages des coopératives
+router.get('/coop/:slug', async (req, res) => {
+  try {
+    const { slug } = req.params;
+    
+    console.log('🔍 Recherche coopérative:', slug);
+    
+    const coop = await prisma.organization.findFirst({
+      where: {
+        slug: slug,
+        type: 'COOPERATIVE',
+        status: 'active',
+      },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+        vehicles: {
+          where: { status: 'active' },
+          take: 6,
+        },
+        drivers: {
+          where: { status: 'active' },
+          take: 6,
+        },
+        _count: {
+          select: {
+            vehicles: true,
+            drivers: true,
+          },
+        },
+      },
+    });
+    
+    if (!coop) {
+      console.log('❌ Coopérative non trouvée:', slug);
+      return res.status(404).json({ error: 'Coop not found' });
+    }
+    
+    console.log('✅ Coopérative trouvée:', coop.name);
+    res.json(coop);
+  } catch (error) {
+    console.error('Error fetching coop:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 module.exports = router;

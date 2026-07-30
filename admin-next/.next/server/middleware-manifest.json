@@ -11,16 +11,16 @@
       "page": "/",
       "matchers": [
         {
-          "regexp": "^(?:\\/(_next\\/data\\/[^/]{1,}))?(?:\\/((?!_next|api|images|favicon\\.ico|b-trans\\.svg|b-trans\\.png).*))(.json)?[\\/#\\?]?$",
-          "originalSource": "/((?!_next|api|images|favicon\\.ico|b-trans\\.svg|b-trans\\.png).*)"
+          "regexp": "^(?:\\/(_next\\/data\\/[^/]{1,}))?(?:\\/((?!_next\\/static|_next\\/image|favicon.ico|assets).*))(.json)?[\\/#\\?]?$",
+          "originalSource": "/((?!_next/static|_next/image|favicon.ico|assets).*)"
         }
       ],
       "wasm": [],
       "assets": [],
       "environments": {
-        "previewModeId": "56aed0870a1fa9ce78c895d4ba46b9ce",
-        "previewModeSigningKey": "51e04e9ee6aba41843507e02638dc075dfb13376237fcadde12fbf75827dcee5",
-        "previewModeEncryptionKey": "b6aecd04f5715248b5bc007a179dfe12f046721ecb70d58b116dcd719c12019d"
+        "previewModeId": "6fc11e9de4a4187ebe248ad1f0fcfbc5",
+        "previewModeSigningKey": "3d5379559f900a2e0468aeef3051fc8a0171b9fc60ec698064415aa28c650bfb",
+        "previewModeEncryptionKey": "de0424e305d94485941b1319e6b0ae4a752bd877b31d29831669f1c17a235d03"
       }
     }
   },
