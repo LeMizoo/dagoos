@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { Building2, Phone, Star, CheckCircle } from 'lucide-react';
-import Link from 'next/link';
+import { Building2, Phone, Star, CheckCircle, Globe } from 'lucide-react';
+// Link remplacé par a pour éviter prefetch
 
 interface Org {
   id: string;
@@ -106,7 +106,7 @@ export default function TrustSection() {
           style={{ scrollBehavior: 'auto' }}
         >
           {displayOrgs.map((org, index) => (
-            <Link
+            <a
               key={`${org.id}-${index}`}
               href={`/${org.type === 'FLEET_MANAGER' ? 'fleet' : 'coop'}/${org.slug}`}
               className="flex-shrink-0 w-64 bg-white rounded-2xl p-5 border border-gray-100 hover:shadow-lg hover:border-secondary/30 transition-all duration-300 hover:-translate-y-1 group/card"
@@ -147,7 +147,7 @@ export default function TrustSection() {
                   <Phone size={10} /> {org.phone}
                 </div>
               )}
-            </Link>
+            </a>
           ))}
         </div>
 
@@ -159,12 +159,12 @@ export default function TrustSection() {
 
       {/* CTA */}
       <div className="text-center mt-8">
-        <Link
+        <a
           href="/register"
           className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-800 transition"
         >
           Rejoignez-les →
-        </Link>
+        </a>
       </div>
     </section>
   );
