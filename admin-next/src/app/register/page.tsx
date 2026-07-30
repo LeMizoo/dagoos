@@ -332,23 +332,21 @@ export default function RegisterPage() {
                 <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
                   <h3 className="font-semibold text-blue-800 mb-2">💡 Les avantages</h3>
                   <ul className="space-y-1 text-sm text-blue-700">
-                    <li className="flex items-center gap-2">
-                      <Check size={14} /> Support 24/7
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check size={14} /> Gestion des véhicules et chauffeurs
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check size={14} /> Tableau de bord en temps réel
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check size={14} /> Suivi des livraisons
-                    </li>
-                    {form.planId && filteredPlans.find(p => (p.id || p.name) === form.planId)?.name === 'Premium' && (
-                      <li className="flex items-center gap-2 font-semibold text-yellow-700">
-                        <Check size={14} /> 🌟 Landing page personnalisée offerte
-                      </li>
-                    )}
+                    <li className="flex items-center gap-2"><Check size={14} /> Support 24/7</li>
+                    <li className="flex items-center gap-2"><Check size={14} /> Gestion des véhicules et chauffeurs</li>
+                    <li className="flex items-center gap-2"><Check size={14} /> Tableau de bord en temps réel</li>
+                    <li className="flex items-center gap-2"><Check size={14} /> Suivi des livraisons</li>
+                    {(() => {
+                      const selected = filteredPlans.find(p => (p.id || p.name) === form.planId);
+                      if (selected && (selected.name === 'Standard' || selected.name === 'Premium' || selected.name === 'Sur devis')) {
+                        return (
+                          <li className="flex items-center gap-2 font-semibold text-green-700">
+                            <Check size={14} /> 🌐 Landing page personnalisée incluse
+                          </li>
+                        );
+                      }
+                      return null;
+                    })()}
                   </ul>
                 </div>
               </div>
