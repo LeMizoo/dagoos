@@ -1,33 +1,80 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Home, Truck, Building2 } from 'lucide-react';
+import { Check, Truck, Building2 } from 'lucide-react';
 import Link from 'next/link';
+
+interface Plan {
+  id?: string;
+  type: 'FLEET_MANAGER' | 'COOPERATIVE';
+  name: string;
+  price: number;
+  vehiclesMax: number;
+  driversMax: number;
+  features?: string[];
+}
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [step, setStep] = useState(1);
-  const [role, setRole] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
-    name: '', email: '', phone: '', password: '', confirmPassword: '',
-    organizationName: '', organizationPhone: ''
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    planId: '',
+    organizationName: '',
+    organizationType: 'FLEET_MANAGER' as 'FLEET_MANAGER' | 'COOPERATIVE',
   });
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
-  function selectRole(r: string) {
-    setRole(r);
-    setStep(2);
-  }
+  useEffect(() => {
+    fetch('/api/public/plans')
+      .then(r => r.json())
+      .then(data => {
+        setPlans(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
+      .catch(() => {
+        // Fallback plans
+        setPlans([
+          { type: 'FLEET_MANAGER', name: 'Freemium', price: 0, vehiclesMax: 1, driversMax: 1 },
+          { type: 'FLEET_MANAGER', name: 'Basic', price: 15000, vehiclesMax: 5, driversMax: 10 },
+          { type: 'FLEET_MANAGER', name: 'Standard', price: 35000, vehiclesMax: 20, driversMax: 50 },
+          { type: 'FLEET_MANAGER', name: 'Premium', price: 75000, vehiclesMax: 100, driversMax: 200 },
+          { type: 'COOPERATIVE', name: 'Freemium', price: 0, vehiclesMax: 1, driversMax: 2 },
+          { type: 'COOPERATIVE', name: 'Basic', price: 20000, vehiclesMax: 5, driversMax: 15 },
+          { type: 'COOPERATIVE', name: 'Standard', price: 45000, vehiclesMax: 20, driversMax: 60 },
+          { type: 'COOPERATIVE', name: 'Premium', price: 90000, vehiclesMax: 100, driversMax: 300 },
+        ]);
+        setLoading(false);
+      });
+  }, []);
 
-  async function handleSubmit(e: React.FormEvent) {
+  const filteredPlans = plans.filter(p => p.type === form.organizationType);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    setSuccess(false);
+
     if (form.password !== form.confirmPassword) {
       setError('Les mots de passe ne correspondent pas');
       return;
     }
-    setLoading(true);
-    setError('');
+
+    if (form.password.length < 6) {
+      setError('Le mot de passe doit contenir au moins 6 caractères');
+      return;
+    }
+
+    if (!form.planId) {
+      setError('Veuillez sélectionner un plan');
+      return;
+    }
+
     try {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
@@ -35,87 +82,279 @@ export default function RegisterPage() {
         body: JSON.stringify({
           name: form.name,
           email: form.email,
-          phone: form.phone,
           password: form.password,
-          role: role === 'fleet' ? 'FLEET_MANAGER' : 'COOPERATIVE',
+          role: form.organizationType,
           organizationName: form.organizationName,
-          organizationPhone: form.organizationPhone,
+          planId: form.planId,
         }),
       });
+
+      const data = await res.json();
+
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Erreur lors de l\'inscription');
+        setError(data.error || 'Erreur lors de l\'inscription');
+        return;
       }
-      router.push(role === 'fleet' ? '/fleet-login' : '/coop-login');
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+
+      setSuccess(true);
+      setTimeout(() => router.push('/login'), 2000);
+    } catch (err) {
+      setError('Erreur de connexion au serveur');
     }
-  }
+  };
+
+  const getPlanEmoji = (name: string) => {
+    switch(name) {
+      case 'Freemium': return '🟢';
+      case 'Basic': return '📘';
+      case 'Standard': return '🟣';
+      case 'Premium': return '💡';
+      default: return '⚪';
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-dark to-primary/50 p-4">
-      <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl relative">
-        {step === 1 ? (
-          <>
-            <div className="text-center mb-8">
-              <h1 className="text-2xl font-bold text-gray-800">Créer un compte</h1>
-              <p className="text-gray-500 text-sm mt-1">Choisissez votre type de compte</p>
-          <Link href="/" className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-primary mt-3"><Home size={12} /> Retour à l'accueil</Link>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <button onClick={() => selectRole('fleet')}
-                className="bg-blue-50 hover:bg-blue-100 rounded-2xl p-6 text-center transition border-2 border-transparent hover:border-blue-500">
-                <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                  <Truck size={28} className="text-white" />
+    <div className="min-h-screen bg-gray-50 py-12">
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">Créer un compte</h1>
+          <p className="text-gray-500">Choisissez votre type d'organisation et votre plan</p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {/* Formulaire */}
+          <div className="bg-white rounded-2xl shadow-sm p-8">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Type d'organisation */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Type d'organisation
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, organizationType: 'FLEET_MANAGER', planId: '' })}
+                    className={`p-3 rounded-xl border-2 transition flex items-center justify-center gap-2 ${
+                      form.organizationType === 'FLEET_MANAGER'
+                        ? 'border-blue-600 bg-blue-50 text-blue-700'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <Truck size={18} />
+                    Flotte
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, organizationType: 'COOPERATIVE', planId: '' })}
+                    className={`p-3 rounded-xl border-2 transition flex items-center justify-center gap-2 ${
+                      form.organizationType === 'COOPERATIVE'
+                        ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <Building2 size={18} />
+                    Coopérative
+                  </button>
                 </div>
-                <h3 className="font-bold text-gray-800">Flotte</h3>
-                <p className="text-xs text-gray-500 mt-1">Gestionnaire de flotte</p>
-              </button>
-              <button onClick={() => selectRole('coop')}
-                className="bg-emerald-50 hover:bg-emerald-100 rounded-2xl p-6 text-center transition border-2 border-transparent hover:border-emerald-500">
-                <div className="w-14 h-14 bg-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                  <Building2 size={28} className="text-white" />
+              </div>
+
+              {/* Nom de l'organisation */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Nom de l'organisation</label>
+                <input
+                  type="text"
+                  required
+                  className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={form.organizationName}
+                  onChange={(e) => setForm({ ...form, organizationName: e.target.value })}
+                  placeholder="Nom de votre flotte ou coopérative"
+                />
+              </div>
+
+              {/* Plan */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Sélectionnez votre plan
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {filteredPlans.map(plan => (
+                    <button
+                      key={plan.name}
+                      type="button"
+                      onClick={() => setForm({ ...form, planId: plan.id || plan.name })}
+                      className={`p-3 rounded-xl border-2 text-left transition ${
+                        form.planId === (plan.id || plan.name)
+                          ? 'border-blue-600 bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>{getPlanEmoji(plan.name)}</span>
+                        <span className="font-semibold text-sm">{plan.name}</span>
+                      </div>
+                      <div className="text-lg font-bold text-gray-800">
+                        {plan.price === 0 ? 'Gratuit' : `${plan.price.toLocaleString()} Ar`}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {plan.vehiclesMax} véhicules · {plan.driversMax} chauffeurs
+                      </div>
+                    </button>
+                  ))}
                 </div>
-                <h3 className="font-bold text-gray-800">Coopérative</h3>
-                <p className="text-xs text-gray-500 mt-1">Coopérative de chauffeurs</p>
-              </button>
-            </div>
-            <p className="text-center text-sm text-gray-500 mt-6">
-              Déjà un compte ? <Link href="/login" className="text-primary hover:underline">Connectez-vous</Link>
-            </p>
-          </>
-        ) : (
-          <>
-            <div className="text-center mb-6">
-              <div className={`w-14 h-14 ${role === 'fleet' ? 'bg-blue-600' : 'bg-emerald-600'} rounded-2xl flex items-center justify-center mx-auto mb-3`}>
-                {role === 'fleet' ? <Truck size={28} className="text-white" /> : <Building2 size={28} className="text-white" />}
               </div>
-              <h1 className="text-xl font-bold text-gray-800">
-                Inscription {role === 'fleet' ? 'Flotte' : 'Coopérative'}
-              </h1>
-              <button onClick={() => setStep(1)} className="text-xs text-primary hover:underline mt-1"><Link href="/" className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-primary absolute left-4 top-4"><Home size={12} /> Accueil</Link>
-            ← Changer de type</button>
-            </div>
-            <form onSubmit={handleSubmit} className="space-y-3">
-              {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">{error}</div>}
-              <div><label className="block text-xs font-medium text-gray-700 mb-1">Nom complet *</label><input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} className="w-full px-3 py-2 border rounded-lg text-sm" required /></div>
-              <div><label className="block text-xs font-medium text-gray-700 mb-1">Email *</label><input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="w-full px-3 py-2 border rounded-lg text-sm" required /></div>
-              <div><label className="block text-xs font-medium text-gray-700 mb-1">Téléphone</label><input type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} className="w-full px-3 py-2 border rounded-lg text-sm" /></div>
-              <div><label className="block text-xs font-medium text-gray-700 mb-1">Nom de l&apos;organisation *</label><input type="text" value={form.organizationName} onChange={e => setForm({...form, organizationName: e.target.value})} className="w-full px-3 py-2 border rounded-lg text-sm" required /></div>
-              <div><label className="block text-xs font-medium text-gray-700 mb-1">Téléphone organisation</label><input type="tel" value={form.organizationPhone} onChange={e => setForm({...form, organizationPhone: e.target.value})} className="w-full px-3 py-2 border rounded-lg text-sm" /></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><label className="block text-xs font-medium text-gray-700 mb-1">Mot de passe *</label><input type="password" value={form.password} onChange={e => setForm({...form, password: e.target.value})} className="w-full px-3 py-2 border rounded-lg text-sm" required minLength={6} /></div>
-                <div><label className="block text-xs font-medium text-gray-700 mb-1">Confirmer *</label><input type="password" value={form.confirmPassword} onChange={e => setForm({...form, confirmPassword: e.target.value})} className="w-full px-3 py-2 border rounded-lg text-sm" required /></div>
+
+              {/* Informations utilisateur */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Nom complet</label>
+                <input
+                  type="text"
+                  required
+                  className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  placeholder="Votre nom"
+                />
               </div>
-              <button type="submit" disabled={loading}
-                className={`w-full py-3 rounded-lg font-semibold text-white transition text-sm ${role === 'fleet' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-emerald-600 hover:bg-emerald-700'} disabled:bg-gray-400`}>
-                {loading ? '⏳ Inscription...' : '✅ Créer mon compte'}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <input
+                  type="email"
+                  required
+                  className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder="votre@email.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Mot de passe</label>
+                <input
+                  type="password"
+                  required
+                  className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  placeholder="Minimum 6 caractères"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Confirmer le mot de passe</label>
+                <input
+                  type="password"
+                  required
+                  className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={form.confirmPassword}
+                  onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+                  placeholder="Confirmez votre mot de passe"
+                />
+              </div>
+
+              {error && (
+                <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm">
+                  {error}
+                </div>
+              )}
+
+              {success && (
+                <div className="bg-green-50 text-green-600 p-3 rounded-xl text-sm">
+                  ✅ Inscription réussie ! Redirection vers la connexion...
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading || success}
+                className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition disabled:opacity-50"
+              >
+                {loading ? 'Chargement...' : 'Créer un compte'}
               </button>
+
+              <p className="text-center text-sm text-gray-500">
+                Déjà un compte ?{' '}
+                <Link href="/login" className="text-blue-600 hover:underline">
+                  Se connecter
+                </Link>
+              </p>
             </form>
-          </>
-        )}
+          </div>
+
+          {/* Résumé des plans */}
+          <div className="bg-white rounded-2xl shadow-sm p-8">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">📋 Récapitulatif</h2>
+            {loading ? (
+              <p className="text-gray-400">Chargement...</p>
+            ) : (
+              <div className="space-y-4">
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-500">Type</p>
+                  <p className="font-semibold">
+                    {form.organizationType === 'FLEET_MANAGER' ? '🚛 Gestion de Flotte' : '🏢 Coopérative'}
+                  </p>
+                </div>
+
+                {form.organizationName && (
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-sm text-gray-500">Organisation</p>
+                    <p className="font-semibold">{form.organizationName}</p>
+                  </div>
+                )}
+
+                {form.planId && (
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-sm text-gray-500">Plan sélectionné</p>
+                    {(() => {
+                      const selected = filteredPlans.find(p => (p.id || p.name) === form.planId);
+                      return selected ? (
+                        <div>
+                          <p className="font-semibold text-lg">{selected.name}</p>
+                          <p className="text-2xl font-bold text-blue-600">
+                            {selected.price === 0 ? 'Gratuit' : `${selected.price.toLocaleString()} Ar`}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {selected.vehiclesMax} véhicules · {selected.driversMax} chauffeurs
+                          </p>
+                          {selected.name === 'Premium' && (
+                            <p className="text-xs text-yellow-600 mt-2">
+                              ✨ Inclut une landing page personnalisée
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-gray-400">Plan non trouvé</p>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                  <h3 className="font-semibold text-blue-800 mb-2">💡 Les avantages</h3>
+                  <ul className="space-y-1 text-sm text-blue-700">
+                    <li className="flex items-center gap-2">
+                      <Check size={14} /> Support 24/7
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check size={14} /> Gestion des véhicules et chauffeurs
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check size={14} /> Tableau de bord en temps réel
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check size={14} /> Suivi des livraisons
+                    </li>
+                    {form.planId && filteredPlans.find(p => (p.id || p.name) === form.planId)?.name === 'Premium' && (
+                      <li className="flex items-center gap-2 font-semibold text-yellow-700">
+                        <Check size={14} /> 🌟 Landing page personnalisée offerte
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
