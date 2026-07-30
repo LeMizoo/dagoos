@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { UserPlus, Truck, Building2 } from 'lucide-react';
+import { Home, Truck, Building2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function RegisterPage() {
@@ -56,12 +56,13 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-dark to-primary/50 p-4">
-      <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
+      <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl relative">
         {step === 1 ? (
           <>
             <div className="text-center mb-8">
               <h1 className="text-2xl font-bold text-gray-800">Créer un compte</h1>
               <p className="text-gray-500 text-sm mt-1">Choisissez votre type de compte</p>
+          <Link href="/" className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-primary mt-3"><Home size={12} /> Retour à l'accueil</Link>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <button onClick={() => selectRole('fleet')}
@@ -94,7 +95,8 @@ export default function RegisterPage() {
               <h1 className="text-xl font-bold text-gray-800">
                 Inscription {role === 'fleet' ? 'Flotte' : 'Coopérative'}
               </h1>
-              <button onClick={() => setStep(1)} className="text-xs text-primary hover:underline mt-1">← Changer de type</button>
+              <button onClick={() => setStep(1)} className="text-xs text-primary hover:underline mt-1"><Link href="/" className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-primary absolute left-4 top-4"><Home size={12} /> Accueil</Link>
+            ← Changer de type</button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-3">
               {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">{error}</div>}
