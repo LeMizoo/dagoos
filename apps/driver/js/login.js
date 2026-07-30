@@ -36,10 +36,10 @@ orgSelect.addEventListener('change', () => {
     const selected = orgSelect.options[orgSelect.selectedIndex];
     const prefix = selected.dataset.prefix || '--';
     
-    codePrefix.textContent = prefix;
+    codePrefix.textContent = prefix + '-';
     driverCodeInput.value = '';
     driverCodeInput.placeholder = 'ex: 001';
-    codeHint.textContent = `Votre code complet sera : ${prefix}001`;
+    codeHint.textContent = `Votre code complet : ${prefix}-001`;
     driverCodeInput.focus();
 });
 
@@ -73,8 +73,8 @@ function getFullCode() {
     // Supprimer tout tiret
     driverNumber = driverNumber.replace(/-/g, '');
     
-    // Retourner le code complet
-    return `${prefix}${driverNumber}`;
+    // Retourner le code complet AVEC le tiret entre préfixe et numéro
+    return `${prefix}-${driverNumber}`;
 }
 
 // ===== LOGIN =====
@@ -125,7 +125,7 @@ loginForm.addEventListener('submit', async (e) => {
     }
     
     loginBtn.disabled = false;
-    loginBtn.innerHTML = '🔑 Se connecter';
+    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Se connecter';
 });
 
 function showMessage(text, type) {
