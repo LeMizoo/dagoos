@@ -16,6 +16,11 @@ async function loadOrganizations() {
         const response = await fetch(`${API_URL}/organizations`);
         if (response.ok) {
             const orgs = await response.json();
+            if (!orgs || orgs.length === 0) {
+                showMessage('Aucune organisation disponible', 'error');
+                return;
+            }
+            orgSelect.innerHTML = '<option value="">— Sélectionner votre entité —</option>';
             orgs.forEach(org => {
                 const option = document.createElement('option');
                 option.value = org.id;
@@ -25,9 +30,12 @@ async function loadOrganizations() {
                 option.dataset.type = typePrefix;
                 orgSelect.appendChild(option);
             });
+        } else {
+            showMessage('Erreur chargement organisations', 'error');
         }
     } catch (error) {
-        console.log('Organisations non disponibles');
+        console.log('Organisations non disponibles:', error);
+        showMessage('Service temporairement indisponible', 'error');
     }
 }
 
@@ -35,7 +43,6 @@ async function loadOrganizations() {
 orgSelect.addEventListener('change', () => {
     const selected = orgSelect.options[orgSelect.selectedIndex];
     const prefix = selected.dataset.prefix || '--';
-    
     codePrefix.textContent = prefix + '-';
     driverCodeInput.value = '';
     driverCodeInput.placeholder = 'ex: 001';
@@ -68,12 +75,7 @@ function getPin() {
 function getFullCode() {
     const selected = orgSelect.options[orgSelect.selectedIndex];
     const prefix = selected.dataset.prefix || '';
-    let driverNumber = driverCodeInput.value.trim().toUpperCase();
-    
-    // Supprimer tout tiret
-    driverNumber = driverNumber.replace(/-/g, '');
-    
-    // Retourner le code complet AVEC le tiret entre préfixe et numéro
+    let driverNumber = driverCodeInput.value.trim().toUpperCase().replace(/-/g, '');
     return `${prefix}-${driverNumber}`;
 }
 
@@ -113,15 +115,19 @@ loginForm.addEventListener('submit', async (e) => {
         const data = await response.json();
         
         if (response.ok) {
+            // Stocker avant de rediriger
             localStorage.setItem('dagoos_token', data.token);
             localStorage.setItem('dagoos_user', JSON.stringify(data.user));
             showMessage('✅ Bienvenue ' + (data.user.name || fullCode) + ' !', 'success');
-            setTimeout(() => { window.location.href = DASHBOARD_URL; }, 1000);
+            // Redirection après un court délai
+            setTimeout(() => { 
+                window.location.replace(DASHBOARD_URL); 
+            }, 800);
         } else {
             showMessage('❌ ' + (data.error || 'Code ou PIN incorrect'), 'error');
         }
     } catch (error) {
-        showMessage('❌ Erreur de connexion', 'error');
+        showMessage('❌ Erreur de connexion au serveur', 'error');
     }
     
     loginBtn.disabled = false;
@@ -131,6 +137,10 @@ loginForm.addEventListener('submit', async (e) => {
 function showMessage(text, type) {
     messageDiv.textContent = text;
     messageDiv.className = 'message ' + type;
+    // Cacher le message après 5 secondes
+    setTimeout(() => {
+        messageDiv.className = 'message';
+    }, 5000);
 }
 
 // ===== INIT =====
