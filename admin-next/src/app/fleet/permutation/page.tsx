@@ -80,7 +80,7 @@ export default function FleetPermutationPage() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">
         <div className="p-4 border-b"><h3 className="font-semibold text-gray-800">📋 Assignations actuelles</h3></div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm min-w-[600px]">
             <thead className="bg-gray-50 text-left text-gray-500"><tr><th className="px-4 py-3">Chauffeur</th><th className="px-4 py-3">Moto assignée</th><th className="px-4 py-3">Actions</th></tr></thead>
             <tbody>
               {drivers.filter(d => d.vehicleId).length === 0 ? <tr><td colSpan={3} className="text-center py-8 text-gray-400">Aucune assignation</td></tr> :

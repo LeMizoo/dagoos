@@ -2,11 +2,19 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const res = await fetch('https://dagoos-api.onrender.com/api/plans');
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
+    const res = await fetch('https://dagoos-api.onrender.com/api/plans', {
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    
     if (!res.ok) throw new Error('API erreur');
     const plans = await res.json();
     return NextResponse.json(plans);
   } catch {
+    // Fallback : plans par défaut
     return NextResponse.json([
       { id: 'fleets_free', type: 'FLEET_MANAGER', name: 'Freemium', price: 0, vehiclesMax: 1, driversMax: 1, landingPage: false },
       { id: 'fleets_basic', type: 'FLEET_MANAGER', name: 'Basic', price: 15000, vehiclesMax: 5, driversMax: 10, landingPage: false },

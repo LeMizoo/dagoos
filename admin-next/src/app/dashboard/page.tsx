@@ -51,7 +51,7 @@ export default function DashboardPage() {
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">📋 Dernières inscriptions</h2>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[600px]">
               <thead>
                 <tr className="border-b text-left text-gray-500">
                   <th className="pb-2">Organisation</th>

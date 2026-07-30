@@ -172,7 +172,7 @@ export default function MaintenancePage() {
           </div>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm min-w-[600px]">
             <thead className="bg-gray-50 text-left text-gray-500">
               <tr>
                 <th className="px-4 py-3">Véhicule</th>
