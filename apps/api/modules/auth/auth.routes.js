@@ -52,4 +52,26 @@ router.post('/login', async (req, res) => {
   }
 });
 
+
+// Connexion chauffeur (par code + PIN)
+router.post('/driver-login', async (req, res) => {
+  try {
+    const { code, pin } = req.body;
+    const driver = await prisma.driver.findUnique({ 
+      where: { driverCode: code },
+      include: { user: true, organization: true }
+    });
+    if (!driver) return res.status(401).json({ error: 'Code chauffeur introuvable' });
+    if (driver.pin !== pin) return res.status(401).json({ error: 'PIN incorrect' });
+    const token = jwt.sign(
+      { id: driver.user.id, email: driver.user.email, role: 'DRIVER', driverId: driver.id },
+      JWT_SECRET, { expiresIn: '7d' }
+    );
+    res.json({
+      message: 'Connexion réussie !', token,
+      user: { id: driver.user.id, name: driver.user.name, email: driver.user.email, driverCode: driver.driverCode, driverId: driver.id, organization: driver.organization?.name }
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 module.exports = router;
