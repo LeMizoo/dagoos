@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Rocket, ArrowDown, Building2, Truck, Smartphone, Users, Shield, Zap, Car } from 'lucide-react';
 import HeroSlider from '@/components/landing/HeroSlider';
+import PlansSection from '@/components/landing/PlansSection';
 
 async function getStats() {
   try {
@@ -84,47 +85,8 @@ export default async function LandingPage() {
         </section>
       )}
 
-      {/* ESPACES */}
-      <section id="spaces" className="py-20 bg-white">
-        <div className="max-w-5xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Nos Espaces</h2>
-          <p className="text-center text-gray-500 mb-12">Choisissez votre espace pour commencer</p>
-          <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-            <div className="bg-white rounded-2xl p-8 text-center shadow-sm hover:shadow-lg transition border border-gray-100">
-              <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Truck size={32} className="text-blue-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">Gestionnaire de Flotte</h3>
-              <p className="text-gray-500 text-sm mb-6">Gérez vos véhicules, chauffeurs et finances.</p>
-              <div className="flex gap-3 justify-center flex-wrap">
-                <Link href="/fleet-login" className="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">Connexion</Link>
-                <Link href="/register" className="border-2 border-blue-600 text-blue-600 px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-50 transition">Inscription</Link>
-              </div>
-            </div>
-            <div className="bg-white rounded-2xl p-8 text-center shadow-sm hover:shadow-lg transition border border-gray-100">
-              <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Building2 size={32} className="text-emerald-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">Coopérative</h3>
-              <p className="text-gray-500 text-sm mb-6">Gérez votre coopérative, contrats et livraisons.</p>
-              <div className="flex gap-3 justify-center flex-wrap">
-                <Link href="/coop-login" className="bg-emerald-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition">Connexion</Link>
-                <Link href="/register" className="border-2 border-emerald-600 text-emerald-600 px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-emerald-50 transition">Inscription</Link>
-              </div>
-            </div>
-          </div>
-          <div className="mt-6 max-w-sm mx-auto">
-            <div className="bg-white rounded-2xl p-6 text-center shadow-sm hover:shadow-lg transition border border-gray-100">
-              <div className="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                <Smartphone size={28} className="text-orange-600" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-800 mb-1">Application Chauffeur</h3>
-              <p className="text-gray-500 text-xs mb-4">Recevez des courses, suivez vos revenus.</p>
-              <a href="https://dago-driver.pages.dev" className="bg-orange-500 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-orange-600 transition inline-block">Ouvrir l&apos;app</a>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* PLANS */}
+      <PlansSection />
 
       {/* SERVICES */}
       <section id="services" className="py-20 bg-gray-50">
