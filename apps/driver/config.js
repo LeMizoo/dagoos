@@ -1,14 +1,14 @@
 // DAGOO'S - CONFIGURATION GLOBALE
 var DAGOOS_CONFIG = {
-    apiUrl: 'https://dagoos-api.onrender.com/api',
-    landingUrl: 'https://dago-mobility.pages.dev',
-    logoUrl: 'https://dago-mobility.pages.dev/assets/logo/b-trans.svg',
+    apiUrl: 'https://dago-mobility.vercel.app/api/proxy',
+    landingUrl: 'https://dago-mobility.vercel.app',
+    logoUrl: 'https://dago-mobility.vercel.app/b-trans.svg',
     
     apps: {
         driver: 'https://dago-driver.pages.dev',
-        admin: 'https://dago-admin.pages.dev',
-        fleet: 'https://dago-fleet.pages.dev',
-        coop: 'https://dago-coop.pages.dev',
+        admin: 'https://dago-mobility.vercel.app/login',
+        fleet: 'https://dago-mobility.vercel.app/fleet-login',
+        coop: 'https://dago-mobility.vercel.app/coop-login',
     },
     
     pricing: {
