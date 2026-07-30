@@ -1,13 +1,17 @@
 'use client';
-import { User } from 'lucide-react';
+import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 
-export default function ProprietairesPage() {
+export default function FleetProprietairesPage() {
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">👤 Propriétaires</h1>
-      <div className="bg-white rounded-xl p-12 shadow-sm border border-gray-100 text-center text-gray-400">
-        <User size={48} className="mx-auto mb-4 opacity-50" />
-        <p>Page en cours de développement</p>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">🏢 Propriétaires</h1>
+        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition text-sm">
+          <Plus size={16} /> Nouveau propriétaire
+        </button>
+      </div>
+      <div className="bg-white rounded-xl shadow-sm border p-12 text-center text-gray-400">
+        Gestion des propriétaires bientôt disponible
       </div>
     </div>
   );

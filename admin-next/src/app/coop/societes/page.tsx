@@ -1,13 +1,17 @@
 'use client';
-import { Building2 } from 'lucide-react';
+import { Plus, Building2 } from 'lucide-react';
 
-export default function SocietesPage() {
+export default function CoopSocietesPage() {
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">🏢 Sociétés</h1>
-      <div className="bg-white rounded-xl p-12 shadow-sm border border-gray-100 text-center text-gray-400">
-        <Building2 size={48} className="mx-auto mb-4 opacity-50" />
-        <p>Page en cours de développement</p>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">🏢 Sociétés</h1>
+        <button className="bg-emerald-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-emerald-700 transition text-sm">
+          <Plus size={16} /> Nouvelle société
+        </button>
+      </div>
+      <div className="bg-white rounded-xl shadow-sm border p-12 text-center text-gray-400">
+        Gestion des sociétés bientôt disponible
       </div>
     </div>
   );
