@@ -22,7 +22,7 @@ export default function FleetCodesPage() {
       </div>
       <div className="bg-white rounded-xl shadow-sm border">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm min-w-[600px]">
             <thead className="bg-gray-50 text-left text-gray-500">
               <tr><th className="px-4 py-3">Nom</th><th className="px-4 py-3">Code</th><th className="px-4 py-3">Statut</th><th className="px-4 py-3">Actions</th></tr>
             </thead>

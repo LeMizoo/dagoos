@@ -31,7 +31,7 @@ export default function FleetVersementsPage() {
       </div>
       <div className="bg-white rounded-xl shadow-sm border">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm min-w-[600px]">
             <thead className="bg-gray-50 text-left text-gray-500">
               <tr><th className="px-4 py-3">Code</th><th className="px-4 py-3">Chauffeur</th><th className="px-4 py-3">Courses</th><th className="px-4 py-3">CA brut</th><th className="px-4 py-3">Commission</th><th className="px-4 py-3">Net</th></tr>
             </thead>
