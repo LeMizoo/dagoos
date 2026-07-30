@@ -2,47 +2,36 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get('token')?.value;
+  const token = request.cookies.get('dagoos_token')?.value;
   const { pathname } = request.nextUrl;
 
-  // Public routes (accessibles sans authentification)
-  const publicRoutes = [
-    '/',
-    '/login',
-    '/fleet-login',
-    '/coop-login',
-    '/register',
-    '/api',
-  ];
-
-  // Landing pages des organisations (accessibles sans auth)
-  const isFleetLanding = pathname.startsWith('/fleet/') && pathname !== '/fleet-login' && pathname !== '/fleet';
-  const isCoopLanding = pathname.startsWith('/coop/') && pathname !== '/coop-login' && pathname !== '/coop';
+  // Routes publiques (sans token)
+  const publicPaths = ['/', '/login', '/fleet-login', '/coop-login', '/register'];
   
-  // Routes protégées qui nécessitent une authentification
-  const protectedRoutes = [
-    '/dashboard',
-    '/fleet',
-    '/coop',
-  ];
-
-  // Vérifier si la route est publique
-  const isPublicRoute = publicRoutes.some(route => pathname === route || pathname.startsWith(route + '/'));
-  const isLandingPage = isFleetLanding || isCoopLanding;
-
-  // Si c'est une landing page, on laisse passer
-  if (isLandingPage) {
+  // Landing pages publiques
+  if (/^\/(fleet|coop)\/[^/]+$/.test(pathname)) {
     return NextResponse.next();
   }
 
-  // Si la route est publique, on laisse passer
-  if (isPublicRoute) {
+  // Routes API et statiques
+  if (pathname.startsWith('/api/') || pathname.startsWith('/_next') || pathname.startsWith('/images/')) {
     return NextResponse.next();
   }
 
-  // Si pas de token et route protégée → rediriger vers login
-  if (!token) {
-    const loginUrl = new URL('/login', request.url);
+  // Routes publiques exactes
+  if (publicPaths.includes(pathname)) {
+    return NextResponse.next();
+  }
+
+  // Routes protégées : dashboard, fleet/*, coop/*
+  const isProtected = pathname.startsWith('/dashboard') || pathname.startsWith('/fleet') || pathname.startsWith('/coop');
+  
+  if (isProtected && !token) {
+    let loginPath = '/login';
+    if (pathname.startsWith('/fleet')) loginPath = '/fleet-login';
+    else if (pathname.startsWith('/coop')) loginPath = '/coop-login';
+    
+    const loginUrl = new URL(loginPath, request.url);
     loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
   }
@@ -51,14 +40,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - assets (assets folder)
-     */
-    '/((?!_next/static|_next/image|favicon.ico|assets).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|b-trans.svg|b-trans.png).*)'],
 };
