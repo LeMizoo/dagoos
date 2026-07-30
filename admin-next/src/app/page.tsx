@@ -4,12 +4,12 @@ import HeroSlider from '@/components/landing/HeroSlider';
 
 async function getStats() {
   try {
-    const res = await fetch('https://dagoos-api.onrender.com/api/organizations', { cache: 'no-store' });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_URL || 'http://localhost:5001'}/api/public/stats`, { cache: 'no-store' });
     if (!res.ok) return null;
     const orgs = await res.json();
-    const fleets = orgs.filter((o: any) => o.type === 'FLEET_MANAGER').length;
-    const coops = orgs.filter((o: any) => o.type === 'COOPERATIVE').length;
-    return { fleets, coops, total: orgs.length };
+    // Stats fournies directement par l'API publique
+    
+    return res.json();
   } catch { return null; }
 }
 
