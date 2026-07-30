@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Star, CheckCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Org {
   id: string;
@@ -12,14 +12,10 @@ interface Org {
 }
 
 const gradients = [
-  'from-blue-600 to-blue-800',
-  'from-emerald-600 to-emerald-800',
-  'from-purple-600 to-purple-800',
-  'from-orange-600 to-orange-800',
-  'from-cyan-600 to-cyan-800',
-  'from-rose-600 to-rose-800',
-  'from-amber-600 to-amber-800',
-  'from-indigo-600 to-indigo-800',
+  'from-blue-600 to-blue-800', 'from-emerald-600 to-emerald-800',
+  'from-purple-600 to-purple-800', 'from-orange-600 to-orange-800',
+  'from-cyan-600 to-cyan-800', 'from-rose-600 to-rose-800',
+  'from-amber-600 to-amber-800', 'from-indigo-600 to-indigo-800',
 ];
 
 export default function TrustSection() {
@@ -32,15 +28,11 @@ export default function TrustSection() {
   useEffect(() => {
     fetch('/api/public/organizations')
       .then(r => r.json())
-      .then(data => {
-        setOrgs(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
+      .then(data => { setOrgs(Array.isArray(data) ? data : []); setLoading(false); })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
-  // Auto-rotation
   useEffect(() => {
     if (orgs.length === 0 || isPaused) return;
     intervalRef.current = setInterval(() => {
@@ -49,24 +41,13 @@ export default function TrustSection() {
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [orgs, isPaused]);
 
-  if (loading || orgs.length === 0) {
-    return (
-      <section className="py-20 bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <div className="animate-pulse space-y-4">
-            <div className="h-6 bg-gray-700 rounded w-32 mx-auto" />
-            <div className="h-10 bg-gray-700 rounded w-96 mx-auto" />
-          </div>
-        </div>
-      </section>
-    );
-  }
+  if (loading || orgs.length === 0) return null;
 
-  // Calculer les indices pour le cover flow (5 éléments visibles)
+  // Positions : -2, -1, 0 (centre), 1, 2
   const getVisibleOrgs = () => {
     const result = [];
     for (let i = -2; i <= 2; i++) {
-      let index = (activeIndex + i + orgs.length) % orgs.length;
+      const index = (activeIndex + i + orgs.length) % orgs.length;
       result.push({ org: orgs[index], position: i });
     }
     return result;
@@ -74,20 +55,18 @@ export default function TrustSection() {
 
   const visibleOrgs = getVisibleOrgs();
 
-  const getCardStyle = (position: number) => {
-    const absPos = Math.abs(position);
-    const isCenter = position === 0;
-    
+  const getTransform = (position: number) => {
+    const angle = position * 25; // degrés entre chaque carte
+    const translateX = position * 180; // espacement horizontal
+    const translateZ = -Math.abs(position) * 150; // profondeur
+    const scale = position === 0 ? 1 : 0.75;
+    const opacity = position === 0 ? 1 : 0.5;
+
     return {
-      transform: `
-        translateX(${position * 60}px) 
-        scale(${isCenter ? 1 : 1 - absPos * 0.15}) 
-        rotateY(${position * 15}deg)
-        translateZ(${isCenter ? 50 : -absPos * 50}px)
-      `,
-      zIndex: 5 - absPos,
-      opacity: 1 - absPos * 0.2,
-      filter: isCenter ? 'blur(0px)' : `blur(${absPos * 2}px)`,
+      transform: `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${-angle}deg) scale(${scale})`,
+      zIndex: 5 - Math.abs(position),
+      opacity,
+      filter: position === 0 ? 'blur(0px)' : 'blur(1px)',
     };
   };
 
@@ -96,20 +75,19 @@ export default function TrustSection() {
       <div className="max-w-7xl mx-auto px-4 mb-12">
         <div className="text-center">
           <span className="text-sm font-semibold text-gray-400 uppercase tracking-[0.2em]">Nos</span>
-          <h2 className="text-4xl md:text-5xl font-bold text-white mt-2 mb-4">
-            partenaires
-          </h2>
+          <h2 className="text-4xl md:text-5xl font-bold text-white mt-2 mb-4">partenaires</h2>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
             Des établissements d&apos;exception soigneusement choisis pour vous
           </p>
         </div>
       </div>
 
-      {/* Cover Flow */}
+      {/* Carrousel 3D */}
       <div
-        className="relative h-[350px] flex items-center justify-center perspective-1000"
+        className="relative h-[420px] flex items-center justify-center overflow-hidden"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
+        style={{ perspective: '1200px' }}
       >
         {/* Flèches */}
         <button
@@ -125,32 +103,38 @@ export default function TrustSection() {
           <ChevronRight size={24} />
         </button>
 
-        {/* Cartes */}
-        <div className="relative flex items-center justify-center" style={{ perspective: '1000px', transformStyle: 'preserve-3d' }}>
+        {/* Scène 3D */}
+        <div
+          className="relative flex items-center justify-center"
+          style={{
+            transformStyle: 'preserve-3d',
+            transform: 'rotateY(0deg)',
+            width: '800px',
+            height: '350px',
+          }}
+        >
           {visibleOrgs.map(({ org, position }) => (
             <a
               key={org.id}
               href={`/${org.type === 'FLEET_MANAGER' ? 'fleet' : 'coop'}/${org.slug}`}
-              className="absolute w-64 cursor-pointer transition-all duration-700 ease-out"
+              className="absolute w-60 cursor-pointer transition-all duration-700 ease-out"
               style={{
-                ...getCardStyle(position),
+                ...getTransform(position),
                 transformStyle: 'preserve-3d',
+                left: '50%',
+                marginLeft: '-120px',
               }}
             >
-              <div className={`bg-gray-800 rounded-2xl p-6 text-center border border-gray-700 hover:border-gray-500 transition-colors ${
-                position === 0 ? 'shadow-2xl shadow-primary/20' : ''
+              <div className={`bg-gray-800 rounded-2xl p-5 text-center border border-gray-700 hover:border-gray-500 transition-colors ${
+                position === 0 ? 'shadow-2xl shadow-primary/20 ring-1 ring-primary/30' : ''
               }`}>
                 {/* Icône */}
-                <div className={`w-20 h-20 bg-gradient-to-br ${gradients[orgs.indexOf(org) % gradients.length]} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg`}>
-                  <span className="text-white font-bold text-2xl">
-                    {org.name.charAt(0)}
-                  </span>
+                <div className={`w-16 h-16 bg-gradient-to-br ${gradients[orgs.indexOf(org) % gradients.length]} rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg`}>
+                  <span className="text-white font-bold text-xl">{org.name.charAt(0)}</span>
                 </div>
 
                 {/* Nom */}
-                <h4 className="font-bold text-white text-sm line-clamp-2 mb-2">
-                  {org.name}
-                </h4>
+                <h4 className="font-bold text-white text-sm line-clamp-2 mb-1">{org.name}</h4>
 
                 {/* Type */}
                 <p className="text-gray-400 text-xs capitalize mb-2">
@@ -159,16 +143,13 @@ export default function TrustSection() {
 
                 {/* Badge */}
                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
-                  org.plan === 'Premium'
-                    ? 'bg-yellow-500/20 text-yellow-400'
-                    : 'bg-green-500/20 text-green-400'
+                  org.plan === 'Premium' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-green-500/20 text-green-400'
                 }`}>
                   {org.plan === 'Premium' ? '★ Premium' : '✓ Standard'}
                 </span>
 
-                {/* Téléphone (visible uniquement sur la carte centrale) */}
                 {org.phone && position === 0 && (
-                  <p className="text-gray-500 text-xs mt-3">{org.phone}</p>
+                  <p className="text-gray-500 text-xs mt-2">{org.phone}</p>
                 )}
               </div>
             </a>
@@ -176,33 +157,24 @@ export default function TrustSection() {
         </div>
       </div>
 
-      {/* Pagination dots */}
+      {/* Pagination */}
       <div className="flex justify-center gap-2 mt-8">
         {orgs.map((_, i) => (
           <button
             key={i}
             onClick={() => setActiveIndex(i)}
             className={`h-2 rounded-full transition-all duration-300 ${
-              i === activeIndex
-                ? 'bg-white w-8'
-                : 'bg-gray-600 hover:bg-gray-500 w-2'
+              i === activeIndex ? 'bg-white w-8' : 'bg-gray-600 hover:bg-gray-500 w-2'
             }`}
           />
         ))}
       </div>
 
-      {/* Compteur */}
       <div className="text-center mt-8">
         <p className="text-gray-500 text-sm">
           <span className="text-white font-bold text-lg">{orgs.length}</span> organisations partenaires
         </p>
       </div>
-
-      <style jsx>{`
-        .perspective-1000 {
-          perspective: 1000px;
-        }
-      `}</style>
     </section>
   );
 }
