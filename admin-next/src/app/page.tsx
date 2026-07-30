@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Rocket, ArrowDown, Building2, Truck, Smartphone, Users, Shield, Zap, Car } from 'lucide-react';
+import HeroSlider from '@/components/landing/HeroSlider';
 
 async function getStats() {
   try {
@@ -35,7 +36,8 @@ export default async function LandingPage() {
 
       {/* HERO */}
       <section className="relative min-h-screen flex items-center bg-dark overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-dark via-dark to-primary/30" />
+        <HeroSlider />
+        <div className="absolute inset-0 bg-gradient-to-br from-dark/80 via-dark/70 to-primary/50 z-10" />
         <div className="relative z-10 max-w-7xl mx-auto px-4 py-20 text-center">
           <span className="inline-flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded-full text-sm mb-6 backdrop-blur-sm">
             <Rocket size={16} /> Dago Mobility
