@@ -1,7 +1,0 @@
-{
-  "name": "dago-coop",
-  "version": "1.0.0",
-  "scripts": {
-    "build": "echo 'No build needed - static files'"
-  }
-}
