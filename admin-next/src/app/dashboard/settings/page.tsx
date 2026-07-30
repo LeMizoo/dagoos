@@ -2,6 +2,7 @@
 export const dynamic = 'force-dynamic';
 import { useState } from 'react';
 import { Settings, User, Shield, Palette, Bell, Globe, Save } from 'lucide-react';
+import PasswordInput from '@/components/ui/PasswordInput';
 
 export default function SettingsPage() {
   const [tab, setTab] = useState('general');
@@ -107,15 +108,15 @@ export default function SettingsPage() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Ancien mot de passe</label>
-                  <input type="password" className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary" />
+                  <PasswordInput value="" onChange={() => {}} className="text-sm" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nouveau mot de passe</label>
-                  <input type="password" className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary" />
+                  <PasswordInput value="" onChange={() => {}} className="text-sm" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Confirmer</label>
-                  <input type="password" className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary" />
+                  <PasswordInput value="" onChange={() => {}} className="text-sm" />
                 </div>
               </div>
             </div>

@@ -47,9 +47,7 @@ Chez les potes, ça roule.</h1>
           </div>
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="••••••••" required />
+            <PasswordInput value={password} onChange={e => setPassword(e.target.value)} required />
           </div>
           {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
           <button type="submit" disabled={loading}

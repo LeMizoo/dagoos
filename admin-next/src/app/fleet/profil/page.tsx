@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { User, Save } from 'lucide-react';
+import PasswordInput from '@/components/ui/PasswordInput';
 
 export default function FleetProfilPage() {
   const [user, setUser] = useState({ name: '', email: '', phone: '' });
@@ -40,7 +41,7 @@ export default function FleetProfilPage() {
           <div><label className="block text-sm font-medium text-gray-700 mb-1">Nom</label><input type="text" value={user.name} onChange={e => setUser({ ...user, name: e.target.value })} className="w-full px-3 py-2 border rounded-lg text-sm" /></div>
           <div><label className="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" value={user.email} disabled className="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50" /></div>
           <div><label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label><input type="tel" value={user.phone} onChange={e => setUser({ ...user, phone: e.target.value })} className="w-full px-3 py-2 border rounded-lg text-sm" /></div>
-          <div><label className="block text-sm font-medium text-gray-700 mb-1">Nouveau mot de passe (laisser vide si inchangé)</label><input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Min 6 caractères" className="w-full px-3 py-2 border rounded-lg text-sm" /></div>
+          <PasswordInput label="Nouveau mot de passe (laisser vide si inchangé)" value={password} onChange={e => setPassword(e.target.value)} placeholder="Min 6 caractères" className="text-sm" />
           <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition text-sm">
             <Save size={14} /> {saved ? '✓ Sauvegardé !' : 'Enregistrer'}
           </button>
