@@ -3,6 +3,7 @@ import { Rocket, ArrowDown, Building2, Truck, Smartphone, Users, Shield, Zap, Ca
 import HeroSlider from '@/components/landing/HeroSlider';
 import HeroParticles from '@/components/landing/HeroParticles';
 import PlansSection from '@/components/landing/PlansSection';
+import TrustSection from '@/components/landing/TrustSection';
 import AnimatedSection from '@/components/landing/AnimatedSection';
 
 async function getStats() {
@@ -102,6 +103,9 @@ export default async function LandingPage() {
 
       {/* PLANS */}
       <PlansSection />
+
+      {/* ILS NOUS FONT CONFIANCE */}
+      <TrustSection />
 
       {/* SERVICES */}
       <AnimatedSection animation="fade-up">
