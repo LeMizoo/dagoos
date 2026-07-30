@@ -1,5 +1,6 @@
 'use client';
 import { useState, Suspense } from 'react';
+import PasswordInput from '@/components/ui/PasswordInput';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Truck } from 'lucide-react';
 

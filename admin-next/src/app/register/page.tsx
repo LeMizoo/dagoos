@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, Truck, Building2 } from 'lucide-react';
+import PasswordInput from '@/components/ui/PasswordInput';
 import Link from 'next/link';
 
 interface Plan {
@@ -229,26 +230,24 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Mot de passe</label>
-                <input
-                  type="password"
-                  required
-                  className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <PasswordInput
+                  label="Mot de passe"
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   placeholder="Minimum 6 caractères"
+                  required
+                  className="mt-1 border-gray-300 rounded-xl focus:ring-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Confirmer le mot de passe</label>
-                <input
-                  type="password"
-                  required
-                  className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <PasswordInput
+                  label="Confirmer le mot de passe"
                   value={form.confirmPassword}
                   onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
                   placeholder="Confirmez votre mot de passe"
+                  required
+                  className="mt-1 border-gray-300 rounded-xl focus:ring-blue-500"
                 />
               </div>
 
