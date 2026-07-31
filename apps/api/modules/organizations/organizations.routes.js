@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
+const { authMiddleware } = require('../../middleware/auth');
 const prisma = new PrismaClient();
 
-// Routes existantes
+// GET toutes les organisations (publique pour le driver)
 router.get('/', async (req, res) => {
   try {
     const organizations = await prisma.organization.findMany();
@@ -13,119 +14,49 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET une organisation par ID
 router.get('/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const organization = await prisma.organization.findUnique({
-      where: { id }
-    });
-    if (!organization) {
-      return res.status(404).json({ error: 'Organization not found' });
-    }
+    const organization = await prisma.organization.findUnique({ where: { id: req.params.id } });
+    if (!organization) return res.status(404).json({ error: 'Organisation introuvable' });
     res.json(organization);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
-// 🚛 Route pour les landing pages des flottes
+// Landing page flotte
 router.get('/fleet/:slug', async (req, res) => {
   try {
-    const { slug } = req.params;
-    
-    console.log('🔍 Recherche flotte:', slug);
-    
     const fleet = await prisma.organization.findFirst({
-      where: {
-        slug: slug,
-        type: 'FLEET_MANAGER',
-        status: 'active',
-      },
-      include: {
-        user: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-        vehicles: {
-          where: { status: 'active' },
-          take: 6,
-        },
-        drivers: {
-          where: { status: 'active' },
-          take: 6,
-        },
-        _count: {
-          select: {
-            vehicles: true,
-            drivers: true,
-          },
-        },
-      },
+      where: { slug: req.params.slug, type: 'FLEET_MANAGER', status: 'active' },
+      include: { user: { select: { name: true, email: true } }, vehicles: { where: { status: 'active' }, take: 6 }, drivers: { where: { status: 'active' }, take: 6 }, _count: { select: { vehicles: true, drivers: true } } }
     });
-    
-    if (!fleet) {
-      console.log('❌ Flotte non trouvée:', slug);
-      return res.status(404).json({ error: 'Fleet not found' });
-    }
-    
-    console.log('✅ Flotte trouvée:', fleet.name);
+    if (!fleet) return res.status(404).json({ error: 'Flotte introuvable' });
     res.json(fleet);
-  } catch (error) {
-    console.error('Error fetching fleet:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+  } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
-// 🏢 Route pour les landing pages des coopératives
+// Landing page coop
 router.get('/coop/:slug', async (req, res) => {
   try {
-    const { slug } = req.params;
-    
-    console.log('🔍 Recherche coopérative:', slug);
-    
     const coop = await prisma.organization.findFirst({
-      where: {
-        slug: slug,
-        type: 'COOPERATIVE',
-        status: 'active',
-      },
-      include: {
-        user: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-        vehicles: {
-          where: { status: 'active' },
-          take: 6,
-        },
-        drivers: {
-          where: { status: 'active' },
-          take: 6,
-        },
-        _count: {
-          select: {
-            vehicles: true,
-            drivers: true,
-          },
-        },
-      },
+      where: { slug: req.params.slug, type: 'COOPERATIVE', status: 'active' },
+      include: { user: { select: { name: true, email: true } }, vehicles: { where: { status: 'active' }, take: 6 }, drivers: { where: { status: 'active' }, take: 6 }, _count: { select: { vehicles: true, drivers: true } } }
     });
-    
-    if (!coop) {
-      console.log('❌ Coopérative non trouvée:', slug);
-      return res.status(404).json({ error: 'Coop not found' });
-    }
-    
-    console.log('✅ Coopérative trouvée:', coop.name);
+    if (!coop) return res.status(404).json({ error: 'Coopérative introuvable' });
     res.json(coop);
-  } catch (error) {
-    console.error('Error fetching coop:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+  } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+// DELETE une organisation (super-admin uniquement)
+router.delete('/:id', authMiddleware, async (req, res) => {
+  try {
+    // Vérifier que l'utilisateur est super-admin
+    if (req.user.role !== 'SUPER_ADMIN') {
+      return res.status(403).json({ error: 'Réservé aux super-administrateurs' });
+    }
+    await prisma.organization.delete({ where: { id: req.params.id } });
+    res.json({ ok: true, message: 'Organisation supprimée' });
+  } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 module.exports = router;
