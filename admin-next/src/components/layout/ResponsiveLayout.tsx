@@ -1,19 +1,36 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, X, LogOut, LayoutDashboard, Car, Wrench, Users, ClipboardList, DollarSign, CreditCard, MessageSquare, Bell, ScrollText, Settings, Truck, Building2, ArrowRightLeft, Receipt, User, QrCode, FileText, FileCheck, Globe } from 'lucide-react';
+import { Menu, X, LogOut, LayoutDashboard, Car, Wrench, Users, ClipboardList, DollarSign, CreditCard, MessageSquare, Bell, ScrollText, Settings, Truck, Building2, ArrowRightLeft, Receipt, User, QrCode, FileText, FileCheck } from 'lucide-react';
 
 // Menus par type
 const menus: Record<string, any> = {
   admin: [
-    { section: 'Principal', items: [{ href: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' }] },
-    { section: 'Flotte', items: [{ href: '/dashboard/vehicules', icon: Car, label: 'Véhicules' }, { href: '/dashboard/entretien', icon: Wrench, label: 'Entretien' }] },
-    { section: 'Chauffeurs', items: [{ href: '/dashboard/chauffeurs', icon: Users, label: 'Chauffeurs' }] },
-    { section: 'Missions', items: [{ href: '/dashboard/missions', icon: ClipboardList, label: 'Missions' }] },
-    { section: 'Finances', items: [{ href: '/dashboard/finances', icon: DollarSign, label: 'Finances' }, { href: '/dashboard/paiements', icon: CreditCard, label: 'Paiements' }] },
-    { section: 'Communication', items: [{ href: '/dashboard/messages', icon: MessageSquare, label: 'Messages' }, { href: '/dashboard/notifications', icon: Bell, label: 'Notifications' }] },
-    { section: 'Système', items: [{ href: '/dashboard/system-logs', icon: ScrollText, label: 'Logs' }, { href: '/dashboard/settings', icon: Settings, label: 'Paramètres' }] },
+    { 
+      section: 'Principal', 
+      items: [
+        { href: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
+        { href: '/dashboard/flottes', icon: Truck, label: 'Flottes' },
+        { href: '/dashboard/cooperatives', icon: Building2, label: 'Coopératives' },
+        { href: '/dashboard/finances', icon: DollarSign, label: 'Finances' },
+      ] 
+    },
+    { 
+      section: 'Communication', 
+      items: [
+        { href: '/dashboard/messages', icon: MessageSquare, label: 'Messages' },
+        { href: '/dashboard/notifications', icon: Bell, label: 'Notifications' },
+      ] 
+    },
+    { 
+      section: 'Système', 
+      items: [
+        { href: '/dashboard/system-logs', icon: ScrollText, label: 'Logs' },
+        { href: '/dashboard/settings', icon: Settings, label: 'Paramètres' },
+      ] 
+    },
   ],
   fleet: [
     { section: 'Principal', items: [{ href: '/fleet', icon: LayoutDashboard, label: 'Tableau de bord' }] },
@@ -49,37 +66,56 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
     router.refresh();
   };
 
+  // Vérifie si un item est actif (correspondance exacte ou préfixe)
+  const isActive = (href: string) => {
+    if (href === '/dashboard') return pathname === '/dashboard';
+    return pathname.startsWith(href);
+  };
+
   const sidebarContent = (
     <>
-      <div className="p-4 border-b border-gray-700">
-        <div className="flex items-center gap-3 mb-1">
-          <div className="w-8 h-8 bg-secondary rounded-lg flex items-center justify-center">
-            <span className="text-dark font-bold text-sm">D</span>
+      {/* En-tête avec logo */}
+      <div className="p-5 border-b border-gray-700/50">
+        <Link href={app === 'admin' ? '/dashboard' : `/${app}`} className="flex flex-col items-center gap-2">
+          <Image 
+            src="/b-trans.svg" 
+            alt="DAGOO" 
+            width={56} 
+            height={56}
+            className="brightness-0 invert"
+          />
+          <div className="text-center">
+            <h2 className="text-lg font-bold tracking-wide">DAGOO{app !== 'admin' ? "'S" : ''}</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Chez les potes, ça roule.</p>
           </div>
-          <h2 className="text-lg font-bold">DAGOO{app === 'admin' ? '' : "'S"}</h2>
+        </Link>
+        <div className="flex justify-center mt-3">
+          <span className="inline-block bg-primary/50 text-white text-[10px] px-3 py-0.5 rounded-full capitalize">
+            {app === 'admin' ? 'Admin' : app === 'fleet' ? 'Flotte' : 'Coopérative'}
+          </span>
         </div>
-        <p className="text-xs text-gray-400">Chez les potes, ça roule.</p>
-        <span className="inline-block bg-primary/50 text-white text-[10px] px-2 py-0.5 rounded-full mt-2 capitalize">
-          {app === 'admin' ? 'Admin' : app === 'fleet' ? 'Flotte' : 'Coopérative'}
-        </span>
       </div>
+
+      {/* Navigation */}
       <nav className="flex-1 p-3 overflow-y-auto">
         {menu.map((s: any) => (
           <div key={s.section} className="mb-4">
             <div className="text-xs text-gray-500 uppercase px-3 mb-1 tracking-wider">{s.section}</div>
             {s.items.map((item: any) => {
               const Icon = item.icon;
-              const isActive = pathname === item.href;
+              const active = isActive(item.href);
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={() => setIsOpen(false)}
                   className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition mb-0.5 ${
-                    isActive ? 'bg-primary text-white font-medium' : 'text-gray-300 hover:bg-white/10'
+                    active 
+                      ? 'bg-emerald-500/20 text-emerald-400 shadow-lg shadow-emerald-500/10 font-medium' 
+                      : 'text-gray-300 hover:bg-white/10'
                   }`}
                 >
-                  <Icon size={18} />
+                  <Icon size={18} className={active ? 'text-emerald-400' : ''} />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -87,6 +123,8 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
           </div>
         ))}
       </nav>
+
+      {/* Déconnexion */}
       <div className="p-3 border-t border-gray-700">
         <button
           onClick={handleLogout}
@@ -112,7 +150,12 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
           <button onClick={() => setIsOpen(!isOpen)} className="p-1">
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
-          <span className="font-bold text-sm">DAGOO{app === 'admin' ? '' : "'S"} - {app === 'admin' ? 'Admin' : app === 'fleet' ? 'Flotte' : 'Coopérative'}</span>
+          <div className="flex items-center gap-2">
+            <Image src="/b-trans.svg" alt="DAGOO" width={24} height={24} className="brightness-0 invert" />
+            <span className="font-bold text-sm">
+              DAGOO{app !== 'admin' ? "'S" : ''} - {app === 'admin' ? 'Admin' : app === 'fleet' ? 'Flotte' : 'Coopérative'}
+            </span>
+          </div>
           <button onClick={handleLogout} className="p-1 text-red-400"><LogOut size={18} /></button>
         </div>
       </div>
