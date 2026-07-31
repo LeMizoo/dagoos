@@ -3,7 +3,6 @@ import { cookies } from 'next/headers';
 
 const API_BASE = 'https://dagoos-api.onrender.com';
 
-// Mapping des chemins : admin-next → API Render réelle
 const pathMapping: Record<string, string> = {
   '/finances/transactions': '/api/transactions',
   '/finances/versements': '/api/versements',
@@ -11,29 +10,14 @@ const pathMapping: Record<string, string> = {
 };
 
 function resolveApiPath(proxyPath: string): string {
-  // Vérifier si un mapping existe
-  if (pathMapping[proxyPath]) {
-    return pathMapping[proxyPath];
-  }
-  // Comportement standard : /api/proxy/xxx → /api/xxx
+  if (pathMapping[proxyPath]) return pathMapping[proxyPath];
   return `/api${proxyPath}`;
 }
 
-export async function GET(req: NextRequest) {
-  return proxyRequest(req);
-}
-
-export async function POST(req: NextRequest) {
-  return proxyRequest(req);
-}
-
-export async function PUT(req: NextRequest) {
-  return proxyRequest(req);
-}
-
-export async function DELETE(req: NextRequest) {
-  return proxyRequest(req);
-}
+export async function GET(req: NextRequest) { return proxyRequest(req); }
+export async function POST(req: NextRequest) { return proxyRequest(req); }
+export async function PUT(req: NextRequest) { return proxyRequest(req); }
+export async function DELETE(req: NextRequest) { return proxyRequest(req); }
 
 async function proxyRequest(req: NextRequest) {
   const proxyPath = req.nextUrl.pathname.replace('/api/proxy', '');
@@ -41,8 +25,11 @@ async function proxyRequest(req: NextRequest) {
   const searchParams = req.nextUrl.search;
   const apiUrl = `${API_BASE}${apiPath}${searchParams}`;
 
+  // Récupérer le token depuis le header Authorization (driver) ou le cookie (admin/fleet/coop)
+  const authHeader = req.headers.get('Authorization');
   const cookieStore = cookies();
-  const token = cookieStore.get('dagoos_token')?.value;
+  const cookieToken = cookieStore.get('dagoos_token')?.value;
+  const token = authHeader?.replace('Bearer ', '') || cookieToken;
 
   console.log(`🔐 Proxy -> ${req.method} ${apiUrl} ${token ? '(avec token)' : '(sans token)'}`);
 
@@ -53,12 +40,7 @@ async function proxyRequest(req: NextRequest) {
 
     const body = req.method !== 'GET' && req.method !== 'HEAD' ? await req.text() : undefined;
 
-    const res = await fetch(apiUrl, {
-      method: req.method,
-      headers,
-      body,
-    });
-
+    const res = await fetch(apiUrl, { method: req.method, headers, body });
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
   } catch (e: any) {
