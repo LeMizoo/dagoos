@@ -1,5 +1,5 @@
 var DAGOOS_CONFIG = {
-    apiUrl: 'https://dago-mobility.vercel.app/api',
+    apiUrl: 'https://dago-mobility.vercel.app/api/proxy',
     landingUrl: 'https://dago-mobility.vercel.app',
     logoUrl: 'https://dago-mobility.vercel.app/b-trans.svg',
     apps: {
