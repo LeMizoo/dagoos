@@ -1,30 +1,14 @@
-const CACHE_NAME = 'dagoos-driver-v2';
+const CACHE_NAME = 'dagoos-driver-v3';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll([
-        '/',
-        '/index.html',
-        '/dashboard.html',
-        '/js/login.js',
-        '/js/config.js',
-        '/config.js',
-        '/manifest.json',
-        '/favicon.svg',
-        '/offline.html',
-      ]);
-    })
-  );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-  // Supprimer les anciens caches
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.filter(name => name !== CACHE_NAME).map(name => caches.delete(name))
+        cacheNames.map(name => caches.delete(name))
       );
     })
   );
@@ -32,18 +16,32 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Ne pas mettre en cache les appels API
+  // Ne pas intercepter les requêtes API
   if (event.request.url.includes('/api/')) {
-    return fetch(event.request);
+    return;
   }
   
+  // Pour les navigations (pages HTML), toujours aller au réseau
+  if (event.request.mode === 'navigate') {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // Pour le reste (CSS, JS, images), cache-first
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request).then((fetchResponse) => {
-        return caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, fetchResponse.clone());
-          return fetchResponse;
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(event.request).then((response) => {
+        if (!response || response.status !== 200 || response.type !== 'basic') {
+          return response;
+        }
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseToCache);
         });
+        return response;
       });
     })
   );
