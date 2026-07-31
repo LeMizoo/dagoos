@@ -69,7 +69,7 @@ router.post('/driver-login', async (req, res) => {
     );
     res.json({
       message: 'Connexion réussie !', token,
-      user: { id: driver.user.id, name: driver.user.name, email: driver.user.email, driverCode: driver.driverCode, driverId: driver.id, organization: driver.organization?.name }
+      user: { id: driver.user.id, name: driver.user.name, email: driver.user.email, driverCode: driver.driverCode, driverId: driver.id, role: 'DRIVER', organization: driver.organization?.name }
     });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
