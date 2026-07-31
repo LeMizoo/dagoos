@@ -74,4 +74,17 @@ router.post('/driver-login', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+
+// Récupérer le profil utilisateur connecté
+router.get('/me', authMiddleware, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { id: true, name: true, email: true, role: true, phone: true }
+    });
+    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+    res.json({ user });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 module.exports = router;
