@@ -50,22 +50,20 @@ export default function SettingsPage() {
     setThemeReady(true);
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('dagoos_theme', theme);
+  const applyTheme = (newTheme: 'light' | 'dark' | 'system') => {
+    setTheme(newTheme);
+    localStorage.setItem('dagoos_theme', newTheme);
     const root = document.documentElement;
-    if (theme === 'dark') {
+    root.classList.remove('dark');
+    if (newTheme === 'dark') {
       root.classList.add('dark');
-    } else if (theme === 'light') {
-      root.classList.remove('dark');
-    } else {
-      // system
+    } else if (newTheme === 'system') {
       if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
         root.classList.add('dark');
-      } else {
-        root.classList.remove('dark');
       }
     }
-  }, [theme]);
+    // light : rien (déjà retiré)
+  };
 
   const currentPlans = entityTab === 'fleet' ? fleetPlans : coopPlans;
   const setCurrentPlans = entityTab === 'fleet' ? setFleetPlans : setCoopPlans;
@@ -267,7 +265,7 @@ export default function SettingsPage() {
                       { id: 'dark' as const, icon: '🌙', label: 'Sombre' },
                       { id: 'system' as const, icon: '💻', label: 'Système' },
                     ].map(item => (
-                      <button key={item.id} onClick={() => setTheme(item.id)}
+                      <button key={item.id} onClick={() => applyTheme(item.id)}
                         className={`flex-1 p-3 rounded-xl border text-center transition-all ${
                           theme === item.id
                             ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-400 shadow-sm'

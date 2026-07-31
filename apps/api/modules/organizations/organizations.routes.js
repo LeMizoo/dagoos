@@ -59,4 +59,28 @@ router.delete('/:id', authMiddleware, async (req, res) => {
   } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
+
+// PUT - Modifier une organisation (super-admin uniquement)
+router.put('/:id', authMiddleware, async (req, res) => {
+  try {
+    if (req.user.role !== 'SUPER_ADMIN' && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Réservé aux administrateurs' });
+    }
+    const { name, email, plan, status, type } = req.body;
+    const data = {};
+    if (name !== undefined) data.name = name;
+    if (email !== undefined) data.email = email;
+    if (plan !== undefined) data.plan = plan;
+    if (status !== undefined) data.status = status;
+    if (type !== undefined) data.type = type;
+
+    const organization = await prisma.organization.update({
+      where: { id: req.params.id },
+      data,
+    });
+    res.json(organization);
+  } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+
 module.exports = router;
