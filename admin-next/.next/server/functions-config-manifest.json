@@ -1,1 +1,1 @@
-{"version":1,"functions":{"/fleet/[slug]":{},"/dashboard/finances":{},"/coop/[slug]":{},"/dashboard/entretien":{},"/dashboard/messages":{},"/dashboard/missions":{},"/dashboard/notifications":{},"/dashboard/paiements":{},"/dashboard/settings":{}}}
+{"version":1,"functions":{"/coop/[slug]":{},"/dashboard/finances/paiements":{},"/fleet/[slug]":{},"/dashboard/messages":{},"/dashboard/notifications":{},"/dashboard/settings":{}}}
