@@ -1,10 +1,24 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { ArrowRightLeft, User, Car, X } from 'lucide-react';
+import { ArrowRightLeft, User, Car, X, Gauge, Tag } from 'lucide-react';
+
+interface Driver {
+  id: string;
+  driverCode: string;
+  user?: { name?: string };
+  vehicleId?: string;
+}
+interface Vehicle {
+  id: string;
+  plate: string;
+  model?: string;
+  currentKm?: number;
+  status?: string;
+}
 
 export default function FleetPermutationPage() {
-  const [drivers, setDrivers] = useState<any[]>([]);
-  const [vehicles, setVehicles] = useState<any[]>([]);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [selectedDriver, setSelectedDriver] = useState('');
   const [selectedVehicle, setSelectedVehicle] = useState('');
   const [loading, setLoading] = useState(true);
@@ -23,14 +37,18 @@ export default function FleetPermutationPage() {
   async function handleAssign() {
     if (!selectedDriver || !selectedVehicle) return;
     try {
-      await fetch(`/api/proxy/drivers/${selectedDriver}`, {
+      const res = await fetch(`/api/proxy/drivers/${selectedDriver}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ vehicleId: selectedVehicle }),
       });
+      if (!res.ok) throw new Error('Erreur');
       setMessage('✅ Véhicule assigné avec succès !');
       setTimeout(() => setMessage(''), 3000);
       setSelectedVehicle('');
+      // Recharger les données
+      const d = await fetch('/api/proxy/drivers').then(r => r.json());
+      setDrivers(Array.isArray(d) ? d : []);
     } catch (e) { setMessage('❌ Erreur lors de l\'assignation'); }
   }
 
@@ -43,6 +61,8 @@ export default function FleetPermutationPage() {
       });
       setMessage('✅ Véhicule retiré !');
       setTimeout(() => setMessage(''), 3000);
+      const d = await fetch('/api/proxy/drivers').then(r => r.json());
+      setDrivers(Array.isArray(d) ? d : []);
     } catch (e) { setMessage('❌ Erreur'); }
   }
 
@@ -56,7 +76,7 @@ export default function FleetPermutationPage() {
 
       {/* Assignation */}
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
-        <h3 className="font-semibold text-gray-800 mb-4">Assigner une moto</h3>
+        <h3 className="font-semibold text-gray-800 mb-4">Assigner un véhicule</h3>
         <div className="flex gap-4 flex-wrap items-end">
           <div className="flex-1 min-w-[200px]">
             <label className="block text-xs text-gray-500 mb-1">Chauffeur</label>
@@ -66,9 +86,9 @@ export default function FleetPermutationPage() {
             </select>
           </div>
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-xs text-gray-500 mb-1">Moto</label>
+            <label className="block text-xs text-gray-500 mb-1">Véhicule</label>
             <select value={selectedVehicle} onChange={e => setSelectedVehicle(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm">
-              <option value="">-- Moto --</option>
+              <option value="">-- Véhicule --</option>
               {vehicles.filter(v => v.status === 'active').map(v => <option key={v.id} value={v.id}>{v.plate} - {v.model}</option>)}
             </select>
           </div>
@@ -80,20 +100,41 @@ export default function FleetPermutationPage() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">
         <div className="p-4 border-b"><h3 className="font-semibold text-gray-800">📋 Assignations actuelles</h3></div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[600px]">
-            <thead className="bg-gray-50 text-left text-gray-500"><tr><th className="px-4 py-3">Chauffeur</th><th className="px-4 py-3">Moto assignée</th><th className="px-4 py-3">Actions</th></tr></thead>
+          <table className="w-full text-sm min-w-[700px]">
+            <thead className="bg-gray-50 text-left text-gray-500">
+              <tr>
+                <th className="px-4 py-3">Chauffeur</th>
+                <th className="px-4 py-3">Véhicule</th>
+                <th className="px-4 py-3">Modèle</th>
+                <th className="px-4 py-3">Kilométrage</th>
+                <th className="px-4 py-3">Statut</th>
+                <th className="px-4 py-3">Actions</th>
+              </tr>
+            </thead>
             <tbody>
-              {drivers.filter(d => d.vehicleId).length === 0 ? <tr><td colSpan={3} className="text-center py-8 text-gray-400">Aucune assignation</td></tr> :
+              {drivers.filter(d => d.vehicleId).length === 0 ? (
+                <tr><td colSpan={6} className="text-center py-8 text-gray-400">Aucune assignation</td></tr>
+              ) : (
                 drivers.filter(d => d.vehicleId).map(d => {
                   const v = vehicles.find(v => v.id === d.vehicleId);
                   return (
                     <tr key={d.id} className="border-t hover:bg-gray-50">
                       <td className="px-4 py-3 font-medium flex items-center gap-1"><User size={14} className="text-gray-400" />{d.user?.name || d.driverCode}</td>
                       <td className="px-4 py-3 flex items-center gap-1"><Car size={14} className="text-gray-400" />{v?.plate || d.vehicleId}</td>
-                      <td className="px-4 py-3"><button onClick={() => handleRetirer(d.id)} className="text-red-600 hover:bg-red-50 px-2 py-1 rounded text-xs flex items-center gap-1"><X size={12} /> Retirer</button></td>
+                      <td className="px-4 py-3">{v?.model || '-'}</td>
+                      <td className="px-4 py-3">{(v?.currentKm || 0).toLocaleString()} km</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-0.5 rounded-full text-xs ${v?.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                          {v?.status === 'active' ? 'Actif' : v?.status || '-'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <button onClick={() => handleRetirer(d.id)} className="text-red-600 hover:bg-red-50 px-2 py-1 rounded text-xs flex items-center gap-1"><X size={12} /> Retirer</button>
+                      </td>
                     </tr>
                   );
-                })}
+                })
+              )}
             </tbody>
           </table>
         </div>
