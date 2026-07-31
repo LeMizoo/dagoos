@@ -2,13 +2,15 @@
               (function() {
                 try {
                   var theme = localStorage.getItem('dagoos_theme');
+                  // Par d\xe9faut : light. Dark seulement si explicitement choisi
                   if (theme === 'dark') {
                     document.documentElement.classList.add('dark');
-                  } else if (theme === 'system' || !theme) {
+                  } else if (theme === 'system') {
                     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
                       document.documentElement.classList.add('dark');
                     }
                   }
+                  // Si theme === 'light' ou absent : rien (reste light)
                 } catch(e) {}
               })();
             `}})}),n.jsx("body",{className:"bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors",children:e})]})}},12523:(e,t,r)=>{"use strict";r.r(t),r.d(t,{default:()=>o});var n=r(19510),s=r(57371);function o(){return n.jsx("div",{className:"min-h-screen flex items-center justify-center bg-gray-50",children:(0,n.jsxs)("div",{className:"text-center",children:[n.jsx("h1",{className:"text-6xl font-bold text-gray-300 mb-4",children:"404"}),n.jsx("p",{className:"text-gray-500 mb-6",children:"Page introuvable"}),n.jsx(s.default,{href:"/dashboard",className:"text-primary hover:underline text-sm",children:"Retour au tableau de bord"})]})})}},5023:()=>{},53370:(e,t,r)=>{"use strict";function n(e){return e&&e.__esModule?e:{default:e}}r.r(t),r.d(t,{_:()=>n,_interop_require_default:()=>n})}};var t=require("../../webpack-runtime.js");t.C(e);var r=e=>t(t.s=e),n=t.X(0,[8948,6779],()=>r(44197));module.exports=n})();

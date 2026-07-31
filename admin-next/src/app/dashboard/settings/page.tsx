@@ -42,10 +42,12 @@ export default function SettingsPage() {
 
   // Dark mode
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('light');
+  const [themeReady, setThemeReady] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('dagoos_theme') as 'light' | 'dark' | 'system' | null;
     if (saved) setTheme(saved);
+    setThemeReady(true);
   }, []);
 
   useEffect(() => {
