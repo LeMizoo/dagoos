@@ -17,7 +17,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               (function() {
                 try {
                   var theme = localStorage.getItem('dagoos_theme');
-                  // Par défaut : light. Dark seulement si explicitement choisi
                   if (theme === 'dark') {
                     document.documentElement.classList.add('dark');
                   } else if (theme === 'system') {
@@ -25,14 +24,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                       document.documentElement.classList.add('dark');
                     }
                   }
-                  // Si theme === 'light' ou absent : rien (reste light)
+                  // Si theme === 'light', null, ou absent : pas de classe dark
                 } catch(e) {}
               })();
             `,
           }}
         />
       </head>
-      <body className="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors">{children}</body>
+      <body className="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">{children}</body>
     </html>
   );
 }

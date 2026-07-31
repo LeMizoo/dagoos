@@ -2,7 +2,6 @@
               (function() {
                 try {
                   var theme = localStorage.getItem('dagoos_theme');
-                  // Par d\xe9faut : light. Dark seulement si explicitement choisi
                   if (theme === 'dark') {
                     document.documentElement.classList.add('dark');
                   } else if (theme === 'system') {
@@ -10,10 +9,10 @@
                       document.documentElement.classList.add('dark');
                     }
                   }
-                  // Si theme === 'light' ou absent : rien (reste light)
+                  // Si theme === 'light', null, ou absent : pas de classe dark
                 } catch(e) {}
               })();
-            `}})}),s.jsx("body",{className:"bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors",children:e})]})}},12523:(e,t,r)=>{"use strict";r.r(t),r.d(t,{default:()=>n});var s=r(19510),a=r(57371);function n(){return s.jsx("div",{className:"min-h-screen flex items-center justify-center bg-gray-50",children:(0,s.jsxs)("div",{className:"text-center",children:[s.jsx("h1",{className:"text-6xl font-bold text-gray-300 mb-4",children:"404"}),s.jsx("p",{className:"text-gray-500 mb-6",children:"Page introuvable"}),s.jsx(a.default,{href:"/dashboard",className:"text-primary hover:underline text-sm",children:"Retour au tableau de bord"})]})})}},5023:()=>{},2430:(e,t,r)=>{"use strict";r.d(t,{default:()=>d});var s=r(17577),a={xmlns:"http://www.w3.org/2000/svg",width:24,height:24,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round"};/**
+            `}})}),s.jsx("body",{className:"bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200",children:e})]})}},12523:(e,t,r)=>{"use strict";r.r(t),r.d(t,{default:()=>n});var s=r(19510),a=r(57371);function n(){return s.jsx("div",{className:"min-h-screen flex items-center justify-center bg-gray-50",children:(0,s.jsxs)("div",{className:"text-center",children:[s.jsx("h1",{className:"text-6xl font-bold text-gray-300 mb-4",children:"404"}),s.jsx("p",{className:"text-gray-500 mb-6",children:"Page introuvable"}),s.jsx(a.default,{href:"/dashboard",className:"text-primary hover:underline text-sm",children:"Retour au tableau de bord"})]})})}},5023:()=>{},2430:(e,t,r)=>{"use strict";r.d(t,{default:()=>d});var s=r(17577),a={xmlns:"http://www.w3.org/2000/svg",width:24,height:24,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round"};/**
  * @license lucide-react v1.27.0 - ISC
  *
  * This source code is licensed under the ISC license.

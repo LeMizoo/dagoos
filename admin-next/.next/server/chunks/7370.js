@@ -2,7 +2,6 @@ exports.id=7370,exports.ids=[7370],exports.modules={16121:(e,s,t)=>{Promise.reso
               (function() {
                 try {
                   var theme = localStorage.getItem('dagoos_theme');
-                  // Par d\xe9faut : light. Dark seulement si explicitement choisi
                   if (theme === 'dark') {
                     document.documentElement.classList.add('dark');
                   } else if (theme === 'system') {
@@ -10,7 +9,7 @@ exports.id=7370,exports.ids=[7370],exports.modules={16121:(e,s,t)=>{Promise.reso
                       document.documentElement.classList.add('dark');
                     }
                   }
-                  // Si theme === 'light' ou absent : rien (reste light)
+                  // Si theme === 'light', null, ou absent : pas de classe dark
                 } catch(e) {}
               })();
-            `}})}),a.jsx("body",{className:"bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors",children:e})]})}},12523:(e,s,t)=>{"use strict";t.r(s),t.d(s,{default:()=>i});var a=t(19510),r=t(57371);function i(){return a.jsx("div",{className:"min-h-screen flex items-center justify-center bg-gray-50",children:(0,a.jsxs)("div",{className:"text-center",children:[a.jsx("h1",{className:"text-6xl font-bold text-gray-300 mb-4",children:"404"}),a.jsx("p",{className:"text-gray-500 mb-6",children:"Page introuvable"}),a.jsx(r.default,{href:"/dashboard",className:"text-primary hover:underline text-sm",children:"Retour au tableau de bord"})]})})}},92728:(e,s,t)=>{"use strict";t.d(s,{ZP:()=>n});var a=t(68570);let r=(0,a.createProxy)(String.raw`D:\Dagoos\admin-next\src\components\layout\ResponsiveLayout.tsx`),{__esModule:i,$$typeof:l}=r;r.default;let n=(0,a.createProxy)(String.raw`D:\Dagoos\admin-next\src\components\layout\ResponsiveLayout.tsx#default`)},5023:()=>{}};
+            `}})}),a.jsx("body",{className:"bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200",children:e})]})}},12523:(e,s,t)=>{"use strict";t.r(s),t.d(s,{default:()=>i});var a=t(19510),r=t(57371);function i(){return a.jsx("div",{className:"min-h-screen flex items-center justify-center bg-gray-50",children:(0,a.jsxs)("div",{className:"text-center",children:[a.jsx("h1",{className:"text-6xl font-bold text-gray-300 mb-4",children:"404"}),a.jsx("p",{className:"text-gray-500 mb-6",children:"Page introuvable"}),a.jsx(r.default,{href:"/dashboard",className:"text-primary hover:underline text-sm",children:"Retour au tableau de bord"})]})})}},92728:(e,s,t)=>{"use strict";t.d(s,{ZP:()=>n});var a=t(68570);let r=(0,a.createProxy)(String.raw`D:\Dagoos\admin-next\src\components\layout\ResponsiveLayout.tsx`),{__esModule:i,$$typeof:l}=r;r.default;let n=(0,a.createProxy)(String.raw`D:\Dagoos\admin-next\src\components\layout\ResponsiveLayout.tsx#default`)},5023:()=>{}};
