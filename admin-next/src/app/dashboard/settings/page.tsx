@@ -31,6 +31,20 @@ const defaultCoopPlans: Record<PlanKey, Plan> = {
   surdevis: { name: 'Sur devis', price: -1, vehiclesMax: 999, driversMax: 999, landingPage: true },
 };
 
+// Fonction globale pour appliquer le thème
+function applyGlobalTheme(newTheme: 'light' | 'dark' | 'system') {
+  localStorage.setItem('dagoos_theme', newTheme);
+  const root = document.documentElement;
+  root.classList.remove('dark');
+  if (newTheme === 'dark') {
+    root.classList.add('dark');
+  } else if (newTheme === 'system') {
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      root.classList.add('dark');
+    }
+  }
+}
+
 export default function SettingsPage() {
   const [tab, setTab] = useState('general');
   const [saved, setSaved] = useState(false);
@@ -40,7 +54,7 @@ export default function SettingsPage() {
   const [editPlan, setEditPlan] = useState<string | null>(null);
   const [editPrice, setEditPrice] = useState(0);
 
-  // Dark mode
+  // Thème
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('light');
   const [themeReady, setThemeReady] = useState(false);
 
@@ -49,21 +63,6 @@ export default function SettingsPage() {
     if (saved) setTheme(saved);
     setThemeReady(true);
   }, []);
-
-  const applyTheme = (newTheme: 'light' | 'dark' | 'system') => {
-    setTheme(newTheme);
-    localStorage.setItem('dagoos_theme', newTheme);
-    const root = document.documentElement;
-    root.classList.remove('dark');
-    if (newTheme === 'dark') {
-      root.classList.add('dark');
-    } else if (newTheme === 'system') {
-      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        root.classList.add('dark');
-      }
-    }
-    // light : rien (déjà retiré)
-  };
 
   const currentPlans = entityTab === 'fleet' ? fleetPlans : coopPlans;
   const setCurrentPlans = entityTab === 'fleet' ? setFleetPlans : setCoopPlans;
@@ -80,7 +79,6 @@ export default function SettingsPage() {
 
   function handleSave() {
     setSaved(true);
-    // Sauvegarder dans le localStorage pour persistance
     localStorage.setItem('dagoos_fleet_plans', JSON.stringify(fleetPlans));
     localStorage.setItem('dagoos_coop_plans', JSON.stringify(coopPlans));
     setTimeout(() => setSaved(false), 2000);
@@ -137,26 +135,10 @@ export default function SettingsPage() {
             <div>
               <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Paramètres généraux</h2>
               <div className="space-y-4 max-w-lg">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom de la plateforme</label>
-                  <input type="text" defaultValue="Dagoo's" className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email de contact</label>
-                  <input type="email" defaultValue="contact@dagoos.mg" className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Devise</label>
-                  <select className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    <option>Ariary (Ar)</option><option>Euro (€)</option><option>Dollar ($)</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fuseau horaire</label>
-                  <select className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    <option>Indian/Antananarivo (GMT+3)</option><option>Europe/Paris (GMT+1)</option>
-                  </select>
-                </div>
+                <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom de la plateforme</label><input type="text" defaultValue="Dagoo's" className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg text-sm" /></div>
+                <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email de contact</label><input type="email" defaultValue="contact@dagoos.mg" className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg text-sm" /></div>
+                <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Devise</label><select className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg text-sm"><option>Ariary (Ar)</option></select></div>
+                <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fuseau horaire</label><select className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg text-sm"><option>Indian/Antananarivo (GMT+3)</option></select></div>
               </div>
             </div>
           )}
@@ -166,18 +148,10 @@ export default function SettingsPage() {
             <div>
               <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">📋 Plans & Abonnements</h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Configurez les prix et limites pour chaque entité.</p>
-
               <div className="flex gap-2 mb-6">
-                <button onClick={() => setEntityTab('fleet')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${entityTab === 'fleet' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}>
-                  🚛 Flottes
-                </button>
-                <button onClick={() => setEntityTab('coop')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${entityTab === 'coop' ? 'bg-emerald-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}>
-                  🏢 Coopératives
-                </button>
+                <button onClick={() => setEntityTab('fleet')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${entityTab === 'fleet' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>🚛 Flottes</button>
+                <button onClick={() => setEntityTab('coop')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${entityTab === 'coop' ? 'bg-emerald-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>🏢 Coopératives</button>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
                 {(Object.entries(currentPlans) as [PlanKey, Plan][]).map(([planKey, plan]) => {
                   const Icon = planIcons[planKey];
@@ -186,21 +160,13 @@ export default function SettingsPage() {
                   return (
                     <div key={planKey} className={`bg-white dark:bg-gray-750 rounded-xl border ${planColors[planKey]} dark:border-gray-600 p-4 transition-all`}>
                       <div className="flex items-center gap-2 mb-3">
-                        <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${planIconColors[planKey]}`}>
-                          <Icon size={18} />
-                        </div>
+                        <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${planIconColors[planKey]}`}><Icon size={18} /></div>
                         <div>
                           <h3 className="font-semibold text-gray-800 dark:text-white text-sm">{plan.name}</h3>
                           {isEditing ? (
-                            <div className="flex items-center gap-1 mt-1">
-                              <input type="number" value={editPrice} onChange={e => setEditPrice(Number(e.target.value))}
-                                className="w-20 px-2 py-1 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded text-xs" />
-                              <span className="text-xs text-gray-500">Ar</span>
-                            </div>
+                            <div className="flex items-center gap-1 mt-1"><input type="number" value={editPrice} onChange={e => setEditPrice(Number(e.target.value))} className="w-20 px-2 py-1 border rounded text-xs dark:bg-gray-700 dark:text-white" /><span className="text-xs text-gray-500">Ar</span></div>
                           ) : (
-                            <p className="text-xs font-bold text-gray-700 dark:text-gray-300">
-                              {isSurDevis ? 'Sur devis' : plan.price === 0 ? 'Gratuit' : `${plan.price.toLocaleString()} Ar/mois`}
-                            </p>
+                            <p className="text-xs font-bold text-gray-700 dark:text-gray-300">{isSurDevis ? 'Sur devis' : plan.price === 0 ? 'Gratuit' : `${plan.price.toLocaleString()} Ar/mois`}</p>
                           )}
                         </div>
                       </div>
@@ -211,43 +177,15 @@ export default function SettingsPage() {
                       </ul>
                       {isEditing ? (
                         <div className="flex gap-1.5">
-                          <button onClick={() => { setCurrentPlans((prev: Record<PlanKey, Plan>) => ({ ...prev, [planKey]: { ...prev[planKey], price: editPrice } })); setEditPlan(null); handleSave(); }}
-                            className="flex-1 py-1.5 text-xs bg-green-600 text-white rounded-lg hover:bg-green-700">Valider</button>
-                          <button onClick={() => setEditPlan(null)} className="flex-1 py-1.5 text-xs bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-300">Annuler</button>
+                          <button onClick={() => { setCurrentPlans((prev: Record<PlanKey, Plan>) => ({ ...prev, [planKey]: { ...prev[planKey], price: editPrice } })); setEditPlan(null); handleSave(); }} className="flex-1 py-1.5 text-xs bg-green-600 text-white rounded-lg">Valider</button>
+                          <button onClick={() => setEditPlan(null)} className="flex-1 py-1.5 text-xs bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-lg">Annuler</button>
                         </div>
                       ) : (
-                        <button onClick={() => { setEditPlan(`${entityTab}-${planKey}`); setEditPrice(plan.price === -1 ? 0 : plan.price); }}
-                          className={`w-full py-1.5 text-xs text-white rounded-lg transition ${planBtnColors[planKey]}`}>
-                          {isSurDevis ? 'Configurer' : 'Modifier le prix'}
-                        </button>
+                        <button onClick={() => { setEditPlan(`${entityTab}-${planKey}`); setEditPrice(plan.price === -1 ? 0 : plan.price); }} className={`w-full py-1.5 text-xs text-white rounded-lg transition ${planBtnColors[planKey]}`}>{isSurDevis ? 'Configurer' : 'Modifier le prix'}</button>
                       )}
                     </div>
                   );
                 })}
-              </div>
-            </div>
-          )}
-
-          {/* ========== PROFILE ========== */}
-          {tab === 'profile' && (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Profil administrateur</h2>
-              <div className="space-y-4 max-w-lg">
-                <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom</label><input type="text" defaultValue="Super Admin" className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg text-sm" /></div>
-                <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label><input type="email" defaultValue="admin@dagoos.mg" className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg text-sm" /></div>
-                <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Téléphone</label><input type="tel" defaultValue="+261 00 000 00" className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg text-sm" /></div>
-              </div>
-            </div>
-          )}
-
-          {/* ========== SECURITY ========== */}
-          {tab === 'security' && (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Sécurité</h2>
-              <div className="space-y-4 max-w-lg">
-                <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ancien mot de passe</label><PasswordInput value="" onChange={() => {}} className="text-sm" /></div>
-                <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nouveau mot de passe</label><PasswordInput value="" onChange={() => {}} className="text-sm" /></div>
-                <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirmer</label><PasswordInput value="" onChange={() => {}} className="text-sm" /></div>
               </div>
             </div>
           )}
@@ -265,12 +203,18 @@ export default function SettingsPage() {
                       { id: 'dark' as const, icon: '🌙', label: 'Sombre' },
                       { id: 'system' as const, icon: '💻', label: 'Système' },
                     ].map(item => (
-                      <button key={item.id} onClick={() => applyTheme(item.id)}
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          setTheme(item.id);
+                          applyGlobalTheme(item.id);
+                        }}
                         className={`flex-1 p-3 rounded-xl border text-center transition-all ${
                           theme === item.id
                             ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-400 shadow-sm'
                             : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
-                        }`}>
+                        }`}
+                      >
                         <div className="text-lg">{item.icon}</div>
                         <div className="text-xs mt-1">{item.label}</div>
                       </button>
@@ -289,27 +233,21 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {/* ========== NOTIFICATIONS ========== */}
-          {tab === 'notifications' && (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Notifications</h2>
-              <div className="space-y-3 max-w-lg">
-                {['Nouvelles inscriptions', 'Paiements reçus', 'Alertes maintenance', 'Messages', 'Rapports hebdo'].map(item => (
-                  <label key={item} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg"><input type="checkbox" defaultChecked className="rounded w-4 h-4" />{item}</label>
-                ))}
-              </div>
-            </div>
+          {/* Autres onglets (profil, sécurité, notifs, API) */}
+          {tab === 'profile' && (
+            <div><h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Profil administrateur</h2><div className="space-y-4 max-w-lg"><div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom</label><input type="text" defaultValue="Super Admin" className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg text-sm" /></div><div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label><input type="email" defaultValue="admin@dagoos.mg" className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg text-sm" /></div></div></div>
           )}
 
-          {/* ========== API ========== */}
+          {tab === 'security' && (
+            <div><h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Sécurité</h2><div className="space-y-4 max-w-lg"><div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ancien mot de passe</label><PasswordInput value="" onChange={() => {}} className="text-sm" /></div><div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nouveau mot de passe</label><PasswordInput value="" onChange={() => {}} className="text-sm" /></div></div></div>
+          )}
+
+          {tab === 'notifications' && (
+            <div><h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Notifications</h2><div className="space-y-3 max-w-lg">{['Nouvelles inscriptions', 'Paiements reçus', 'Alertes maintenance'].map(item => (<label key={item} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg"><input type="checkbox" defaultChecked className="rounded w-4 h-4" />{item}</label>))}</div></div>
+          )}
+
           {tab === 'api' && (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">API</h2>
-              <div className="space-y-4 max-w-lg">
-                <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL API</label><input type="text" defaultValue="https://dagoos-api.onrender.com" className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg text-sm" readOnly /></div>
-                <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Clé API</label><div className="flex gap-2"><input type="password" defaultValue="sk-••••••••••••" className="flex-1 px-3 py-2 border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 rounded-lg text-sm" readOnly /><button className="px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-600 dark:text-gray-300">Régénérer</button></div></div>
-              </div>
-            </div>
+            <div><h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">API</h2><div className="space-y-4 max-w-lg"><div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL API</label><input type="text" defaultValue="https://dagoos-api.onrender.com" className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 rounded-lg text-sm" readOnly /></div></div></div>
           )}
 
           {tab !== 'plans' && (
