@@ -100,10 +100,10 @@ export default function VehiclesPage() {
         <div className="p-4 border-b"><div className="relative max-w-sm"><Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" /><input type="text" placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 pr-4 py-2 border rounded-lg w-full text-sm focus:ring-2 focus:ring-primary" /></div></div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm min-w-[600px]">
-            <thead className="bg-gray-50 text-left text-gray-500"><tr><th className="px-4 py-3">Plaque</th><th className="px-4 py-3">Modèle</th><th className="px-4 py-3">Année</th><th className="px-4 py-3">Km</th><th className="px-4 py-3">Vidange</th><th className="px-4 py-3">Statut</th><th className="px-4 py-3">Actions</th></tr></thead>
+            <thead className="bg-gray-50 text-left text-gray-500"><tr><th className="px-4 py-3">Plaque</th><th className="px-4 py-3">Modèle</th><th className="px-4 py-3">Année</th><th className="px-4 py-3">Km</th><th className="px-4 py-3">Vidange</th><th className="px-4 py-3">Assurance</th><th className="px-4 py-3">Vignette</th><th className="px-4 py-3">Statut</th><th className="px-4 py-3">Actions</th></tr></thead>
             <tbody>
-              {loading ? <tr><td colSpan={7} className="text-center py-8 text-gray-400">⏳ Chargement...</td></tr> :
-               filtered.length === 0 ? <tr><td colSpan={7} className="text-center py-8 text-gray-400">Aucun véhicule</td></tr> :
+              {loading ? <tr><td colSpan={9} className="text-center py-8 text-gray-400">⏳ Chargement...</td></tr> :
+               filtered.length === 0 ? <tr><td colSpan={9} className="text-center py-8 text-gray-400">Aucun véhicule</td></tr> :
                filtered.map(v => {
                  const restant = (v.nextMaintenanceKm || 0) - (v.currentKm || 0);
                  const vidangeClass = restant <= 0 ? 'bg-red-100 text-red-700' : restant <= 500 ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700';
@@ -113,6 +113,8 @@ export default function VehiclesPage() {
                     <td className="px-4 py-3">{v.model || '-'}</td><td className="px-4 py-3">{v.year || '-'}</td>
                     <td className="px-4 py-3">{v.currentKm?.toLocaleString()} km</td>
                     <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-xs ${vidangeClass}`}>{restant <= 0 ? '⚠️ Urgent' : `${restant.toLocaleString()} km`}</span></td>
+                    <td className="px-4 py-3 text-xs">{v.insuranceDate ? new Date(v.insuranceDate).toLocaleDateString('fr-FR') : '-'}</td>
+                    <td className="px-4 py-3 text-xs">{v.vignetteDate ? new Date(v.vignetteDate).toLocaleDateString('fr-FR') : '-'}</td>
                     <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-xs ${v.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{v.status === 'active' ? '✅ Actif' : '⚠️ Maintenance'}</span></td>
                     <td className="px-4 py-3"><div className="flex gap-2"><button onClick={() => openEdit(v)} className="p-1 hover:bg-blue-100 rounded text-blue-600"><Edit size={14} /></button><button onClick={() => handleDelete(v.id)} className="p-1 hover:bg-red-100 rounded text-red-600"><Trash2 size={14} /></button></div></td>
                   </tr>
