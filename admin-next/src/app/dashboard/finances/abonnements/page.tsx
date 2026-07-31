@@ -72,6 +72,7 @@ export default function AbonnementsPage() {
       const res = await fetch(`/api/proxy/organizations/${orgId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ plan: newPlan }),
       });
       if (!res.ok) {
