@@ -75,7 +75,7 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
   const sidebarContent = (
     <>
       {/* En-tête avec logo */}
-      <div className="p-5 border-b border-gray-700/50">
+      <div className="p-5 border-b border-gray-700 dark:border-gray-800/50">
         <Link href={app === 'admin' ? '/dashboard' : `/${app}`} className="flex flex-col items-center gap-2">
           <Image 
             src="/b-trans.svg" 
@@ -125,7 +125,7 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
       </nav>
 
       {/* Déconnexion */}
-      <div className="p-3 border-t border-gray-700">
+      <div className="p-3 border-t border-gray-700 dark:border-gray-800">
         <button
           onClick={handleLogout}
           className="flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-red-500/20 hover:text-red-400 rounded-lg transition w-full"
@@ -138,14 +138,14 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
   );
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Sidebar desktop */}
-      <aside className="hidden lg:flex w-60 bg-dark text-white fixed h-full flex-col z-40">
+      <aside className="hidden lg:flex w-60 bg-[#1A1A2E] dark:bg-gray-950 text-white fixed h-full flex-col z-40">
         {sidebarContent}
       </aside>
 
       {/* Menu mobile */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-dark text-white">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-[#1A1A2E] dark:bg-gray-950 text-white">
         <div className="flex items-center justify-between px-4 py-3">
           <button onClick={() => setIsOpen(!isOpen)} className="p-1">
             {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -164,7 +164,7 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
       {isOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setIsOpen(false)} />
-          <aside className="absolute left-0 top-0 h-full w-64 bg-dark text-white flex flex-col shadow-2xl pt-14">
+          <aside className="absolute left-0 top-0 h-full w-64 bg-[#1A1A2E] dark:bg-gray-950 text-white flex flex-col shadow-2xl pt-14">
             {sidebarContent}
           </aside>
         </div>
