@@ -1,14 +1,21 @@
-import { NextRequest } from 'next/server';
-import db from '@/db';
-import { drivers } from '@/db/schema';
-import { getSession } from '@/lib/auth';
-import { apiError, apiSuccess } from '@/lib/api-helpers';
+import { NextResponse } from 'next/server';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
-    const session = await getSession();
-    if (!session) return apiError('Non authentifié', 401);
-    const data = await db.select().from(drivers).all();
-    return apiSuccess(data);
-  } catch (e: any) { return apiError(e.message); }
+    const loginRes = await fetch('https://dagoos-api.onrender.com/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'admin@dagoos.mg', password: 'admin123' }),
+    });
+    if (!loginRes.ok) throw new Error('Login failed');
+    const { token } = await loginRes.json();
+
+    const res = await fetch('https://dagoos-api.onrender.com/api/drivers', {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    const data = await res.json();
+    return NextResponse.json(data);
+  } catch {
+    return NextResponse.json([]);
+  }
 }
