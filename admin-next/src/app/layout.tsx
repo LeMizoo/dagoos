@@ -17,13 +17,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               (function() {
                 try {
                   var theme = localStorage.getItem('dagoos_theme');
+                  // Par défaut : light. Dark seulement si explicitement choisi
                   if (theme === 'dark') {
                     document.documentElement.classList.add('dark');
-                  } else if (theme === 'system' || !theme) {
+                  } else if (theme === 'system') {
                     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
                       document.documentElement.classList.add('dark');
                     }
                   }
+                  // Si theme === 'light' ou absent : rien (reste light)
                 } catch(e) {}
               })();
             `,

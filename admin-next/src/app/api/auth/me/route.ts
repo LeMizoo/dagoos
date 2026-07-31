@@ -1,18 +1,26 @@
-import { NextRequest } from 'next/server';
-import db from '@/db';
-import { users } from '@/db/schema';
-import { eq } from 'drizzle-orm';
-import { getSession } from '@/lib/auth';
-import { apiError, apiSuccess } from '@/lib/api-helpers';
+import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) return apiError('Non authentifié', 401);
+    const cookieStore = cookies();
+    const token = cookieStore.get('dagoos_token')?.value;
     
-    const user = await db.select().from(users).where(eq(users.id, session.id as string)).get();
-    if (!user) return apiError('Utilisateur introuvable', 404);
+    if (!token) {
+      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+    }
+
+    const res = await fetch('https://dagoos-api.onrender.com/api/auth/me', {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
     
-    return apiSuccess({ id: user.id, name: user.name, email: user.email, role: user.role });
-  } catch (e: any) { return apiError(e.message); }
+    if (!res.ok) {
+      return NextResponse.json({ error: 'Session invalide' }, { status: 401 });
+    }
+    
+    const data = await res.json();
+    return NextResponse.json(data);
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
 }
