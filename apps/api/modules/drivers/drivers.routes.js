@@ -22,7 +22,18 @@ router.post('/', authMiddleware, async (req, res) => {
 
 router.put('/:id', authMiddleware, async (req, res) => {
   try {
-    const driver = await prisma.driver.update({ where: { id: req.params.id }, data: req.body });
+    const { driverCode, pin, status, vehicleId } = req.body;
+    const data = {};
+    if (driverCode !== undefined) data.driverCode = driverCode;
+    if (pin !== undefined) data.pin = pin;
+    if (status !== undefined) data.status = status;
+    if (vehicleId !== undefined) data.vehicleId = vehicleId;
+
+    const driver = await prisma.driver.update({
+      where: { id: req.params.id },
+      data,
+      include: { user: true, organization: true, vehicle: true }
+    });
     res.json(driver);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
