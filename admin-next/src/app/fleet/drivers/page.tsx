@@ -6,7 +6,9 @@ import Modal from '@/components/ui/Modal';
 interface Driver {
   id: string; userId: string; organizationId: string;
   driverCode: string; pin?: string; vehicleId?: string; status: string;
-  user?: { name?: string; email?: string }; organization?: { name?: string };
+  user?: { name?: string; email?: string };
+  organization?: { name?: string };
+  vehicle?: { plate?: string };
 }
 
 export default function FleetDriversPage() {
@@ -32,17 +34,8 @@ export default function FleetDriversPage() {
     } catch (err: any) { setError('Impossible de charger les chauffeurs.'); } finally { setLoading(false); }
   }
 
-  function openCreate() {
-    setEditItem(null); setSubmitError('');
-    setForm({ driverCode: '', pin: '', status: 'active' });
-    setModalOpen(true);
-  }
-
-  function openEdit(driver: Driver) {
-    setEditItem(driver); setSubmitError('');
-    setForm({ driverCode: driver.driverCode, pin: driver.pin || '', status: driver.status });
-    setModalOpen(true);
-  }
+  function openCreate() { setEditItem(null); setSubmitError(''); setForm({ driverCode: '', pin: '', status: 'active' }); setModalOpen(true); }
+  function openEdit(driver: Driver) { setEditItem(driver); setSubmitError(''); setForm({ driverCode: driver.driverCode, pin: driver.pin || '', status: driver.status }); setModalOpen(true); }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault(); setSaving(true); setSubmitError('');
@@ -55,10 +48,7 @@ export default function FleetDriversPage() {
     } catch (err: any) { setSubmitError(err.message); } finally { setSaving(false); }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm('Supprimer ce chauffeur ?')) return;
-    try { await fetch(`/api/proxy/drivers/${id}`, { method: 'DELETE' }); fetchDrivers(); } catch (err) { console.error(err); }
-  }
+  async function handleDelete(id: string) { if (!confirm('Supprimer ce chauffeur ?')) return; try { await fetch(`/api/proxy/drivers/${id}`, { method: 'DELETE' }); fetchDrivers(); } catch (err) { console.error(err); } }
 
   const filtered = drivers.filter(d => d.driverCode?.toLowerCase().includes(search.toLowerCase()));
 
@@ -72,8 +62,17 @@ export default function FleetDriversPage() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">
         <div className="p-4 border-b"><div className="relative max-w-sm"><Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" /><input type="text" placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 pr-4 py-2 border rounded-lg w-full text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" /></div></div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[600px]">
-            <thead className="bg-gray-50 text-left text-gray-500"><tr><th className="px-4 py-3">Code</th><th className="px-4 py-3">Chauffeur</th><th className="px-4 py-3">Organisation</th><th className="px-4 py-3">Véhicule</th><th className="px-4 py-3">Statut</th><th className="px-4 py-3">Actions</th></tr></thead>
+          <table className="w-full text-sm min-w-[800px]">
+            <thead className="bg-gray-50 text-left text-gray-500">
+              <tr>
+                <th className="px-4 py-3">Code</th>
+                <th className="px-4 py-3">Nom complet</th>
+                <th className="px-4 py-3">Organisation</th>
+                <th className="px-4 py-3">Véhicule</th>
+                <th className="px-4 py-3">Statut</th>
+                <th className="px-4 py-3">Actions</th>
+              </tr>
+            </thead>
             <tbody>
               {loading ? <tr><td colSpan={6} className="text-center py-8 text-gray-400">⏳ Chargement...</td></tr> :
                filtered.length === 0 ? <tr><td colSpan={6} className="text-center py-8 text-gray-400">Aucun chauffeur</td></tr> :
@@ -82,7 +81,7 @@ export default function FleetDriversPage() {
                   <td className="px-4 py-3 font-medium">{d.driverCode}</td>
                   <td className="px-4 py-3">{d.user?.name || d.user?.email || '-'}</td>
                   <td className="px-4 py-3 text-xs">{d.organization?.name || '-'}</td>
-                  <td className="px-4 py-3">{d.vehicleId ? '🏍️ Assigné' : '❌ Aucun'}</td>
+                  <td className="px-4 py-3">{d.vehicle?.plate || (d.vehicleId ? '🏍️ Assigné' : '❌ Aucun')}</td>
                   <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-xs ${d.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{d.status}</span></td>
                   <td className="px-4 py-3"><div className="flex gap-2"><button onClick={() => openEdit(d)} className="p-1 hover:bg-blue-100 rounded text-blue-600"><Edit size={14} /></button><button onClick={() => handleDelete(d.id)} className="p-1 hover:bg-red-100 rounded text-red-600"><Trash2 size={14} /></button></div></td>
                 </tr>
