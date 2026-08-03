@@ -11,17 +11,14 @@ export async function PUT(req: NextRequest) {
     });
     
     if (!loginRes.ok) {
-      return NextResponse.json({ error: 'Échec authentification admin' }, { status: 500 });
+      return NextResponse.json({ error: 'Échec authentification' }, { status: 500 });
     }
     
     const { token } = await loginRes.json();
     
     const res = await fetch(`https://dagoos-api.onrender.com/api/organizations/${orgId}`, {
       method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ plan }),
     });
     
@@ -30,8 +27,7 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: errData.error || 'Erreur API' }, { status: res.status });
     }
     
-    const data = await res.json();
-    return NextResponse.json(data);
+    return NextResponse.json(await res.json());
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
