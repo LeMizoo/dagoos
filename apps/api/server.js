@@ -31,3 +31,94 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`✅ API sur http://localhost:${PORT}`));
 // Force deploy Fri, Jul 31, 2026 11:25:10 AM
 // Force redeploy Mon, Aug  3, 2026  8:27:15 AM
+
+// ============ ROUTES PUBLIQUES POUR DRIVER ============
+
+// Route publique pour récupérer les infos du chauffeur (par ID)
+app.get('/api/public/driver/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const { data, error } = await supabase
+      .from('Driver')
+      .select('*, Vehicle(*), Organization(*)')
+      .eq('id', id)
+      .single();
+    
+    if (error) throw error;
+    
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
+// Route publique pour récupérer les véhicules d'un chauffeur
+app.get('/api/public/vehicles/:driverId', async (req, res) => {
+  try {
+    const { driverId } = req.params;
+    
+    const { data, error } = await supabase
+      .from('Vehicle')
+      .select('*')
+      .eq('driverId', driverId);
+    
+    if (error) throw error;
+    
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
+// Route publique pour récupérer les organisations
+app.get('/api/public/organizations', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('Organization')
+      .select('*');
+    
+    if (error) throw error;
+    
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
+// Route publique pour récupérer les courses d'un chauffeur
+app.get('/api/public/trips/:driverId', async (req, res) => {
+  try {
+    const { driverId } = req.params;
+    const { date } = req.query;
+    
+    let query = supabase
+      .from('Trip')
+      .select('*')
+      .eq('driverId', driverId);
+    
+    if (date) {
+      query = query.gte('createdAt', date);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) throw error;
+    
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
