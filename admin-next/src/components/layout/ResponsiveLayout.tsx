@@ -1,5 +1,11 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+interface UserInfo {
+  name?: string;
+  email?: string;
+  role?: string;
+}
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -57,6 +63,15 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
   const pathname = usePathname();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<UserInfo | null>(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d && !d.error) setUser(d); })
+      .catch(() => {});
+  }, []);
   const menu = menus[app] || menus.admin;
 
   const handleLogout = async () => {
@@ -171,8 +186,70 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
       )}
 
       {/* Contenu principal */}
-      <main className="flex-1 lg:ml-60 p-4 lg:p-6 pt-16 lg:pt-6 min-h-screen w-full">
-        {children}
+      <main className="flex-1 lg:ml-60 min-h-screen w-full">
+        {/* Header */}
+        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 lg:px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+          <div>
+            <h1 className="text-lg font-bold text-gray-800 dark:text-white">
+              {app === 'admin' ? 'Tableau de Bord Admin' : app === 'fleet' ? 'Tableau de Bord Flotte' : 'Tableau de Bord Coopérative'}
+            </h1>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Gestion complète de {app === 'admin' ? 'la plateforme' : app === 'fleet' ? 'la flotte' : 'la coopérative'}</p>
+          </div>
+          
+          {/* Profil utilisateur */}
+          <div className="relative">
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg px-3 py-2 transition"
+            >
+              <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                {user?.name?.charAt(0) || 'U'}
+              </div>
+              <div className="hidden sm:block text-left">
+                <p className="text-sm font-medium text-gray-800 dark:text-white">{user?.name || 'Utilisateur'}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email || ''}</p>
+              </div>
+            </button>
+
+            {/* Dropdown menu */}
+            {showUserMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
+                <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50 overflow-hidden">
+                  <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+                    <p className="font-semibold text-gray-800 dark:text-white">{user?.name || 'Utilisateur'}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email || ''}</p>
+                    <span className="inline-block mt-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full capitalize">
+                      {user?.role || app}
+                    </span>
+                  </div>
+                  <div className="p-2">
+                    <Link
+                      href={app === 'admin' ? '/dashboard/settings' : `/${app}/profil`}
+                      onClick={() => setShowUserMenu(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
+                    >
+                      <User size={18} />
+                      Mon Profil
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition"
+                    >
+                      <LogOut size={18} />
+                      Déconnexion
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </header>
+
+        {/* Page content */}
+        <div className="p-4 lg:p-6 pt-4">
+          {children}
+        </div>
       </main>
     </div>
   );
