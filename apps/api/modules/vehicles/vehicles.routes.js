@@ -5,7 +5,18 @@ const router = express.Router();
 
 router.get('/', authMiddleware, async (req, res) => {
   try {
+    let where = {};
+    if (req.user.role !== 'SUPER_ADMIN' && req.user.role !== 'ADMIN') {
+      const userWithOrg = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        include: { driver: { select: { organizationId: true } } }
+      });
+      if (userWithOrg?.driver?.organizationId) {
+        where = { organizationId: userWithOrg.driver.organizationId };
+      }
+    }
     const vehicles = await prisma.vehicle.findMany({
+      where,
       include: { organization: true, proprietaire: true },
       orderBy: { createdAt: 'desc' }
     });
