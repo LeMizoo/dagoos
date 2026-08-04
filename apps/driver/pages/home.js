@@ -39,7 +39,7 @@ async function init_home() {
         // HEADER
         '<div style="background:#1E293B;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;">' +
             '<div style="display:flex;align-items:center;gap:8px;">' +
-                '<img src="' + logo + '" style="width:32px;height:32px;object-fit:contain;border-radius:8px;" onerror="this.src=\\'/b-trans.svg\\'">' +
+                '<img src="' + logo + '" style="width:32px;height:32px;object-fit:contain;border-radius:8px;" onerror="this.style.display='none'">' +
                 '<div>' +
                     '<div style="font-size:14px;font-weight:700;color:#DAA520;">' + (user.name || 'Chauffeur') + '</div>' +
                     (plate ? '<div style="font-size:10px;color:#94A3B8;">🏍️ ' + plate + '</div>' : '') +
