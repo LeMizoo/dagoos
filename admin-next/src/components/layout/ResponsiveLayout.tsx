@@ -67,9 +67,23 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   useEffect(() => {
+    // Essayer d'abord l'API locale, puis le proxy
     fetch('/api/auth/me')
       .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d && !d.error) setUser(d); })
+      .then(d => {
+        if (d && !d.error) {
+          setUser(d);
+        } else {
+          // Fallback : récupérer depuis le token JWT dans le cookie
+          const token = document.cookie.split('; ').find(row => row.startsWith('dagoos_token='));
+          if (token) {
+            try {
+              const payload = JSON.parse(atob(token.split('.')[1]));
+              setUser({ name: payload.name || 'Utilisateur', email: payload.email, role: payload.role });
+            } catch {}
+          }
+        }
+      })
       .catch(() => {});
   }, []);
   const menu = menus[app] || menus.admin;
