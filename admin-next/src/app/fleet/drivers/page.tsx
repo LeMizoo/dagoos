@@ -1,21 +1,42 @@
 'use client';
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { Users, Plus, Search, Phone, Car, CheckCircle, XCircle, AlertCircle, TrendingUp } from 'lucide-react';
+import { Users, Plus, Search, Car, CheckCircle, XCircle, Link2 } from 'lucide-react';
 
 export default function FleetDrivers() {
   const [drivers, setDrivers] = useState<any[]>([]);
+  const [vehicles, setVehicles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [assigning, setAssigning] = useState<string | null>(null);
 
   useEffect(() => { load(); }, []);
+  
   async function load() {
-    try { const r = await fetch('/api/proxy/drivers'); setDrivers(Array.isArray(await r.json()) ? await r.json() : []); } catch {} finally { setLoading(false); }
+    try {
+      const [dRes, vRes] = await Promise.all([
+        fetch('/api/proxy/drivers').then(r => r.json()),
+        fetch('/api/proxy/vehicles').then(r => r.json())
+      ]);
+      setDrivers(Array.isArray(dRes) ? dRes : []);
+      setVehicles(Array.isArray(vRes) ? vRes.filter((v: any) => v.status === 'active') : []);
+    } catch {} finally { setLoading(false); }
+  }
+
+  async function assignVehicle(driverId: string, vehicleId: string) {
+    try {
+      await fetch(`/api/proxy/drivers/${driverId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vehicleId: vehicleId || null }),
+      });
+      setAssigning(null);
+      load();
+    } catch (e) { console.error(e); }
   }
 
   const filtered = drivers.filter(d => 
-    (d.firstName + ' ' + d.lastName).toLowerCase().includes(search.toLowerCase()) &&
+    (d.firstName + ' ' + d.lastName + ' ' + (d.driverCode || '')).toLowerCase().includes(search.toLowerCase()) &&
     (statusFilter === 'all' || d.status === statusFilter)
   );
 
@@ -38,7 +59,7 @@ export default function FleetDrivers() {
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-        <div className="p-4 border-b flex gap-3">
+        <div className="p-4 border-b dark:border-gray-700 flex gap-3">
           <div className="relative flex-1"><Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" /><input type="text" placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)} className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600" /></div>
           <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600">
             <option value="all">Tous</option><option value="active">Actifs</option><option value="inactive">Inactifs</option>
@@ -46,20 +67,54 @@ export default function FleetDrivers() {
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400"><tr><th className="px-4 py-3 text-left">Chauffeur</th><th className="px-4 py-3 text-left">Code</th><th className="px-4 py-3 text-left">Téléphone</th><th className="px-4 py-3 text-left">Véhicule</th><th className="px-4 py-3 text-left">Statut</th><th className="px-4 py-3 text-left">CA/mois</th></tr></thead>
+            <thead className="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
+              <tr><th className="px-4 py-3 text-left">Chauffeur</th><th className="px-4 py-3 text-left">Code</th><th className="px-4 py-3 text-left">Téléphone</th><th className="px-4 py-3 text-left">Véhicule assigné</th><th className="px-4 py-3 text-left">Statut</th><th className="px-4 py-3 text-left">CA/mois</th></tr>
+            </thead>
             <tbody>
               {loading ? <tr><td colSpan={6} className="text-center py-8 text-gray-400">Chargement...</td></tr> :
                filtered.length === 0 ? <tr><td colSpan={6} className="text-center py-8 text-gray-400">Aucun chauffeur</td></tr> :
-               filtered.map(d => (
+               filtered.map(d => {
+                const currentVehicle = vehicles.find(v => v.id === d.vehicleId);
+                return (
                 <tr key={d.id} className="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                   <td className="px-4 py-3 font-medium text-gray-800 dark:text-white">{d.firstName} {d.lastName}</td>
                   <td className="px-4 py-3 font-mono text-xs text-gray-500">{d.driverCode || '-'}</td>
                   <td className="px-4 py-3 text-gray-500">{d.phone || '-'}</td>
-                  <td className="px-4 py-3 text-gray-500">{d.vehicle?.plate || '-'}</td>
+                  <td className="px-4 py-3">
+                    {assigning === d.id ? (
+                      <select 
+                        className="text-xs border rounded px-2 py-1 dark:bg-gray-700 dark:text-white"
+                        defaultValue={d.vehicleId || ''}
+                        onChange={e => assignVehicle(d.id, e.target.value)}
+                        onBlur={() => setAssigning(null)}
+                        autoFocus
+                      >
+                        <option value="">Aucun</option>
+                        {vehicles.map(v => (
+                          <option key={v.id} value={v.id}>{v.plate} - {v.model}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <button 
+                        onClick={() => setAssigning(d.id)}
+                        className="flex items-center gap-1 text-xs text-blue-600 hover:underline"
+                      >
+                        {currentVehicle ? (
+                          <span className="flex items-center gap-1">
+                            <Car size={12} /> {currentVehicle.plate}
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1 text-gray-400">
+                            <Link2 size={12} /> Assigner
+                          </span>
+                        )}
+                      </button>
+                    )}
+                  </td>
                   <td className="px-4 py-3"><span className={`text-xs px-2 py-0.5 rounded-full ${d.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{d.status || 'inactif'}</span></td>
                   <td className="px-4 py-3 font-medium text-gray-800 dark:text-white">{(Math.random() * 500000 + 100000).toFixed(0)} Ar</td>
                 </tr>
-              ))}
+              )})}
             </tbody>
           </table>
         </div>
