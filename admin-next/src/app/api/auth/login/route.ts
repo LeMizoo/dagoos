@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
     const res = apiSuccess({ user: data.user || data });
     res.cookies.set('dagoos_token', data.token, {
       httpOnly: true,
+      secure: true,
       maxAge: 7 * 24 * 3600,
       path: '/',
       sameSite: 'lax',

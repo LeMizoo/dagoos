@@ -1,16 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-export async function GET(req: NextRequest) {
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.API_BASE_URL || 'https://dagoos-api.onrender.com').replace(/\/$/, '');
+
+export async function GET(_req: NextRequest) {
   try {
-    // Récupérer le token depuis les cookies
     const cookieStore = cookies();
     const token = cookieStore.get('dagoos_token')?.value;
 
-    // Login admin pour obtenir un token si pas déjà connecté
     let authToken = token;
     if (!authToken) {
-      const loginRes = await fetch('https://dagoos-api.onrender.com/api/auth/login', {
+      const loginRes = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: 'admin@dagoos.mg', password: 'admin123' }),
@@ -22,22 +26,29 @@ export async function GET(req: NextRequest) {
     }
 
     if (!authToken) {
-      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+      return NextResponse.json({
+        fleets: 0,
+        cooperatives: 0,
+        drivers: 0,
+        vehicles: 0,
+        messages: 0,
+        recentOrgs: [],
+        error: 'Non authentifié',
+      }, { status: 200 });
     }
 
-    // Récupérer les données depuis l'API Render
     const [orgsRes, driversRes, vehiclesRes, messagesRes] = await Promise.all([
-      fetch('https://dagoos-api.onrender.com/api/organizations', {
-        headers: { 'Authorization': `Bearer ${authToken}` },
+      fetch(`${API_BASE_URL}/api/organizations`, {
+        headers: { Authorization: `Bearer ${authToken}` },
       }),
-      fetch('https://dagoos-api.onrender.com/api/drivers', {
-        headers: { 'Authorization': `Bearer ${authToken}` },
+      fetch(`${API_BASE_URL}/api/drivers`, {
+        headers: { Authorization: `Bearer ${authToken}` },
       }),
-      fetch('https://dagoos-api.onrender.com/api/vehicles', {
-        headers: { 'Authorization': `Bearer ${authToken}` },
+      fetch(`${API_BASE_URL}/api/vehicles`, {
+        headers: { Authorization: `Bearer ${authToken}` },
       }),
-      fetch('https://dagoos-api.onrender.com/api/messages', {
-        headers: { 'Authorization': `Bearer ${authToken}` },
+      fetch(`${API_BASE_URL}/api/messages`, {
+        headers: { Authorization: `Bearer ${authToken}` },
       }),
     ]);
 
@@ -55,6 +66,14 @@ export async function GET(req: NextRequest) {
       recentOrgs: Array.isArray(orgs) ? orgs.slice(0, 5) : [],
     });
   } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+    return NextResponse.json({
+      fleets: 0,
+      cooperatives: 0,
+      drivers: 0,
+      vehicles: 0,
+      messages: 0,
+      recentOrgs: [],
+      error: e?.message || 'Erreur inconnue',
+    }, { status: 200 });
   }
 }

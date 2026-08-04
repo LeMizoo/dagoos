@@ -1,5 +1,7 @@
 {
-  "version": 3,
+  "sortedMiddleware": [
+    "/"
+  ],
   "middleware": {
     "/": {
       "files": [
@@ -16,16 +18,9 @@
         }
       ],
       "wasm": [],
-      "assets": [],
-      "environments": {
-        "previewModeId": "f8fbd8fb873704ce0331dbbbe989bb95",
-        "previewModeSigningKey": "2b1bff736c109614d3ed0ba9c583861ac1e01bbeb13e72a56eeb37bcfdaef63d",
-        "previewModeEncryptionKey": "50b9a9a82ad2faae24f699acdb99f886718e34ffb20e024a57a0c99f5a945589"
-      }
+      "assets": []
     }
   },
   "functions": {},
-  "sortedMiddleware": [
-    "/"
-  ]
+  "version": 2
 }
