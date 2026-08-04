@@ -17,13 +17,13 @@ async function init_home() {
     // Charger les infos du chauffeur depuis l'API
     try {
         // Utiliser les routes publiques pour éviter les problèmes d'auth
-        var driverData = await apiGet('/public/driver/' + driverId);
+        var driverData = await apiGet('/drivers/' + driverId);
         if (driverData && driverData.id) {
             currentDriver = driverData;
             
             // Récupérer le véhicule
             if (driverData.vehicleId) {
-                var vehicles = await apiGet('/public/vehicles/' + driverId);
+                var vehicles = await apiGet('/vehicles/' + driverId);
                 if (Array.isArray(vehicles) && vehicles.length > 0) {
                     currentVehicle = vehicles[0];
                 }
@@ -31,7 +31,7 @@ async function init_home() {
             
             // Récupérer l'organisation
             if (driverData.organizationId) {
-                var orgs = await apiGet('/public/organizations');
+                var orgs = await apiGet('/organizations');
                 if (Array.isArray(orgs)) {
                     currentOrg = orgs.find(function(o) { return o.id === driverData.organizationId; });
                 }
@@ -148,7 +148,7 @@ async function loadStats(driverId) {
         var today = new Date().toISOString().split('T')[0];
         
         // Utiliser les routes publiques
-        var courses = await apiGet('/public/trips/' + driverId);
+        var courses = await apiGet('/courses?driverId=' + driverId);
         var coursesArray = Array.isArray(courses) ? courses : [];
         
         // Courses d'aujourd'hui
