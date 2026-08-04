@@ -5,7 +5,21 @@ const router = express.Router();
 
 router.get('/', authMiddleware, async (req, res) => {
   try {
+    // Si SUPER_ADMIN ou ADMIN, voir tous les chauffeurs
+    // Sinon, filtrer par l'organisation de l'utilisateur
+    let where = {};
+    if (req.user.role !== 'SUPER_ADMIN' && req.user.role !== 'ADMIN') {
+      // Récupérer l'organisation de l'utilisateur
+      const userWithOrg = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        include: { driver: { select: { organizationId: true } } }
+      });
+      if (userWithOrg?.driver?.organizationId) {
+        where = { organizationId: userWithOrg.driver.organizationId };
+      }
+    }
     const drivers = await prisma.driver.findMany({
+      where,
       include: { user: true, organization: true, vehicle: true },
       orderBy: { createdAt: 'desc' }
     });
