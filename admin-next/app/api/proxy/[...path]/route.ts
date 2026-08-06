@@ -1,74 +1,50 @@
-// app/api/proxy/[...path]/route.ts - Proxy API
 import { NextRequest, NextResponse } from 'next/server';
-import { apiFetch } from '@/lib/api';
+import { cookies } from 'next/headers';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { path: string[] } }
-) {
-  return handleRequest(request, params, 'GET');
+const API_BASE = 'https://dagoos-api.onrender.com';
+
+const pathMapping: Record<string, string> = {
+  '/finances/transactions': '/api/transactions',
+  '/finances/versements': '/api/versements',
+  '/finances/courses': '/api/courses',
+};
+
+function resolveApiPath(proxyPath: string): string {
+  if (pathMapping[proxyPath]) return pathMapping[proxyPath];
+  return `/api${proxyPath}`;
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { path: string[] } }
-) {
-  return handleRequest(request, params, 'POST');
-}
+export async function GET(req: NextRequest) { return proxyRequest(req); }
+export async function POST(req: NextRequest) { return proxyRequest(req); }
+export async function PUT(req: NextRequest) { return proxyRequest(req); }
+export async function DELETE(req: NextRequest) { return proxyRequest(req); }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { path: string[] } }
-) {
-  return handleRequest(request, params, 'PUT');
-}
+async function proxyRequest(req: NextRequest) {
+  const proxyPath = req.nextUrl.pathname.replace('/api/proxy', '');
+  const apiPath = resolveApiPath(proxyPath);
+  const searchParams = req.nextUrl.search;
+  const apiUrl = `${API_BASE}${apiPath}${searchParams}`;
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { path: string[] } }
-) {
-  return handleRequest(request, params, 'DELETE');
-}
+  // Récupérer le token depuis le header Authorization (driver) ou le cookie (admin/fleet/coop)
+  const authHeader = req.headers.get('Authorization');
+  const cookieStore = cookies();
+  const cookieToken = cookieStore.get('dagoos_token')?.value;
+  const token = authHeader?.replace('Bearer ', '') || cookieToken;
 
-async function handleRequest(
-  request: NextRequest,
-  params: { path: string[] },
-  method: string
-) {
+  console.log(`🔐 Proxy -> ${req.method} ${apiUrl} ${token ? '(avec token)' : '(sans token)'}`);
+
   try {
-    const authHeader = request.headers.get('authorization');
-    let token = authHeader?.replace('Bearer ', '');
-    
-    const pathString = params.path.join('/');
-    const url = `/api/${pathString}`;
-    
-    let body = undefined;
-    if (method === 'POST' || method === 'PUT') {
-      body = await request.json().catch(() => undefined);
-    }
-    
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    
-    const response = await apiFetch(url, {
-      method,
-      headers,
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    
-    const data = await response.json();
-    
-    return NextResponse.json(data, { status: response.status });
-  } catch (error: any) {
-    console.error('Proxy error:', error);
-    return NextResponse.json(
-      { error: 'Proxy error', message: error.message },
-      { status: 500 }
-    );
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    if (req.headers.get('content-type')) headers['Content-Type'] = req.headers.get('content-type')!;
+
+    const body = req.method !== 'GET' && req.method !== 'HEAD' ? await req.text() : undefined;
+
+    const res = await fetch(apiUrl, { method: req.method, headers, body });
+    const data = await res.json();
+    return NextResponse.json(data, { status: res.status });
+  } catch (e: any) {
+    console.error(`❌ Erreur proxy ${apiUrl}:`, e.message);
+    return NextResponse.json({ error: 'API indisponible', details: e.message }, { status: 502 });
   }
 }
