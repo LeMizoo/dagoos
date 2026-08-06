@@ -21,7 +21,13 @@ function LoginForm() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     });
-    if (res.ok) { router.push(redirect); router.refresh(); }
+    if (res.ok) { 
+      const data = await res.json();
+      // Stocker dans localStorage pour les appels API
+      if (data.token) localStorage.setItem('dagoos_token', data.token);
+      if (data.user) localStorage.setItem('dagoos_user', JSON.stringify(data.user));
+      router.push(redirect); router.refresh(); 
+    }
     else { const data = await res.json(); setError(data.error || 'Erreur de connexion'); }
     setLoading(false);
   }

@@ -22,7 +22,7 @@ function CoopLoginForm() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     });
-    if (res.ok) { router.push(redirect); router.refresh(); }
+    if (res.ok) { const data = await res.json(); if (data.token) localStorage.setItem("dagoos_token", data.token); if (data.user) localStorage.setItem("dagoos_user", JSON.stringify(data.user)); router.push(redirect); router.refresh(); }
     else { const data = await res.json(); setError(data.error || 'Email ou mot de passe incorrect'); }
     setLoading(false);
   }
