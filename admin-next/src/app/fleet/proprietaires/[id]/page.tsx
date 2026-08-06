@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/api';
 'use client';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
@@ -13,7 +14,7 @@ export default function ProprietaireDetailPage() {
 
   async function load() {
     try {
-      const r = await fetch(`/api/proxy/proprietaires/${id}`);
+      const r = await apiFetch(`/proxy/proprietaires/${id}`);
       if (r.ok) setProprietaire(await r.json());
     } catch(e) { console.error(e); } finally { setLoading(false); }
   }

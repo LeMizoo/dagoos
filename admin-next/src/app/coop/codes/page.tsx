@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 import { useState, useEffect } from 'react';
 import { QrCode, RefreshCw, Key, Eye, EyeOff, Copy, Check } from 'lucide-react';
 

@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 import { useState, useEffect } from 'react';
 import { DollarSign, Save, AlertCircle } from 'lucide-react';
 
@@ -37,7 +38,7 @@ export default function FleetSettingsPage() {
       if (!myOrg) { setError('Aucune flotte trouvée'); setLoading(false); return; }
       setOrgId(myOrg.id);
 
-      const tRes = await fetch(`/api/proxy/tarifs/${myOrg.id}`);
+      const tRes = await apiFetch(`/proxy/tarifs/${myOrg.id}`);
       if (tRes.ok) {
         const data = await tRes.json();
         if (data && data.vehiculeTarifs) {
