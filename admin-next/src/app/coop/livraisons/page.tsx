@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 import { useState, useEffect } from 'react';
 import { Search, Truck, MapPin, User, CheckCircle, Clock } from 'lucide-react';
 

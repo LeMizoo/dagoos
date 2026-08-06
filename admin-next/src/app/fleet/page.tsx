@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 import { useState, useEffect } from 'react';
 import { Users, Car, DollarSign, TrendingUp, TrendingDown, Activity, AlertTriangle, CheckCircle, Clock, ArrowUpRight } from 'lucide-react';
 import StatCard from '@/components/dashboard/StatCard';

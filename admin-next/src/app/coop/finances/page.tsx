@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 import { useState, useEffect } from 'react';
 import { Search, TrendingUp, TrendingDown, Wallet } from 'lucide-react';
 

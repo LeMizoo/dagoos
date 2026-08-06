@@ -1,8 +1,8 @@
-// File: D:\Dagoos\admin-next\src\app\api\public\organizations\route.ts
-import * as entry from '../../../../../../src/app/api/public/organizations/route.js'
+// File: D:\Dagoos\admin-next\app\api\public\organizations\route.ts
+import * as entry from '../../../../../../app/api/public/organizations/route.js'
 import type { NextRequest } from 'next/server.js'
 
-type TEntry = typeof import('../../../../../../src/app/api/public/organizations/route.js')
+type TEntry = typeof import('../../../../../../app/api/public/organizations/route.js')
 
 // Check that the entry is a valid entry
 checkFields<Diff<{

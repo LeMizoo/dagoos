@@ -1,8 +1,8 @@
-// File: D:\Dagoos\admin-next\src\app\dashboard\flottes\page.tsx
-import * as entry from '../../../../../src/app/dashboard/flottes/page.js'
+// File: D:\Dagoos\admin-next\app\dashboard\flottes\page.tsx
+import * as entry from '../../../../../app/dashboard/flottes/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
-type TEntry = typeof import('../../../../../src/app/dashboard/flottes/page.js')
+type TEntry = typeof import('../../../../../app/dashboard/flottes/page.js')
 
 // Check that the entry is a valid entry
 checkFields<Diff<{

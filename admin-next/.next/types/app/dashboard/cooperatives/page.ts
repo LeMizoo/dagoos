@@ -1,8 +1,8 @@
-// File: D:\Dagoos\admin-next\src\app\dashboard\cooperatives\page.tsx
-import * as entry from '../../../../../src/app/dashboard/cooperatives/page.js'
+// File: D:\Dagoos\admin-next\app\dashboard\cooperatives\page.tsx
+import * as entry from '../../../../../app/dashboard/cooperatives/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
-type TEntry = typeof import('../../../../../src/app/dashboard/cooperatives/page.js')
+type TEntry = typeof import('../../../../../app/dashboard/cooperatives/page.js')
 
 // Check that the entry is a valid entry
 checkFields<Diff<{

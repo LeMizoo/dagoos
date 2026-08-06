@@ -1,8 +1,8 @@
-// File: D:\Dagoos\admin-next\src\app\dashboard\system-logs\page.tsx
-import * as entry from '../../../../../src/app/dashboard/system-logs/page.js'
+// File: D:\Dagoos\admin-next\app\dashboard\system-logs\page.tsx
+import * as entry from '../../../../../app/dashboard/system-logs/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
-type TEntry = typeof import('../../../../../src/app/dashboard/system-logs/page.js')
+type TEntry = typeof import('../../../../../app/dashboard/system-logs/page.js')
 
 // Check that the entry is a valid entry
 checkFields<Diff<{

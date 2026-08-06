@@ -1,8 +1,8 @@
-// File: D:\Dagoos\admin-next\src\app\coop\messages\page.tsx
-import * as entry from '../../../../../src/app/coop/messages/page.js'
+// File: D:\Dagoos\admin-next\app\coop\messages\page.tsx
+import * as entry from '../../../../../app/coop/messages/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
-type TEntry = typeof import('../../../../../src/app/coop/messages/page.js')
+type TEntry = typeof import('../../../../../app/coop/messages/page.js')
 
 // Check that the entry is a valid entry
 checkFields<Diff<{

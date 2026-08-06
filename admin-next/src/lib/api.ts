@@ -5,7 +5,7 @@ console.log('🔧 API_BASE:', API_BASE);
 
 const getToken = (): string | null => {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token') || localStorage.getItem('dagoos_token');
     if (token) return token;
     const cookies = document.cookie.split(';');
     for (const cookie of cookies) {
