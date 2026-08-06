@@ -19,8 +19,8 @@ export default function CoopVehicles() {
   useEffect(() => { load(); }, []);
   async function load() {
     try {
-      const r = await fetch('/api/proxy/vehicles');
-      if (r.ok) setVehicles((await r.json()) || []);
+      const r = await fetch('/api/proxy/vehicles', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } });
+      if (r.ok) { const data = await r.json(); const arr = Array.isArray(data) ? data.filter((v: any) => v.societe || v.societeId) : []; setVehicles(arr); }
     } catch {} finally { setLoading(false); }
   }
 
