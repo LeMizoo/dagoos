@@ -5,6 +5,7 @@ function init_profil() {
     var main = document.getElementById('mainContent');
     var user = JSON.parse(localStorage.getItem("dagoos_user") || "{}");
     var token = localStorage.getItem('dagoos_token');
+    var orgName = user.organization || '-';
 
     main.innerHTML = 
         '<div style="padding:12px;max-width:500px;margin:0 auto;">' +
@@ -13,7 +14,7 @@ function init_profil() {
                 '<div style="display:flex;flex-direction:column;gap:12px;">' +
                     '<div><span style="color:#94A3B8;font-size:11px;">Nom</span><div style="font-weight:600;color:#fff;">' + (user.name || 'Chauffeur') + '</div></div>' +
                     '<div><span style="color:#94A3B8;font-size:11px;">Code</span><div style="font-weight:600;color:#DAA520;font-family:monospace;">' + (user.driverCode || '-') + '</div></div>' +
-                    '<div><span style="color:#94A3B8;font-size:11px;">Organisation</span><div style="font-weight:600;color:#fff;">' + (user.organization || '-') + '</div></div>' +
+                    '<div><span style="color:#94A3B8;font-size:11px;">Organisation</span><div style="font-weight:600;color:#fff;">' + orgName + '</div></div>' +
                 '</div>' +
             '</div>' +
 
