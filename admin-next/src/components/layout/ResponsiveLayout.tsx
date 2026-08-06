@@ -72,7 +72,12 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
       .then(r => r.ok ? r.json() : null)
       .then(d => {
         if (d && !d.error) {
-          setUser(d);
+          const authUser = d.user || d;
+          setUser({
+            name: authUser?.name || authUser?.fullName || 'Utilisateur',
+            email: authUser?.email,
+            role: authUser?.role,
+          });
         } else {
           // Fallback : récupérer depuis le token JWT dans le cookie
           const token = document.cookie.split('; ').find(row => row.startsWith('dagoos_token='));
