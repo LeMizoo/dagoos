@@ -36,21 +36,17 @@ async function handleRequest(
   method: string
 ) {
   try {
-    // Récupérer le token du header
     const authHeader = request.headers.get('authorization');
     let token = authHeader?.replace('Bearer ', '');
     
-    // Récupérer le chemin
     const pathString = params.path.join('/');
     const url = `/api/${pathString}`;
     
-    // Récupérer le body si méthode POST/PUT
     let body = undefined;
     if (method === 'POST' || method === 'PUT') {
       body = await request.json().catch(() => undefined);
     }
     
-    // Préparer les headers
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
@@ -59,7 +55,6 @@ async function handleRequest(
       headers['Authorization'] = `Bearer ${token}`;
     }
     
-    // Faire la requête
     const response = await apiFetch(url, {
       method,
       headers,

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import auth from '@/lib/auth';
+import authClient from '@/lib/auth-client';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,7 +17,7 @@ export default function LoginPage() {
     setLoading(true);
     
     try {
-      const data = await auth.login(email, password);
+      const data = await authClient.login(email, password);
       if (data.user.role === 'SUPER_ADMIN') {
         router.push('/dashboard');
       } else if (data.user.role === 'FLEET_MANAGER') {
