@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { resolveOrganization } from '@/lib/organization';
 
 interface UserInfo {
   name?: string;
@@ -40,14 +41,14 @@ const menus: Record<string, any> = {
   ],
   fleet: [
     { section: 'Principal', items: [{ href: '/fleet', icon: LayoutDashboard, label: 'Tableau de bord' }] },
-    { section: 'Gestion', items: [{ href: '/fleet/drivers', icon: Users, label: 'Chauffeurs' }, { href: '/fleet/vehicles', icon: Car, label: 'Véhicules' }, { href: '/fleet/proprietaires', icon: User, label: 'Propriétaires' }] },
+    { section: 'Gestion', items: [] },
     { section: 'Opérations', items: [{ href: '/fleet/permutation', icon: ArrowRightLeft, label: 'Permutation' }, { href: '/fleet/codes', icon: QrCode, label: 'Codes' }] },
     { section: 'Finances', items: [{ href: '/fleet/finances', icon: DollarSign, label: 'Finances' }, { href: '/fleet/versements', icon: Receipt, label: 'Versements' }, { href: '/fleet/depenses', icon: DollarSign, label: 'Dépenses' }] },
     { section: 'Autres', items: [{ href: '/fleet/messages', icon: MessageSquare, label: 'Messages' }, { href: '/fleet/rapports', icon: FileText, label: 'Rapports' }, { href: '/fleet/profil', icon: User, label: 'Profil' }, { href: '/fleet/settings', icon: Settings, label: 'Paramètres' }] },
   ],
   coop: [
     { section: 'Principal', items: [{ href: '/coop', icon: LayoutDashboard, label: 'Tableau de bord' }] },
-    { section: 'Gestion', items: [{ href: '/coop/drivers', icon: Users, label: 'Chauffeurs' }, { href: '/coop/vehicles', icon: Car, label: 'Véhicules' }, { href: '/coop/societes', icon: Building2, label: 'Sociétés' }] },
+    { section: 'Gestion', items: [] },
     { section: 'Opérations', items: [{ href: '/coop/contrats', icon: FileCheck, label: 'Contrats' }, { href: '/coop/livraisons', icon: Truck, label: 'Livraisons' }, { href: '/coop/permutation', icon: ArrowRightLeft, label: 'Permutation' }, { href: '/coop/codes', icon: QrCode, label: 'Codes' }] },
     { section: 'Finances', items: [{ href: '/coop/finances', icon: DollarSign, label: 'Finances' }, { href: '/coop/versements', icon: Receipt, label: 'Versements' }, { href: '/coop/depenses', icon: DollarSign, label: 'Dépenses' }] },
     { section: 'Autres', items: [{ href: '/coop/messages', icon: MessageSquare, label: 'Messages' }, { href: '/coop/rapports', icon: FileText, label: 'Rapports' }, { href: '/coop/profil', icon: User, label: 'Profil' }, { href: '/coop/settings', icon: Settings, label: 'Paramètres' }] },
@@ -65,12 +66,13 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<UserInfo | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [menuAccess, setMenuAccess] = useState({ showOwners: true, showSocieties: true, showDrivers: true, showVehicles: true });
 
   useEffect(() => {
     // Essayer d'abord l'API locale, puis le proxy
     fetch('/api/auth/me')
       .then(r => r.ok ? r.json() : null)
-      .then(d => {
+      .then(async (d) => {
         if (d && !d.error) {
           const authUser = d.user || d;
           setUser({
@@ -78,6 +80,38 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
             email: authUser?.email,
             role: authUser?.role,
           });
+
+          try {
+            const [orgsRes, driversRes, vehiclesRes] = await Promise.all([
+              fetch('/api/proxy/organizations').then(r => r.ok ? r.json() : []),
+              fetch('/api/proxy/drivers').then(r => r.ok ? r.json() : []),
+              fetch('/api/proxy/vehicles').then(r => r.ok ? r.json() : [])
+            ]);
+
+            const organizations = Array.isArray(orgsRes) ? orgsRes : [];
+            const currentOrg = resolveOrganization(authUser, organizations, app === 'fleet' ? 'FLEET_MANAGER' : 'COOPERATIVE');
+            const orgId = currentOrg?.id || authUser?.organizationId || authUser?.organization?.id || null;
+            const isFleet = app === 'fleet';
+            const allDrivers = Array.isArray(driversRes) ? driversRes : [];
+            const allVehicles = Array.isArray(vehiclesRes) ? vehiclesRes : [];
+
+            const matchesOrg = (item: any) => {
+              if (!orgId) return false;
+              return item?.organizationId === orgId || item?.organization?.id === orgId;
+            };
+
+            const hasOwners = Boolean((currentOrg as any)?.proprietaires?.length || (currentOrg as any)?.proprietairesCount || (currentOrg as any)?.ownersCount || (currentOrg as any)?.owners?.length);
+            const hasSocieties = Boolean((currentOrg as any)?.societes?.length || (currentOrg as any)?.societesCount || (currentOrg as any)?.societies?.length);
+            const hasDrivers = allDrivers.some(matchesOrg);
+            const hasVehicles = allVehicles.some(matchesOrg);
+
+            setMenuAccess({
+              showOwners: isFleet ? (hasOwners || hasDrivers || hasVehicles) : true,
+              showSocieties: !isFleet ? (hasSocieties || hasDrivers || hasVehicles) : true,
+              showDrivers: isFleet ? (hasOwners || hasDrivers || hasVehicles) : (hasSocieties || hasDrivers || hasVehicles),
+              showVehicles: isFleet ? (hasOwners || hasDrivers || hasVehicles) : (hasSocieties || hasDrivers || hasVehicles),
+            });
+          } catch {}
         } else {
           // Fallback : récupérer depuis le token JWT dans le cookie
           const token = document.cookie.split('; ').find(row => row.startsWith('dagoos_token='));
@@ -90,8 +124,25 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
         }
       })
       .catch(() => {});
-  }, []);
-  const menu = menus[app] || menus.admin;
+  }, [app]);
+
+  const menu = (menus[app] || menus.admin).map((section: any) => {
+    if (section.section !== 'Gestion') return section;
+
+    const items = app === 'fleet'
+      ? [
+          ...(menuAccess.showOwners ? [{ href: '/fleet/proprietaires', icon: User, label: 'Propriétaires' }] : []),
+          ...(menuAccess.showDrivers ? [{ href: '/fleet/drivers', icon: Users, label: 'Chauffeurs' }] : []),
+          ...(menuAccess.showVehicles ? [{ href: '/fleet/vehicles', icon: Car, label: 'Véhicules' }] : []),
+        ]
+      : [
+          ...(menuAccess.showSocieties ? [{ href: '/coop/societes', icon: Building2, label: 'Sociétés' }] : []),
+          ...(menuAccess.showDrivers ? [{ href: '/coop/drivers', icon: Users, label: 'Chauffeurs' }] : []),
+          ...(menuAccess.showVehicles ? [{ href: '/coop/vehicles', icon: Car, label: 'Véhicules' }] : []),
+        ];
+
+    return { ...section, items };
+  });
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
