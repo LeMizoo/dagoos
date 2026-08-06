@@ -17,8 +17,15 @@ function init_courses() {
 async function loadCourses() {
     try {
         var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
+        var drivers = await apiGet('/drivers');
+        var currentDriver = Array.isArray(drivers) ? drivers.find(function(d) { return d.id === user.driverId; }) : null;
+        var organizationId = currentDriver && currentDriver.organizationId ? currentDriver.organizationId : (user.organizationId || null);
         var courses = await apiGet('/courses');
-        var myCourses = courses.filter(function(c) { return c.driverId === user.driverId; });
+        var myCourses = Array.isArray(courses) ? courses.filter(function(c) {
+            var matchesDriver = c.driverId === user.driverId;
+            var matchesOrg = !organizationId || !c.organizationId || c.organizationId === organizationId || (c.organization && c.organization.id === organizationId);
+            return matchesDriver && matchesOrg;
+        }) : [];
         var html = '';
         myCourses.reverse().forEach(function(c) {
             html += '<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #334155;">' +
