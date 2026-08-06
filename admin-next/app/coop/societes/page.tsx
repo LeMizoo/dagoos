@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, Search, Phone, Mail, Building2, Car } from 'lucide-react';
@@ -11,7 +12,7 @@ export default function CoopSocietesPage() {
   useEffect(() => { load(); }, []);
   async function load() {
     try {
-      const r = await fetch('/api/proxy/societes', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } });
+      const r = await apiFetch('/api/proxy/societes');
       if (r.ok) setSocietes((await r.json()) || []);
     } catch(e) { console.error(e); } finally { setLoading(false); }
   }

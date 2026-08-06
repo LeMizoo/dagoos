@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
@@ -40,7 +41,7 @@ export default function FinancesPage() {
     setLoading(true);
     try {
       setError('');
-      const res = await fetch('/api/proxy/finances/transactions');
+      const res = await apiFetch('/api/proxy/finances/transactions');
       if (!res.ok) throw new Error(`Erreur ${res.status}`);
       const data = await res.json();
       setTransactions(Array.isArray(data) ? data : []);

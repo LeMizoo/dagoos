@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from 'react';
 import { Search, MessageSquare, Send, Mail, MailOpen } from 'lucide-react';
 
@@ -11,7 +12,7 @@ export default function FleetMessagesPage() {
   const [reply, setReply] = useState('');
 
   useEffect(() => {
-    fetch('/api/proxy/messages', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } }).then(r => r.json()).then(d => setMessages(Array.isArray(d) ? d : [])).catch(console.error).finally(() => setLoading(false));
+    apiFetch('/api/proxy/messages').then(r => r.json()).then(d => setMessages(Array.isArray(d) ? d : [])).catch(console.error).finally(() => setLoading(false));
   }, []);
 
   const selectedMsg = messages.find(m => m.id === selected);

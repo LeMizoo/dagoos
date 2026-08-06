@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from 'react';
 import { Car, Plus, Search, CheckCircle, Wrench, Truck } from 'lucide-react';
 
@@ -19,7 +20,7 @@ export default function CoopVehicles() {
   useEffect(() => { load(); }, []);
   async function load() {
     try {
-      const r = await fetch('/api/proxy/vehicles', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } });
+      const r = await apiFetch('/api/proxy/vehicles');
       if (r.ok) { const data = await r.json(); const arr = Array.isArray(data) ? data.filter((v: any) => v.societe || v.societeId) : []; setVehicles(arr); }
     } catch {} finally { setLoading(false); }
   }

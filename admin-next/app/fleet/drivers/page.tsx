@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from 'react';
 import { Users, Plus, Search, Car, CheckCircle, XCircle, Link2 } from 'lucide-react';
 
@@ -17,8 +18,8 @@ export default function FleetDrivers() {
     try {
       const [meRes, dRes, vRes] = await Promise.all([
         fetch('/api/auth/me').then(r => r.ok ? r.json() : null),
-        fetch('/api/proxy/drivers', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } }).then(r => r.json()).then(d => Array.isArray(d) ? d.filter((dr: any) => dr.vehicleId || dr.organizationId) : []),
-        fetch('/api/proxy/vehicles', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } }).then(r => r.json())
+        apiFetch('/api/proxy/drivers').then(r => r.json()).then(d => Array.isArray(d) ? d.filter((dr: any) => dr.vehicleId || dr.organizationId) : []),
+        apiFetch('/api/proxy/vehicles').then(r => r.json())
       ]);
       const authUser = meRes?.user || meRes;
       const resolvedOrgId = authUser?.organizationId || authUser?.organization?.id || authUser?.id;

@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from 'react';
 import { Users, Car, DollarSign, Building2, ArrowUpRight, TrendingUp, CheckCircle, FileCheck } from 'lucide-react';
 import Greeting from '@/components/dashboard/Greeting';
@@ -13,8 +14,8 @@ export default function CoopHome() {
   async function load() {
     try {
       const [driversRes, vehiclesRes] = await Promise.all([
-        fetch('/api/proxy/drivers', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } }).then(r => r.json()).catch(() => []),
-        fetch('/api/proxy/vehicles', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } }).then(r => r.json()).catch(() => []),
+        apiFetch('/api/proxy/drivers').then(r => r.json()).catch(() => []),
+        apiFetch('/api/proxy/vehicles').then(r => r.json()).catch(() => []),
       ]);
       
       setStats({
