@@ -1,7 +1,5 @@
 // src/lib/api.ts - Configuration API avec proxy Next.js
 
-const API_BASE = '';
-
 export const apiFetch = async (
   endpoint: string,
   options: RequestInit = {}
@@ -11,7 +9,7 @@ export const apiFetch = async (
     ...options.headers,
   };
 
-  const url = `${API_BASE}/api${endpoint}`;
+  const url = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`;
   console.log('🔧 API Fetch:', url);
 
   const response = await fetch(url, {
