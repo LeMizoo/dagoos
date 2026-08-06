@@ -41,14 +41,14 @@ const menus: Record<string, any> = {
   ],
   fleet: [
     { section: 'Principal', items: [{ href: '/fleet', icon: LayoutDashboard, label: 'Tableau de bord' }] },
-    { section: 'Gestion', items: [] },
+    { section: 'Gestion', items: [{ href: '/fleet/proprietaires', icon: User, label: 'Propriétaires' }, { href: '/fleet/drivers', icon: Users, label: 'Chauffeurs' }, { href: '/fleet/vehicles', icon: Car, label: 'Véhicules' }] },
     { section: 'Opérations', items: [{ href: '/fleet/permutation', icon: ArrowRightLeft, label: 'Permutation' }, { href: '/fleet/codes', icon: QrCode, label: 'Codes' }] },
     { section: 'Finances', items: [{ href: '/fleet/finances', icon: DollarSign, label: 'Finances' }, { href: '/fleet/versements', icon: Receipt, label: 'Versements' }, { href: '/fleet/depenses', icon: DollarSign, label: 'Dépenses' }] },
     { section: 'Autres', items: [{ href: '/fleet/messages', icon: MessageSquare, label: 'Messages' }, { href: '/fleet/rapports', icon: FileText, label: 'Rapports' }, { href: '/fleet/profil', icon: User, label: 'Profil' }, { href: '/fleet/settings', icon: Settings, label: 'Paramètres' }] },
   ],
   coop: [
     { section: 'Principal', items: [{ href: '/coop', icon: LayoutDashboard, label: 'Tableau de bord' }] },
-    { section: 'Gestion', items: [] },
+    { section: 'Gestion', items: [{ href: '/fleet/proprietaires', icon: User, label: 'Propriétaires' }, { href: '/fleet/drivers', icon: Users, label: 'Chauffeurs' }, { href: '/fleet/vehicles', icon: Car, label: 'Véhicules' }] },
     { section: 'Opérations', items: [{ href: '/coop/contrats', icon: FileCheck, label: 'Contrats' }, { href: '/coop/livraisons', icon: Truck, label: 'Livraisons' }, { href: '/coop/permutation', icon: ArrowRightLeft, label: 'Permutation' }, { href: '/coop/codes', icon: QrCode, label: 'Codes' }] },
     { section: 'Finances', items: [{ href: '/coop/finances', icon: DollarSign, label: 'Finances' }, { href: '/coop/versements', icon: Receipt, label: 'Versements' }, { href: '/coop/depenses', icon: DollarSign, label: 'Dépenses' }] },
     { section: 'Autres', items: [{ href: '/coop/messages', icon: MessageSquare, label: 'Messages' }, { href: '/coop/rapports', icon: FileText, label: 'Rapports' }, { href: '/coop/profil', icon: User, label: 'Profil' }, { href: '/coop/settings', icon: Settings, label: 'Paramètres' }] },
@@ -126,23 +126,7 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
       .catch(() => {});
   }, [app]);
 
-  const menu = (menus[app] || menus.admin).map((section: any) => {
-    if (section.section !== 'Gestion') return section;
-
-    const items = app === 'fleet'
-      ? [
-          ...(menuAccess.showOwners ? [{ href: '/fleet/proprietaires', icon: User, label: 'Propriétaires' }] : []),
-          ...(menuAccess.showDrivers ? [{ href: '/fleet/drivers', icon: Users, label: 'Chauffeurs' }] : []),
-          ...(menuAccess.showVehicles ? [{ href: '/fleet/vehicles', icon: Car, label: 'Véhicules' }] : []),
-        ]
-      : [
-          ...(menuAccess.showSocieties ? [{ href: '/coop/societes', icon: Building2, label: 'Sociétés' }] : []),
-          ...(menuAccess.showDrivers ? [{ href: '/coop/drivers', icon: Users, label: 'Chauffeurs' }] : []),
-          ...(menuAccess.showVehicles ? [{ href: '/coop/vehicles', icon: Car, label: 'Véhicules' }] : []),
-        ];
-
-    return { ...section, items };
-  });
+  const menu = menus[app] || menus.admin;
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
