@@ -11,7 +11,7 @@ export default function CoopSocietesPage() {
   useEffect(() => { load(); }, []);
   async function load() {
     try {
-      const r = await fetch('/api/proxy/societes');
+      const r = await fetch('/api/proxy/societes', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } });
       if (r.ok) setSocietes((await r.json()) || []);
     } catch(e) { console.error(e); } finally { setLoading(false); }
   }

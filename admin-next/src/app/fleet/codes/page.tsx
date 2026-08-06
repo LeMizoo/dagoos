@@ -14,7 +14,7 @@ export default function FleetCodesPage() {
 
   async function loadDrivers() {
     try {
-      const r = await fetch('/api/proxy/drivers');
+      const r = await fetch('/api/proxy/drivers', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } });
       const d = await r.json();
       setDrivers(Array.isArray(d) ? d : []);
     } catch (e) { console.error(e); } finally { setLoading(false); }

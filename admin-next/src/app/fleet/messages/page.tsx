@@ -11,7 +11,7 @@ export default function FleetMessagesPage() {
   const [reply, setReply] = useState('');
 
   useEffect(() => {
-    fetch('/api/proxy/messages').then(r => r.json()).then(d => setMessages(Array.isArray(d) ? d : [])).catch(console.error).finally(() => setLoading(false));
+    fetch('/api/proxy/messages', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } }).then(r => r.json()).then(d => setMessages(Array.isArray(d) ? d : [])).catch(console.error).finally(() => setLoading(false));
   }, []);
 
   const selectedMsg = messages.find(m => m.id === selected);

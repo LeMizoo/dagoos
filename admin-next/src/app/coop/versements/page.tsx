@@ -6,7 +6,7 @@ export default function FleetVersementsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/proxy/finances/versements')
+    fetch('/api/proxy/finances/versements', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } })
       .then(r => r.json()).then(d => setVersements(Array.isArray(d) ? d : []))
       .catch(console.error).finally(() => setLoading(false));
   }, []);
