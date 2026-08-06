@@ -24,7 +24,7 @@ function LoginForm() {
     if (res.ok) { 
       const data = await res.json();
       // Stocker dans localStorage pour les appels API
-      if (data.token) localStorage.setItem('dagoos_token', data.token);
+      if (data.token) localStorage.setItem('token', data.token);
       if (data.user) localStorage.setItem('dagoos_user', JSON.stringify(data.user));
       router.push(redirect); router.refresh(); 
     }

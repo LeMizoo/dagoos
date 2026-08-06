@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, Pencil, Trash2, Truck, Search, ChevronRight, AlertCircle } from 'lucide-react';

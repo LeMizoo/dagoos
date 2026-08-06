@@ -1,5 +1,6 @@
 'use client';
 export const dynamic = 'force-dynamic';
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from 'react';
 import { Search, MessageSquare, Send, Mail, MailOpen, Trash2 } from 'lucide-react';
 
@@ -26,7 +27,7 @@ export default function MessagesPage() {
   async function fetchMessages() {
     try {
       setError('');
-      const res = await fetch('/api/proxy/messages');
+      const res = await apiFetch('/api/proxy/messages');
       if (!res.ok) throw new Error(`Erreur ${res.status}`);
       const data = await res.json();
       setMessages(Array.isArray(data) ? data : []);

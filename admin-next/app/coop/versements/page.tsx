@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from 'react';
 
 export default function FleetVersementsPage() {
@@ -6,7 +7,7 @@ export default function FleetVersementsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/proxy/finances/versements', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } })
+    apiFetch('/api/proxy/finances/versements')
       .then(r => r.json()).then(d => setVersements(Array.isArray(d) ? d : []))
       .catch(console.error).finally(() => setLoading(false));
   }, []);

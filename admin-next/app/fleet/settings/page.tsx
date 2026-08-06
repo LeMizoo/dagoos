@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from 'react';
 import { DollarSign, Save, AlertCircle } from 'lucide-react';
 
@@ -30,7 +31,7 @@ export default function FleetSettingsPage() {
 
   async function loadOrgAndTarifs() {
     try {
-      const orgsRes = await fetch('/api/proxy/organizations', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } });
+      const orgsRes = await apiFetch('/api/proxy/organizations');
       if (!orgsRes.ok) { setError('Erreur chargement'); setLoading(false); return; }
       const orgs = await orgsRes.json();
       const myOrg = Array.isArray(orgs) ? orgs.find((o: any) => o.type === 'FLEET_MANAGER') : null;

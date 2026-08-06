@@ -1,5 +1,6 @@
 'use client';
 export const dynamic = 'force-dynamic';
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from 'react';
 import { Search, Download, CheckCircle, XCircle, Clock } from 'lucide-react';
 
@@ -37,7 +38,7 @@ export default function PaymentsPage() {
   async function fetchPayments() {
     try {
       setError('');
-      const res = await fetch('/api/proxy/finances/versements');
+      const res = await apiFetch('/api/proxy/finances/versements');
       if (!res.ok) throw new Error(`Erreur ${res.status}`);
       const data = await res.json();
       setPayments(Array.isArray(data) ? data : []);

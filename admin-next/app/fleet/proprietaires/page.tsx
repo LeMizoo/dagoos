@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, Search, Phone, Mail, User, Car, Users } from 'lucide-react';
@@ -11,7 +12,7 @@ export default function FleetProprietairesPage() {
   useEffect(() => { load(); }, []);
   async function load() {
     try {
-      const r = await fetch('/api/proxy/proprietaires', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } });
+      const r = await apiFetch('/api/proxy/proprietaires');
       if (r.ok) setProprietaires((await r.json()) || []);
     } catch(e) { console.error(e); } finally { setLoading(false); }
   }

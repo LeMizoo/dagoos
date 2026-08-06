@@ -1,5 +1,6 @@
 'use client';
 export const dynamic = 'force-dynamic';
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from 'react';
 import { Bell, BellOff, UserPlus, CreditCard, Wrench, AlertCircle, CheckCheck } from 'lucide-react';
 
@@ -30,7 +31,7 @@ export default function NotificationsPage() {
   async function fetchNotifs() {
     try {
       setError('');
-      const res = await fetch('/api/proxy/notifications');
+      const res = await apiFetch('/api/proxy/notifications');
       if (!res.ok) throw new Error(`Erreur ${res.status}`);
       const data = await res.json();
       setNotifs(Array.isArray(data) ? data : []);

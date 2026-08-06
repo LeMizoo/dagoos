@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from 'react';
 import { QrCode, RefreshCw, Key, Eye, EyeOff, Copy, Check } from 'lucide-react';
 
@@ -12,7 +13,7 @@ export default function CoopCodesPage() {
 
   async function loadDrivers() {
     try {
-      const r = await fetch('/api/proxy/drivers', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } });
+      const r = await apiFetch('/api/proxy/drivers');
       setDrivers((await r.json()) || []);
     } catch (e) { console.error(e); } finally { setLoading(false); }
   }

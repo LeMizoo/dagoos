@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from 'react';
 import { Search, Truck, MapPin, User, CheckCircle, Clock } from 'lucide-react';
 
@@ -8,7 +9,7 @@ export default function CoopLivraisonsPage() {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    fetch('/api/proxy/livraisons', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } }).then(r => r.json()).then(d => setLivraisons(Array.isArray(d) ? d : [])).catch(console.error).finally(() => setLoading(false));
+    apiFetch('/api/proxy/livraisons').then(r => r.json()).then(d => setLivraisons(Array.isArray(d) ? d : [])).catch(console.error).finally(() => setLoading(false));
   }, []);
 
   const filtered = livraisons.filter((l: any) => l.driver?.name?.toLowerCase().includes(search.toLowerCase()) || l.vehicle?.plate?.toLowerCase().includes(search.toLowerCase()));

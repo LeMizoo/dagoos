@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from 'react';
 import { Search, TrendingUp, TrendingDown, Wallet } from 'lucide-react';
 
@@ -16,7 +17,7 @@ export default function CoopFinancesPage() {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    fetch('/api/proxy/finances/courses', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } })
+    apiFetch('/api/proxy/finances/courses')
       .then(r => r.json())
       .then(data => setCourses(Array.isArray(data) ? data : []))
       .catch(err => setError(err.message))
