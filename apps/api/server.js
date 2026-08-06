@@ -17,6 +17,7 @@ app.use('/api/societes', require('./modules/societes/societes.routes'));
 app.use('/api/contrats', require('./modules/contrats/contrats.routes'));
 app.use('/api/livraisons', require('./modules/livraisons/livraisons.routes'));
 app.use('/api/plans', require('./modules/plans/plans.routes'));
+app.use('/api/tarifs', require('./modules/tarifs/tarifs.routes'));
 app.use('/api/messages', require('./modules/messages/messages.routes'));
 app.use('/api/notifications', require('./modules/notifications/notifications.routes'));
 app.use('/api/logs', require('./modules/logs.routes'));
