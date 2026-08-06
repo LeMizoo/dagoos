@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { DollarSign, Save, AlertCircle } from 'lucide-react';
+import { resolveOrganization } from '@/lib/organization';
 
 export default function FleetSettingsPage() {
   const [tarifs, setTarifs] = useState({
@@ -8,6 +9,7 @@ export default function FleetSettingsPage() {
     adyVarotraActif: true, courseNormalActif: true, locationActif: true,
   });
   const [orgId, setOrgId] = useState('');
+  const [orgName, setOrgName] = useState('');
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
@@ -20,16 +22,24 @@ export default function FleetSettingsPage() {
       const meRes = await fetch('/api/auth/me');
       if (!meRes.ok) { setError('Non connecté'); setLoading(false); return; }
       const me = await meRes.json();
+      const authUser = me?.user || me;
+      const meEmail = authUser?.email || me?.email;
       
       // Récupérer les organisations et trouver celle du gestionnaire
       const orgsRes = await fetch('/api/proxy/organizations');
+      if (!orgsRes.ok) { setError('Impossible de charger les organisations'); setLoading(false); return; }
       const orgs = await orgsRes.json();
-      const myOrg = Array.isArray(orgs) ? orgs.find((o: any) => 
-        o.type === 'FLEET_MANAGER' && o.email === me.email
-      ) : null;
+      const organizationList = Array.isArray(orgs) ? orgs : [];
+      const myOrg = resolveOrganization({ ...me, ...authUser, email: meEmail }, organizationList, 'FLEET_MANAGER');
       
-      if (!myOrg) { setError('Organisation non trouvée'); setLoading(false); return; }
+      if (!myOrg?.id) {
+        console.error('Fleet settings: unable to resolve organization', { me, orgs });
+        setError('Organisation non trouvée');
+        setLoading(false);
+        return;
+      }
       setOrgId(myOrg.id);
+      setOrgName(myOrg.name || 'Organisation');
 
       // Charger les tarifs de cette organisation
       const tRes = await fetch(`/api/proxy/tarifs/${myOrg.id}`);
@@ -60,6 +70,11 @@ export default function FleetSettingsPage() {
     <div>
       <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">⚙️ Paramètres</h1>
       {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm flex items-center gap-2"><AlertCircle size={16} /> {error}</div>}
+      {!error && orgName && (
+        <div className="mb-4 text-sm text-gray-600 dark:text-gray-300">
+          Organisation : <span className="font-semibold text-blue-600">{orgName}</span>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
