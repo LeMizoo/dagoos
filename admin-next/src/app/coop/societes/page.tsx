@@ -12,7 +12,7 @@ export default function CoopSocietesPage() {
   async function load() {
     try {
       const r = await fetch('/api/proxy/societes');
-      if (r.ok) setSocietes(Array.isArray(await r.json()) ? await r.json() : []);
+      if (r.ok) setSocietes((await r.json()) || []);
     } catch(e) { console.error(e); } finally { setLoading(false); }
   }
 

@@ -21,7 +21,7 @@ export default function FleetVehicles() {
   async function load() {
     try {
       const r = await fetch('/api/proxy/vehicles');
-      if (r.ok) setVehicles(Array.isArray(await r.json()) ? await r.json() : []);
+      if (r.ok) setVehicles((await r.json()) || []);
     } catch {} finally { setLoading(false); }
   }
 
