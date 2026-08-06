@@ -9,17 +9,24 @@ export default function FleetDrivers() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [assigning, setAssigning] = useState<string | null>(null);
+  const [orgId, setOrgId] = useState<string | null>(null);
 
   useEffect(() => { load(); }, []);
   
   async function load() {
     try {
-      const [dRes, vRes] = await Promise.all([
+      const [meRes, dRes, vRes] = await Promise.all([
+        fetch('/api/auth/me').then(r => r.ok ? r.json() : null),
         fetch('/api/proxy/drivers').then(r => r.json()),
         fetch('/api/proxy/vehicles').then(r => r.json())
       ]);
-      setDrivers(Array.isArray(dRes) ? dRes : []);
-      setVehicles(Array.isArray(vRes) ? vRes.filter((v: any) => v.status === 'active') : []);
+      const authUser = meRes?.user || meRes;
+      const resolvedOrgId = authUser?.organizationId || authUser?.organization?.id || authUser?.id;
+      setOrgId(resolvedOrgId || null);
+      const allDrivers = Array.isArray(dRes) ? dRes : [];
+      const allVehicles = Array.isArray(vRes) ? vRes : [];
+      setDrivers(resolvedOrgId ? allDrivers.filter((d: any) => d.organizationId === resolvedOrgId || d.organization?.id === resolvedOrgId) : allDrivers);
+      setVehicles(resolvedOrgId ? allVehicles.filter((v: any) => v.organizationId === resolvedOrgId || v.organization?.id === resolvedOrgId).filter((v: any) => v.status === 'active') : allVehicles.filter((v: any) => v.status === 'active'));
     } catch {} finally { setLoading(false); }
   }
 
