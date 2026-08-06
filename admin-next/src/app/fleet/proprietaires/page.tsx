@@ -12,7 +12,7 @@ export default function FleetProprietairesPage() {
   async function load() {
     try {
       const r = await fetch('/api/proxy/proprietaires');
-      if (r.ok) setProprietaires(Array.isArray(await r.json()) ? await r.json() : []);
+      if (r.ok) setProprietaires((await r.json()) || []);
     } catch(e) { console.error(e); } finally { setLoading(false); }
   }
 
