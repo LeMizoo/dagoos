@@ -36,19 +36,26 @@ export const authClient = {
   
   login: async (email: string, password: string): Promise<LoginResponse> => {
     try {
+      console.log('🔐 Tentative de connexion pour:', email);
       const response = await apiFetch('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       });
+      
+      console.log('📡 Réponse status:', response.status);
+      
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Erreur de connexion');
       }
       const data: LoginResponse = await response.json();
+      console.log('✅ Connexion réussie pour:', data.user.name);
+      
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       return data;
     } catch (error) {
+      console.error('❌ Erreur de connexion:', error);
       throw error;
     }
   },

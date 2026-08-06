@@ -1,6 +1,8 @@
 // src/lib/api.ts - Configuration API avec token
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://dagoos-api.onrender.com';
 
+console.log('🔧 API_BASE:', API_BASE);
+
 const getToken = (): string | null => {
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('token');
@@ -23,10 +25,15 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
   if (token) {
     (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
   }
-  const response = await fetch(`${API_BASE}${endpoint}`, {
+  
+  const url = `${API_BASE}${endpoint}`;
+  console.log('🌐 Fetching:', url);
+  
+  const response = await fetch(url, {
     ...options,
     headers,
   });
+  
   if (response.status === 401) {
     console.warn('🔄 Token expiré');
     if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
