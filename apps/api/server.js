@@ -18,6 +18,18 @@ app.use('/api/contrats', require('./modules/contrats/contrats.routes'));
 app.use('/api/livraisons', require('./modules/livraisons/livraisons.routes'));
 app.use('/api/plans', require('./modules/plans/plans.routes'));
 app.use('/api/tarifs', require('./modules/tarifs/tarifs.routes'));
+
+// Route db-push
+app.post('/api/db-push', async (req, res) => {
+  const { password } = req.body;
+  if (password !== 'DagoosSeed2026!') return res.status(403).json({ error: 'Accès refusé' });
+  const { execSync } = require('child_process');
+  try {
+    execSync('npx prisma db push --accept-data-loss', { stdio: 'pipe', timeout: 60000 });
+    execSync('npx prisma generate', { stdio: 'pipe', timeout: 60000 });
+    res.json({ success: true, message: 'Schéma synchronisé' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 app.use('/api/messages', require('./modules/messages/messages.routes'));
 app.use('/api/notifications', require('./modules/notifications/notifications.routes'));
 app.use('/api/logs', require('./modules/logs.routes'));
