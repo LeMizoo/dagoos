@@ -1,15 +1,17 @@
-import { useState } from 'react';
-import { useRouter } from 'next/router';
-import auth from '../lib/auth';
+'use client';
 
-export default function Login() {
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import auth from '@/lib/auth';
+
+export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -25,7 +27,7 @@ export default function Login() {
       } else {
         router.push('/dashboard');
       }
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message || 'Erreur de connexion');
     } finally {
       setLoading(false);
