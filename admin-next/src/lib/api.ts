@@ -9,6 +9,14 @@ export const apiFetch = async (
     ...options.headers,
   };
 
+  // Ajouter le token du localStorage ou cookie
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('token') || localStorage.getItem('dagoos_token');
+    if (token) {
+      (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+    }
+  }
+
   const url = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`;
   console.log('🔧 API Fetch:', url);
 
