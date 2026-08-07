@@ -134,10 +134,9 @@
         <form id="loginForm">
             <!-- Sélection Flotte/Coop -->
             <div class="form-group">
-                <label><i class="fas fa-building"></i> Flotte / Coopérative</label>
-                <select id="organization" required>
-                    <option value="">— Sélectionner votre entité —</option>
-                </select>
+                <label>🔑 Votre code chauffeur</label>
+                <input type="text" id="driverCode" placeholder="Ex: FL-AL-001" required autocomplete="off" style="text-transform: uppercase; width: 100%; padding: 12px; font-size: 16px; text-align: center; letter-spacing: 2px; background: #1E293B; border: 2px solid #DAA520; border-radius: 10px; color: #DAA520;">
+                <div class="code-hint" id="codeHint" style="font-size: 11px; color: #888; margin-top: 5px; text-align: center;">Code fourni par votre gestionnaire</div>
             </div>
             
             <!-- CODE -->
