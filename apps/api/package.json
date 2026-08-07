@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon src/server.js",
-    "start": "npx prisma db push --accept-data-loss && npx prisma generate && node seed-full.js && node reset-tovo.js && node seed-coops-premium.js && node server.js",
+    "start": "npx prisma db push --accept-data-loss && npx prisma generate && node seed-full.js && node reset-tovo.js && node seed-coops-premium.js && node seed-proprietaires-societes.js && node seed-chauffeurs.js && node server.js",
     "build": "npm install && npx prisma generate",
     "setup": "node reset-admin.js"
   },
