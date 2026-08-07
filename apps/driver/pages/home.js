@@ -16,6 +16,24 @@ async function init_home() {
     var token = localStorage.getItem('dagoos_token');
     var driverId = user.driverId;
 
+    // Charger les tarifs/types de l'organisation
+    var courseTypes = [
+      { value: 'course', label: '🚖 Course normale' },
+      { value: 'ady_varotra', label: '🛺 Ady Varotra' },
+      { value: 'location', label: '📅 Location journalière' },
+    ];
+    try {
+      if (currentDriver && currentDriver.organizationId) {
+        var tarifsRes = await apiGet('/tarifs/' + currentDriver.organizationId);
+        if (tarifsRes && tarifsRes.vehiculeTarifs) {
+          var vt = typeof tarifsRes.vehiculeTarifs === 'string' ? JSON.parse(tarifsRes.vehiculeTarifs) : tarifsRes.vehiculeTarifs;
+          courseTypes = Object.keys(vt).map(function(k) {
+            return { value: k, label: vt[k].label || k };
+          });
+        }
+      }
+    } catch(e) { console.log('Types par défaut'); }
+
     // Charger infos chauffeur
     try {
         var drivers = await apiGet('/drivers');
