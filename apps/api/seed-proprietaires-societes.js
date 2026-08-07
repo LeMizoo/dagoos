@@ -114,16 +114,23 @@ async function seed() {
       // Créer 2 véhicules pour cette société
       const plaques = ['T-1234', 'T-5678', 'D-3456', 'F-1234', 'H-9012', 'M-7890', 'B-1111', 'C-2222'];
       for (let i = 0; i < 2; i++) {
-        await prisma.vehicle.create({
-          data: {
-            organizationId: org.id,
-            plate: plaques[Math.floor(Math.random() * plaques.length)] + ' ' + (i + 1),
-            model: ['Toyota Coaster', 'Mercedes Sprinter', 'Hyundai H1'][i],
-            year: 2020 + i,
-            currentKm: Math.floor(Math.random() * 100000),
-            status: 'active',
-          },
-        });
+        const plate = plaques[Math.floor(Math.random() * plaques.length)] + ' ' + (i + 1) + '-' + org.code;
+        try {
+          await prisma.vehicle.upsert({
+            where: { plate },
+            update: { organizationId: org.id, status: 'active' },
+            create: {
+              organizationId: org.id,
+              plate,
+              model: ['Toyota Coaster', 'Mercedes Sprinter', 'Hyundai H1'][i],
+              year: 2020 + i,
+              currentKm: Math.floor(Math.random() * 100000),
+              status: 'active',
+            },
+          });
+        } catch (e) {
+          console.log(`    ⚠️ Véhicule ignoré: ${e.message}`);
+        }
       }
       console.log(`    🚗 2 véhicules créés pour ${org.name}`);
     }
