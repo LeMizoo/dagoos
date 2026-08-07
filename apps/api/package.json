@@ -1,21 +1,21 @@
 {
   "name": "dagoos-backend",
   "version": "1.0.0",
-  "description": "Dagoo's API - La mobilit\u00c3\u00a9 connect\u00c3\u00a9e",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon src/server.js",
-    "start": "npx prisma db push --accept-data-loss && npx prisma generate && node seed-full.js && node reset-tovo.js && node seed-coops-premium.js && node seed-proprietaires-societes.js && node seed-chauffeurs.js && node server.js",
-    "build": "npm install && npx prisma generate",
-    "setup": "node reset-admin.js"
+    "start": "npx prisma db push --accept-data-loss && npx prisma generate && node server.js",
+    "seed": "node seed-full.js && node reset-tovo.js && node seed-coops-premium.js && node seed-proprietaires-societes.js && node seed-chauffeurs.js"
   },
   "dependencies": {
-    "@prisma/client": "^5.22.0",
+    "@prisma/client": "5.22.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "jsonwebtoken": "^9.0.2",
-    "prisma": "^5.22.0"
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7",
+    "prisma": "5.22.0"
   }
 }
