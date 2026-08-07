@@ -30,7 +30,7 @@ async function apiPost(endpoint, data) {
 
 function logout() {
   localStorage.clear();
-  window.location.replace(DAGOOS_CONFIG.landingUrl);
+  window.location.replace(DAGOOS_CONFIG.apps.driver || DAGOOS_CONFIG.landingUrl);
 }
 
 function loadPage(page) {
