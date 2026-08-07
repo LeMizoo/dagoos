@@ -9,7 +9,7 @@
   "description": "Application chauffeur Dagoo's - La mobilité connectée",
   "icons": [
     {
-      "src": "/icons/b-trans.svg",
+      "src": "/b-trans.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
