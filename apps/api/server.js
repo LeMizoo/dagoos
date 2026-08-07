@@ -40,6 +40,21 @@ app.get('/api', (req, res) => {
   res.json({ message: "🚀 Dagoo's API - La mobilité connectée", status: 'online' });
 });
 
+// Route seed protégée
+app.post('/api/seed', async (req, res) => {
+  const { password } = req.body;
+  if (password !== 'DagoosSeed2026!') return res.status(403).json({ error: 'Accès refusé' });
+  const { execSync } = require('child_process');
+  try {
+    execSync('node seed-full.js', { stdio: 'pipe', timeout: 60000 });
+    execSync('node reset-tovo.js', { stdio: 'pipe', timeout: 30000 });
+    execSync('node seed-coops-premium.js', { stdio: 'pipe', timeout: 30000 });
+    execSync('node seed-proprietaires-societes.js', { stdio: 'pipe', timeout: 60000 });
+    execSync('node seed-chauffeurs.js', { stdio: 'pipe', timeout: 120000 });
+    res.json({ success: true, message: 'Seeds exécutés avec succès' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`✅ API sur http://localhost:${PORT}`));
 // Force deploy Fri, Jul 31, 2026 11:25:10 AM
