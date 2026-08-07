@@ -6,6 +6,8 @@ interface UserInfo {
   name?: string;
   email?: string;
   role?: string;
+  organizationCode?: string;
+  organizationName?: string;
 }
 import Link from 'next/link';
 import Image from 'next/image';
@@ -76,9 +78,11 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
         if (d && !d.error) {
           const authUser = d.user || d;
           setUser({
-            name: authUser?.name || authUser?.fullName || 'Utilisateur',
+            name: authUser?.organizationName || authUser?.name || 'Utilisateur',
             email: authUser?.email,
             role: authUser?.role,
+            organizationCode: authUser?.organizationCode,
+            organizationName: authUser?.organizationName,
           });
 
           try {
@@ -118,7 +122,13 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
           if (token) {
             try {
               const payload = JSON.parse(atob(token.split('.')[1]));
-              setUser({ name: payload.name || 'Utilisateur', email: payload.email, role: payload.role });
+              setUser({ 
+                name: payload.organizationName || payload.name || 'Utilisateur', 
+                email: payload.email, 
+                role: payload.role,
+                organizationCode: payload.organizationCode,
+                organizationName: payload.organizationName,
+              });
             } catch {}
           }
         }
@@ -260,7 +270,8 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
                 {user?.name?.charAt(0) || 'U'}
               </div>
               <div className="hidden sm:block text-left">
-                <p className="text-sm font-medium text-gray-800 dark:text-white">{user?.name || 'Utilisateur'}</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white">{user?.organizationName || user?.name || 'Utilisateur'}</p>
+                {user?.organizationCode && <p className="text-xs text-blue-600 dark:text-blue-400 font-mono">{user.organizationCode}</p>}
                 <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email || ''}</p>
               </div>
             </button>
@@ -271,7 +282,8 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
                 <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
                 <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50 overflow-hidden">
                   <div className="p-4 border-b border-gray-100 dark:border-gray-700">
-                    <p className="font-semibold text-gray-800 dark:text-white">{user?.name || 'Utilisateur'}</p>
+                    <p className="font-semibold text-gray-800 dark:text-white">{user?.organizationName || user?.name || 'Utilisateur'}</p>
+                    {user?.organizationCode && <p className="text-xs text-blue-600 dark:text-blue-400 font-mono">{user.organizationCode}</p>}
                     <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email || ''}</p>
                     <span className="inline-block mt-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full capitalize">
                       {user?.role || app}
