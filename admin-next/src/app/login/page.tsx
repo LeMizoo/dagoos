@@ -38,7 +38,7 @@ function LoginForm() {
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-gray-800">Dagoo Admin</h1>
           <p className="text-gray-500 text-sm mt-1">Plateforme d&apos;administration</p>
-          <span className="inline-block bg-primary text-white text-xs px-3 py-1 rounded-full mt-3">Réservé aux administrateurs</span>
+          <span className="inline-block bg-primary text-white text-xs px-3 py-1 rounded-full mt-3">🔐 Réservé aux SUPER_ADMIN et ADMIN</span>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">

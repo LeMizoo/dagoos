@@ -36,17 +36,85 @@ router.post('/register', async (req, res) => {
 });
 
 // Connexion
+// Login Super Admin / Admin (central)
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
     
+    // Vérifier le rôle : seuls SUPER_ADMIN et ADMIN peuvent se connecter ici
+    if (user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Accès réservé aux administrateurs. Utilisez le portail Fleet ou Coop.' });
+    }
+    
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
     
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ message: 'Connexion réussie !', token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Login Fleet Manager
+router.post('/fleet-login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
+    
+    // Vérifier le rôle : seuls FLEET_MANAGER peuvent se connecter ici
+    if (user.role !== 'FLEET_MANAGER') {
+      return res.status(403).json({ error: 'Accès réservé aux gestionnaires de flotte.' });
+    }
+    
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
+    
+    // Chercher l'organisation liée
+    const org = await prisma.organization.findFirst({ where: { email: user.email } });
+    
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role, organizationId: org?.id, organizationCode: org?.code, organizationName: org?.name },
+      JWT_SECRET, { expiresIn: '7d' }
+    );
+    res.json({ 
+      message: 'Connexion réussie !', token, 
+      user: { id: user.id, name: user.name, email: user.email, role: user.role, organizationId: org?.id, organizationCode: org?.code, organizationName: org?.name }
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Login Coop Manager
+router.post('/coop-login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
+    
+    // Vérifier le rôle : seuls COOPERATIVE peuvent se connecter ici
+    if (user.role !== 'COOPERATIVE') {
+      return res.status(403).json({ error: 'Accès réservé aux gestionnaires de coopérative.' });
+    }
+    
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
+    
+    // Chercher l'organisation liée
+    const org = await prisma.organization.findFirst({ where: { email: user.email } });
+    
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role, organizationId: org?.id, organizationCode: org?.code, organizationName: org?.name },
+      JWT_SECRET, { expiresIn: '7d' }
+    );
+    res.json({ 
+      message: 'Connexion réussie !', token, 
+      user: { id: user.id, name: user.name, email: user.email, role: user.role, organizationId: org?.id, organizationCode: org?.code, organizationName: org?.name }
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

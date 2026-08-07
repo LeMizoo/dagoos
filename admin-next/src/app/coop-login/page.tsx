@@ -17,7 +17,7 @@ function CoopLoginForm() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    const res = await fetch('/api/auth/login', {
+    const res = await fetch('/api/auth/coop-login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
@@ -35,8 +35,9 @@ function CoopLoginForm() {
             <Building2 size={32} className="text-emerald-600" />
           </div>
           <h1 className="text-2xl font-bold text-gray-800">Dagoo Coop</h1>
-          <p className="text-gray-500 text-sm mt-1">Gérez votre coopérative de chauffeurs</p>
-          <span className="inline-block bg-emerald-100 text-emerald-700 text-xs px-3 py-1 rounded-full mt-3">🏢 Coopérative</span>
+          <p className="text-gray-500 text-sm mt-1">Espace Coopérative
+Gérez vos sociétés, véhicules, chauffeurs, contrats et livraisons.</p>
+          <span className="inline-block bg-emerald-100 text-emerald-700 text-xs px-3 py-1 rounded-full mt-3">🏢 Connexion Coopérative</span>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="mb-4"><label className="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent" placeholder="coop@exemple.mg" required /></div>

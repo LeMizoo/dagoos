@@ -17,7 +17,7 @@ function FleetLoginForm() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    const res = await fetch('/api/auth/login', {
+    const res = await fetch('/api/auth/fleet-login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
@@ -35,8 +35,9 @@ function FleetLoginForm() {
             <Truck size={32} className="text-blue-600" />
           </div>
           <h1 className="text-2xl font-bold text-gray-800">Dagoo Fleet</h1>
-          <p className="text-gray-500 text-sm mt-1">Gérez votre flotte de véhicules</p>
-          <span className="inline-block bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full mt-3">🚛 Gestionnaire de flotte</span>
+          <p className="text-gray-500 text-sm mt-1">Espace Flotte
+Gérez vos propriétaires, véhicules, chauffeurs et courses.</p>
+          <span className="inline-block bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full mt-3">🚛 Connexion Flotte</span>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="mb-4"><label className="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="fleet@exemple.mg" required /></div>
