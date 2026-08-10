@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "npx prisma db push --accept-data-loss && npx prisma generate && node server.js",
+    "start": "npx prisma db push --accept-data-loss && npx prisma generate && node sync-organization-accounts.js && node server.js",
     "seed": "node seed-full.js && node reset-tovo.js && node seed-coops-premium.js && node seed-proprietaires-societes.js && node seed-chauffeurs.js"
   },
   "dependencies": {
