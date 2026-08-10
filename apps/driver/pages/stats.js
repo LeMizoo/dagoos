@@ -1,46 +1,51 @@
-function init_stats() {
-    var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
+// ========================================
+// DRIVER - STATISTIQUES
+// ========================================
+async function init_stats() {
     var main = document.getElementById('mainContent');
-    main.innerHTML = 
-        '<div style="background:linear-gradient(135deg,#F1C40F,#F39C12);color:#1A1A2E;padding:14px 16px;">' +
-            '<h1 style="font-size:16px;"><i class="fas fa-chart-bar"></i> Statistiques</h1>' +
-        '</div>' +
-        '<div style="padding:12px;max-width:500px;margin:0 auto;">' +
-            '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:8px;">' +
-                '<h3 style="color:#DAA520;margin-bottom:10px;">📅 Ce mois</h3>' +
-                '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;">' +
-                    '<div><div style="font-size:20px;font-weight:800;color:#fff;" id="statMoisCourses">0</div><div style="font-size:10px;color:#94A3B8;">Courses</div></div>' +
-                    '<div><div style="font-size:20px;font-weight:800;color:#22C55E;" id="statMoisCA">0 Ar</div><div style="font-size:10px;color:#94A3B8;">CA</div></div>' +
-                    '<div><div style="font-size:20px;font-weight:800;color:#3B82F6;" id="statMoisGain">0 Ar</div><div style="font-size:10px;color:#94A3B8;">Gain net</div></div>' +
+    var user = JSON.parse(localStorage.getItem("dagoos_user") || "{}");
+    
+    main.innerHTML = '<div style="padding:12px;max-width:500px;margin:0 auto;padding-bottom:80px;"><div style="text-align:center;padding:40px;color:#DAA520;"><i class="fas fa-spinner fa-spin"></i> Chargement...</div></div>';
+
+    try {
+        var courses = await apiGet('/courses?driverId=' + user.driverId);
+        var arr = Array.isArray(courses) ? courses : [];
+        
+        var today = new Date().toISOString().split('T')[0];
+        var todayCourses = arr.filter(function(c) { return c.date && c.date.startsWith(today); });
+        var weekCourses = arr;
+        
+        var caJour = todayCourses.reduce(function(s, c) { return s + (c.price || 0); }, 0);
+        var comJour = Math.round(caJour * 0.20);
+        var netJour = Math.round(caJour * 0.80);
+        var caSem = weekCourses.reduce(function(s, c) { return s + (c.price || 0); }, 0);
+        var comSem = Math.round(caSem * 0.20);
+        var netSem = Math.round(caSem * 0.80);
+
+        main.innerHTML = 
+            '<div style="padding:12px;max-width:500px;margin:0 auto;padding-bottom:80px;">' +
+                '<div class="card" style="background:#1E293B;border-radius:12px;padding:20px;margin-bottom:12px;">' +
+                    '<h3 style="color:#DAA520;margin-bottom:16px;">📅 Aujourd\'hui</h3>' +
+                    '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;text-align:center;">' +
+                        '<div style="background:#252525;border-radius:10px;padding:12px;"><div style="font-size:24px;font-weight:800;color:#fff;">' + todayCourses.length + '</div><div style="font-size:10px;color:#888;">Courses</div></div>' +
+                        '<div style="background:#252525;border-radius:10px;padding:12px;"><div style="font-size:24px;font-weight:800;color:#22C55E;">' + caJour.toLocaleString() + ' Ar</div><div style="font-size:10px;color:#888;">CA Brut</div></div>' +
+                        '<div style="background:#252525;border-radius:10px;padding:12px;"><div style="font-size:24px;font-weight:800;color:#3B82F6;">' + comJour.toLocaleString() + ' Ar</div><div style="font-size:10px;color:#888;">Commission (gardé)</div></div>' +
+                        '<div style="background:#252525;border-radius:10px;padding:12px;"><div style="font-size:24px;font-weight:800;color:#8B5CF6;">' + netJour.toLocaleString() + ' Ar</div><div style="font-size:10px;color:#888;">Net (versé)</div></div>' +
+                    '</div>' +
                 '</div>' +
-            '</div>' +
-            '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;">' +
-                '<h3 style="color:#DAA520;margin-bottom:10px;">📊 Résumé</h3>' +
-                '<div id="statsSummary" style="color:#94A3B8;font-size:12px;"></div>' +
-            '</div>' +
-        '</div>';
-    loadStats();
+                '<div class="card" style="background:#1E293B;border-radius:12px;padding:20px;margin-bottom:12px;">' +
+                    '<h3 style="color:#DAA520;margin-bottom:16px;">📆 Cette semaine</h3>' +
+                    '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;text-align:center;">' +
+                        '<div style="background:#252525;border-radius:10px;padding:12px;"><div style="font-size:20px;font-weight:800;color:#fff;">' + weekCourses.length + '</div><div style="font-size:10px;color:#888;">Courses</div></div>' +
+                        '<div style="background:#252525;border-radius:10px;padding:12px;"><div style="font-size:20px;font-weight:800;color:#22C55E;">' + caSem.toLocaleString() + ' Ar</div><div style="font-size:10px;color:#888;">CA Brut</div></div>' +
+                        '<div style="background:#252525;border-radius:10px;padding:12px;"><div style="font-size:20px;font-weight:800;color:#3B82F6;">' + comSem.toLocaleString() + ' Ar</div><div style="font-size:10px;color:#888;">Commission</div></div>' +
+                        '<div style="background:#252525;border-radius:10px;padding:12px;"><div style="font-size:20px;font-weight:800;color:#8B5CF6;">' + netSem.toLocaleString() + ' Ar</div><div style="font-size:10px;color:#888;">Net</div></div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+    } catch(e) {
+        main.innerHTML = '<div style="text-align:center;padding:40px;color:#F87171;">Erreur de chargement</div>';
+    }
 }
 
-async function loadStats() {
-    try {
-        var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
-        var courses = await apiGet('/courses');
-        var myCourses = courses.filter(function(c) { return c.driverId === user.driverId; });
-        var moisCourses = myCourses.filter(function(c) {
-            var d = new Date(c.date);
-            var now = new Date();
-            return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-        });
-        var caMois = moisCourses.reduce(function(s, c) { return s + (c.price || 0); }, 0);
-        var commMois = moisCourses.reduce(function(s, c) { return s + (c.commission || 0); }, 0);
-        
-        document.getElementById('statMoisCourses').textContent = moisCourses.length;
-        document.getElementById('statMoisCA').textContent = caMois.toLocaleString() + ' Ar';
-        document.getElementById('statMoisGain').textContent = (caMois - commMois).toLocaleString() + ' Ar';
-        document.getElementById('statsSummary').innerHTML = 
-            'Total courses: <strong>' + myCourses.length + '</strong><br>' +
-            'CA total: <strong>' + myCourses.reduce(function(s,c){return s+(c.price||0);},0).toLocaleString() + ' Ar</strong><br>' +
-            'Km parcourus: <strong>' + myCourses.reduce(function(s,c){return s+(c.distanceKm||0);},0).toLocaleString() + ' km</strong>';
-    } catch(e) {}
-}
+window.init_stats = init_stats;

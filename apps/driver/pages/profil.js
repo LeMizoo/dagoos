@@ -5,20 +5,21 @@ function init_profil() {
     var main = document.getElementById('mainContent');
     var user = JSON.parse(localStorage.getItem("dagoos_user") || "{}");
     var token = localStorage.getItem('dagoos_token');
-    var orgName = user.organization || '-';
 
     main.innerHTML = 
-        '<div style="padding:12px;max-width:500px;margin:0 auto;">' +
+        '<div style="padding:12px;max-width:500px;margin:0 auto;padding-bottom:80px;">' +
+            // Carte infos chauffeur
             '<div class="card" style="background:#1E293B;border-radius:12px;padding:20px;margin-bottom:12px;">' +
                 '<h3 style="color:#DAA520;margin-bottom:16px;">👤 Profil Chauffeur</h3>' +
                 '<div style="display:flex;flex-direction:column;gap:12px;">' +
                     '<div><span style="color:#94A3B8;font-size:11px;">Nom</span><div style="font-weight:600;color:#fff;">' + (user.name || 'Chauffeur') + '</div></div>' +
                     '<div><span style="color:#94A3B8;font-size:11px;">Code</span><div style="font-weight:600;color:#DAA520;font-family:monospace;">' + (user.driverCode || '-') + '</div></div>' +
-                    '<div><span style="color:#94A3B8;font-size:11px;">Organisation</span><div style="font-weight:600;color:#fff;">' + orgName + '</div></div>' +
+                    '<div><span style="color:#94A3B8;font-size:11px;">Organisation</span><div style="font-weight:600;color:#fff;">' + (user.organization || '-') + '</div></div>' +
+                    '<div><span style="color:#94A3B8;font-size:11px;">Email</span><div style="font-weight:600;color:#fff;font-size:12px;">' + (user.email || '-') + '</div></div>' +
                 '</div>' +
             '</div>' +
 
-            // Changer le PIN
+            // Changer PIN
             '<div class="card" style="background:#1E293B;border-radius:12px;padding:20px;margin-bottom:12px;">' +
                 '<h3 style="color:#DAA520;margin-bottom:16px;">🔐 Changer mon PIN</h3>' +
                 '<div style="display:flex;flex-direction:column;gap:10px;">' +
@@ -49,7 +50,7 @@ async function changePin() {
         var r = await fetch(DAGOOS_CONFIG.apiUrl + '/drivers/' + user.driverId, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('dagoos_token') },
-            body: JSON.stringify({ oldPin: oldPin, pin: newPin })
+            body: JSON.stringify({ pin: newPin })
         });
         var data = await r.json();
         if (r.ok) {
