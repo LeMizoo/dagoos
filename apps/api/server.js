@@ -50,6 +50,18 @@ app.post('/api/seed', async (req, res) => {
   const { password } = req.body;
   if (password !== 'DagoosSeed2026!') return res.status(403).json({ error: 'Accès refusé' });
   res.json({ success: true, message: 'Seeds lancés en arrière-plan' });
+
+// Route seed-full (synchrone)
+app.post("/api/seed-full", async (req, res) => {
+  const { password } = req.body;
+  if (password !== "DagoosSeed2026!") return res.status(403).json({ error: "Accès refusé" });
+  const { execSync } = require("child_process");
+  try {
+    const out = execSync("node seed-full.js", { cwd: __dirname, timeout: 120000, encoding: "utf8" });
+    console.log(out);
+    res.json({ success: true, output: out });
+  } catch (e) { res.status(500).json({ error: e.message, stderr: e.stderr?.toString() }); }
+});
   const { exec } = require('child_process');
   exec('npm run seed', { cwd: __dirname }, (error, stdout, stderr) => {
     if (error) console.error('❌ Seed error:', error.message);
