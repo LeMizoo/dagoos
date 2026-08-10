@@ -7,12 +7,21 @@ router.get('/', authMiddleware, async (req, res) => {
   try {
     let where = {};
     if (req.user.role !== 'SUPER_ADMIN' && req.user.role !== 'ADMIN') {
+      // Chercher d'abord via driver
       const userWithOrg = await prisma.user.findUnique({
         where: { id: req.user.id },
         include: { driver: { select: { organizationId: true } } }
       });
       if (userWithOrg?.driver?.organizationId) {
         where = { organizationId: userWithOrg.driver.organizationId };
+      } else {
+        // Sinon, chercher via l'email de l'organisation (FLEET_MANAGER / COOPERATIVE)
+        const org = await prisma.organization.findFirst({
+          where: { email: req.user.email }
+        });
+        if (org) {
+          where = { organizationId: org.id };
+        }
       }
     }
     const vehicles = await prisma.vehicle.findMany({
