@@ -29,7 +29,55 @@ router.get('/', authMiddleware, async (req, res) => {
 
 router.post('/', authMiddleware, async (req, res) => {
   try {
-    const driver = await prisma.driver.create({ data: req.body });
+    const { email, password, driverCode, pin, firstName, lastName, phone, organizationId, vehicleId, status, license } = req.body;
+    
+    // Créer ou récupérer le User associé
+    let user;
+    if (email) {
+      user = await prisma.user.upsert({
+        where: { email },
+        update: { name: `${firstName || ''} ${lastName || ''}`.trim(), role: 'DRIVER' },
+        create: {
+          email,
+          name: `${firstName || ''} ${lastName || ''}`.trim(),
+          password: password || pin || '1234',
+          role: 'DRIVER',
+          phone: phone || '',
+        },
+      });
+    } else if (driverCode) {
+      // Générer un email basé sur le code
+      const generatedEmail = `${driverCode.toLowerCase()}@driver.dagoos.mg`;
+      user = await prisma.user.upsert({
+        where: { email: generatedEmail },
+        update: { name: `${firstName || ''} ${lastName || ''}`.trim(), role: 'DRIVER' },
+        create: {
+          email: generatedEmail,
+          name: `${firstName || ''} ${lastName || ''}`.trim(),
+          password: password || pin || '1234',
+          role: 'DRIVER',
+          phone: phone || '',
+        },
+      });
+    } else {
+      return res.status(400).json({ error: 'Email ou driverCode requis' });
+    }
+    
+    // Créer le Driver
+    const driver = await prisma.driver.upsert({
+      where: { driverCode: driverCode || `DRV-${user.id}` },
+      update: { organizationId, vehicleId, status, license, pin: pin || '1234' },
+      create: {
+        userId: user.id,
+        organizationId,
+        driverCode: driverCode || `DRV-${user.id}`,
+        pin: pin || '1234',
+        vehicleId: vehicleId || null,
+        status: status || 'active',
+        license: license || null,
+      },
+    });
+    
     res.status(201).json(driver);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
