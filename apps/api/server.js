@@ -20,16 +20,15 @@ app.use('/api/plans', require('./modules/plans/plans.routes'));
 app.use('/api/tarifs', require('./modules/tarifs/tarifs.routes'));
 
 // Route db-push
-app.post('/api/db-push', async (req, res) => {
-  const { password } = req.body;
-  if (password !== 'DagoosSeed2026!') return res.status(403).json({ error: 'Accès refusé' });
-  const { execSync } = require('child_process');
-  try {
-    execSync('npx prisma db push --accept-data-loss', { stdio: 'pipe', timeout: 60000 });
-    execSync('npx prisma generate', { stdio: 'pipe', timeout: 60000 });
-    res.json({ success: true, message: 'Schéma synchronisé' });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+// /api/db-push désactivé en production.
+// Les migrations/synchronisations Prisma doivent être lancées manuellement.
+app.post('/api/db-push', (req, res) => {
+  res.status(410).json({
+    error: 'Route désactivée',
+    message: 'Les modifications Prisma doivent être effectuées manuellement.'
+  });
 });
+
 app.use('/api/messages', require('./modules/messages/messages.routes'));
 app.use('/api/notifications', require('./modules/notifications/notifications.routes'));
 app.use('/api/logs', require('./modules/logs.routes'));
@@ -41,18 +40,12 @@ app.get('/api', (req, res) => {
 });
 
 // Route seed protégée (asynchrone)
-app.post('/api/seed', async (req, res) => {
-  const { password } = req.body;
-  if (password !== 'DagoosSeed2026!') return res.status(403).json({ error: 'Accès refusé' });
-  
-  // Répondre immédiatement, lancer les seeds en arrière-plan
-  res.json({ success: true, message: 'Seeds lancés en arrière-plan' });
-  
-  const { exec } = require('child_process');
-  exec('npm run seed', { cwd: __dirname }, (error, stdout, stderr) => {
-    if (error) console.error('❌ Seed error:', error.message);
-    if (stdout) console.log(stdout);
-    if (stderr) console.error(stderr);
+// /api/seed désactivé en production.
+// Les seeds doivent être lancés manuellement.
+app.post('/api/seed', (req, res) => {
+  res.status(410).json({
+    error: 'Route désactivée',
+    message: 'Les seeds doivent être lancés manuellement.'
   });
 });
 
