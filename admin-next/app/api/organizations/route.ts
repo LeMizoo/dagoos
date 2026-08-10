@@ -1,21 +1,18 @@
 import { NextResponse } from 'next/server';
 
+const API_BASE_URL = (process.env.API_BASE_URL || 'https://dagoos-api.onrender.com').replace(/\/$/, '');
+
 export async function GET() {
   try {
-    const loginRes = await fetch('https://dagoos-api.onrender.com/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'admin@dagoos.mg', password: 'admin123' }),
-    });
-    if (!loginRes.ok) throw new Error('Login failed');
-    const { token } = await loginRes.json();
-
-    const res = await fetch('https://dagoos-api.onrender.com/api/organizations', {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
-    const orgs = await res.json();
-    return NextResponse.json(orgs);
-  } catch {
-    return NextResponse.json([]);
+    const res = await fetch(`${API_BASE_URL}/api/organizations`, { cache: 'no-store' });
+    const data = await res.json().catch(() => ({ error: 'Réponse API invalide' }));
+    if (!res.ok) {
+      console.error('[api/organizations] upstream error', { status: res.status, error: data.error });
+      return NextResponse.json({ error: data.error || 'Impossible de charger les organisations' }, { status: res.status });
+    }
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('[api/organizations] request failed', error);
+    return NextResponse.json({ error: 'API indisponible' }, { status: 502 });
   }
 }

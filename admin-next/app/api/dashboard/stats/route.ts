@@ -12,18 +12,7 @@ export async function GET(_req: NextRequest) {
     const cookieStore = cookies();
     const token = cookieStore.get('dagoos_token')?.value;
 
-    let authToken = token;
-    if (!authToken) {
-      const loginRes = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: 'admin@dagoos.mg', password: 'admin123' }),
-      });
-      if (loginRes.ok) {
-        const { token: t } = await loginRes.json();
-        authToken = t;
-      }
-    }
+    const authToken = token;
 
     if (!authToken) {
       return NextResponse.json({
