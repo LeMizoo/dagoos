@@ -156,7 +156,7 @@ async function init_home() {
             '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
                 '<h3 style="color:#DAA520;margin-bottom:8px;font-size:13px;">🔗 Assignation</h3>' +
                 '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">' +
-                    '<div><span style="color:#94A3B8;">Véhicule</span><br><span style="font-weight:600;color:#fff;">' + (plate || 'Aucun') + '</span></div>' +
+                    '<div><span style="color:#94A3B8;">Véhicule</span><br><span style="font-weight:600;color:#fff;" id="assignedVehicle">' + (plate || 'Aucun') + '</span></div>' +
                     '<div><span style="color:#94A3B8;">Organisation</span><br><span style="font-weight:600;color:#fff;">' + orgName + '</span></div>' +
                 '</div>' +
             '</div>' +
@@ -277,7 +277,7 @@ async function changeStatus(status) {
         await fetch(DAGOOS_CONFIG.apiUrl + '/drivers/' + user.driverId, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('dagoos_token') },
-            body: JSON.stringify({ status: status })
+            body: JSON.stringify({ status: status === 'active' ? 'active' : status === 'pause' ? 'pause' : 'inactive' })
         });
     } catch(e) { console.error(e); }
     
