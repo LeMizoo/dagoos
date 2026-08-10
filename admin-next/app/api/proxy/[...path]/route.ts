@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const API_BASE = 'https://dagoos-api.onrender.com';
+const API_BASE = (process.env.API_BASE_URL || 'https://dagoos-api.onrender.com').replace(/\/$/, '');
 
 const pathMapping: Record<string, string> = {
   '/finances/transactions': '/api/transactions',
@@ -29,7 +29,8 @@ async function proxyRequest(req: NextRequest) {
   const authHeader = req.headers.get('Authorization');
   const cookieStore = cookies();
   const cookieToken = cookieStore.get('dagoos_token')?.value;
-  const token = authHeader?.replace('Bearer ', '') || cookieToken;
+  // A cookie is refreshed at login, whereas local-storage tokens may be stale.
+  const token = cookieToken || authHeader?.replace('Bearer ', '');
 
   console.log(`🔐 Proxy -> ${req.method} ${apiUrl} ${token ? '(avec token)' : '(sans token)'}`);
 
@@ -40,8 +41,8 @@ async function proxyRequest(req: NextRequest) {
 
     const body = req.method !== 'GET' && req.method !== 'HEAD' ? await req.text() : undefined;
 
-    const res = await fetch(apiUrl, { method: req.method, headers, body });
-    const data = await res.json();
+    const res = await fetch(apiUrl, { method: req.method, headers, body, cache: 'no-store' });
+    const data = await res.json().catch(() => ({ error: 'Réponse API invalide' }));
     return NextResponse.json(data, { status: res.status });
   } catch (e: any) {
     console.error(`❌ Erreur proxy ${apiUrl}:`, e.message);

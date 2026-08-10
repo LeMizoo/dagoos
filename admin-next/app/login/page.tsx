@@ -24,11 +24,12 @@ function LoginForm() {
     if (res.ok) { 
       const data = await res.json();
       // Stocker dans localStorage pour les appels API
-      if (data.token) localStorage.setItem('token', data.token);
+      localStorage.removeItem('token');
+      localStorage.removeItem('dagoos_token');
       if (data.user) localStorage.setItem('dagoos_user', JSON.stringify(data.user));
       router.push(redirect); router.refresh(); 
     }
-    else { const data = await res.json(); setError(data.error || 'Erreur de connexion'); }
+    else { const data = await res.json().catch(() => ({})); setError(data.error || 'Erreur de connexion'); }
     setLoading(false);
   }
 

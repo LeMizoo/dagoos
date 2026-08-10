@@ -14,6 +14,30 @@ router.get('/', async (req, res) => {
   }
 });
 
+// These routes must precede '/:id', otherwise Express interprets "fleet" or
+// "coop" as an ID and the public landing pages cannot be reached.
+router.get('/fleet/:slug', async (req, res) => {
+  try {
+    const fleet = await prisma.organization.findFirst({
+      where: { slug: req.params.slug, type: 'FLEET_MANAGER', status: 'active' },
+      include: { vehicles: { where: { status: 'active' }, take: 6 }, drivers: { where: { status: 'active' }, take: 6 }, _count: { select: { vehicles: true, drivers: true } } }
+    });
+    if (!fleet) return res.status(404).json({ error: 'Flotte introuvable' });
+    res.json(fleet);
+  } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+router.get('/coop/:slug', async (req, res) => {
+  try {
+    const coop = await prisma.organization.findFirst({
+      where: { slug: req.params.slug, type: 'COOPERATIVE', status: 'active' },
+      include: { vehicles: { where: { status: 'active' }, take: 6 }, drivers: { where: { status: 'active' }, take: 6 }, _count: { select: { vehicles: true, drivers: true } } }
+    });
+    if (!coop) return res.status(404).json({ error: 'Coopérative introuvable' });
+    res.json(coop);
+  } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
 // GET une organisation par ID
 router.get('/:id', async (req, res) => {
   try {
