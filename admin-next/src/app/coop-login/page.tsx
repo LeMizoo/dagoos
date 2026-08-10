@@ -40,7 +40,7 @@ Gérez vos sociétés, véhicules, chauffeurs, contrats et livraisons.</p>
           <span className="inline-block bg-emerald-100 text-emerald-700 text-xs px-3 py-1 rounded-full mt-3">🏢 Connexion Coopérative</span>
         </div>
         <form onSubmit={handleSubmit}>
-          <div className="mb-4"><label className="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent" placeholder="coop@exemple.mg" required /></div>
+          <div className="mb-4"><label className="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent" placeholder="votre@email.mg" required /></div>
           <div className="mb-6"><label className="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label><input type="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent" placeholder="••••••••" required /></div>
           {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
           <button type="submit" disabled={loading} className="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 disabled:bg-gray-400 transition">{loading ? '⏳ Connexion...' : '🏢 Accéder à mon espace'}</button>
