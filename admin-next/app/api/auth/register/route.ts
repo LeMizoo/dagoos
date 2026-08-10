@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,13 +20,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Appeler l'API backend
-    const hashedPassword = await bcrypt.hash(password, 10);
-
     const registerData = {
       name,
       email,
-      password: hashedPassword,
+      password,
       role,
       organizationName,
       planId,

@@ -10,6 +10,7 @@ const router = express.Router();
 router.post('/register', async (req, res) => {
   try {
     const { name, email, phone, password, role, plan } = req.body;
+    if (!name || !email || !password) return res.status(400).json({ error: 'Nom, email et mot de passe requis' });
     const hashed = await bcrypt.hash(password, 10);
     
     const user = await prisma.user.create({
@@ -31,6 +32,7 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({ message: 'Compte créé avec succès !' });
   } catch (e) {
+    if (e.code === 'P2002') return res.status(409).json({ error: 'Un compte utilise déjà cet email' });
     res.status(500).json({ error: e.message });
   }
 });

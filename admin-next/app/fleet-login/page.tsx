@@ -17,13 +17,13 @@ function FleetLoginForm() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    const res = await fetch('/api/auth/login', {
+    const res = await fetch('/api/auth/fleet-login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     });
-    if (res.ok) { const data = await res.json(); if (data.token) localStorage.setItem("token", data.token); if (data.user) localStorage.setItem("dagoos_user", JSON.stringify(data.user)); router.push(redirect); router.refresh(); }
-    else { const data = await res.json(); setError(data.error || 'Email ou mot de passe incorrect'); }
+    if (res.ok) { const data = await res.json(); localStorage.removeItem('token'); localStorage.removeItem('dagoos_token'); if (data.user) localStorage.setItem("dagoos_user", JSON.stringify(data.user)); router.push(redirect); router.refresh(); }
+    else { const data = await res.json().catch(() => ({})); setError(data.error || 'Email ou mot de passe incorrect'); }
     setLoading(false);
   }
 
