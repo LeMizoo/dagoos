@@ -99,7 +99,7 @@ export default function CoopDrivers() {
                 const cv = vehicles.find(v => v.id === d.vehicleId);
                 return (
                 <tr key={d.id} className="border-t hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium">{d.firstName} {d.lastName}</td>
+                  <td className="px-4 py-3 font-medium">{d.user?.name || `${d.firstName || ""} ${d.lastName || ""}`.trim() || "Sans nom"}</td>
                   <td className="px-4 py-3 font-mono text-xs text-gray-500">{d.driverCode || '-'}</td>
                   <td className="px-4 py-3 text-gray-500">{d.phone || '-'}</td>
                   <td className="px-4 py-3">
