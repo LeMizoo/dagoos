@@ -115,4 +115,66 @@ router.delete('/:id', authMiddleware, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+router.get('/me', authMiddleware, async (req, res) => {
+  try {
+    const driver = await prisma.driver.findFirst({
+      where: req.user.role === 'DRIVER' 
+        ? { id: req.user.driverId }
+        : { userId: req.user.id },
+      include: { user: true, organization: true, vehicle: true }
+    });
+    if (!driver) return res.status(404).json({ error: 'Chauffeur non trouvé' });
+    res.json(driver);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// --- PWA Driver : Shift & Statut ---
+router.get('/me/status', authMiddleware, async (req, res) => {
+  try {
+    const driver = await prisma.driver.findUnique({
+      where: { id: req.user.driverId },
+      select: { status: true }
+    });
+    return res.json({ status: driver ? driver.status : 'OFFLINE' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+router.post('/shift/start', authMiddleware, async (req, res) => {
+  try {
+    await prisma.driver.update({
+      where: { id: req.user.driverId },
+      data: { status: 'active' }
+    });
+    return res.json({ success: true, status: 'active' });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Erreur démarrage service' });
+  }
+});
+
+router.post('/shift/pause', authMiddleware, async (req, res) => {
+  try {
+    await prisma.driver.update({
+      where: { id: req.user.driverId },
+      data: { status: 'pause' }
+    });
+    return res.json({ success: true, status: 'pause' });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Erreur pause' });
+  }
+});
+
+router.post('/shift/end', authMiddleware, async (req, res) => {
+  try {
+    await prisma.driver.update({
+      where: { id: req.user.driverId },
+      data: { status: 'inactive' }
+    });
+    return res.json({ success: true, status: 'inactive' });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Erreur fin de service' });
+  }
+});
+
 module.exports = router;

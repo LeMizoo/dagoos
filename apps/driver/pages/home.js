@@ -59,8 +59,8 @@ async function init_home() {
     var logo = DAGOOS_CONFIG.logoUrl;
 
     // Déterminer le statut
-    var statusLabel = currentDriver && currentDriver.status === 'active' ? 'En service' : 'Absent';
-    var statusColor = currentDriver && currentDriver.status === 'active' ? '#22C55E' : '#E74C3C';
+    var statusLabel = currentDriver && currentDriver.status === 'active' || status === 'present' ? 'En service' : 'Absent';
+    var statusColor = currentDriver && currentDriver.status === 'active' || status === 'present' ? '#22C55E' : '#E74C3C';
 
     main.innerHTML = 
         // HEADER
@@ -277,7 +277,7 @@ async function changeStatus(status) {
         await fetch(DAGOOS_CONFIG.apiUrl + '/drivers/' + user.driverId, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('dagoos_token') },
-            body: JSON.stringify({ status: status === 'active' ? 'active' : status === 'pause' ? 'pause' : 'inactive' })
+            body: JSON.stringify({ status: status === 'active' || status === 'present' ? 'active' : status === 'pause' ? 'pause' : 'inactive' })
         });
     } catch(e) { console.error(e); }
     
@@ -352,3 +352,32 @@ window.enregistrerCourse = enregistrerCourse;
 window.calcCourse = calcCourse;
 window.updateCourseForm = updateCourseForm;
 window.loadStats = loadStats;
+
+// Chargement des infos du véhicule
+async function loadDriverVehicleInfo() {
+  var vehicleBadge = document.getElementById('vehicleStatusBadge');
+  var vehicleNameEl = document.getElementById('assignedVehicleName');
+
+  try {
+    var data = await apiFetch('/drivers/me');
+    
+    if (data && data.vehicle) {
+      if (vehicleBadge) {
+        vehicleBadge.textContent = '🛵 ' + (data.vehicle.plate || 'Moto assignée');
+        vehicleBadge.className = 'badge badge-success';
+      }
+      if (vehicleNameEl) {
+        vehicleNameEl.textContent = data.vehicle.plate || data.vehicle.model || 'Moto';
+      }
+    } else {
+      if (vehicleBadge) {
+        vehicleBadge.textContent = '⚠️ Sans moto';
+        vehicleBadge.className = 'badge badge-danger';
+      }
+    }
+  } catch (err) {
+    console.warn('Impossible de charger les données du véhicule:', err);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadDriverVehicleInfo);

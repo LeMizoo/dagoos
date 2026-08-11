@@ -1,51 +1,44 @@
-// ========================================
-// DRIVER - STATISTIQUES
-// ========================================
-async function init_stats() {
-    var main = document.getElementById('mainContent');
-    var user = JSON.parse(localStorage.getItem("dagoos_user") || "{}");
+async function refreshDailyStats() {
+  try {
+    var stats = await apiFetch('/finances/courses');
     
-    main.innerHTML = '<div style="padding:12px;max-width:500px;margin:0 auto;padding-bottom:80px;"><div style="text-align:center;padding:40px;color:#DAA520;"><i class="fas fa-spinner fa-spin"></i> Chargement...</div></div>';
+    if (stats && Array.isArray(stats)) {
+      var today = new Date().toISOString().split('T')[0];
+      var todayCourses = stats.filter(function(c) {
+        return c.date && c.date.startsWith(today);
+      });
+      
+      var todayCA = todayCourses.reduce(function(sum, c) { return sum + (c.price || c.amount || 0); }, 0);
+      var todayCom = todayCourses.reduce(function(sum, c) { return sum + (c.commission || 0); }, 0);
+      var todayNet = todayCA - todayCom;
+      
+      var el = function(id) { return document.getElementById(id); };
+      if (el('statTodayCourses')) el('statTodayCourses').textContent = todayCourses.length;
+      if (el('statTodayCA')) el('statTodayCA').textContent = todayCA.toLocaleString() + ' Ar';
+      if (el('statTodayCom')) el('statTodayCom').textContent = todayCom.toLocaleString() + ' Ar';
+      if (el('statTodayNet')) el('statTodayNet').textContent = todayNet.toLocaleString() + ' Ar';
 
-    try {
-        var courses = await apiGet('/courses?driverId=' + user.driverId);
-        var arr = Array.isArray(courses) ? courses : [];
-        
-        var today = new Date().toISOString().split('T')[0];
-        var todayCourses = arr.filter(function(c) { return c.date && c.date.startsWith(today); });
-        var weekCourses = arr;
-        
-        var caJour = todayCourses.reduce(function(s, c) { return s + (c.price || 0); }, 0);
-        var comJour = Math.round(caJour * 0.20);
-        var netJour = Math.round(caJour * 0.80);
-        var caSem = weekCourses.reduce(function(s, c) { return s + (c.price || 0); }, 0);
-        var comSem = Math.round(caSem * 0.20);
-        var netSem = Math.round(caSem * 0.80);
+      // Cette semaine
+      var weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      var weekCourses = stats.filter(function(c) {
+        return c.date && new Date(c.date) >= weekAgo;
+      });
+      var weekCA = weekCourses.reduce(function(sum, c) { return sum + (c.price || c.amount || 0); }, 0);
+      var weekCom = weekCourses.reduce(function(sum, c) { return sum + (c.commission || 0); }, 0);
+      var weekNet = weekCA - weekCom;
 
-        main.innerHTML = 
-            '<div style="padding:12px;max-width:500px;margin:0 auto;padding-bottom:80px;">' +
-                '<div class="card" style="background:#1E293B;border-radius:12px;padding:20px;margin-bottom:12px;">' +
-                    '<h3 style="color:#DAA520;margin-bottom:16px;">📅 Aujourd\'hui</h3>' +
-                    '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;text-align:center;">' +
-                        '<div style="background:#252525;border-radius:10px;padding:12px;"><div style="font-size:24px;font-weight:800;color:#fff;">' + todayCourses.length + '</div><div style="font-size:10px;color:#888;">Courses</div></div>' +
-                        '<div style="background:#252525;border-radius:10px;padding:12px;"><div style="font-size:24px;font-weight:800;color:#22C55E;">' + caJour.toLocaleString() + ' Ar</div><div style="font-size:10px;color:#888;">CA Brut</div></div>' +
-                        '<div style="background:#252525;border-radius:10px;padding:12px;"><div style="font-size:24px;font-weight:800;color:#3B82F6;">' + comJour.toLocaleString() + ' Ar</div><div style="font-size:10px;color:#888;">Commission (gardé)</div></div>' +
-                        '<div style="background:#252525;border-radius:10px;padding:12px;"><div style="font-size:24px;font-weight:800;color:#8B5CF6;">' + netJour.toLocaleString() + ' Ar</div><div style="font-size:10px;color:#888;">Net (versé)</div></div>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="card" style="background:#1E293B;border-radius:12px;padding:20px;margin-bottom:12px;">' +
-                    '<h3 style="color:#DAA520;margin-bottom:16px;">📆 Cette semaine</h3>' +
-                    '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;text-align:center;">' +
-                        '<div style="background:#252525;border-radius:10px;padding:12px;"><div style="font-size:20px;font-weight:800;color:#fff;">' + weekCourses.length + '</div><div style="font-size:10px;color:#888;">Courses</div></div>' +
-                        '<div style="background:#252525;border-radius:10px;padding:12px;"><div style="font-size:20px;font-weight:800;color:#22C55E;">' + caSem.toLocaleString() + ' Ar</div><div style="font-size:10px;color:#888;">CA Brut</div></div>' +
-                        '<div style="background:#252525;border-radius:10px;padding:12px;"><div style="font-size:20px;font-weight:800;color:#3B82F6;">' + comSem.toLocaleString() + ' Ar</div><div style="font-size:10px;color:#888;">Commission</div></div>' +
-                        '<div style="background:#252525;border-radius:10px;padding:12px;"><div style="font-size:20px;font-weight:800;color:#8B5CF6;">' + netSem.toLocaleString() + ' Ar</div><div style="font-size:10px;color:#888;">Net</div></div>' +
-                    '</div>' +
-                '</div>' +
-            '</div>';
-    } catch(e) {
-        main.innerHTML = '<div style="text-align:center;padding:40px;color:#F87171;">Erreur de chargement</div>';
+      if (el('statWeekCourses')) el('statWeekCourses').textContent = weekCourses.length;
+      if (el('statWeekCA')) el('statWeekCA').textContent = weekCA.toLocaleString() + ' Ar';
+      if (el('statWeekCom')) el('statWeekCom').textContent = weekCom.toLocaleString() + ' Ar';
+      if (el('statWeekNet')) el('statWeekNet').textContent = weekNet.toLocaleString() + ' Ar';
     }
+  } catch (err) {
+    console.warn('Erreur de récupération des stats:', err);
+  }
 }
 
-window.init_stats = init_stats;
+document.addEventListener('DOMContentLoaded', function() {
+  refreshDailyStats();
+  setInterval(refreshDailyStats, 30000);
+});
