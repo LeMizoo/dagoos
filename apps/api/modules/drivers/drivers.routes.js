@@ -16,6 +16,14 @@ router.get('/', authMiddleware, async (req, res) => {
       });
       if (userWithOrg?.driver?.organizationId) {
         where = { organizationId: userWithOrg.driver.organizationId };
+      } else {
+        // Pour FLEET_MANAGER / COOPERATIVE, chercher par email
+        const org = await prisma.organization.findFirst({
+          where: { email: req.user.email }
+        });
+        if (org) {
+          where = { organizationId: org.id };
+        }
       }
     }
     const drivers = await prisma.driver.findMany({
