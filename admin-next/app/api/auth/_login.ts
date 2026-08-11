@@ -12,18 +12,18 @@ export async function login(request: NextRequest, endpoint: 'login' | 'fleet-log
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email.trim().toLowerCase(), password }), cache: 'no-store',
     });
-    const data = await upstream.json().catch(() => ({ error: 'Réponse invalide du service d’authentification' }));
+    const data = await upstream.json().catch(() => ({ error: 'Réponse invalide' }));
     if (!upstream.ok || !data.token) {
       return NextResponse.json({ error: data.error || 'Email ou mot de passe incorrect' }, { status: upstream.ok ? 502 : upstream.status });
     }
-    const response = NextResponse.json({ user: data.user }, { status: 200 });
+    const response = NextResponse.json({ token: data.token, user: data.user }, { status: 200 });
     response.cookies.set('dagoos_token', data.token, {
-      httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax',
+      httpOnly: true, secure: true, sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60, path: '/',
     });
     return response;
   } catch (error) {
-    console.error('[auth/login] upstream request failed', error);
-    return NextResponse.json({ error: 'Service d’authentification indisponible' }, { status: 502 });
+    console.error('[auth/login]', error);
+    return NextResponse.json({ error: 'Service d\'authentification indisponible' }, { status: 502 });
   }
 }
