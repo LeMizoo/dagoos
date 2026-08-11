@@ -41,7 +41,7 @@ async function login() {
     var data = await response.json();
 
     if (response.ok && data.token) {
-      localStorage.removeItem('dagoos_token');
+      localStorage.removeItem('dagoo_driver_token');
       localStorage.removeItem('dagoos_user');
       localStorage.setItem('dagoo_driver_token', data.token);
       localStorage.setItem('dagoo_driver_user', JSON.stringify(data.user));

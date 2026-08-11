@@ -34,7 +34,7 @@ async function syncPendingChanges() {
     var pending = JSON.parse(localStorage.getItem('dago_pending_changes') || '[]');
     if (pending.length === 0) return;
     
-    var token = localStorage.getItem('dagoos_token');
+    var token = localStorage.getItem('dagoo_driver_token');
     if (!token) return;
     
     for (var change of pending) {

@@ -5,15 +5,15 @@ var currentDriver = null;
 var currentVehicle = null;
 var currentOrg = null;
 var expenses = [];
-var statutPresence = 'absent';
+
 var estBloque = false;
 var isOnline = navigator.onLine;
 var refreshInterval = null;
 
 async function init_home() {
     var main = document.getElementById('mainContent');
-    var user = JSON.parse(localStorage.getItem("dagoos_user") || "{}");
-    var token = localStorage.getItem('dagoos_token');
+    var user = JSON.parse(localStorage.getItem("dagoo_driver_user") || "{}");
+    var token = localStorage.getItem('dagoo_driver_token');
     var driverId = user.driverId;
 
     // Charger les tarifs/types de l'organisation
@@ -36,20 +36,23 @@ async function init_home() {
 
     // Charger infos chauffeur
     try {
-        var drivers = await apiGet('/drivers');
-        if (Array.isArray(drivers)) {
-            currentDriver = drivers.find(function(d) { return d.id === driverId; });
-            if (currentDriver && currentDriver.vehicleId) {
-                var vehicles = await apiGet('/vehicles');
-                if (Array.isArray(vehicles)) {
-                    currentVehicle = vehicles.find(function(v) { return v.id === currentDriver.vehicleId; });
-                }
+        currentDriver = await apiGet('/drivers/me');
+
+        if (currentDriver && currentDriver.vehicleId) {
+            var vehicles = await apiGet('/vehicles');
+            if (Array.isArray(vehicles)) {
+                currentVehicle = vehicles.find(function(v) {
+                    return v.id === currentDriver.vehicleId;
+                });
             }
-            if (currentDriver && currentDriver.organizationId) {
-                var orgs = await apiGet('/organizations');
-                if (Array.isArray(orgs)) {
-                    currentOrg = orgs.find(function(o) { return o.id === currentDriver.organizationId; });
-                }
+        }
+
+        if (currentDriver && currentDriver.organizationId) {
+            var orgs = await apiGet('/organizations');
+            if (Array.isArray(orgs)) {
+                currentOrg = orgs.find(function(o) {
+                    return o.id === currentDriver.organizationId;
+                });
             }
         }
     } catch(e) { console.error(e); }
@@ -59,8 +62,10 @@ async function init_home() {
     var logo = DAGOOS_CONFIG.logoUrl;
 
     // Déterminer le statut
-    var statusLabel = currentDriver && currentDriver.status === 'active' || status === 'present' ? 'En service' : 'Absent';
-    var statusColor = currentDriver && currentDriver.status === 'active' || status === 'present' ? '#22C55E' : '#E74C3C';
+    var driverStatus = currentDriver && currentDriver.status ? currentDriver.status : 'inactive';
+    var statutPresence = driverStatus === 'active' ? 'present' : driverStatus === 'pause' ? 'pause' : 'absent';
+    var statusLabel = driverStatus === 'active' ? 'En service' : driverStatus === 'pause' ? 'En pause' : 'Absent';
+    var statusColor = driverStatus === 'active' ? '#22C55E' : driverStatus === 'pause' ? '#F59E0B' : '#E74C3C';
 
     main.innerHTML = 
         // HEADER
@@ -222,9 +227,9 @@ function updateCourseForm() {
 
 async function enregistrerCourse() {
     var type = document.getElementById('typeCourse')?.value || 'course';
-    var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
+    var user = JSON.parse(localStorage.getItem('dagoo_driver_user') || '{}');
     var msg = document.getElementById('courseMsg');
-    var token = localStorage.getItem('dagoos_token');
+    var token = localStorage.getItem('dagoo_driver_token');
     var distance = 0, montant = 0;
 
     if (type === 'course') {
@@ -245,7 +250,7 @@ async function enregistrerCourse() {
     try {
         var r = await fetch(DAGOOS_CONFIG.apiUrl + '/courses', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('dagoo_driver_token') },
             body: JSON.stringify({ driverId: user.driverId, vehicleId: currentVehicle?.id, type: type, distanceKm: distance, price: montant, commission: Math.round(montant * 0.80) })
         });
         if (r.ok) {
@@ -272,11 +277,11 @@ async function changeStatus(status) {
     var colors = { present: '#22C55E', pause: '#F59E0B', termine: '#E74C3C' };
     statutPresence = status;
     
-    var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
+    var user = JSON.parse(localStorage.getItem('dagoo_driver_user') || '{}');
     try {
         await fetch(DAGOOS_CONFIG.apiUrl + '/drivers/' + user.driverId, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('dagoos_token') },
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('dagoo_driver_token') },
             body: JSON.stringify({ status: status === 'active' || status === 'present' ? 'active' : status === 'pause' ? 'pause' : 'inactive' })
         });
     } catch(e) { console.error(e); }
@@ -287,7 +292,7 @@ async function changeStatus(status) {
 }
 
 async function proposerVersement() {
-    var user = JSON.parse(localStorage.getItem('dagoos_user') || '{}');
+    var user = JSON.parse(localStorage.getItem('dagoo_driver_user') || '{}');
     try {
         var courses = await apiGet('/courses?driverId=' + user.driverId);
         var arr = Array.isArray(courses) ? courses : [];

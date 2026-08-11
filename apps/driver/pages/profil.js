@@ -4,7 +4,7 @@
 function init_profil() {
     var main = document.getElementById('mainContent');
     var user = JSON.parse(localStorage.getItem("dagoos_user") || "{}");
-    var token = localStorage.getItem('dagoos_token');
+    var token = localStorage.getItem('dagoo_driver_token');
 
     main.innerHTML = 
         '<div style="padding:12px;max-width:500px;margin:0 auto;padding-bottom:80px;">' +
@@ -49,7 +49,7 @@ async function changePin() {
     try {
         var r = await fetch(DAGOOS_CONFIG.apiUrl + '/drivers/' + user.driverId, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('dagoos_token') },
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('dagoo_driver_token') },
             body: JSON.stringify({ pin: newPin })
         });
         var data = await r.json();

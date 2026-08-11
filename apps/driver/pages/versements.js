@@ -59,7 +59,7 @@ async function demanderVersement() {
     try {
         var r = await fetch(DAGOOS_CONFIG.apiUrl + '/versements', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('dagoos_token') },
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('dagoo_driver_token') },
             body: JSON.stringify({ driverId: user.driverId, amount: parseInt(montant), method: mode, periode: new Date().toISOString().slice(0,7) })
         });
         if (r.ok) {

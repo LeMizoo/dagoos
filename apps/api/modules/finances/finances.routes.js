@@ -23,7 +23,21 @@ router.get('/courses', authMiddleware, async (req, res) => {
 
 router.post('/courses', authMiddleware, async (req, res) => {
   try {
-    const course = await prisma.course.create({ data: req.body });
+    if (!req.user.driverId) return res.status(400).json({ error: 'Chauffeur non associé' });
+    const driver = await prisma.driver.findUnique({ where: { id: req.user.driverId } });
+    if (!driver) return res.status(404).json({ error: 'Chauffeur introuvable' });
+    const { vehicleId, type, distanceKm, price, commission } = req.body;
+    if (!price || Number(price) <= 0) return res.status(400).json({ error: 'Montant invalide' });
+    const course = await prisma.course.create({
+      data: {
+        driverId: req.user.driverId,
+        vehicleId: vehicleId || driver.vehicleId,
+        type: type || 'course',
+        distanceKm: Number(distanceKm || 0),
+        price: Number(price),
+        commission: Number(commission || Math.round(Number(price) * 0.80))
+      }
+    });
     res.status(201).json(course);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
