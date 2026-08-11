@@ -3,53 +3,19 @@ import { cookies } from 'next/headers';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.API_BASE_URL || 'https://dagoos-api.onrender.com').replace(/\/$/, '');
+const API_BASE_URL = (process.env.API_BASE_URL || 'https://dagoos-api.onrender.com').replace(/\/$/, '');
 
 export async function GET(_req: NextRequest) {
   try {
     const cookieStore = cookies();
     const token = cookieStore.get('dagoos_token')?.value;
-
-    let authToken = token;
-    if (!authToken) {
-      const loginRes = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: 'admin@dagoos.mg', password: 'admin123' }),
-      });
-      if (loginRes.ok) {
-        const { token: t } = await loginRes.json();
-        authToken = t;
-      }
-    }
-
-    if (!authToken) {
-      return NextResponse.json({
-        fleets: 0,
-        cooperatives: 0,
-        drivers: 0,
-        vehicles: 0,
-        messages: 0,
-        recentOrgs: [],
-        error: 'Non authentifié',
-      }, { status: 200 });
-    }
+    if (!token) return NextResponse.json({ fleets: 0, cooperatives: 0, drivers: 0, vehicles: 0, messages: 0, recentOrgs: [], error: 'Non authentifié' }, { status: 200 });
 
     const [orgsRes, driversRes, vehiclesRes, messagesRes] = await Promise.all([
-      fetch(`${API_BASE_URL}/api/organizations`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      }),
-      fetch(`${API_BASE_URL}/api/drivers`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      }),
-      fetch(`${API_BASE_URL}/api/vehicles`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      }),
-      fetch(`${API_BASE_URL}/api/messages`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      }),
+      fetch(`${API_BASE_URL}/api/organizations`, { headers: { Authorization: `Bearer ${token}` } }),
+      fetch(`${API_BASE_URL}/api/drivers`, { headers: { Authorization: `Bearer ${token}` } }),
+      fetch(`${API_BASE_URL}/api/vehicles`, { headers: { Authorization: `Bearer ${token}` } }),
+      fetch(`${API_BASE_URL}/api/messages`, { headers: { Authorization: `Bearer ${token}` } }),
     ]);
 
     const orgs = orgsRes.ok ? await orgsRes.json() : [];
@@ -66,14 +32,6 @@ export async function GET(_req: NextRequest) {
       recentOrgs: Array.isArray(orgs) ? orgs.slice(0, 5) : [],
     });
   } catch (e: any) {
-    return NextResponse.json({
-      fleets: 0,
-      cooperatives: 0,
-      drivers: 0,
-      vehicles: 0,
-      messages: 0,
-      recentOrgs: [],
-      error: e?.message || 'Erreur inconnue',
-    }, { status: 200 });
+    return NextResponse.json({ fleets: 0, cooperatives: 0, drivers: 0, vehicles: 0, messages: 0, recentOrgs: [], error: e?.message }, { status: 200 });
   }
 }

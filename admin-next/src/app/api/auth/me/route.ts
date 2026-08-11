@@ -1,26 +1,58 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-export async function GET(req: NextRequest) {
+const API_BASE = (
+  process.env.API_BASE_URL ||
+  'https://dagoos-api.onrender.com'
+).replace(/\/$/, '');
+
+export async function GET() {
   try {
     const cookieStore = cookies();
     const token = cookieStore.get('dagoos_token')?.value;
-    
+
     if (!token) {
-      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Non authentifié' },
+        { status: 401 }
+      );
     }
 
-    const res = await fetch('https://dagoos-api.onrender.com/api/auth/me', {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
-    
-    if (!res.ok) {
-      return NextResponse.json({ error: 'Session invalide' }, { status: 401 });
+    const response = await fetch(
+      `${API_BASE}/api/auth/me`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        },
+        cache: 'no-store',
+      }
+    );
+
+    const text = await response.text();
+
+    let data: unknown;
+
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = {
+        error: 'Réponse invalide du serveur API',
+      };
     }
-    
-    const data = await res.json();
-    return NextResponse.json(data);
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+
+    return NextResponse.json(data, {
+      status: response.status,
+    });
+  } catch (error) {
+    console.error('[auth/me]', error);
+
+    return NextResponse.json(
+      {
+        error: "Service d'authentification indisponible",
+      },
+      { status: 502 }
+    );
   }
 }
