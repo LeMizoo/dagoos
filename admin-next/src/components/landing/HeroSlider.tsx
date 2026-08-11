@@ -36,6 +36,9 @@ export default function HeroSlider() {
         {slides.map((_, index) => (
           <button
             key={index}
+            type="button"
+            aria-label={`Afficher la diapositive ${index + 1}`}
+            aria-pressed={index === current}
             onClick={() => setCurrent(index)}
             className={`w-2.5 h-2.5 rounded-full transition-all ${
               index === current ? 'bg-secondary w-6' : 'bg-white/50 hover:bg-white/80'

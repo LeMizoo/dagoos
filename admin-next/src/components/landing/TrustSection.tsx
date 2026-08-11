@@ -91,12 +91,16 @@ export default function TrustSection() {
       >
         {/* Flèches */}
         <button
+          type="button"
+          aria-label="Partenaire précédent"
           onClick={() => setActiveIndex(prev => (prev - 1 + orgs.length) % orgs.length)}
           className="absolute left-4 md:left-10 z-30 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/20 transition border border-white/20 text-white"
         >
           <ChevronLeft size={24} />
         </button>
         <button
+          type="button"
+          aria-label="Partenaire suivant"
           onClick={() => setActiveIndex(prev => (prev + 1) % orgs.length)}
           className="absolute right-4 md:right-10 z-30 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/20 transition border border-white/20 text-white"
         >
@@ -162,6 +166,9 @@ export default function TrustSection() {
         {orgs.map((_, i) => (
           <button
             key={i}
+            type="button"
+            aria-label={`Afficher le partenaire ${i + 1}`}
+            aria-pressed={i === activeIndex}
             onClick={() => setActiveIndex(i)}
             className={`h-2 rounded-full transition-all duration-300 ${
               i === activeIndex ? 'bg-white w-8' : 'bg-gray-600 hover:bg-gray-500 w-2'

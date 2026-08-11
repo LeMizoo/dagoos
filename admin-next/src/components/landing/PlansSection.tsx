@@ -37,13 +37,13 @@ export default function PlansSection() {
 
         {/* Tabs */}
         <div className="flex justify-center gap-4 mb-10">
-          <button onClick={() => setActiveTab('FLEET_MANAGER')}
+          <button type="button" aria-pressed={activeTab === 'FLEET_MANAGER'} onClick={() => setActiveTab('FLEET_MANAGER')}
             className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition text-sm ${
               activeTab === 'FLEET_MANAGER' ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-100 border'
             }`}>
             <Truck size={18} /> Gestion de Flotte
           </button>
-          <button onClick={() => setActiveTab('COOPERATIVE')}
+          <button type="button" aria-pressed={activeTab === 'COOPERATIVE'} onClick={() => setActiveTab('COOPERATIVE')}
             className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition text-sm ${
               activeTab === 'COOPERATIVE' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-100 border'
             }`}>
