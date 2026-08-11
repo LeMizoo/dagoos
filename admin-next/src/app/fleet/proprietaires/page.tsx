@@ -12,7 +12,7 @@ export default function FleetProprietairesPage() {
   useEffect(() => { load(); }, []);
   async function load() {
     try {
-      const r = await fetch('/api/proxy/proprietaires', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } });
+      const r = await fetch('/api/proxy/proprietaires');
       if (r.ok) setProprietaires((await r.json()) || []);
     } catch(e) { console.error(e); } finally { setLoading(false); }
   }

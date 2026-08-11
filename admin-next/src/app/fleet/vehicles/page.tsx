@@ -21,7 +21,7 @@ export default function FleetVehicles() {
   useEffect(() => { load(); }, []);
   async function load() {
     try {
-      const r = await fetch('/api/proxy/vehicles', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } });
+      const r = await fetch('/api/proxy/vehicles');
       if (r.ok) setVehicles((await r.json()) || []);
     } catch {} finally { setLoading(false); }
   }

@@ -17,7 +17,7 @@ export default function CoopFinancesPage() {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    fetch('/api/proxy/finances/courses', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } })
+    fetch('/api/proxy/finances/courses')
       .then(r => r.json())
       .then(data => setCourses(Array.isArray(data) ? data : []))
       .catch(err => setError(err.message))

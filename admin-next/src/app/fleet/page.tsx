@@ -15,9 +15,9 @@ export default function FleetHome() {
   async function load() {
     try {
       const [driversRes, vehiclesRes, messagesRes] = await Promise.all([
-        fetch('/api/proxy/drivers', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } }).then(r => r.json()).catch(() => []),
-        fetch('/api/proxy/vehicles', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } }).then(r => r.json()).catch(() => []),
-        fetch('/api/proxy/messages', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } }).then(r => r.json()).catch(() => []),
+        fetch('/api/proxy/drivers').then(r => r.json()).catch(() => []),
+        fetch('/api/proxy/vehicles').then(r => r.json()).catch(() => []),
+        fetch('/api/proxy/messages').then(r => r.json()).catch(() => []),
       ]);
       
       const vehicles = Array.isArray(vehiclesRes) ? vehiclesRes : [];

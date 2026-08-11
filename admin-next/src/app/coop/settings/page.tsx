@@ -29,7 +29,7 @@ export default function FleetSettingsPage() {
 
   async function loadOrgAndTarifs() {
     try {
-      const orgsRes = await fetch('/api/proxy/organizations', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } });
+      const orgsRes = await fetch('/api/proxy/organizations');
       if (!orgsRes.ok) { setError('Erreur chargement'); setLoading(false); return; }
       const orgs = await orgsRes.json();
       const myOrg = Array.isArray(orgs) ? orgs.find((o: any) => o.type === 'COOPERATIVE') : null;

@@ -13,7 +13,7 @@ export default function CoopCodesPage() {
 
   async function loadDrivers() {
     try {
-      const r = await fetch('/api/proxy/drivers', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } });
+      const r = await fetch('/api/proxy/drivers');
       setDrivers((await r.json()) || []);
     } catch (e) { console.error(e); } finally { setLoading(false); }
   }

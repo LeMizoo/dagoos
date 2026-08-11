@@ -18,8 +18,8 @@ export default function FleetDrivers() {
     try {
       const [meRes, dRes, vRes] = await Promise.all([
         fetch('/api/auth/me').then(r => r.ok ? r.json() : null),
-        fetch('/api/proxy/drivers', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } }).then(r => r.json()).then(d => Array.isArray(d) ? d.filter((dr: any) => dr.vehicleId || dr.organizationId) : []),
-        fetch('/api/proxy/vehicles', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } }).then(r => r.json())
+        fetch('/api/proxy/drivers').then(r => r.json()).then(d => Array.isArray(d) ? d.filter((dr: any) => dr.vehicleId || dr.organizationId) : []),
+        fetch('/api/proxy/vehicles').then(r => r.json())
       ]);
       const authUser = meRes?.user || meRes;
       const resolvedOrgId = authUser?.organizationId || authUser?.organization?.id || authUser?.id;

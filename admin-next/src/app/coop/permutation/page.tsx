@@ -27,8 +27,8 @@ export default function FleetPermutationPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/proxy/drivers', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } }).then(r => r.json()).catch(() => []),
-      fetch('/api/proxy/vehicles', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } }).then(r => r.json()).catch(() => []),
+      fetch('/api/proxy/drivers').then(r => r.json()).catch(() => []),
+      fetch('/api/proxy/vehicles').then(r => r.json()).catch(() => []),
     ]).then(([d, v]) => {
       setDrivers(Array.isArray(d) ? d : []);
       setVehicles(Array.isArray(v) ? v : []);
@@ -48,7 +48,7 @@ export default function FleetPermutationPage() {
       setTimeout(() => setMessage(''), 3000);
       setSelectedVehicle('');
       // Recharger les données
-      const d = await fetch('/api/proxy/drivers', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } }).then(r => r.json());
+      const d = await fetch('/api/proxy/drivers').then(r => r.json());
       setDrivers(Array.isArray(d) ? d : []);
     } catch (e) { setMessage('❌ Erreur lors de l\'assignation'); }
   }
@@ -62,7 +62,7 @@ export default function FleetPermutationPage() {
       });
       setMessage('✅ Véhicule retiré !');
       setTimeout(() => setMessage(''), 3000);
-      const d = await fetch('/api/proxy/drivers', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('dagoos_token') || '') } }).then(r => r.json());
+      const d = await fetch('/api/proxy/drivers').then(r => r.json());
       setDrivers(Array.isArray(d) ? d : []);
     } catch (e) { setMessage('❌ Erreur'); }
   }
