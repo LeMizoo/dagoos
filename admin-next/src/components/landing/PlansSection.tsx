@@ -1,6 +1,7 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 import { useState, useEffect } from 'react';
-import { Truck, Building2, Check, Zap, Globe, Mail } from 'lucide-react';
+import { Truck, Building2, Check, Zap, Mail } from 'lucide-react';
 import Link from 'next/link';
 
 interface Plan {
@@ -10,7 +11,6 @@ interface Plan {
   price: number;
   vehiclesMax: number;
   driversMax: number;
-  landingPage?: boolean;
 }
 
 export default function PlansSection() {
@@ -19,7 +19,7 @@ export default function PlansSection() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/public/plans')
+    apiFetch('/public/plans')
       .then(r => r.json())
       .then(data => setPlans(Array.isArray(data) ? data : []))
       .catch(console.error)
@@ -95,12 +95,6 @@ export default function PlansSection() {
                 <p className="text-xs text-gray-500 mt-1">
                   {plan.vehiclesMax >= 999 ? 'Illimité' : `${plan.vehiclesMax} véhicule${plan.vehiclesMax > 1 ? 's' : ''}`} · {plan.driversMax >= 999 ? 'Illimité' : `${plan.driversMax} chauffeur${plan.driversMax > 1 ? 's' : ''}`}
                 </p>
-                {/* Landing page badge */}
-                {plan.landingPage && (
-                  <div className="mt-2 bg-green-50 text-green-700 text-xs py-1 px-2 rounded-lg inline-flex items-center gap-1">
-                    <Globe size={10} /> Landing page offerte
-                  </div>
-                )}
                 <div className="mt-4 space-y-2">
                   {plan.name === 'Sur devis' ? (
                     <a href="mailto:contact@dagoos.mg"
@@ -127,9 +121,6 @@ export default function PlansSection() {
           </div>
         )}
 
-        <p className="text-center text-xs text-gray-400 mt-6">
-          🌐 Les plans Standard, Premium et Sur devis incluent une <strong>landing page personnalisée</strong> accessible via dago-mobility.vercel.app/fleet/votre-nom
-        </p>
       </div>
     </section>
   );

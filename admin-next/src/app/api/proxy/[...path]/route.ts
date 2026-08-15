@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-
-const API_BASE = (
-  process.env.API_BASE_URL ||
-  'https://dagoos-api.onrender.com'
-).replace(/\/$/, '');
+import { API_BASE_URL } from '@/lib/config';
 
 const pathMapping: Record<string, string> = {
-  '/finances/transactions': '/api/transactions',
-  '/finances/versements': '/api/versements',
-  '/finances/courses': '/api/courses',
+  '/finances/transactions': '/api/finances/transactions',
+  '/finances/versements': '/api/finances/versements',
+  '/finances/courses': '/api/finances/courses',
+  '/finances/stats/summary': '/api/finances/stats/summary',
 };
 
 function resolveApiPath(proxyPath: string): string {
@@ -49,7 +46,7 @@ async function proxyRequest(req: NextRequest) {
   const apiPath = resolveApiPath(proxyPath);
   const searchParams = req.nextUrl.search;
 
-  const apiUrl = `${API_BASE}${apiPath}${searchParams}`;
+  const apiUrl = `${API_BASE_URL}${apiPath}${searchParams}`;
 
   const cookieStore = cookies();
   const cookieToken = cookieStore.get('dagoos_token')?.value;

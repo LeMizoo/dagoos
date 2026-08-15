@@ -1,13 +1,56 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { API_BASE_URL } from '@/lib/config';
 
-export async function GET(_req: NextRequest) {
+export const dynamic = 'force-dynamic';
+
+export async function GET() {
   try {
-    const cookieStore = cookies();
-    const token = cookieStore.get('dagoos_token')?.value;
-    if (!token) return NextResponse.json([]);
-    const res = await fetch('https://dagoos-api.onrender.com/api/organizations', { headers: { Authorization: `Bearer ${token}` } });
-    const orgs = await res.json();
-    return NextResponse.json(orgs.filter((o: any) => o.plan === 'Premium' || o.plan === 'Standard'));
-  } catch { return NextResponse.json([]); }
+    const token = cookies().get('dagoos_token')?.value;
+
+    if (!token) {
+      return NextResponse.json(
+        { error: 'Non authentifié' },
+        { status: 401 }
+      );
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/organizations`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        },
+        cache: 'no-store',
+      }
+    );
+
+    const data = await response.json().catch(() => ({
+      error: 'Réponse invalide du serveur API',
+    }));
+
+    if (!response.ok) {
+      return NextResponse.json(data, {
+        status: response.status,
+      });
+    }
+
+    const organizations = Array.isArray(data)
+      ? data.filter(
+          (organization: any) =>
+            organization.plan === 'Premium' ||
+            organization.plan === 'Standard'
+        )
+      : [];
+
+    return NextResponse.json(organizations);
+  } catch (error) {
+    console.error('[api/public/organizations]', error);
+
+    return NextResponse.json(
+      { error: 'API indisponible' },
+      { status: 502 }
+    );
+  }
 }

@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { API_BASE_URL } from '@/lib/config';
 
-const API_BASE = (
-  process.env.API_BASE_URL ||
-  'https://dagoos-api.onrender.com'
-).replace(/\/$/, '');
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
@@ -19,7 +17,7 @@ export async function GET() {
     }
 
     const response = await fetch(
-      `${API_BASE}/api/auth/me`,
+      `${API_BASE_URL}/api/auth/me`,
       {
         method: 'GET',
         headers: {
@@ -50,7 +48,8 @@ export async function GET() {
 
     return NextResponse.json(
       {
-        error: "Service d'authentification indisponible",
+        error:
+          "Service d'authentification indisponible",
       },
       { status: 502 }
     );

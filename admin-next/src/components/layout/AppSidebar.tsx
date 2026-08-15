@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
@@ -74,7 +75,7 @@ export default function AppSidebar({ app }: AppSidebarProps) {
   const menu = app === 'fleet' ? menuFleet : menuCoop;
 
   async function handleLogout() {
-    await fetch('/api/auth/logout', { method: 'POST' });
+    await apiFetch('/api/auth/logout', { method: 'POST' });
     router.push(`/${app}-login`);
     router.refresh();
   }

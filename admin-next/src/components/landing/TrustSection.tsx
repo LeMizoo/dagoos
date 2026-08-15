@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -26,7 +27,7 @@ export default function TrustSection() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    fetch('/api/public/organizations')
+    apiFetch('/public/organizations')
       .then(r => r.json())
       .then(data => { setOrgs(Array.isArray(data) ? data : []); setLoading(false); })
       .catch(console.error)

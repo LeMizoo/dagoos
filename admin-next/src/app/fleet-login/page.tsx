@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 import { useState, Suspense } from 'react';
 import PasswordInput from '@/components/ui/PasswordInput';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -17,7 +18,7 @@ function FleetLoginForm() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    const res = await fetch('/api/auth/fleet-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+    const res = await apiFetch('/api/auth/fleet-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
     if (res.ok) { router.push(redirect); router.refresh(); }
     else { const data = await res.json().catch(() => ({})); setError(data.error || 'Email ou mot de passe incorrect'); }
     setLoading(false);

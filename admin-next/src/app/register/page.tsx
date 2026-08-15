@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, Truck, Building2 } from 'lucide-react';
@@ -32,7 +33,7 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    fetch('/api/public/plans')
+    apiFetch('/public/plans')
       .then(r => r.json())
       .then(data => {
         setPlans(Array.isArray(data) ? data : []);
@@ -77,7 +78,7 @@ export default function RegisterPage() {
     }
 
     try {
-      const res = await fetch('/api/auth/register', {
+      const res = await apiFetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
