@@ -1,90 +1,617 @@
 const express = require('express');
 const prisma = require('../../lib/prisma');
 const { authMiddleware } = require('../../middleware/auth');
+const { requirePermission } = require('../../security/require-permission');
+
 const router = express.Router();
 
-// Courses
-router.get('/courses', authMiddleware, async (req, res) => {
+// =========================================================
+// HELPERS
+// =========================================================
+
+async function getOrganizationId(req) {
+  if (req.user.organizationId) {
+    return req.user.organizationId;
+  }
+
+  if (req.user.driverId) {
+    const driver = await prisma.driver.findUnique({
+      where: { id: req.user.driverId },
+      select: { organizationId: true }
+    });
+
+    return driver?.organizationId || null;
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: req.user.id },
+    select: {
+      driver: {
+        select: {
+          organizationId: true
+        }
+      }
+    }
+  });
+
+  return user?.driver?.organizationId || null;
+}
+
+async function getOrganizationDriverIds(req) {
+  const organizationId = await getOrganizationId(req);
+
+  if (!organizationId) {
+    return [];
+  }
+
+  const drivers = await prisma.driver.findMany({
+    where: { organizationId },
+    select: { id: true }
+  });
+
+  return drivers.map((driver) => driver.id);
+}
+
+function isAdmin(req) {
+  return req.user.role === 'SUPER_ADMIN' || req.user.role === 'ADMIN';
+}
+
+// =========================================================
+// COURSES
+// =========================================================
+
+// GET /api/finances/courses
+router.get('/courses', authMiddleware, requirePermission('finances.read'), async (req, res) => {
   try {
     const where = {};
-    if (req.query.driverId) {
-      where.driverId = req.query.driverId;
+
+    if (isAdmin(req)) {
+      if (req.query.driverId) {
+        where.driverId = req.query.driverId;
+      }
     } else if (req.user.role === 'DRIVER' && req.user.driverId) {
       where.driverId = req.user.driverId;
+    } else {
+      const driverIds = await getOrganizationDriverIds(req);
+
+      if (req.query.driverId) {
+        if (!driverIds.includes(req.query.driverId)) {
+          return res.status(403).json({
+            success: false,
+            error: 'Accès refusé à ce chauffeur'
+          });
+        }
+
+        where.driverId = req.query.driverId;
+      } else {
+        where.driverId = {
+          in: driverIds
+        };
+      }
     }
+
     const courses = await prisma.course.findMany({
       where,
-      include: { driver: true, vehicle: true },
-      orderBy: { date: 'desc' }
+      include: {
+        driver: {
+          select: {
+            id: true,
+            driverCode: true,
+            status: true,
+            user: {
+              select: {
+                name: true,
+                email: true
+              }
+            }
+          }
+        },
+        vehicle: {
+          select: {
+            id: true,
+            plate: true,
+            model: true
+          }
+        }
+      },
+      orderBy: {
+        date: 'desc'
+      },
+      take: 500
     });
+
     res.json(courses);
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-router.post('/courses', authMiddleware, async (req, res) => {
-  try {
-    if (!req.user.driverId) return res.status(400).json({ error: 'Chauffeur non associ�' });
-    const driver = await prisma.driver.findUnique({ where: { id: req.user.driverId } });
-    if (!driver) return res.status(404).json({ error: 'Chauffeur introuvable' });
-    const { vehicleId, type, distanceKm, price, commission } = req.body;
-    if (!price || Number(price) <= 0) return res.status(400).json({ error: 'Montant invalide' });
-    const course = await prisma.course.create({
-      data: {
-        driverId: req.user.driverId,
-        vehicleId: vehicleId || driver.vehicleId,
-        type: type || 'course',
-        distanceKm: Number(distanceKm || 0),
-        price: Number(price),
-        commission: Number(commission || Math.round(Number(price) * 0.80))
-      }
-    });
-    res.status(201).json(course);
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// Transactions (tous les paiements)
-router.get('/transactions', authMiddleware, async (req, res) => {
-  try {
-    const payments = await prisma.payment.findMany({ orderBy: { date: 'desc' }, take: 200 });
-    res.json(payments);
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// Versements
-router.get('/versements', authMiddleware, async (req, res) => {
-  try {
-    const versements = await prisma.versement.findMany({ orderBy: { createdAt: 'desc' } });
-    res.json(versements);
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// --- PWA Driver : D�penses & Stats ---
-router.post('/expenses', authMiddleware, async (req, res) => {
-  try {
-    const { category, amount } = req.body;
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ message: 'Montant invalide' });
-    }
-    // Stocker dans une table ou log
-    res.json({ success: true, category, amount });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Erreur d�pense' });
+    console.error('GET /finances/courses:', error);
+
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
 });
 
-router.get('/stats/summary', authMiddleware, async (req, res) => {
+// POST /api/finances/courses
+router.post('/courses', authMiddleware, requirePermission('courses.create'), async (req, res) => {
   try {
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    const courses = await prisma.course.findMany({
-      where: { driverId: req.user.driverId, date: { gte: today } }
+    if (!req.user.driverId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Chauffeur non associé'
+      });
+    }
+
+    const driver = await prisma.driver.findUnique({
+      where: {
+        id: req.user.driverId
+      }
     });
-    const count = courses.length;
-    const ca = courses.reduce((s, c) => s + (c.price || 0), 0);
-    const com = courses.reduce((s, c) => s + (c.commission || 0), 0);
-    res.json({ today: { count, ca, com, net: ca - com }, week: { count, ca, com, net: ca - com } });
+
+    if (!driver) {
+      return res.status(404).json({
+        success: false,
+        error: 'Chauffeur introuvable'
+      });
+    }
+
+    const {
+      vehicleId,
+      type,
+      distanceKm,
+      price,
+      commission
+    } = req.body;
+
+    if (!price || Number(price) <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Montant invalide'
+      });
+    }
+
+    const finalVehicleId = vehicleId || driver.vehicleId;
+
+    if (!finalVehicleId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Aucun véhicule associé au chauffeur'
+      });
+    }
+
+    const vehicle = await prisma.vehicle.findUnique({
+      where: {
+        id: finalVehicleId
+      },
+      select: {
+        id: true,
+        organizationId: true
+      }
+    });
+
+    if (!vehicle) {
+      return res.status(404).json({
+        success: false,
+        error: 'Véhicule introuvable'
+      });
+    }
+
+    if (
+      vehicle.organizationId &&
+      vehicle.organizationId !== driver.organizationId
+    ) {
+      return res.status(403).json({
+        success: false,
+        error: 'Véhicule non autorisé pour ce chauffeur'
+      });
+    }
+
+    const amount = Number(price);
+
+    const course = await prisma.course.create({
+      data: {
+        driverId: driver.id,
+        vehicleId: finalVehicleId,
+        type: type || 'NORMALE',
+        distanceKm: Number(distanceKm || 0),
+        price: amount,
+        commission:
+          commission !== undefined
+            ? Number(commission)
+            : Math.round(amount * 0.20)
+      },
+      include: {
+        driver: {
+          select: {
+            id: true,
+            driverCode: true,
+            user: {
+              select: {
+                name: true
+              }
+            }
+          }
+        },
+        vehicle: {
+          select: {
+            id: true,
+            plate: true,
+            model: true
+          }
+        }
+      }
+    });
+
+    res.status(201).json(course);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur stats' });
+    console.error('POST /finances/courses:', error);
+
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// =========================================================
+// TRANSACTIONS / PAYMENTS
+// =========================================================
+
+// GET /api/finances/transactions
+router.get('/transactions', authMiddleware, requirePermission('finances.read'), async (req, res) => {
+  try {
+    const where = {};
+
+    if (req.user.role === 'DRIVER' && req.user.driverId) {
+      // SELF : un chauffeur ne peut voir que ses propres transactions.
+      const trips = await prisma.trip.findMany({
+        where: {
+          driverId: req.user.driverId
+        },
+        select: {
+          id: true
+        }
+      });
+
+      const tripIds = trips.map((trip) => trip.id);
+
+      if (!tripIds.length) {
+        return res.json([]);
+      }
+
+      where.tripId = {
+        in: tripIds
+      };
+    } else if (!isAdmin(req)) {
+      // ORGANIZATION : Fleet / Coop ne voient que les transactions
+      // des chauffeurs de leur propre organisation.
+      const driverIds = await getOrganizationDriverIds(req);
+
+      if (!driverIds.length) {
+        return res.json([]);
+      }
+
+      const trips = await prisma.trip.findMany({
+        where: {
+          driverId: {
+            in: driverIds
+          }
+        },
+        select: {
+          id: true
+        }
+      });
+
+      const tripIds = trips.map((trip) => trip.id);
+
+      if (!tripIds.length) {
+        return res.json([]);
+      }
+
+      where.tripId = {
+        in: tripIds
+      };
+    }
+
+    if (req.query.method) {
+      where.method = req.query.method;
+    }
+
+    const payments = await prisma.payment.findMany({
+      where,
+      orderBy: {
+        date: 'desc'
+      },
+      take: 500
+    });
+
+    res.json(payments);
+  } catch (error) {
+    console.error('GET /finances/transactions:', error);
+
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// =========================================================
+// VERSEMENTS
+// =========================================================
+
+// GET /api/finances/versements
+router.get('/versements', authMiddleware, requirePermission('finances.read'), async (req, res) => {
+  try {
+    const where = {};
+
+    if (isAdmin(req)) {
+      if (req.query.driverId) {
+        where.driverId = req.query.driverId;
+      }
+    } else if (req.user.role === 'DRIVER' && req.user.driverId) {
+      where.driverId = req.user.driverId;
+    } else {
+      const driverIds = await getOrganizationDriverIds(req);
+
+      if (!driverIds.length) {
+        return res.json([]);
+      }
+
+      if (req.query.driverId) {
+        if (!driverIds.includes(req.query.driverId)) {
+          return res.status(403).json({
+            success: false,
+            error: 'Accès refusé à ce chauffeur'
+          });
+        }
+
+        where.driverId = req.query.driverId;
+      } else {
+        where.driverId = {
+          in: driverIds
+        };
+      }
+    }
+
+    if (req.query.status) {
+      where.status = req.query.status;
+    }
+
+    if (req.query.periode) {
+      where.periode = req.query.periode;
+    }
+
+    const versements = await prisma.versement.findMany({
+      where,
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: 500
+    });
+
+    res.json(versements);
+  } catch (error) {
+    console.error('GET /finances/versements:', error);
+
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// POST /api/finances/versements
+router.post('/versements', authMiddleware, async (req, res) => {
+  try {
+    if (req.user.role !== 'DRIVER') {
+      return res.status(403).json({
+        success: false,
+        error: 'Seul un chauffeur peut demander un versement'
+      });
+    }
+
+    if (!req.user.driverId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Chauffeur non associé'
+      });
+    }
+
+    const { amount, periode } = req.body;
+
+    const parsedAmount = Number(amount);
+
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Montant invalide'
+      });
+    }
+
+    if (!periode || !/^\d{4}-(0[1-9]|1[0-2])$/.test(periode)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Période invalide. Format attendu : YYYY-MM'
+      });
+    }
+
+    const driver = await prisma.driver.findUnique({
+      where: {
+        id: req.user.driverId
+      },
+      select: {
+        id: true,
+        organizationId: true
+      }
+    });
+
+    if (!driver) {
+      return res.status(404).json({
+        success: false,
+        error: 'Chauffeur introuvable'
+      });
+    }
+
+    const versement = await prisma.versement.create({
+      data: {
+        driverId: driver.id,
+        amount: parsedAmount,
+        periode,
+        status: 'en_attente'
+      }
+    });
+
+    res.status(201).json(versement);
+  } catch (error) {
+    console.error('POST /finances/versements:', error);
+
+    res.status(500).json({
+      success: false,
+      error: 'Erreur lors de la demande de versement'
+    });
+  }
+});
+
+// =========================================================
+// DÉPENSES
+// =========================================================
+
+// POST /api/finances/expenses
+router.post('/expenses', authMiddleware, requirePermission('finances.manage'), async (req, res) => {
+  try {
+    const { category, amount } = req.body;
+
+    if (!amount || Number(amount) <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Montant invalide'
+      });
+    }
+
+    // Pas encore de modèle Expense dans Prisma.
+    // Cette route reste temporairement informative.
+    res.json({
+      success: true,
+      category: category || 'autre',
+      amount: Number(amount)
+    });
+  } catch (error) {
+    console.error('POST /finances/expenses:', error);
+
+    res.status(500).json({
+      success: false,
+      error: 'Erreur dépense'
+    });
+  }
+});
+
+// =========================================================
+// STATS
+// =========================================================
+
+// GET /api/finances/stats/summary
+router.get('/stats/summary', authMiddleware, requirePermission('finances.read'), async (req, res) => {
+  try {
+    const now = new Date();
+
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+
+    const week = new Date(now);
+    const day = week.getDay();
+    const diff = day === 0 ? 6 : day - 1;
+    week.setDate(week.getDate() - diff);
+    week.setHours(0, 0, 0, 0);
+
+    const whereBase = {};
+
+    if (req.user.role === 'DRIVER' && req.user.driverId) {
+      whereBase.driverId = req.user.driverId;
+    } else if (!isAdmin(req)) {
+      const driverIds = await getOrganizationDriverIds(req);
+
+      if (!driverIds.length) {
+        return res.json({
+          today: {
+            count: 0,
+            ca: 0,
+            com: 0,
+            net: 0
+          },
+          week: {
+            count: 0,
+            ca: 0,
+            com: 0,
+            net: 0
+          }
+        });
+      }
+
+      whereBase.driverId = {
+        in: driverIds
+      };
+    }
+
+    const [todayCourses, weekCourses] = await Promise.all([
+      prisma.course.findMany({
+        where: {
+          ...whereBase,
+          date: {
+            gte: today
+          }
+        },
+        select: {
+          price: true,
+          commission: true
+        }
+      }),
+
+      prisma.course.findMany({
+        where: {
+          ...whereBase,
+          date: {
+            gte: week
+          }
+        },
+        select: {
+          price: true,
+          commission: true
+        }
+      })
+    ]);
+
+    function calculate(courses) {
+      const count = courses.length;
+
+      const ca = courses.reduce(
+        (sum, course) => sum + Number(course.price || 0),
+        0
+      );
+
+      const com = courses.reduce(
+        (sum, course) => sum + Number(course.commission || 0),
+        0
+      );
+
+      return {
+        count,
+        ca,
+        com,
+        net: ca - com
+      };
+    }
+
+    res.json({
+      today: calculate(todayCourses),
+      week: calculate(weekCourses)
+    });
+  } catch (error) {
+    console.error('GET /finances/stats/summary:', error);
+
+    res.status(500).json({
+      success: false,
+      error: 'Erreur stats'
+    });
   }
 });
 

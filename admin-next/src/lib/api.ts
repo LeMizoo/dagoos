@@ -1,31 +1,91 @@
-export const apiFetch = async (
+export interface ApiError {
+  error?: string;
+  message?: string;
+  [key: string]: unknown;
+}
+
+export async function apiFetch(
   endpoint: string,
   options: RequestInit = {}
-): Promise<Response> => {
-  const url = endpoint.startsWith('/api')
+): Promise<Response> {
+  const normalizedEndpoint = endpoint.startsWith('/')
     ? endpoint
-    : `/api/proxy${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    : `/${endpoint}`;
 
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
+  const url = normalizedEndpoint.startsWith('/api/')
+    ? normalizedEndpoint
+    : `/api/proxy${normalizedEndpoint}`;
+
+  const headers = new Headers(options.headers);
+
+  if (
+    options.body &&
+    !headers.has('Content-Type') &&
+    !(options.body instanceof FormData)
+  ) {
+    headers.set('Content-Type', 'application/json');
+  }
+
+  if (!headers.has('Accept')) {
+    headers.set('Accept', 'application/json');
+  }
 
   const response = await fetch(url, {
     ...options,
     headers,
     credentials: 'include',
+    cache: options.cache ?? 'no-store',
   });
 
   if (
     response.status === 401 &&
     typeof window !== 'undefined' &&
-    !window.location.pathname.includes('/login')
+    !window.location.pathname.endsWith('/login') &&
+    !window.location.pathname.endsWith('/fleet-login') &&
+    !window.location.pathname.endsWith('/coop-login')
   ) {
-    window.location.href = '/login';
+    const pathname = window.location.pathname;
+
+    let loginPath = '/login';
+
+    if (pathname.startsWith('/fleet')) {
+      loginPath = '/fleet-login';
+    } else if (pathname.startsWith('/coop')) {
+      loginPath = '/coop-login';
+    }
+
+    const redirect = encodeURIComponent(
+      `${pathname}${window.location.search}`
+    );
+
+    window.location.href = `${loginPath}?redirect=${redirect}`;
   }
 
   return response;
-};
+}
+
+export async function apiJson<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const response = await apiFetch(endpoint, options);
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const errorData =
+      data && typeof data === 'object'
+        ? (data as ApiError)
+        : {};
+
+    throw new Error(
+      errorData.error ||
+        errorData.message ||
+        `Erreur API (${response.status})`
+    );
+  }
+
+  return data as T;
+}
 
 export default apiFetch;

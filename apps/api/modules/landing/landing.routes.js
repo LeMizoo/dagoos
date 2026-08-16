@@ -1,6 +1,7 @@
 const express = require('express');
 const prisma = require('../../lib/prisma');
 const { authMiddleware } = require('../../middleware/auth');
+const { requirePermission } = require('../../security/require-permission');
 const router = express.Router();
 
 router.get('/stats', async (req, res) => {
@@ -22,7 +23,7 @@ router.get('/landing-content', async (req, res) => {
 });
 
 // Admin : modifier le contenu landing
-router.put('/landing-content/:section', authMiddleware, async (req, res) => {
+router.put('/landing-content/:section', authMiddleware, requirePermission('landing.manage'), async (req, res) => {
   try {
     const { title, subtitle, body, imageUrl, active } = req.body;
     const content = await prisma.landingContent.upsert({

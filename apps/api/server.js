@@ -1,11 +1,16 @@
 const express = require('express');
 const cors = require('cors');
+const prisma = require('./lib/prisma');
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
-// Routes
+// =========================================================
+// ROUTES API
+// =========================================================
+
 app.use('/api/auth', require('./modules/auth/auth.routes'));
 app.use('/api/users', require('./modules/users/users.routes'));
 app.use('/api/organizations', require('./modules/organizations/organizations.routes'));
@@ -18,154 +23,200 @@ app.use('/api/contrats', require('./modules/contrats/contrats.routes'));
 app.use('/api/livraisons', require('./modules/livraisons/livraisons.routes'));
 app.use('/api/plans', require('./modules/plans/plans.routes'));
 app.use('/api/tarifs', require('./modules/tarifs/tarifs.routes'));
-
-// Route db-push
-// /api/db-push désactivé en production.
-// Les migrations/synchronisations Prisma doivent être lancées manuellement.
-app.post('/api/db-push', async (req, res) => {
-  const { password } = req.body;
-  if (password !== 'DagoosSeed2026!') return res.status(403).json({ error: 'Accès refusé' });
-  const { execSync } = require('child_process');
-  try {
-    execSync('npx prisma db push', { stdio: 'pipe', timeout: 60000 });
-    execSync('npx prisma generate', { stdio: 'pipe', timeout: 60000 });
-    res.json({ success: true, message: 'Schéma synchronisé' });
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
 app.use('/api/messages', require('./modules/messages/messages.routes'));
 app.use('/api/notifications', require('./modules/notifications/notifications.routes'));
 app.use('/api/logs', require('./modules/logs.routes'));
-app.use('/api', require('./modules/finances/finances.routes'));
+app.use('/api/finances', require('./modules/finances/finances.routes'));
 app.use('/api', require('./modules/landing/landing.routes'));
 
-app.get('/api', (req, res) => {
-  res.json({ message: "🚀 Dagoo's API - La mobilité connectée", status: 'online' });
-});
+// =========================================================
+// HEALTH
+// =========================================================
 
-// Route seed protégée (asynchrone)
-// /api/seed désactivé en production.
-// Les seeds doivent être lancés manuellement.
-app.post('/api/seed', async (req, res) => {
-  const { password } = req.body;
-  if (password !== 'DagoosSeed2026!') return res.status(403).json({ error: 'Accès refusé' });
-  res.json({ success: true, message: 'Seeds lancés en arrière-plan' });
-
-// Route seed-full (synchrone)
-app.post("/api/seed-full", async (req, res) => {
-  const { password } = req.body;
-  if (password !== "DagoosSeed2026!") return res.status(403).json({ error: "Accès refusé" });
-  const { execSync } = require("child_process");
+app.get('/api', async (req, res) => {
   try {
-    const out = execSync("node seed-full.js", { cwd: __dirname, timeout: 120000, encoding: "utf8" });
-    console.log(out);
-    res.json({ success: true, output: out });
-  } catch (e) { res.status(500).json({ error: e.message, stderr: e.stderr?.toString() }); }
+    await prisma.$queryRaw`SELECT 1`;
+
+    res.json({
+      message: "Dagoo's API - La mobilité connectée",
+      status: 'online',
+      database: 'connected'
+    });
+  } catch (error) {
+    res.status(503).json({
+      message: "Dagoo's API - La mobilité connectée",
+      status: 'degraded',
+      database: 'disconnected',
+      error: error.message
+    });
+  }
 });
-  const { exec } = require('child_process');
-  exec('npm run seed', { cwd: __dirname }, (error, stdout, stderr) => {
-    if (error) console.error('❌ Seed error:', error.message);
-    if (stdout) console.log(stdout);
-    if (stderr) console.error(stderr);
+
+// =========================================================
+// ROUTES PUBLIQUES DRIVER
+// =========================================================
+
+// Informations publiques d'un chauffeur
+app.get('/api/public/driver/:id', async (req, res) => {
+  try {
+    const driver = await prisma.driver.findUnique({
+      where: { id: req.params.id },
+      include: {
+        user: true,
+        vehicle: true,
+        organization: true
+      }
+    });
+
+    if (!driver) {
+      return res.status(404).json({
+        success: false,
+        error: 'Chauffeur introuvable'
+      });
+    }
+
+    res.json(driver);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Véhicule affecté à un chauffeur
+app.get('/api/public/vehicles/:driverId', async (req, res) => {
+  try {
+    const driver = await prisma.driver.findUnique({
+      where: { id: req.params.driverId },
+      include: {
+        vehicle: true
+      }
+    });
+
+    if (!driver) {
+      return res.status(404).json({
+        success: false,
+        error: 'Chauffeur introuvable'
+      });
+    }
+
+    res.json(driver.vehicle ? [driver.vehicle] : []);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Organisations publiques
+app.get('/api/public/organizations', async (req, res) => {
+  try {
+    const organizations = await prisma.organization.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    res.json(organizations);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Courses d'un chauffeur
+
+app.get('/api/public/plans', async (req, res) => {
+  try {
+    const plans = await prisma.plan.findMany({
+      where: { active: true },
+      orderBy: [{ type: 'asc' }, { price: 'asc' }],
+    });
+    res.json(plans);
+  } catch (e) {
+    console.error('Erreur plans publics:', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+app.get('/api/public/trips/:driverId', async (req, res) => {
+  try {
+    const where = {
+      driverId: req.params.driverId
+    };
+
+    if (req.query.date) {
+      const date = new Date(req.query.date);
+
+      if (Number.isNaN(date.getTime())) {
+        return res.status(400).json({
+          success: false,
+          error: 'Date invalide'
+        });
+      }
+
+      where.createdAt = {
+        gte: date
+      };
+    }
+
+    const trips = await prisma.trip.findMany({
+      where,
+      include: {
+        vehicle: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    res.json(trips);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// =========================================================
+// ERROR HANDLER
+// =========================================================
+
+app.use((err, req, res, next) => {
+  console.error('API ERROR:', err);
+
+  res.status(500).json({
+    error: 'Erreur interne du serveur'
   });
 });
 
+// =========================================================
+// START
+// =========================================================
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`✅ API sur http://localhost:${PORT}`));
-// Force deploy Fri, Jul 31, 2026 11:25:10 AM
-// Force redeploy Mon, Aug  3, 2026  8:27:15 AM
 
-// ============ ROUTES PUBLIQUES POUR DRIVER ============
-
-// Route publique pour récupérer les infos du chauffeur (par ID)
-app.get('/api/public/driver/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    const { data, error } = await supabase
-      .from('Driver')
-      .select('*, Vehicle(*), Organization(*)')
-      .eq('id', id)
-      .single();
-    
-    if (error) throw error;
-    
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      error: error.message 
-    });
-  }
+const server = app.listen(PORT, () => {
+  console.log(`API démarrée sur le port ${PORT}`);
 });
 
-// Route publique pour récupérer les véhicules d'un chauffeur
-app.get('/api/public/vehicles/:driverId', async (req, res) => {
-  try {
-    const { driverId } = req.params;
-    
-    const { data, error } = await supabase
-      .from('Vehicle')
-      .select('*')
-      .eq('driverId', driverId);
-    
-    if (error) throw error;
-    
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      error: error.message 
-    });
-  }
-});
+// =========================================================
+// SHUTDOWN PROPRE
+// =========================================================
 
-// Route publique pour récupérer les organisations
-app.get('/api/public/organizations', async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from('Organization')
-      .select('*');
-    
-    if (error) throw error;
-    
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      error: error.message 
-    });
-  }
-});
+async function shutdown(signal) {
+  console.log(`${signal} reçu. Arrêt de l'API...`);
 
-// Route publique pour récupérer les courses d'un chauffeur
-app.get('/api/public/trips/:driverId', async (req, res) => {
-  try {
-    const { driverId } = req.params;
-    const { date } = req.query;
-    
-    let query = supabase
-      .from('Trip')
-      .select('*')
-      .eq('driverId', driverId);
-    
-    if (date) {
-      query = query.gte('createdAt', date);
-    }
-    
-    const { data, error } = await query;
-    
-    if (error) throw error;
-    
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      error: error.message 
-    });
-  }
-});
-// Force deploy Thu, Aug  6, 2026  5:35:03 AM
-// force deploy Fri, Aug  7, 2026  8:54:59 AM
-// force seed route deploy Fri, Aug  7, 2026 10:41:06 AM
-// force deploy v2 Fri, Aug  7, 2026 10:51:47 AM
+  server.close(async () => {
+    await prisma.$disconnect();
+    console.log('Prisma déconnecté.');
+    process.exit(0);
+  });
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));

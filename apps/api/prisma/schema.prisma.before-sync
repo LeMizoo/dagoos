@@ -1,0 +1,358 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ========================================
+// UTILISATEURS
+// ========================================
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String
+  role      String   @default("USER")
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  driver    Driver?
+  logs      Log[]
+}
+
+// ========================================
+// ORGANISATIONS
+// ========================================
+model Organization {
+  id              String        @id @default(cuid())
+  name            String
+  code            String        @unique
+  slug            String        @unique
+  type            String        // FLEET_MANAGER, COOPERATIVE
+  email           String        @unique
+  phone           String?
+  logo            String?
+  description     String?
+  plan            String        @default("Freemium")
+  paymentStatus   String?       @default("unpaid")
+  paymentRef      String?
+  paymentAmount   Int?
+  subscriptionEnd DateTime?
+  status          String        @default("pending")
+  createdAt       DateTime      @default(now())
+  drivers         Driver[]
+  messages        Message[]
+  vehicles        Vehicle[]
+  societes        Societe[]
+  notifications   Notification[]
+}
+
+// ========================================
+// CHAUFFEURS
+// ========================================
+model Driver {
+  id             String       @id @default(cuid())
+  userId         String       @unique
+  user           User         @relation(fields: [userId], references: [id])
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  driverCode     String       @unique
+  pin            String
+  license        String?
+  vehicleId      String?
+  vehicle        Vehicle?     @relation(fields: [vehicleId], references: [id])
+  status         String       @default("active")
+  createdAt      DateTime     @default(now())
+  courses        Course[]
+  trips          Trip[]
+}
+
+// ========================================
+// VÉHICULES
+// ========================================
+model Vehicle {
+  id                String         @id @default(cuid())
+  organizationId    String?
+  organization      Organization?  @relation(fields: [organizationId], references: [id])
+  proprietaireId    String?
+  proprietaire      Proprietaire?  @relation(fields: [proprietaireId], references: [id])
+  plate             String         @unique
+  model             String?
+  year              Int?
+  currentKm         Int            @default(0)
+  status            String         @default("active")
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  drivers           Driver[]
+  maintenances      Maintenance[]
+  assurances        Assurance[]
+  vignettes         Vignette[]
+  courses           Course[]
+  trips             Trip[]
+}
+
+// ========================================
+// MAINTENANCE (historique entretiens)
+// ========================================
+model Maintenance {
+  id          String   @id @default(cuid())
+  vehicleId   String
+  vehicle     Vehicle  @relation(fields: [vehicleId], references: [id])
+  type        String   // vidange, pneu, plaquette, bougie, chaine, autre
+  description String?
+  km          Int
+  cost        Float    @default(0)
+  date        DateTime @default(now())
+  nextKm      Int?
+  prestataire String?
+  notes       String?
+  createdAt   DateTime @default(now())
+}
+
+// ========================================
+// ASSURANCE
+// ========================================
+model Assurance {
+  id         String   @id @default(cuid())
+  vehicleId  String
+  vehicle    Vehicle  @relation(fields: [vehicleId], references: [id])
+  compagnie  String?
+  police     String?
+  debut      DateTime
+  fin        DateTime
+  cost       Float    @default(0)
+  status     String   @default("active")
+  createdAt  DateTime @default(now())
+}
+
+// ========================================
+// VIGNETTE
+// ========================================
+model Vignette {
+  id        String   @id @default(cuid())
+  vehicleId String
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
+  annee     Int
+  cost      Float    @default(0)
+  datePaiement DateTime?
+  status    String   @default("en_attente")
+  createdAt DateTime @default(now())
+}
+
+// ========================================
+// PROPRIÉTAIRE
+// ========================================
+model Proprietaire {
+  id        String    @id @default(cuid())
+  name      String
+  cin       String?
+  phone     String?
+  email     String?
+  address   String?
+  nif       String?
+  stat      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  vehicles  Vehicle[]
+}
+
+// ========================================
+// SOCIÉTÉ
+// ========================================
+model Societe {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  activite       String       @default("Transport")
+  adresse        String?
+  createdAt      DateTime     @default(now())
+  contrats       Contrat[]
+  livraisons     Livraison[]
+}
+
+// ========================================
+// CONTRAT
+// ========================================
+model Contrat {
+  id        String   @id @default(cuid())
+  societeId String
+  societe   Societe  @relation(fields: [societeId], references: [id])
+  client    String
+  dateDebut String
+  dateFin   String
+  montant   Float    @default(0)
+  statut    String   @default("actif")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ========================================
+// LIVRAISON
+// ========================================
+model Livraison {
+  id             String   @id @default(cuid())
+  societeId      String
+  societe        Societe  @relation(fields: [societeId], references: [id])
+  driverId       String?
+  vehicleId      String?
+  type           String   @default("colis")
+  description    String?
+  adresseDepart  String?
+  adresseArrivee String?
+  prix           Float    @default(0)
+  commission     Float    @default(0)
+  statut         String   @default("en_attente")
+  preuve         String?
+  createdAt      DateTime @default(now())
+}
+
+// ========================================
+// COURSE
+// ========================================
+model Course {
+  id         String   @id @default(cuid())
+  driverId   String
+  driver     Driver   @relation(fields: [driverId], references: [id])
+  vehicleId  String
+  vehicle    Vehicle  @relation(fields: [vehicleId], references: [id])
+  type       String   @default("NORMALE")
+  distanceKm Float    @default(0)
+  price      Float    @default(0)
+  commission Float    @default(0)
+  date       DateTime @default(now())
+}
+
+// ========================================
+// TRIP (trajet/service)
+// ========================================
+model Trip {
+  id        String   @id @default(cuid())
+  driverId  String
+  driver    Driver   @relation(fields: [driverId], references: [id])
+  vehicleId String
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
+  status    String   @default("pending")
+  startAt   DateTime?
+  endAt     DateTime?
+  createdAt DateTime @default(now())
+}
+
+// ========================================
+// PAIEMENT
+// ========================================
+model Payment {
+  id     String @id @default(cuid())
+  tripId String
+  amount Float
+  method String
+  date   DateTime @default(now())
+}
+
+// ========================================
+// VERSEMENT
+// ========================================
+model Versement {
+  id          String   @id @default(cuid())
+  driverId    String
+  amount      Float
+  periode     String   // format: YYYY-MM
+  status      String   @default("en_attente")
+  dateVersement DateTime?
+  createdAt   DateTime @default(now())
+}
+
+// ========================================
+// TARIFS (par organisation)
+// ========================================
+model Tarif {
+  id                  String @id @default(cuid())
+  organizationId      String @unique
+  prixBase            Float  @default(2000)
+  prixKm              Float  @default(500)
+  locationJournalier  Float  @default(13500)
+  commissionChauffeur Int    @default(20)
+  adyVarotraActif     Boolean @default(true)
+  courseNormalActif   Boolean @default(true)
+  locationActif       Boolean @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+// ========================================
+// PLAN D'ABONNEMENT
+// ========================================
+model Plan {
+  @@unique([type, name])
+  id          String   @id @default(cuid())
+  type        String   // FLEET_MANAGER, COOPERATIVE
+  name        String   // Freemium, Basic, Standard, Premium
+  price       Float    @default(0)
+  vehiclesMax Int      @default(1)
+  driversMax  Int      @default(1)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ========================================
+// MESSAGE
+// ========================================
+model Message {
+  id             String        @id @default(cuid())
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  subject        String
+  content        String
+  sender         String        @default("Admin")
+  reply          String?
+  repliedAt      DateTime?
+  repliedBy      String?
+  type           String        @default("info")
+  read           Boolean       @default(false)
+  replied        Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+}
+
+// ========================================
+// NOTIFICATION
+// ========================================
+model Notification {
+  id             String        @id @default(cuid())
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  title          String
+  message        String
+  type           String        @default("info")
+  read           Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+}
+
+// ========================================
+// LANDING CONTENT
+// ========================================
+model LandingContent {
+  id       String  @id @default(cuid())
+  section  String  @unique
+  title    String?
+  subtitle String?
+  body     String?
+  imageUrl String?
+  active   Boolean @default(true)
+}
+
+// ========================================
+// LOG (journal d'activité)
+// ========================================
+model Log {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  details   String?
+  ip        String?
+  createdAt DateTime @default(now())
+}

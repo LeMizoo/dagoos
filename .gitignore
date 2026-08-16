@@ -1,42 +1,40 @@
-# Node.js
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# ==================================================
+# Dagoos — fichiers temporaires et sauvegardes locales
+# ==================================================
 
-# Environment
+# Backups locaux
+*.bak
+*.backup
+*.backup-*
+.backup-*/
+backups/
+
+# Backups avec suffixes de sécurité
+*.bak-*
+*.backup-*
+
+# Environnements locaux
 .env
 .env.local
 .env.*.local
 
-# Build
-dist/
-build/
-.vercel/
-.cache/
+# Dépendances
+node_modules/
+.next/
+.turbo/
 
-# OS
+# Logs
+*.log
+
+# Fichiers système
 .DS_Store
 Thumbs.db
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
+# Vercel local
+.vercel/
+admin-next/.vercel/
 
-# Logs
-logs/
-*.log
-
-# Prisma
 *.db
 *.db-journal
-node_modules/
-dist/
-.env
-*.db
-*.db
-*.db-journal
-*.backup
-inspect-project.sh
+*.db-shm
+*.db-wal

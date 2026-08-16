@@ -1,10 +1,11 @@
 const express = require('express');
 const prisma = require('../../lib/prisma');
 const { authMiddleware } = require('../../middleware/auth');
+const { requirePermission } = require('../../security/require-permission');
 const router = express.Router();
 
 // GET /api/users
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', authMiddleware, requirePermission('users.read'), async (req, res) => {
   try {
     const users = await prisma.user.findMany({
       select: { id: true, name: true, email: true, phone: true, role: true, createdAt: true },
@@ -15,7 +16,7 @@ router.get('/', authMiddleware, async (req, res) => {
 });
 
 // GET /api/users/:id
-router.get('/:id', authMiddleware, async (req, res) => {
+router.get('/:id', authMiddleware, requirePermission('users.read'), async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.params.id },
@@ -27,7 +28,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
 });
 
 // PUT /api/users/:id — Modification du profil utilisateur
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', authMiddleware, requirePermission('users.manage'), async (req, res) => {
   try {
     const { name, email, phone, role } = req.body;
     // Seuls les champs fournis sont mis à jour

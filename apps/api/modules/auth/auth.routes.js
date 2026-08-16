@@ -134,8 +134,17 @@ router.post('/driver-login', async (req, res) => {
     if (!driver) return res.status(401).json({ error: 'Code chauffeur introuvable' });
     if (driver.pin !== pin) return res.status(401).json({ error: 'PIN incorrect' });
     const token = jwt.sign(
-      { id: driver.user.id, email: driver.user.email, role: 'DRIVER', driverId: driver.id },
-      JWT_SECRET, { expiresIn: '7d' }
+      {
+        id: driver.user.id,
+        email: driver.user.email,
+        role: 'DRIVER',
+        driverId: driver.id,
+        organizationId: driver.organizationId,
+        organizationCode: driver.organization?.code,
+        organizationName: driver.organization?.name
+      },
+      JWT_SECRET,
+      { expiresIn: '7d' }
     );
     res.json({
       message: 'Connexion réussie !', token,
@@ -150,11 +159,52 @@ router.get('/me', authMiddleware, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
-      select: { id: true, name: true, email: true, role: true, phone: true }
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        phone: true
+      }
     });
-    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
-    res.json({ user });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+
+    if (!user) {
+      return res.status(404).json({
+        error: 'Utilisateur introuvable'
+      });
+    }
+
+    // Le JWT contient les informations de contexte
+    // nécessaires aux profils Fleet / Coop / Driver.
+    const sessionUser = {
+      ...user,
+
+      ...(req.user.organizationId
+        ? {
+            organizationId: req.user.organizationId,
+            organizationCode: req.user.organizationCode,
+            organizationName: req.user.organizationName
+          }
+        : {}),
+
+      ...(req.user.driverId
+        ? {
+            driverId: req.user.driverId,
+            driverCode: req.user.driverCode
+          }
+        : {})
+    };
+
+    res.json({
+      user: sessionUser
+    });
+  } catch (e) {
+    console.error('[auth/me]', e);
+
+    res.status(500).json({
+      error: 'Erreur lors de la récupération du profil'
+    });
+  }
 });
 
 module.exports = router;

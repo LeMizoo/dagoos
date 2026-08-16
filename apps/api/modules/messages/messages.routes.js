@@ -1,11 +1,12 @@
 const express = require('express');
 const prisma = require('../../lib/prisma');
 const { authMiddleware } = require('../../middleware/auth');
+const { requirePermission } = require('../../security/require-permission');
 
 const router = express.Router();
 
 
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', authMiddleware, requirePermission('messages.read'), async (req, res) => {
   try {
     const messages = await prisma.message.findMany({
       include: { organization: true },
@@ -20,7 +21,7 @@ router.get('/', authMiddleware, async (req, res) => {
 });
 
 
-router.get('/unread-count', authMiddleware, async (req, res) => {
+router.get('/unread-count', authMiddleware, requirePermission('messages.read'), async (req, res) => {
   try {
     const count = await prisma.message.count({
       where: {
@@ -42,7 +43,7 @@ router.get('/unread-count', authMiddleware, async (req, res) => {
 });
 
 
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', authMiddleware, requirePermission('messages.manage'), async (req, res) => {
   try {
     const { organizationId, subject, content, type } = req.body;
 
@@ -63,7 +64,7 @@ router.post('/', authMiddleware, async (req, res) => {
 });
 
 
-router.put('/:id/read', authMiddleware, async (req, res) => {
+router.put('/:id/read', authMiddleware, requirePermission('messages.manage'), async (req, res) => {
   try {
     await prisma.message.update({
       where: {
@@ -83,7 +84,7 @@ router.put('/:id/read', authMiddleware, async (req, res) => {
   }
 });
 
-router.put('/:id/reply', authMiddleware, async (req, res) => {
+router.put('/:id/reply', authMiddleware, requirePermission('messages.manage'), async (req, res) => {
   try {
     const { reply } = req.body;
 

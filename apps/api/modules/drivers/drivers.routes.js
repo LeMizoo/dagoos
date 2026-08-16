@@ -1,80 +1,233 @@
 const express = require('express');
+const bcrypt = require('bcryptjs');
 const prisma = require('../../lib/prisma');
 const { authMiddleware } = require('../../middleware/auth');
+const { requirePermission } = require('../../security/require-permission');
+
 const router = express.Router();
 
-router.get('/', authMiddleware, async (req, res) => {
+const PRIVILEGED_ROLES = ['SUPER_ADMIN', 'ADMIN'];
+
+async function getUserOrganizationId(req) {
+  if (req.user.organizationId) {
+    return req.user.organizationId;
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: req.user.id },
+    include: {
+      driver: {
+        select: { organizationId: true },
+      },
+    },
+  });
+
+  if (user?.driver?.organizationId) {
+    return user.driver.organizationId;
+  }
+
+  const org = await prisma.organization.findFirst({
+    where: { email: req.user.email },
+    select: { id: true },
+  });
+
+  return org?.id || null;
+}
+
+function sanitizeDriver(driver) {
+if (!driver) return driver;
+
+const { pin, user, ...safeDriver } = driver;
+
+if (user) {
+const { password, ...safeUser } = user;
+
+return {
+...safeDriver,
+user: safeUser,
+};
+}
+
+return safeDriver;
+}
+
+async function canAccessOrganization(req, organizationId) {
+  if (PRIVILEGED_ROLES.includes(req.user.role)) {
+    return true;
+  }
+
+  if (!organizationId) {
+    return false;
+  }
+
+  const userOrganizationId = await getUserOrganizationId(req);
+  return userOrganizationId === organizationId;
+}
+
+/*
+ * GET /api/drivers
+ */
+router.get('/', authMiddleware, requirePermission('drivers.read'), async (req, res) => {
   try {
-    // Si SUPER_ADMIN ou ADMIN, voir tous les chauffeurs
-    // Sinon, filtrer par l'organisation de l'utilisateur
     let where = {};
-    if (req.user.role !== 'SUPER_ADMIN' && req.user.role !== 'ADMIN') {
-      // Récupérer l'organisation de l'utilisateur
-      const userWithOrg = await prisma.user.findUnique({
-        where: { id: req.user.id },
-        include: { driver: { select: { organizationId: true } } }
-      });
-      if (userWithOrg?.driver?.organizationId) {
-        where = { organizationId: userWithOrg.driver.organizationId };
-      } else {
-        // Pour FLEET_MANAGER / COOPERATIVE, chercher par email
-        const org = await prisma.organization.findFirst({
-          where: { email: req.user.email }
+
+    if (!PRIVILEGED_ROLES.includes(req.user.role)) {
+      const organizationId = await getUserOrganizationId(req);
+
+      if (!organizationId) {
+        return res.status(403).json({
+          error: 'Organisation introuvable',
         });
-        if (org) {
-          where = { organizationId: org.id };
-        }
       }
+
+      where = { organizationId };
     }
+
     const drivers = await prisma.driver.findMany({
       where,
-      include: { user: true, organization: true, vehicle: true },
-      orderBy: { createdAt: 'desc' }
+      include: {
+        user: true,
+        organization: true,
+        vehicle: true,
+      },
+      orderBy: { createdAt: 'desc' },
     });
-    res.json(drivers);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+
+    res.json(drivers.map(sanitizeDriver));
+  } catch (error) {
+    console.error('GET /drivers:', error);
+    res.status(500).json({
+      error: 'Erreur récupération chauffeurs',
+    });
+  }
 });
 
-router.post('/', authMiddleware, async (req, res) => {
+/*
+ * POST /api/drivers
+ */
+router.post('/', authMiddleware, requirePermission('drivers.manage'), async (req, res) => {
   try {
-    const { email, password, driverCode, pin, firstName, lastName, phone, organizationId, vehicleId, status, license } = req.body;
-    
-    // Créer ou récupérer le User associé
-    let user;
-    if (email) {
-      user = await prisma.user.upsert({
-        where: { email },
-        update: { name: `${firstName || ''} ${lastName || ''}`.trim(), role: 'DRIVER' },
-        create: {
-          email,
-          name: `${firstName || ''} ${lastName || ''}`.trim(),
-          password: password || pin || '1234',
-          role: 'DRIVER',
-          phone: phone || '',
-        },
+    const {
+      email,
+      password,
+      driverCode,
+      pin,
+      firstName,
+      lastName,
+      phone,
+      organizationId: requestedOrganizationId,
+      vehicleId,
+      status,
+      license,
+    } = req.body;
+
+    if (req.user.role === 'DRIVER') {
+      return res.status(403).json({
+        error: 'Accès refusé',
       });
-    } else if (driverCode) {
-      // Générer un email basé sur le code
-      const generatedEmail = `${driverCode.toLowerCase()}@driver.dagoos.mg`;
-      user = await prisma.user.upsert({
-        where: { email: generatedEmail },
-        update: { name: `${firstName || ''} ${lastName || ''}`.trim(), role: 'DRIVER' },
-        create: {
-          email: generatedEmail,
-          name: `${firstName || ''} ${lastName || ''}`.trim(),
-          password: password || pin || '1234',
-          role: 'DRIVER',
-          phone: phone || '',
-        },
-      });
-    } else {
-      return res.status(400).json({ error: 'Email ou driverCode requis' });
     }
-    
-    // Créer le Driver
+
+    let organizationId = requestedOrganizationId;
+
+    if (!PRIVILEGED_ROLES.includes(req.user.role)) {
+      const ownOrganizationId = await getUserOrganizationId(req);
+
+      if (!ownOrganizationId) {
+        return res.status(403).json({
+          error: 'Organisation introuvable',
+        });
+      }
+
+      if (
+        requestedOrganizationId &&
+        requestedOrganizationId !== ownOrganizationId
+      ) {
+        return res.status(403).json({
+          error: 'Vous ne pouvez pas créer un chauffeur dans une autre organisation',
+        });
+      }
+
+      organizationId = ownOrganizationId;
+    }
+
+    if (!organizationId) {
+      return res.status(400).json({
+        error: 'organizationId requis',
+      });
+    }
+
+    if (!email && !driverCode) {
+      return res.status(400).json({
+        error: 'Email ou driverCode requis',
+      });
+    }
+
+    /*
+     * Vérifier que le véhicule appartient à la même organisation.
+     */
+    if (vehicleId) {
+      const vehicle = await prisma.vehicle.findUnique({
+        where: { id: vehicleId },
+        select: {
+          id: true,
+          organizationId: true,
+        },
+      });
+
+      if (!vehicle) {
+        return res.status(404).json({
+          error: 'Véhicule introuvable',
+        });
+      }
+
+      if (vehicle.organizationId !== organizationId) {
+        return res.status(403).json({
+          error: 'Le véhicule appartient à une autre organisation',
+        });
+      }
+    }
+
+    const name = `${firstName || ''} ${lastName || ''}`.trim();
+
+    const generatedEmail = email
+      ? email.trim().toLowerCase()
+      : `${driverCode.toLowerCase()}@driver.dagoos.mg`;
+
+    /*
+     * Le compte User du chauffeur possède lui aussi un mot de passe.
+     * On le hash systématiquement.
+     */
+    const plainPassword = password || pin || '1234';
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
+    const user = await prisma.user.upsert({
+      where: { email: generatedEmail },
+      update: {
+        name,
+        role: 'DRIVER',
+        phone: phone || '',
+        password: hashedPassword,
+      },
+      create: {
+        email: generatedEmail,
+        name,
+        password: hashedPassword,
+        role: 'DRIVER',
+        phone: phone || '',
+      },
+    });
+
     const driver = await prisma.driver.upsert({
-      where: { driverCode: driverCode || `DRV-${user.id}` },
-      update: { organizationId, vehicleId, status, license, pin: pin || '1234' },
+      where: {
+        driverCode: driverCode || `DRV-${user.id}`,
+      },
+      update: {
+        organizationId,
+        vehicleId: vehicleId || null,
+        status: status || 'active',
+        license: license || null,
+        pin: pin || '1234',
+      },
       create: {
         userId: user.id,
         organizationId,
@@ -84,96 +237,305 @@ router.post('/', authMiddleware, async (req, res) => {
         status: status || 'active',
         license: license || null,
       },
+      include: {
+        user: true,
+        organization: true,
+        vehicle: true,
+      },
     });
-    
-    res.status(201).json(driver);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+
+    res.status(201).json(sanitizeDriver(driver));
+  } catch (error) {
+    console.error('POST /drivers:', error);
+
+    res.status(500).json({
+      error: error.message,
+    });
+  }
 });
 
-router.put('/:id', authMiddleware, async (req, res) => {
+/*
+ * PUT /api/drivers/:id
+ */
+router.put('/:id', authMiddleware, requirePermission('drivers.manage'), async (req, res) => {
   try {
-    const { driverCode, pin, status, vehicleId } = req.body;
+    if (req.user.role === 'DRIVER') {
+      return res.status(403).json({
+        error: 'Accès refusé',
+      });
+    }
+
+    const existingDriver = await prisma.driver.findUnique({
+      where: { id: req.params.id },
+      select: {
+        id: true,
+        organizationId: true,
+      },
+    });
+
+    if (!existingDriver) {
+      return res.status(404).json({
+        error: 'Chauffeur introuvable',
+      });
+    }
+
+    if (
+      !(await canAccessOrganization(
+        req,
+        existingDriver.organizationId
+      ))
+    ) {
+      return res.status(403).json({
+        error: 'Accès à cette organisation refusé',
+      });
+    }
+
+    const {
+      driverCode,
+      pin,
+      status,
+      vehicleId,
+      license,
+    } = req.body;
+
     const data = {};
+
     if (driverCode !== undefined) data.driverCode = driverCode;
     if (pin !== undefined) data.pin = pin;
     if (status !== undefined) data.status = status;
-    if (vehicleId !== undefined) data.vehicleId = vehicleId;
+    if (license !== undefined) data.license = license;
+
+    if (vehicleId !== undefined) {
+      if (vehicleId === null) {
+        data.vehicleId = null;
+      } else {
+        const vehicle = await prisma.vehicle.findUnique({
+          where: { id: vehicleId },
+          select: {
+            id: true,
+            organizationId: true,
+          },
+        });
+
+        if (!vehicle) {
+          return res.status(404).json({
+            error: 'Véhicule introuvable',
+          });
+        }
+
+        if (vehicle.organizationId !== existingDriver.organizationId) {
+          return res.status(403).json({
+            error: 'Le véhicule appartient à une autre organisation',
+          });
+        }
+
+        data.vehicleId = vehicleId;
+      }
+    }
 
     const driver = await prisma.driver.update({
       where: { id: req.params.id },
       data,
-      include: { user: true, organization: true, vehicle: true }
+      include: {
+        user: true,
+        organization: true,
+        vehicle: true,
+      },
     });
-    res.json(driver);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+
+    res.json(sanitizeDriver(driver));
+  } catch (error) {
+    console.error('PUT /drivers/:id:', error);
+
+    res.status(500).json({
+      error: error.message,
+    });
+  }
 });
 
-router.delete('/:id', authMiddleware, async (req, res) => {
+/*
+ * DELETE /api/drivers/:id
+ */
+router.delete(
+  '/:id',
+  authMiddleware,
+  requirePermission('drivers.manage'),
+  async (req, res) => {
   try {
-    await prisma.driver.delete({ where: { id: req.params.id } });
+    if (req.user.role === 'DRIVER') {
+      return res.status(403).json({
+        error: 'Accès refusé',
+      });
+    }
+
+    const driver = await prisma.driver.findUnique({
+      where: { id: req.params.id },
+      select: {
+        id: true,
+        organizationId: true,
+      },
+    });
+
+    if (!driver) {
+      return res.status(404).json({
+        error: 'Chauffeur introuvable',
+      });
+    }
+
+    if (!(await canAccessOrganization(req, driver.organizationId))) {
+      return res.status(403).json({
+        error: 'Accès à cette organisation refusé',
+      });
+    }
+
+    await prisma.driver.delete({
+      where: { id: req.params.id },
+    });
+
     res.json({ ok: true });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (error) {
+    console.error('DELETE /drivers/:id:', error);
+
+    res.status(500).json({
+      error: error.message,
+    });
+  }
 });
 
+/*
+ * GET /api/drivers/me
+ */
 router.get('/me', authMiddleware, async (req, res) => {
   try {
     const driver = await prisma.driver.findFirst({
-      where: req.user.role === 'DRIVER' 
-        ? { id: req.user.driverId }
-        : { userId: req.user.id },
-      include: { user: true, organization: true, vehicle: true }
+      where:
+        req.user.role === 'DRIVER'
+          ? { id: req.user.driverId }
+          : { userId: req.user.id },
+      include: {
+        user: true,
+        organization: true,
+        vehicle: true,
+      },
     });
-    if (!driver) return res.status(404).json({ error: 'Chauffeur non trouv�' });
-    res.json(driver);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+
+    if (!driver) {
+      return res.status(404).json({
+        error: 'Chauffeur non trouvé',
+      });
+    }
+
+    res.json(sanitizeDriver(driver));
+  } catch (error) {
+    console.error('GET /drivers/me:', error);
+
+    res.status(500).json({
+      error: 'Erreur récupération chauffeur',
+    });
+  }
 });
 
-// --- PWA Driver : Shift & Statut ---
+/*
+ * GET /api/drivers/me/status
+ */
 router.get('/me/status', authMiddleware, async (req, res) => {
   try {
     const driver = await prisma.driver.findUnique({
       where: { id: req.user.driverId },
-      select: { status: true }
+      select: { status: true },
     });
-    return res.json({ status: driver ? driver.status : 'OFFLINE' });
+
+    return res.json({
+      status: driver ? driver.status : 'OFFLINE',
+    });
   } catch (error) {
-    return res.status(500).json({ message: 'Erreur serveur' });
+    return res.status(500).json({
+      message: 'Erreur serveur',
+    });
   }
 });
 
+/*
+ * POST /api/drivers/shift/start
+ */
 router.post('/shift/start', authMiddleware, async (req, res) => {
   try {
+    if (req.user.role !== 'DRIVER') {
+      return res.status(403).json({
+        error: 'Accès réservé aux chauffeurs',
+      });
+    }
+
     await prisma.driver.update({
       where: { id: req.user.driverId },
-      data: { status: 'active' }
+      data: { status: 'active' },
     });
-    return res.json({ success: true, status: 'active' });
+
+    return res.json({
+      success: true,
+      status: 'active',
+    });
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'Erreur d�marrage service' });
+    return res.status(500).json({
+      success: false,
+      message: 'Erreur démarrage service',
+    });
   }
 });
 
+/*
+ * POST /api/drivers/shift/pause
+ */
 router.post('/shift/pause', authMiddleware, async (req, res) => {
   try {
+    if (req.user.role !== 'DRIVER') {
+      return res.status(403).json({
+        error: 'Accès réservé aux chauffeurs',
+      });
+    }
+
     await prisma.driver.update({
       where: { id: req.user.driverId },
-      data: { status: 'pause' }
+      data: { status: 'pause' },
     });
-    return res.json({ success: true, status: 'pause' });
+
+    return res.json({
+      success: true,
+      status: 'pause',
+    });
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'Erreur pause' });
+    return res.status(500).json({
+      success: false,
+      message: 'Erreur pause',
+    });
   }
 });
 
+/*
+ * POST /api/drivers/shift/end
+ */
 router.post('/shift/end', authMiddleware, async (req, res) => {
   try {
+    if (req.user.role !== 'DRIVER') {
+      return res.status(403).json({
+        error: 'Accès réservé aux chauffeurs',
+      });
+    }
+
     await prisma.driver.update({
       where: { id: req.user.driverId },
-      data: { status: 'inactive' }
+      data: { status: 'inactive' },
     });
-    return res.json({ success: true, status: 'inactive' });
+
+    return res.json({
+      success: true,
+      status: 'inactive',
+    });
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'Erreur fin de service' });
+    return res.status(500).json({
+      success: false,
+      message: 'Erreur fin de service',
+    });
   }
 });
 

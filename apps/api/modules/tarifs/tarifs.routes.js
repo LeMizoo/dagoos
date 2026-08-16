@@ -1,10 +1,11 @@
 const express = require('express');
 const prisma = require('../../lib/prisma');
 const { authMiddleware } = require('../../middleware/auth');
+const { requirePermission } = require('../../security/require-permission');
 const router = express.Router();
 
 // GET - Récupérer les tarifs d'une organisation
-router.get('/:organizationId', async (req, res) => {
+router.get('/:organizationId', authMiddleware, requirePermission('tarifs.read'), async (req, res) => {
   try {
     const { organizationId } = req.params;
     let tarifs = await prisma.tarif.findUnique({ where: { organizationId } });
@@ -25,7 +26,7 @@ router.get('/:organizationId', async (req, res) => {
 });
 
 // PUT - Mettre à jour les tarifs (fleet/coop admin)
-router.put('/:organizationId', authMiddleware, async (req, res) => {
+router.put('/:organizationId', authMiddleware, requirePermission('tarifs.manage'), async (req, res) => {
   try {
     const { organizationId } = req.params;
     const { prixBase, prixKm, locationJournalier, commissionChauffeur, adyVarotraActif, courseNormalActif, locationActif } = req.body;
