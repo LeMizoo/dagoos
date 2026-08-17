@@ -121,8 +121,7 @@ export default function LoginForm({ config }: LoginFormProps) {
         }),
       });
 
-      router.push(redirect);
-      router.refresh();
+      window.location.href = redirect;
     } catch (error) {
       setError(
         error instanceof Error

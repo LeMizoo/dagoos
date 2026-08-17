@@ -38,3 +38,4 @@ admin-next/.vercel/
 *.db-journal
 *.db-shm
 *.db-wal
+.vercel
