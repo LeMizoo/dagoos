@@ -1,5 +1,6 @@
 'use client';
 import { apiFetch } from '@/lib/api';
+import { useAuth } from '@/lib/auth-context';
 import { useState, useEffect } from 'react';
 import { DollarSign, Save, AlertCircle } from 'lucide-react';
 
@@ -20,6 +21,7 @@ const DEFAULT_TARIFS: Record<string, { prixBase: number; prixKm: number; locatio
 };
 
 export default function FleetSettingsPage() {
+  const { user, loading: authLoading } = useAuth();
   const [tarifs, setTarifs] = useState(DEFAULT_TARIFS);
   const [commission, setCommission] = useState(20);
   const [orgId, setOrgId] = useState('');
@@ -27,27 +29,48 @@ export default function FleetSettingsPage() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => { loadOrgAndTarifs(); }, []);
+  useEffect(() => {
+    if (!authLoading) {
+      loadOrgAndTarifs();
+    }
+  }, [authLoading, user?.organizationId]);
 
   async function loadOrgAndTarifs() {
     try {
-      const meRes = await apiFetch('/drivers/me');
-      if (!meRes.ok) { setError('Erreur chargement'); setLoading(false); return; }
-      const me = await meRes.json();
-      if (!me || !me.organizationId) { setError('Organisation introuvable'); setLoading(false); return; }
-      setOrgId(me.organizationId);
+      if (!user?.organizationId) {
+        setError('Organisation introuvable');
+        return;
+      }
 
-      const tRes = await apiFetch(`/tarifs/${me.organizationId}`);
-      if (tRes.ok) {
-        const data = await tRes.json();
-        if (data && data.vehiculeTarifs) {
+      const organizationId = user.organizationId;
+      setOrgId(organizationId);
+
+      const tRes = await apiFetch(`/tarifs/${organizationId}`);
+
+      if (!tRes.ok) {
+        const data = await tRes.json().catch(() => null);
+        setError(data?.error || 'Erreur chargement des paramètres');
+        return;
+      }
+
+      const data = await tRes.json();
+
+      if (data?.vehiculeTarifs) {
+        try {
           setTarifs(JSON.parse(data.vehiculeTarifs));
-        }
-        if (data && data.commissionChauffeur !== undefined) {
-          setCommission(data.commissionChauffeur);
+        } catch {
+          setError('Format des tarifs invalide');
         }
       }
-    } catch (e: any) { setError(e.message); } finally { setLoading(false); }
+
+      if (data?.commissionChauffeur !== undefined) {
+        setCommission(data.commissionChauffeur);
+      }
+    } catch (e: any) {
+      setError(e.message || 'Erreur chargement');
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleSave() {
