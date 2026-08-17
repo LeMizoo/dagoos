@@ -9,6 +9,7 @@ export default function FleetHome() {
   const [stats, setStats] = useState({ drivers: 0, vehicles: 0, activeVehicles: 0, maintenanceVehicles: 0, coursesJour: 0, caJour: 0, commissionJour: 0, messages: 0 });
   const [loading, setLoading] = useState(true);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [courses, setCourses] = useState<any[]>([]);
 
   useEffect(() => { load(); }, []);
 
@@ -25,7 +26,8 @@ export default function FleetHome() {
       const messages = Array.isArray(messagesRes) ? messagesRes : [];
 
       const statsSummary = await apiFetch('/finances/stats/summary').then(r => r.ok ? r.json() : null).catch(() => null);
-      const courses = await apiFetch('/finances/courses').then(r => r.ok ? r.json() : []).catch(() => []);
+      const coursesData = await apiFetch('/finances/courses').then(r => r.ok ? r.json() : []).catch(() => []);
+      setCourses(Array.isArray(coursesData) ? coursesData : []);
 
       setStats({
         drivers: drivers.length,
@@ -38,7 +40,7 @@ export default function FleetHome() {
         messages: messages.filter((m: any) => !m.read).length,
       });
 
-      const recentCourses = Array.isArray(courses) ? courses.slice(0, 5).map((c: any) => ({
+      const recentCourses = Array.isArray(coursesData) ? coursesData.slice(0, 5).map((c: any) => ({
         type: 'course',
         driver: c.driver?.user?.name || c.driver?.driverCode || 'Chauffeur',
         vehicle: c.vehicle?.plate || '',
@@ -100,21 +102,43 @@ export default function FleetHome() {
         <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
           <h3 className="font-semibold text-gray-800 dark:text-white mb-4">📊 Chiffre d'affaires - 7 derniers jours</h3>
           <div className="flex items-end gap-3 h-40">
-            {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((day, i) => {
-              const values = [180, 220, 195, 245, 280, 310, 150];
-              const height = values[i];
-              const max = 310;
-              return (
-                <div key={day} className="flex-1 flex flex-col items-center gap-2">
-                  <span className="text-xs font-medium text-gray-600 dark:text-gray-400">{height}K</span>
-                  <div 
-                    className="w-full bg-blue-500 rounded-t-lg transition-all hover:bg-blue-600"
-                    style={{ height: `${(height / max) * 100}%` }}
-                  />
-                  <span className="text-xs text-gray-500">{day}</span>
-                </div>
-              );
-            })}
+            {(() => {
+              const last7Days = [...Array(7)].map((_, i) => {
+                const d = new Date();
+                d.setDate(d.getDate() - (6 - i));
+                return {
+                  dateStr: d.toISOString().split('T')[0],
+                  label: d.toLocaleDateString('fr-FR', { weekday: 'short' }),
+                };
+              });
+
+              const caByDay = last7Days.map(({ dateStr }) => {
+                return courses
+                  .filter((c: any) => c.date?.startsWith(dateStr))
+                  .reduce((sum: number, c: any) => sum + Number(c.price || 0), 0);
+              });
+
+              const max = Math.max(...caByDay, 1);
+
+              return last7Days.map(({ dateStr, label }, i) => {
+                const ca = caByDay[i];
+                const height = ca > 0 ? (ca / max) * 100 : 2;
+
+                return (
+                  <div key={dateStr} className="flex-1 flex flex-col items-center gap-2">
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                      {ca > 0 ? `${Math.round(ca / 1000)}K` : ''}
+                    </span>
+                    <div 
+                      className="w-full bg-blue-500 rounded-t-lg transition-all hover:bg-blue-600"
+                      style={{ height: `${height}%` }}
+                      title={`${ca.toLocaleString()} Ar`}
+                    />
+                    <span className="text-xs text-gray-500 capitalize">{label}</span>
+                  </div>
+                );
+              });
+            })()}
           </div>
         </div>
 
