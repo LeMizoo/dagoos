@@ -2,28 +2,39 @@ var API_URL = DAGOOS_CONFIG.apiUrl;
 
 document.addEventListener('DOMContentLoaded', function() {
   var loginBtn = document.getElementById('loginBtn');
-  var codeInput = document.getElementById('codeInput');
-  var pinInput = document.getElementById('pinInput');
+  var codeInput = document.getElementById('driverCode');
 
   if (loginBtn) {
     loginBtn.addEventListener('click', login);
   }
-  if (pinInput) {
-    pinInput.addEventListener('keyup', function(e) {
+
+  // PIN : écouter les inputs individuels dans #pinInputs
+  var pinInputs = document.querySelectorAll('#pinInputs input');
+  pinInputs.forEach(function(input) {
+    input.addEventListener('keyup', function(e) {
       if (e.key === 'Enter') login();
+      // Auto-focus vers le prochain input
+      if (input.value.length === 1 && input.nextElementSibling) {
+        input.nextElementSibling.focus();
+      }
     });
-  }
+  });
 });
 
 async function login() {
-  var codeInput = document.getElementById('codeInput');
-  var pinInput = document.getElementById('pinInput');
+  var codeInput = document.getElementById('driverCode');
   var loginBtn = document.getElementById('loginBtn');
 
-  var code = codeInput ? codeInput.value.trim() : '';
-  var pin = pinInput ? pinInput.value.trim() : '';
+  // Lire le PIN depuis les inputs individuels
+  var pinInputs = document.querySelectorAll('#pinInputs input');
+  var pin = '';
+  pinInputs.forEach(function(input) {
+    pin += input.value;
+  });
 
-  if (!code || !pin) {
+  var code = codeInput ? codeInput.value.trim() : '';
+
+  if (!code || pin.length < 4) {
     alert('Veuillez saisir votre code chauffeur et votre code PIN.');
     return;
   }
