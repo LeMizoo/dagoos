@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { apiFetch } from '@/lib/api';
 import { Search, MessageSquare, Send, Mail, MailOpen, Trash2 } from 'lucide-react';
 
 interface Message { id: string; organization?: { name?: string; id?: string }; subject?: string; content?: string; read?: boolean; createdAt?: string; }
@@ -18,7 +19,7 @@ export default function MessagesPage() {
   async function fetchMessages() {
     try {
       setError('');
-      const res = await fetch('/api/proxy/messages');
+      const res = await apiFetch('/messages');
       if (!res.ok) throw new Error(`Erreur ${res.status}`);
       const data = await res.json();
       setMessages(Array.isArray(data) ? data : []);
@@ -30,7 +31,7 @@ export default function MessagesPage() {
     setSelected(id);
     const msg = messages.find(m => m.id === id);
     if (msg && !msg.read) {
-      await fetch(`/api/proxy/messages/${id}/read`, { method: 'PUT' });
+      await apiFetch(`/messages/${id}/read`, { method: 'PUT' });
       setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m));
     }
   }
@@ -39,7 +40,7 @@ export default function MessagesPage() {
     if (!reply.trim() || !selectedMsg) return;
     setSending(true);
     try {
-      const res = await fetch(`/api/proxy/messages/${selectedMsg.id}/reply`, {
+      const res = await apiFetch(`/messages/${selectedMsg.id}/reply`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -57,7 +58,7 @@ export default function MessagesPage() {
 
   async function handleDelete(id: string) {
     if (!confirm('Supprimer ce message ?')) return;
-    await fetch(`/api/proxy/messages/${id}`, { method: 'DELETE' });
+    await apiFetch(`/messages/${id}`, { method: 'DELETE' });
     setMessages(prev => prev.filter(m => m.id !== id));
     if (selected === id) setSelected(null);
   }

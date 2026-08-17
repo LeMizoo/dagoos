@@ -1,6 +1,7 @@
 'use client';
 export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
+import { apiFetch } from '@/lib/api';
 import { Bell, BellOff, UserPlus, CreditCard, Wrench, AlertCircle, CheckCheck } from 'lucide-react';
 
 interface Notification {
@@ -30,7 +31,7 @@ export default function NotificationsPage() {
   async function fetchNotifs() {
     try {
       setError('');
-      const res = await fetch('/api/proxy/notifications');
+      const res = await apiFetch('/notifications');
       if (!res.ok) throw new Error(`Erreur ${res.status}`);
       const data = await res.json();
       setNotifs(Array.isArray(data) ? data : []);
@@ -44,7 +45,7 @@ export default function NotificationsPage() {
 
   async function markAllRead() {
     for (const n of notifs.filter(n => !n.read)) {
-      await fetch(`/api/proxy/notifications/${n.id}/read`, { method: 'PUT' });
+      await apiFetch(`/notifications/${n.id}/read`, { method: 'PUT' });
     }
     setNotifs(notifs.map(n => ({ ...n, read: true })));
   }

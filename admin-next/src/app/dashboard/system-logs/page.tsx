@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { apiFetch } from '@/lib/api';
 import { Search, ScrollText, Download, LogIn, LogOut, Settings, AlertTriangle, User } from 'lucide-react';
 
 interface Log {
@@ -40,7 +41,7 @@ export default function LogsPage() {
   async function fetchLogs() {
     try {
       setError('');
-      const res = await fetch('/api/proxy/logs');
+      const res = await apiFetch('/logs');
       if (!res.ok) throw new Error(`Erreur ${res.status}`);
       const data = await res.json();
       setLogs(Array.isArray(data) ? data : []);
