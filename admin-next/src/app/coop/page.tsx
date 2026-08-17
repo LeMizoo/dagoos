@@ -14,8 +14,8 @@ export default function CoopHome() {
   async function load() {
     try {
       const [driversRes, vehiclesRes] = await Promise.all([
-        fetch('/api/proxy/drivers').then(r => r.json()).catch(() => []),
-        fetch('/api/proxy/vehicles').then(r => r.json()).catch(() => []),
+        apiFetch('/drivers').then(r => r.json()).catch(() => []),
+        apiFetch('/vehicles').then(r => r.json()).catch(() => []),
       ]);
       
       setStats({

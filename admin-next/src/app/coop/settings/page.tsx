@@ -29,14 +29,13 @@ export default function FleetSettingsPage() {
 
   async function loadOrgAndTarifs() {
     try {
-      const orgsRes = await apiFetch('/organizations');
-      if (!orgsRes.ok) { setError('Erreur chargement'); setLoading(false); return; }
-      const orgs = await orgsRes.json();
-      const myOrg = Array.isArray(orgs) ? orgs.find((o: any) => o.type === 'COOPERATIVE') : null;
-      if (!myOrg) { setError('Aucune coopérative trouvée'); setLoading(false); return; }
-      setOrgId(myOrg.id);
+      const meRes = await apiFetch('/drivers/me');
+      if (!meRes.ok) { setError('Erreur chargement'); setLoading(false); return; }
+      const me = await meRes.json();
+      if (!me || !me.organizationId) { setError('Organisation introuvable'); setLoading(false); return; }
+      setOrgId(me.organizationId);
 
-      const tRes = await apiFetch(`/tarifs/${myOrg.id}`);
+      const tRes = await apiFetch(`/tarifs/${me.organizationId}`);
       if (tRes.ok) {
         const data = await tRes.json();
         if (data && data.vehiculeTarifs) {

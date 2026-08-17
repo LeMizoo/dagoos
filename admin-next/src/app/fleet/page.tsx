@@ -15,32 +15,37 @@ export default function FleetHome() {
   async function load() {
     try {
       const [driversRes, vehiclesRes, messagesRes] = await Promise.all([
-        fetch('/api/proxy/drivers').then(r => r.json()).catch(() => []),
-        fetch('/api/proxy/vehicles').then(r => r.json()).catch(() => []),
-        fetch('/api/proxy/messages').then(r => r.json()).catch(() => []),
+        apiFetch('/drivers').then(r => r.json()).catch(() => []),
+        apiFetch('/vehicles').then(r => r.json()).catch(() => []),
+        apiFetch('/messages').then(r => r.json()).catch(() => []),
       ]);
       
       const vehicles = Array.isArray(vehiclesRes) ? vehiclesRes : [];
       const drivers = Array.isArray(driversRes) ? driversRes : [];
       const messages = Array.isArray(messagesRes) ? messagesRes : [];
 
+      const statsSummary = await apiFetch('/finances/stats/summary').then(r => r.ok ? r.json() : null).catch(() => null);
+      const courses = await apiFetch('/finances/courses').then(r => r.ok ? r.json() : []).catch(() => []);
+
       setStats({
         drivers: drivers.length,
         vehicles: vehicles.length,
         activeVehicles: vehicles.filter((v: any) => v.status === 'active').length,
         maintenanceVehicles: vehicles.filter((v: any) => v.status === 'maintenance').length,
-        coursesJour: 12,
-        caJour: 245000,
-        commissionJour: 36750,
+        coursesJour: statsSummary?.today?.count || 0,
+        caJour: statsSummary?.today?.ca || 0,
+        commissionJour: statsSummary?.today?.com || 0,
         messages: messages.filter((m: any) => !m.read).length,
       });
 
-      setRecentActivity([
-        { type: 'course', driver: 'Rakoto Jean', vehicle: 'FL-FR-100', montant: 35000, date: new Date().toISOString() },
-        { type: 'maintenance', vehicle: 'FL-PR-M100', desc: 'Vidange', date: new Date(Date.now() - 86400000).toISOString() },
-        { type: 'course', driver: 'Rabe Pierre', vehicle: 'FL-RA-200', montant: 28000, date: new Date(Date.now() - 3600000).toISOString() },
-        { type: 'permutation', driver: 'Andry Miary', from: 'FL-FR-100', to: 'FL-PR-M100', date: new Date(Date.now() - 7200000).toISOString() },
-      ]);
+      const recentCourses = Array.isArray(courses) ? courses.slice(0, 5).map((c: any) => ({
+        type: 'course',
+        driver: c.driver?.user?.name || c.driver?.driverCode || 'Chauffeur',
+        vehicle: c.vehicle?.plate || '',
+        montant: Number(c.price || 0),
+        date: c.date || new Date().toISOString(),
+      })) : [];
+      setRecentActivity(recentCourses);
     } catch (e) { console.error(e); } finally { setLoading(false); }
   }
 
