@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { apiFetch } from '@/lib/api';
 import Link from 'next/link';
 import { Plus, Pencil, Trash2, Building2, Search, ChevronRight, AlertCircle } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
@@ -36,7 +37,7 @@ export default function CooperativesPage() {
   const fetchOrgs = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/organizations');
+      const res = await apiFetch('/organizations');
       if (!res.ok) throw new Error('Erreur ' + res.status);
       const data = await res.json();
       const arr = Array.isArray(data) ? data : [];
@@ -93,7 +94,7 @@ export default function CooperativesPage() {
         ? { ...formData } 
         : { ...formData, type: 'COOPERATIVE', slug: formData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') };
 
-      const res = await fetch(url, {
+      const res = await apiFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -116,7 +117,7 @@ export default function CooperativesPage() {
   const handleDelete = async () => {
     if (!deleteConfirm) return;
     try {
-      const res = await fetch(`/api/proxy/organizations/${deleteConfirm.id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/organizations/${deleteConfirm.id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Erreur ' + res.status);
       setDeleteConfirm(null);
       fetchOrgs();
