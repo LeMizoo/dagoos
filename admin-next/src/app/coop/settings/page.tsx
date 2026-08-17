@@ -36,7 +36,7 @@ export default function FleetSettingsPage() {
       if (!myOrg) { setError('Aucune coopérative trouvée'); setLoading(false); return; }
       setOrgId(myOrg.id);
 
-      const tRes = await apiFetch(`/proxy/tarifs/${myOrg.id}`);
+      const tRes = await apiFetch(`/tarifs/${myOrg.id}`);
       if (tRes.ok) {
         const data = await tRes.json();
         if (data && data.vehiculeTarifs) {

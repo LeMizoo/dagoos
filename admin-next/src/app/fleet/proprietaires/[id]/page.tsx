@@ -15,7 +15,7 @@ export default function ProprietaireDetailPage() {
 
   async function load() {
     try {
-      const r = await apiFetch(`/proxy/proprietaires/${id}`);
+      const r = await apiFetch(`/proprietaires/${id}`);
       if (r.ok) setProprietaire(await r.json());
     } catch(e) { console.error(e); } finally { setLoading(false); }
   }
