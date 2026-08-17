@@ -48,12 +48,11 @@ async function init_home() {
         }
 
         if (currentDriver && currentDriver.organizationId) {
-            var orgs = await apiGet('/organizations');
-            if (Array.isArray(orgs)) {
-                currentOrg = orgs.find(function(o) {
-                    return o.id === currentDriver.organizationId;
-                });
-            }
+            currentOrg = {
+                id: currentDriver.organizationId,
+                name: currentDriver.organizationName || '',
+                code: currentDriver.organizationCode || ''
+            };
         }
     } catch(e) { console.error(e); }
 
@@ -177,7 +176,7 @@ async function init_home() {
 async function loadStats(driverId) {
     try {
         var today = new Date().toISOString().split('T')[0];
-        var courses = await apiGet('/courses?driverId=' + driverId);
+        var courses = await apiGet('/finances/courses?driverId=' + driverId);
         var arr = Array.isArray(courses) ? courses : [];
         var todayCourses = arr.filter(function(c) { return c.date && c.date.startsWith(today); });
         
@@ -294,7 +293,7 @@ async function changeStatus(status) {
 async function proposerVersement() {
     var user = JSON.parse(localStorage.getItem('dagoo_driver_user') || '{}');
     try {
-        var courses = await apiGet('/courses?driverId=' + user.driverId);
+        var courses = await apiGet('/finances/courses?driverId=' + user.driverId);
         var arr = Array.isArray(courses) ? courses : [];
         var today = new Date().toISOString().split('T')[0];
         var todayCourses = arr.filter(function(c) { return c.date && c.date.startsWith(today); });
