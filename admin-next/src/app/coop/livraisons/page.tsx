@@ -9,7 +9,7 @@ export default function CoopLivraisonsPage() {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    fetch('/api/proxy/livraisons').then(r => r.json()).then(d => setLivraisons(Array.isArray(d) ? d : [])).catch(console.error).finally(() => setLoading(false));
+    apiFetch('/livraisons').then(r => r.json()).then(d => setLivraisons(Array.isArray(d) ? d : [])).catch(console.error).finally(() => setLoading(false));
   }, []);
 
   const filtered = livraisons.filter((l: any) => l.driver?.name?.toLowerCase().includes(search.toLowerCase()) || l.vehicle?.plate?.toLowerCase().includes(search.toLowerCase()));

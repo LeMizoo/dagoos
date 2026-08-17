@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { apiFetch } from '@/lib/api';
 import { Search, MessageSquare, Send, Mail, MailOpen } from 'lucide-react';
 
 interface Message { id: string; organization?: { name?: string; id?: string }; subject?: string; content?: string; read?: boolean; createdAt?: string; }
@@ -13,7 +14,7 @@ export default function FleetMessagesPage() {
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    fetch('/api/proxy/messages').then(r => r.json()).then(d => setMessages(Array.isArray(d) ? d : [])).catch(console.error).finally(() => setLoading(false));
+    apiFetch('/messages').then(r => r.json()).then(d => setMessages(Array.isArray(d) ? d : [])).catch(console.error).finally(() => setLoading(false));
   }, []);
 
   const selectedMsg = messages.find(m => m.id === selected);
@@ -22,7 +23,7 @@ export default function FleetMessagesPage() {
     setSelected(id);
     const msg = messages.find(m => m.id === id);
     if (msg && !msg.read) {
-      await fetch(`/api/proxy/messages/${id}/read`, { method: 'PUT' });
+      await apiFetch(`/messages/${id}/read`, { method: 'PUT' });
       setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m));
     }
   }
@@ -31,7 +32,7 @@ export default function FleetMessagesPage() {
     if (!reply.trim() || !selectedMsg) return;
     setSending(true);
     try {
-      const res = await fetch(`/api/proxy/messages/${selectedMsg.id}/reply`, {
+      const res = await apiFetch(`/messages/${selectedMsg.id}/reply`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -15,7 +15,7 @@ export default function FleetCodesPage() {
 
   async function loadDrivers() {
     try {
-      const r = await fetch('/api/proxy/drivers');
+      const r = await apiFetch('/drivers');
       const d = await r.json();
       setDrivers(Array.isArray(d) ? d : []);
     } catch (e) { console.error(e); } finally { setLoading(false); }
@@ -28,7 +28,7 @@ export default function FleetCodesPage() {
       return;
     }
     try {
-      const r = await fetch(`/api/proxy/drivers/${driverId}`, {
+      const r = await apiFetch(`/drivers/${driverId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pin }),

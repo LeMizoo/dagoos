@@ -27,8 +27,8 @@ export default function FleetPermutationPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/proxy/drivers').then(r => r.json()).catch(() => []),
-      fetch('/api/proxy/vehicles').then(r => r.json()).catch(() => []),
+      apiFetch('/drivers').then(r => r.json()).catch(() => []),
+      apiFetch('/vehicles').then(r => r.json()).catch(() => []),
     ]).then(([d, v]) => {
       setDrivers(Array.isArray(d) ? d : []);
       setVehicles(Array.isArray(v) ? v : []);
@@ -38,7 +38,7 @@ export default function FleetPermutationPage() {
   async function handleAssign() {
     if (!selectedDriver || !selectedVehicle) return;
     try {
-      const res = await fetch(`/api/proxy/drivers/${selectedDriver}`, {
+      const res = await apiFetch(`/drivers/${selectedDriver}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ vehicleId: selectedVehicle }),
@@ -48,21 +48,21 @@ export default function FleetPermutationPage() {
       setTimeout(() => setMessage(''), 3000);
       setSelectedVehicle('');
       // Recharger les données
-      const d = await fetch('/api/proxy/drivers').then(r => r.json());
+      const d = await apiFetch('/drivers').then(r => r.json());
       setDrivers(Array.isArray(d) ? d : []);
     } catch (e) { setMessage('❌ Erreur lors de l\'assignation'); }
   }
 
   async function handleRetirer(driverId: string) {
     try {
-      await fetch(`/api/proxy/drivers/${driverId}`, {
+      await apiFetch(`/drivers/${driverId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ vehicleId: null }),
       });
       setMessage('✅ Véhicule retiré !');
       setTimeout(() => setMessage(''), 3000);
-      const d = await fetch('/api/proxy/drivers').then(r => r.json());
+      const d = await apiFetch('/drivers').then(r => r.json());
       setDrivers(Array.isArray(d) ? d : []);
     } catch (e) { setMessage('❌ Erreur'); }
   }
