@@ -7,7 +7,7 @@ export default function FleetVersementsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/proxy/finances/versements')
+    apiFetch('/finances/versements')
       .then(r => r.json()).then(d => setVersements(Array.isArray(d) ? d : []))
       .catch(console.error).finally(() => setLoading(false));
   }, []);
