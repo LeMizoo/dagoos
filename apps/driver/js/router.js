@@ -17,7 +17,7 @@ async function apiFetch(endpoint, options) {
     if (response.status === 401) {
       localStorage.removeItem('dagoo_driver_token');
       localStorage.removeItem('dagoo_driver_user');
-      window.location.href = '/index.html';
+      window.location.href = '/';
       return null;
     }
     var contentType = response.headers.get('content-type') || '';

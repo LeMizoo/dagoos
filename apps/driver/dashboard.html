@@ -36,7 +36,7 @@
 <body>
     <script>
         if (!localStorage.getItem("dagoo_driver_token")) {
-            window.location.replace("/index.html");
+            window.location.replace("/");
         }
     </script>
     <main id="mainContent"></main>
@@ -44,7 +44,7 @@
         var API_URL = DAGOOS_CONFIG.apiUrl;
         var token = localStorage.getItem('dagoo_driver_token');
         var user = JSON.parse(localStorage.getItem('dagoo_driver_user') || '{}');
-        if (!token || !user.driverId) { window.location.href = 'index.html'; }
+        if (!token || !user.driverId) { window.location.href = '/'; }
         function apiGet(e) { return fetch(API_URL+e,{headers:{Authorization:'Bearer '+token}}).then(function(r){return r.json()}); }
     </script>
     <div class="bottom-nav">

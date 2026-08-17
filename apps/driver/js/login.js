@@ -45,7 +45,7 @@ async function login() {
       localStorage.removeItem('dagoos_user');
       localStorage.setItem('dagoo_driver_token', data.token);
       localStorage.setItem('dagoo_driver_user', JSON.stringify(data.user));
-      window.location.href = '/dashboard.html';
+      window.location.href = '/dashboard';
     } else {
       alert(data.error || data.message || 'Identifiants invalides');
       loginBtn.disabled = false;
