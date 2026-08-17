@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { apiFetch } from '@/lib/api';
 import { Car, Plus, Search, CheckCircle, Wrench } from 'lucide-react';
 
 const FLEET_VEHICLE_TYPES: Record<string, string> = {
@@ -21,13 +22,14 @@ export default function FleetVehicles() {
   async function load() {
     try {
       const [meRes, vRes] = await Promise.all([
-        fetch('/api/auth/me').then(r => r.ok ? r.json() : null),
-        fetch('/api/proxy/vehicles').then(r => r.json())
+        apiFetch('/api/auth/me').then(r => r.ok ? r.json() : null),
+        apiFetch('/vehicles').then(r => r.json())
       ]);
       const authUser = meRes?.user || meRes;
-      setOrgId(authUser?.organizationId || authUser?.organization?.id || null);
+      const resolvedOrgId = authUser?.organizationId || authUser?.organization?.id || null;
+      setOrgId(resolvedOrgId);
       const all = Array.isArray(vRes) ? vRes : [];
-      setVehicles(orgId ? all.filter((v: any) => v.organizationId === orgId) : all);
+      setVehicles(resolvedOrgId ? all.filter((v: any) => v.organizationId === resolvedOrgId) : all);
     } catch {} finally { setLoading(false); }
   }
 
@@ -35,9 +37,8 @@ export default function FleetVehicles() {
     if (!form.plate || !orgId) return;
     setSaving(true);
     try {
-      const res = await fetch('/api/proxy/vehicles', {
+      const res = await apiFetch('/vehicles', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, organizationId: orgId, status: 'active' })
       });
       if (res.ok) { setModalOpen(false); setForm({ plate: '', model: '', type: 'voiture', year: new Date().getFullYear(), currentKm: 0 }); load(); }
