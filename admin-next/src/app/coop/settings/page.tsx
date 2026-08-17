@@ -93,21 +93,33 @@ export default function CoopSettingsPage() {
       <div className="space-y-6">
         {/* Livraison */}
         <Card>
-          <h2 className="text-lg font-semibold mb-4">📦 Livraison</h2>
+          <h2 className="text-lg font-semibold mb-2">📦 Livraison</h2>
+          <p className="text-xs text-gray-500 mb-4">
+            <strong>Régionale</strong> : trajet dans la même province (ex : Tanà → Antsirabe)<br />
+            <strong>Nationale</strong> : trajet entre 2 provinces différentes (ex : Tanà → Mahajanga)
+          </p>
           <ZoneRow label="Régionale" service="livraison" zone="regionale" tarifs={tarifs.livraison?.regionale} onChange={updateTarif} modes={['courseNormale', 'courseExpress']} />
           <ZoneRow label="Nationale" service="livraison" zone="nationale" tarifs={tarifs.livraison?.nationale} onChange={updateTarif} modes={['courseNormale', 'courseExpress']} />
         </Card>
 
         {/* Transport en commun */}
         <Card>
-          <h2 className="text-lg font-semibold mb-4">🚌 Transport en commun</h2>
+          <h2 className="text-lg font-semibold mb-2">🚌 Transport en commun</h2>
+          <p className="text-xs text-gray-500 mb-4">
+            <strong>Régionale</strong> : trajet dans la même province<br />
+            <strong>Nationale</strong> : trajet entre 2 provinces différentes
+          </p>
           <TarifLigneRow label="Régionale" value={tarifs.transportCommun?.regionale?.tarifLigne?.prixTrajet || 0} onChange={(v) => updateTarif('transportCommun', 'regionale', 'tarifLigne', 'prixTrajet', v)} />
           <TarifLigneRow label="Nationale" value={tarifs.transportCommun?.nationale?.tarifLigne?.prixTrajet || 0} onChange={(v) => updateTarif('transportCommun', 'nationale', 'tarifLigne', 'prixTrajet', v)} />
         </Card>
 
         {/* Transport de marchandises */}
         <Card>
-          <h2 className="text-lg font-semibold mb-4">🚛 Transport de marchandises</h2>
+          <h2 className="text-lg font-semibold mb-2">🚛 Transport de marchandises</h2>
+          <p className="text-xs text-gray-500 mb-4">
+            <strong>Régionale</strong> : trajet dans la même province<br />
+            <strong>Nationale</strong> : trajet entre 2 provinces différentes
+          </p>
           <BaremeRow label="Régionale" values={tarifs.transportMarchandises?.regionale?.bareme} onChange={(f, v) => updateTarif('transportMarchandises', 'regionale', 'bareme', f, v)} />
           <BaremeRow label="Nationale" values={tarifs.transportMarchandises?.nationale?.bareme} onChange={(f, v) => updateTarif('transportMarchandises', 'nationale', 'bareme', f, v)} />
         </Card>
