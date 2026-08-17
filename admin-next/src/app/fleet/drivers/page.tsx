@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { apiFetch } from '@/lib/api';
 import { Users, Plus, Search, Car, CheckCircle, XCircle, Link2 } from 'lucide-react';
 
 export default function FleetDrivers() {
@@ -19,9 +20,9 @@ export default function FleetDrivers() {
   async function load() {
     try {
       const [meRes, dRes, vRes] = await Promise.all([
-        fetch('/api/auth/me').then(r => r.ok ? r.json() : null),
-        fetch('/api/proxy/drivers').then(r => r.json()),
-        fetch('/api/proxy/vehicles').then(r => r.json())
+        apiFetch('/api/auth/me').then(r => r.ok ? r.json() : null),
+        apiFetch('/drivers').then(r => r.json()),
+        apiFetch('/vehicles').then(r => r.json())
       ]);
       const authUser = meRes?.user || meRes;
       const resolvedOrgId = authUser?.organizationId || authUser?.organization?.id;
@@ -37,9 +38,8 @@ export default function FleetDrivers() {
     if (!form.firstName || !form.lastName || !orgId) return;
     setSaving(true);
     try {
-      const res = await fetch('/api/proxy/drivers', {
+      const res = await apiFetch('/drivers', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, organizationId: orgId, status: 'active' })
       });
       if (res.ok) {
@@ -52,9 +52,8 @@ export default function FleetDrivers() {
   }
 
   async function assignVehicle(driverId: string, vehicleId: string) {
-    await fetch(`/api/proxy/drivers/${driverId}`, {
+    await apiFetch(`/drivers/${driverId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ vehicleId: vehicleId || null }),
     });
     setAssigning(null);
@@ -115,7 +114,7 @@ export default function FleetDrivers() {
                     )}
                   </td>
                   <td className="px-4 py-3"><span className={`text-xs px-2 py-0.5 rounded-full ${d.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{d.status || 'inactif'}</span></td>
-                  <td className="px-4 py-3 font-medium">{(Math.random() * 500000 + 100000).toFixed(0)} Ar</td>
+                  <td className="px-4 py-3 font-medium text-gray-400">-</td>
                 </tr>
               )})}
             </tbody>

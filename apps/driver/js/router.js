@@ -32,6 +32,12 @@ async function apiFetch(endpoint, options) {
 window.apiFetch = apiFetch;
 window.apiGet = function(endpoint) { return apiFetch(endpoint); };
 
+window.logout = function() {
+  localStorage.removeItem('dagoo_driver_token');
+  localStorage.removeItem('dagoo_driver_user');
+  window.location.href = '/';
+};
+
 window.loadPage = async function(pageName) {
   console.log('Chargement page:', pageName);
   var container = document.getElementById('pageContainer') || document.getElementById('mainContent') || document.getElementById('app') || document.querySelector('main');
