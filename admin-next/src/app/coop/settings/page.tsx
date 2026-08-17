@@ -29,7 +29,7 @@ export default function FleetSettingsPage() {
 
   async function loadOrgAndTarifs() {
     try {
-      const orgsRes = await fetch('/api/proxy/organizations');
+      const orgsRes = await apiFetch('/organizations');
       if (!orgsRes.ok) { setError('Erreur chargement'); setLoading(false); return; }
       const orgs = await orgsRes.json();
       const myOrg = Array.isArray(orgs) ? orgs.find((o: any) => o.type === 'COOPERATIVE') : null;
@@ -53,7 +53,7 @@ export default function FleetSettingsPage() {
     setError('');
     if (!orgId) { setError('Organisation non trouvée'); return; }
     try {
-      const res = await fetch(`/api/proxy/tarifs/${orgId}`, {
+      const res = await apiFetch(`/tarifs/${orgId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
