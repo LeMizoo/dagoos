@@ -8,28 +8,46 @@ export default function CoopHome() {
   const [stats, setStats] = useState({ drivers: 0, vehicles: 0, societes: 0, coursesJour: 0, caJour: 0, contratsActifs: 0, livraisonsJour: 0 });
   const [loading, setLoading] = useState(true);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [courses, setCourses] = useState<any[]>([]);
 
   useEffect(() => { load(); }, []);
 
   async function load() {
     try {
-      const [driversRes, vehiclesRes] = await Promise.all([
+      const [driversRes, vehiclesRes, societesRes, contratsRes, livraisonsRes, statsSummary, coursesData] = await Promise.all([
         apiFetch('/drivers').then(r => r.json()).catch(() => []),
         apiFetch('/vehicles').then(r => r.json()).catch(() => []),
+        apiFetch('/societes').then(r => r.json()).catch(() => []),
+        apiFetch('/contrats').then(r => r.json()).catch(() => []),
+        apiFetch('/livraisons').then(r => r.json()).catch(() => []),
+        apiFetch('/finances/stats/summary').then(r => r.ok ? r.json() : null).catch(() => null),
+        apiFetch('/finances/courses').then(r => r.ok ? r.json() : []).catch(() => []),
       ]);
       
+      setCourses(Array.isArray(coursesData) ? coursesData : []);
+
       setStats({
         drivers: Array.isArray(driversRes) ? driversRes.length : 0,
         vehicles: Array.isArray(vehiclesRes) ? vehiclesRes.length : 0,
-        societes: 5, coursesJour: 18, caJour: 380000, contratsActifs: 12, livraisonsJour: 8,
+        societes: Array.isArray(societesRes) ? societesRes.length : 0,
+        coursesJour: statsSummary?.today?.count || 0,
+        caJour: statsSummary?.today?.ca || 0,
+        contratsActifs: Array.isArray(contratsRes) ? contratsRes.filter((c: any) => c.statut === 'actif' || c.status === 'actif').length : 0,
+        livraisonsJour: Array.isArray(livraisonsRes) ? livraisonsRes.filter((l: any) => {
+          const d = new Date(l.createdAt || l.date || new Date());
+          const today = new Date();
+          return d.toDateString() === today.toDateString();
+        }).length : 0,
       });
 
-      setRecentActivity([
-        { type: 'livraison', societe: 'SONATRA', desc: 'Colis Tana → Tamatave', montant: 45000 },
-        { type: 'contrat', societe: 'KOFMAD', desc: 'Nouveau contrat signé', montant: 0 },
-        { type: 'course', driver: 'Rakoto Jean', montant: 28000 },
-        { type: 'livraison', societe: 'TRANS BESADY', desc: 'Marchandises Antsirabe', montant: 62000 },
-      ]);
+      const recentCourses = Array.isArray(coursesData) ? coursesData.slice(0, 5).map((c: any) => ({
+        type: 'course',
+        driver: c.driver?.user?.name || c.driver?.driverCode || 'Chauffeur',
+        desc: `Course - ${c.vehicle?.plate || 'véhicule'}`,
+        montant: Number(c.price || 0),
+      })) : [];
+
+      setRecentActivity(recentCourses);
     } catch (e) { console.error(e); } finally { setLoading(false); }
   }
 
@@ -46,16 +64,43 @@ export default function CoopHome() {
         <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
           <h3 className="font-semibold text-gray-800 dark:text-white mb-4">📊 Activité - 7 derniers jours</h3>
           <div className="flex items-end gap-3 h-40">
-            {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((day, i) => {
-              const values = [250, 300, 280, 380, 420, 350, 200];
-              return (
-                <div key={day} className="flex-1 flex flex-col items-center gap-2">
-                  <span className="text-xs font-medium text-gray-600 dark:text-gray-400">{values[i]}K</span>
-                  <div className="w-full bg-emerald-500 rounded-t-lg hover:bg-emerald-600 transition-all" style={{ height: `${(values[i] / 420) * 100}%` }} />
-                  <span className="text-xs text-gray-500">{day}</span>
-                </div>
-              );
-            })}
+            {(() => {
+              const last7Days = [...Array(7)].map((_, i) => {
+                const d = new Date();
+                d.setDate(d.getDate() - (6 - i));
+                return {
+                  dateStr: d.toISOString().split('T')[0],
+                  label: d.toLocaleDateString('fr-FR', { weekday: 'short' }),
+                };
+              });
+
+              const caByDay = last7Days.map(({ dateStr }) => {
+                return courses
+                  .filter((c: any) => c.date?.startsWith(dateStr))
+                  .reduce((sum: number, c: any) => sum + Number(c.price || 0), 0);
+              });
+
+              const max = Math.max(...caByDay, 1);
+
+              return last7Days.map(({ dateStr, label }, i) => {
+                const ca = caByDay[i];
+                const height = ca > 0 ? (ca / max) * 100 : 2;
+
+                return (
+                  <div key={dateStr} className="flex-1 flex flex-col items-center gap-2">
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                      {ca > 0 ? `${Math.round(ca / 1000)}K` : ''}
+                    </span>
+                    <div 
+                      className="w-full bg-emerald-500 rounded-t-lg hover:bg-emerald-600 transition-all"
+                      style={{ height: `${height}%` }}
+                      title={`${ca.toLocaleString()} Ar`}
+                    />
+                    <span className="text-xs text-gray-500 capitalize">{label}</span>
+                  </div>
+                );
+              });
+            })()}
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
