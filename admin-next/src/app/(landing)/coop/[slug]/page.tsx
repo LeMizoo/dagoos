@@ -135,9 +135,20 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
       });
       
       if (res.ok) {
-        setManageResult(null);
         setChangingPlace(null);
         setNewPlace('');
+        // Recharger les réservations du client
+        const manageRes = await apiFetch('/public/reservations/manage', {
+          method: 'POST',
+          body: JSON.stringify({
+            telephone: manageTel.trim(),
+            passagerNom: manageNom.trim(),
+          }),
+        });
+        if (manageRes.ok) {
+          const data = await manageRes.json();
+          setManageResult(data);
+        }
         loadPage();
       } else {
         const err = await res.json();
@@ -161,7 +172,18 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
       });
       
       if (res.ok) {
-        setManageResult(null);
+        // Recharger les réservations du client
+        const manageRes = await apiFetch('/public/reservations/manage', {
+          method: 'POST',
+          body: JSON.stringify({
+            telephone: manageTel.trim(),
+            passagerNom: manageNom.trim(),
+          }),
+        });
+        if (manageRes.ok) {
+          const data = await manageRes.json();
+          setManageResult(data);
+        }
         loadPage();
       }
     } catch (e: any) {
