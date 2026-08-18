@@ -23,7 +23,17 @@ export default function CoopDepartsPage() {
         apiFetch('/departs'),
         apiFetch('/vehicles'),
       ]);
-      if (dRes.ok) setDeparts(await dRes.json());
+      if (dRes.ok) {
+        const departsData = await dRes.json();
+        const sorted = Array.isArray(departsData)
+          ? [...departsData].sort((a: any, b: any) => {
+              if (a.pointDepart !== b.pointDepart) return a.pointDepart.localeCompare(b.pointDepart);
+              if (a.date !== b.date) return new Date(a.date).getTime() - new Date(b.date).getTime();
+              return (a.heure || '').localeCompare(b.heure || '');
+            })
+          : [];
+        setDeparts(sorted);
+      }
       if (vRes.ok) setVehicles(await vRes.json());
       else setError('Erreur chargement');
     } catch (e: any) { setError(e.message); } finally { setLoading(false); }
