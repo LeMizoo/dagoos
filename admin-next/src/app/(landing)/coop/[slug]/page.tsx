@@ -142,8 +142,11 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white py-12">
+      <header className="relative bg-gradient-to-r from-emerald-600 to-emerald-800 text-white py-12">
         <div className="max-w-5xl mx-auto px-4 text-center">
+          <Link href="/" className="absolute top-4 left-4 text-white/80 hover:text-white transition text-sm flex items-center gap-2">
+            ← Retour à l'accueil
+          </Link>
           <h1 className="text-3xl font-bold mb-2">{cooperative?.name || 'Coopérative'}</h1>
           <p className="text-emerald-100">Réservez votre place en ligne</p>
           {cooperative?.phone && (
@@ -302,6 +305,9 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
 
       <footer className="bg-gray-900 text-gray-400 py-8 text-center text-sm">
         <p>Propulsé par <Link href="/" className="text-secondary hover:underline">Dagoo Mobility</Link></p>
+        <Link href="/" className="inline-block mt-2 text-white hover:underline text-sm">
+          ← Retour à l'accueil
+        </Link>
       </footer>
     </div>
   );
