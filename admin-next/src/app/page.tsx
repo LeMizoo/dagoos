@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 
 async function getOrganizations() {
   try {
-    const res = await fetch('http://localhost:5001/api/proxy/public/organizations', { cache: 'no-store' });
+    const res = await fetch('/api/proxy/public/organizations', { cache: 'no-store' });
     if (!res.ok) return [];
     return await res.json();
   } catch {
@@ -93,6 +93,9 @@ export default async function LandingPage() {
                           {new Date(d.date).toLocaleDateString('fr-FR')} à {d.heure}
                         </p>
                         <p className="text-sm font-bold text-emerald-600 mt-1">{Number(d.prix).toLocaleString()} Ar</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          Places : {d.placesTotal || 26} · Disponible(s) : {(d.placesTotal || 26) - (d.reservations?.length || 0)} · Réservée(s) : {d.reservations?.length || 0}
+                        </p>
                       </div>
                     ))}
                   </div>
