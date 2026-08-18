@@ -3,6 +3,7 @@ import { Rocket, ArrowDown, Building2, Truck, Smartphone, Users, Shield, Zap, Ca
 import HeroSlider from '@/components/landing/HeroSlider';
 import HeroParticles from '@/components/landing/HeroParticles';
 import PlansSection from '@/components/landing/PlansSection';
+import { API_BASE_URL } from '@/lib/config';
 import TrustSection from '@/components/landing/TrustSection';
 import AnimatedSection from '@/components/landing/AnimatedSection';
 
@@ -10,7 +11,7 @@ export const dynamic = 'force-dynamic';
 
 async function getOrganizations() {
   try {
-    const res = await fetch('/api/proxy/public/organizations', { cache: 'no-store' });
+    const res = await fetch(`${API_BASE_URL}/api/public/organizations`, { cache: 'no-store' });
     if (!res.ok) return [];
     return await res.json();
   } catch {
