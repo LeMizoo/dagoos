@@ -393,15 +393,17 @@ model Depart {
 // V7 PRO — RÉSERVATIONS
 // ========================================
 model Reservation {
-  id          String   @id @default(cuid())
-  departId    String
-  depart      Depart   @relation(fields: [departId], references: [id])
-  passagerNom String
-  telephone   String
-  place       String
-  statut      String   @default("PENDING")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(cuid())
+  departId      String
+  depart        Depart   @relation(fields: [departId], references: [id])
+  passagerNom   String
+  telephone     String
+  place         String
+  statut        String   @default("PENDING")
+  paiementRef   String?
+  paiementInfo  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@unique([departId, place])
 }

@@ -22,6 +22,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
   const [editingReservation, setEditingReservation] = useState(false);
   const [captchaQuestion, setCaptchaQuestion] = useState({ a: 0, b: 0 });
   const [captchaAnswer, setCaptchaAnswer] = useState('');
+  const [paiementRef, setPaiementRef] = useState('');
   const [manageTel, setManageTel] = useState('');
   const [manageNom, setManageNom] = useState('');
   const [manageResult, setManageResult] = useState<any | null>(null);
@@ -232,6 +233,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
         body: JSON.stringify({
           departId: selectedDepart.id,
           telephone: telephone.trim(),
+          paiementRef: paiementRef.trim() || null,
           passagers: passagersList,
         }),
       });
@@ -476,6 +478,13 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
                     placeholder="Votre téléphone"
                     value={telephone}
                     onChange={e => setTelephone(e.target.value)}
+                    className="w-full px-4 py-3 border rounded-lg text-sm"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Réf du transfert Mobile Money (optionnel)"
+                    value={paiementRef}
+                    onChange={e => setPaiementRef(e.target.value)}
                     className="w-full px-4 py-3 border rounded-lg text-sm"
                   />
                   <div className="flex items-center gap-2">
