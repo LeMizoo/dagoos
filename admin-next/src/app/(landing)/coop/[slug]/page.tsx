@@ -24,6 +24,8 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
   const [manageNom, setManageNom] = useState('');
   const [manageResult, setManageResult] = useState<any | null>(null);
   const [manageError, setManageError] = useState('');
+  const [changingPlace, setChangingPlace] = useState<string | null>(null);
+  const [newPlace, setNewPlace] = useState('');
 
   useEffect(() => {
     loadPage();
@@ -105,6 +107,38 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
       if (res.ok) {
         const data = await res.json();
         setManageResult(data);
+      } else {
+        const err = await res.json();
+        setManageError(err.error || 'Erreur');
+      }
+    } catch (e: any) {
+      setManageError(e.message);
+    }
+  }
+
+  async function handleChangePlace(reservationId: string) {
+    if (!newPlace.trim()) {
+      setManageError('Veuillez saisir la nouvelle place');
+      return;
+    }
+    
+    try {
+      const res = await apiFetch('/public/reservations/manage', {
+        method: 'POST',
+        body: JSON.stringify({
+          telephone: manageTel.trim(),
+          passagerNom: manageNom.trim(),
+          action: 'modify',
+          reservationId,
+          nouvellePlace: newPlace.trim(),
+        }),
+      });
+      
+      if (res.ok) {
+        setManageResult(null);
+        setChangingPlace(null);
+        setNewPlace('');
+        loadPage();
       } else {
         const err = await res.json();
         setManageError(err.error || 'Erreur');
@@ -303,17 +337,50 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
             {manageResult?.reservations && (
               <div className="space-y-2 mt-4">
                 {manageResult.reservations.map((r: any) => (
-                  <div key={r.id} className="bg-white rounded-lg p-3 border flex justify-between items-center">
-                    <div>
-                      <p className="text-sm font-semibold">{r.depart?.pointDepart} → {r.depart?.destination}</p>
-                      <p className="text-xs text-gray-500">Place : {r.place}</p>
+                  <div key={r.id} className="bg-white rounded-lg p-3 border">
+                    <div className="flex justify-between items-center mb-2">
+                      <div>
+                        <p className="text-sm font-semibold">{r.depart?.pointDepart} → {r.depart?.destination}</p>
+                        <p className="text-xs text-gray-500">Place actuelle : <span className="font-bold text-emerald-600">{r.place}</span></p>
+                      </div>
+                      <button
+                        onClick={() => handleCancelReservation(r.id)}
+                        className="text-red-500 hover:underline text-xs"
+                      >
+                        Annuler
+                      </button>
                     </div>
-                    <button
-                      onClick={() => handleCancelReservation(r.id)}
-                      className="text-red-500 hover:underline text-xs"
-                    >
-                      Annuler
-                    </button>
+                    
+                    {changingPlace === r.id ? (
+                      <div className="flex gap-2 items-center mt-2">
+                        <input
+                          type="text"
+                          placeholder="Nouvelle place (ex: 2B)"
+                          value={newPlace}
+                          onChange={e => setNewPlace(e.target.value.toUpperCase())}
+                          className="flex-1 px-3 py-2 border rounded text-sm"
+                        />
+                        <button
+                          onClick={() => handleChangePlace(r.id)}
+                          className="bg-blue-600 text-white px-3 py-2 rounded text-xs font-semibold hover:bg-blue-700"
+                        >
+                          Valider
+                        </button>
+                        <button
+                          onClick={() => { setChangingPlace(null); setNewPlace(''); }}
+                          className="text-gray-400 hover:underline text-xs"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => { setChangingPlace(r.id); setNewPlace(''); }}
+                        className="text-blue-600 hover:underline text-xs mt-2"
+                      >
+                        🔄 Changer de place
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
