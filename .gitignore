@@ -39,3 +39,4 @@ admin-next/.vercel/
 *.db-shm
 *.db-wal
 .vercel
+admin-next/tsconfig.tsbuildinfo
