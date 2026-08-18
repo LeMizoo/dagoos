@@ -189,4 +189,72 @@ router.post('/reservations', async (req, res) => {
   }
 });
 
+// POST /api/public/reservations/batch - Réservation multiple
+router.post('/reservations/batch', async (req, res) => {
+  try {
+    const { departId, telephone, passagers } = req.body;
+    
+    if (!departId || !telephone || !Array.isArray(passagers) || passagers.length === 0) {
+      return res.status(400).json({ error: 'Tous les champs sont requis' });
+    }
+    
+    const depart = await prisma.depart.findUnique({
+      where: { id: departId },
+      include: {
+        reservations: {
+          where: { statut: 'CONFIRMED' },
+          select: { place: true },
+        },
+      },
+    });
+    
+    if (!depart) return res.status(404).json({ error: 'Départ introuvable' });
+    
+    if (depart.statut !== 'PUBLISHED') {
+      return res.status(400).json({ error: 'Départ non disponible' });
+    }
+    
+    // Vérifier que toutes les places sont disponibles
+    const placesReservees = depart.reservations.map(r => r.place);
+    const placesDemandees = passagers.map(p => p.place);
+    
+    const placesEnConflit = placesDemandees.filter(p => placesReservees.includes(p));
+    if (placesEnConflit.length > 0) {
+      return res.status(409).json({
+        error: 'Places déjà réservées',
+        places: placesEnConflit,
+      });
+    }
+    
+    // Vérifier les doublons dans la demande
+    const uniquePlaces = new Set(placesDemandees);
+    if (uniquePlaces.size !== placesDemandees.length) {
+      return res.status(400).json({ error: 'Places en double dans la demande' });
+    }
+    
+    // Créer une réservation par passager
+    const reservations = [];
+    for (const passager of passagers) {
+      const reservation = await prisma.reservation.create({
+        data: {
+          departId,
+          passagerNom: String(passager.passagerNom).trim(),
+          telephone: String(telephone).trim(),
+          place: String(passager.place).trim(),
+          statut: 'CONFIRMED',
+        },
+      });
+      reservations.push(reservation);
+    }
+    
+    res.status(201).json({
+      ok: true,
+      reservations,
+    });
+  } catch (error) {
+    console.error('POST /public/reservations/batch:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 module.exports = router;
