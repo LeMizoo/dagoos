@@ -267,20 +267,20 @@ export default function RegisterPage() {
               </div>
 
               {/* Numéros Mobile Money */}
-              <div>
-                <p className="text-sm font-medium text-gray-700 mb-2">📱 Numéros Mobile Money (pour recevoir les paiements)</p>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 bg-yellow-400 rounded-lg px-3 py-2">
-                    <span className="font-bold text-black text-xs w-16">MVola</span>
-                    <input type="text" placeholder="034 00 000 00" value={form.mvolaNumber} onChange={e => setForm({ ...form, mvolaNumber: e.target.value })} className="flex-1 px-3 py-2 rounded bg-white text-black text-sm font-semibold outline-none" />
+              <div className="bg-gray-50 rounded-xl p-4">
+                <p className="text-sm font-bold text-gray-700 mb-2">📱 Numéros Mobile Money (pour les abonnements)</p>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 bg-yellow-400 rounded px-3 py-2">
+                    <span className="font-bold text-black text-sm w-16">MVola</span>
+                    <span className="text-black font-extrabold text-sm">034 00 000 00</span>
                   </div>
-                  <div className="flex items-center gap-2 bg-black rounded-lg px-3 py-2">
-                    <span className="font-bold text-orange-500 text-xs w-16">Orange</span>
-                    <input type="text" placeholder="032 00 000 00" value={form.orangeNumber} onChange={e => setForm({ ...form, orangeNumber: e.target.value })} className="flex-1 px-3 py-2 rounded bg-gray-800 text-orange-400 text-sm font-semibold outline-none border border-orange-500/30" />
+                  <div className="flex items-center gap-2 bg-black rounded px-3 py-2">
+                    <span className="font-bold text-orange-500 text-sm w-16">Orange</span>
+                    <span className="text-orange-400 font-extrabold text-sm">032 00 000 00</span>
                   </div>
-                  <div className="flex items-center gap-2 bg-red-600 rounded-lg px-3 py-2">
-                    <span className="font-bold text-white text-xs w-16">Airtel</span>
-                    <input type="text" placeholder="033 00 000 00" value={form.airtelNumber} onChange={e => setForm({ ...form, airtelNumber: e.target.value })} className="flex-1 px-3 py-2 rounded bg-white text-sm font-semibold outline-none" />
+                  <div className="flex items-center gap-2 bg-red-600 rounded px-3 py-2">
+                    <span className="font-bold text-white text-sm w-16">Airtel</span>
+                    <span className="text-white font-extrabold text-sm">033 00 000 00</span>
                   </div>
                 </div>
               </div>
