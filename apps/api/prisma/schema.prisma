@@ -35,6 +35,9 @@ model Organization {
   type            String // FLEET_MANAGER, COOPERATIVE
   email           String         @unique
   phone           String?
+  mvolaNumber     String?
+  orangeNumber    String?
+  airtelNumber    String?
   logo            String?
   description     String?
   plan            String         @default("Freemium")

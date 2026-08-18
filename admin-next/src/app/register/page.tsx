@@ -28,6 +28,9 @@ export default function RegisterPage() {
     planId: '',
     organizationName: '',
     organizationType: 'FLEET_MANAGER' as 'FLEET_MANAGER' | 'COOPERATIVE',
+    mvolaNumber: '',
+    orangeNumber: '',
+    airtelNumber: '',
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
