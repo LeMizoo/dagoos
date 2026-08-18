@@ -103,6 +103,20 @@ export default async function LandingPage() {
                   <button className="w-full mt-4 bg-emerald-600 text-white py-2 rounded-lg font-semibold hover:bg-emerald-700 transition text-sm">
                     Réserver maintenant →
                   </button>
+                  <div className="mt-3 space-y-1">
+                    <div className="flex items-center gap-1 bg-yellow-400 rounded px-2 py-1">
+                      <span className="font-bold text-black text-[10px]">MVola</span>
+                      <span className="text-black font-extrabold text-[10px]">{org.phone || '034 00 000 00'}</span>
+                    </div>
+                    <div className="flex items-center gap-1 bg-black rounded px-2 py-1">
+                      <span className="font-bold text-orange-500 text-[10px]">Orange</span>
+                      <span className="text-orange-400 font-extrabold text-[10px]">{org.phone || '032 00 000 00'}</span>
+                    </div>
+                    <div className="flex items-center gap-1 bg-red-600 rounded px-2 py-1">
+                      <span className="font-bold text-white text-[10px]">Airtel</span>
+                      <span className="text-white font-extrabold text-[10px]">{org.phone || '033 00 000 00'}</span>
+                    </div>
+                  </div>
                 </Link>
               ))}
             </div>
