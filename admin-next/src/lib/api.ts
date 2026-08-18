@@ -43,6 +43,7 @@ export async function apiFetch(
     !window.location.pathname.endsWith('/login') &&
     !window.location.pathname.endsWith('/fleet-login') &&
     !window.location.pathname.endsWith('/coop-login') &&
+    !window.location.pathname.endsWith('/register') &&
     !window.location.pathname.startsWith('/coop/') &&
     !window.location.pathname.startsWith('/fleet/') &&
     window.location.pathname !== '/'
