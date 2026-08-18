@@ -72,6 +72,21 @@ router.post('/', authMiddleware, async (req, res) => {
       if (!orgId) return res.status(403).json({ error: 'Organisation introuvable' });
     }
     
+    // Vérifier que le véhicule n'a pas déjà un départ PUBLISHED
+    if (vehiculeId) {
+      const existingDepart = await prisma.depart.findFirst({
+        where: {
+          vehiculeId,
+          statut: 'PUBLISHED',
+          date: { gte: new Date() },
+        },
+      });
+      
+      if (existingDepart) {
+        return res.status(409).json({ error: 'Ce véhicule a déjà un départ publié' });
+      }
+    }
+
     // Si placesTotal n'est pas fourni, utiliser celui du véhicule
     let finalPlacesTotal = Number(placesTotal || 0);
     if (!finalPlacesTotal && vehiculeId) {
@@ -149,6 +164,22 @@ router.put('/:id', authMiddleware, async (req, res) => {
     }
     
     const { pointDepart, destination, date, heure, prix, vehiculeId, placesTotal, statut } = req.body;
+
+    // Vérifier que le véhicule n'a pas déjà un départ PUBLISHED (hors ce départ)
+    if (vehiculeId) {
+      const existingDepart = await prisma.depart.findFirst({
+        where: {
+          vehiculeId,
+          statut: 'PUBLISHED',
+          date: { gte: new Date() },
+          NOT: { id: req.params.id },
+        },
+      });
+      
+      if (existingDepart) {
+        return res.status(409).json({ error: 'Ce véhicule a déjà un départ publié' });
+      }
+    }
     
     const updated = await prisma.depart.update({
       where: { id: req.params.id },
@@ -161,6 +192,9 @@ router.put('/:id', authMiddleware, async (req, res) => {
         ...(vehiculeId !== undefined && { vehiculeId: vehiculeId || null }),
         ...(placesTotal !== undefined && { placesTotal: Number(placesTotal) }),
         ...(statut && { statut: String(statut) }),
+      },
+      include: {
+        vehicle: { select: { id: true, plate: true, model: true } },
       },
     });
     
