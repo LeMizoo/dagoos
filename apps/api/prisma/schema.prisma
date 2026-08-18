@@ -50,6 +50,8 @@ model Organization {
   societes        Societe[]
   notifications   Notification[]
   proprietaires   Proprietaire[]
+  departs         Depart[]
+  leadActions     LeadAction[]
 }
 
 // ========================================
@@ -78,6 +80,7 @@ model Driver {
 model Vehicle {
   id             String        @id @default(cuid())
   organizationId String?
+  departs        Depart[]
   organization   Organization? @relation(fields: [organizationId], references: [id])
   proprietaireId String?
   proprietaire   Proprietaire? @relation(fields: [proprietaireId], references: [id])
@@ -359,4 +362,59 @@ model Log {
   details   String?
   ip        String?
   createdAt DateTime @default(now())
+}
+
+
+// ========================================
+// V7 PRO — DÉPARTS
+// ========================================
+model Depart {
+  id             String        @id @default(cuid())
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+  pointDepart    String
+  destination    String
+  date           DateTime
+  heure          String
+  prix           Float
+  vehiculeId     String?
+  vehicle        Vehicle?      @relation(fields: [vehiculeId], references: [id])
+  placesTotal    Int           @default(1)
+  statut         String        @default("DRAFT")
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  reservations   Reservation[]
+}
+
+// ========================================
+// V7 PRO — RÉSERVATIONS
+// ========================================
+model Reservation {
+  id          String   @id @default(cuid())
+  departId    String
+  depart      Depart   @relation(fields: [departId], references: [id])
+  passagerNom String
+  telephone   String
+  place       String
+  statut      String   @default("PENDING")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([departId, place])
+}
+
+// ========================================
+// V7 PRO — ACTIONS CLIENTS (LEADS)
+// ========================================
+model LeadAction {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  type           String
+  clientNom      String
+  clientTel      String
+  details        Json?
+  statut         String       @default("NEW")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }

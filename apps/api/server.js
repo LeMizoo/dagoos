@@ -28,6 +28,10 @@ app.use('/api/notifications', require('./modules/notifications/notifications.rou
 app.use('/api/logs', require('./modules/logs.routes'));
 app.use('/api/finances', require('./modules/finances/finances.routes'));
 app.use('/api', require('./modules/landing/landing.routes'));
+app.use('/api/departs', require('./modules/departs/departs.routes'));
+app.use('/api/reservations', require('./modules/reservations/reservations.routes'));
+app.use('/api/actions', require('./modules/actions/actions.routes'));
+app.use('/api/public', require('./modules/public/public.routes'));
 
 // =========================================================
 // HEALTH
