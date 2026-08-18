@@ -20,6 +20,10 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
   const [success, setSuccess] = useState('');
   const [showReservation, setShowReservation] = useState(false);
   const [editingReservation, setEditingReservation] = useState(false);
+  const [manageTel, setManageTel] = useState('');
+  const [manageNom, setManageNom] = useState('');
+  const [manageResult, setManageResult] = useState<any | null>(null);
+  const [manageError, setManageError] = useState('');
 
   useEffect(() => {
     loadPage();
@@ -78,6 +82,57 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
       }
       return [...prev, place];
     });
+  }
+
+  async function handleManage() {
+    setManageError('');
+    setManageResult(null);
+    
+    if (!manageTel.trim() || !manageNom.trim()) {
+      setManageError('Téléphone et nom requis');
+      return;
+    }
+    
+    try {
+      const res = await apiFetch('/public/reservations/manage', {
+        method: 'POST',
+        body: JSON.stringify({
+          telephone: manageTel.trim(),
+          passagerNom: manageNom.trim(),
+        }),
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setManageResult(data);
+      } else {
+        const err = await res.json();
+        setManageError(err.error || 'Erreur');
+      }
+    } catch (e: any) {
+      setManageError(e.message);
+    }
+  }
+
+  async function handleCancelReservation(reservationId: string) {
+    try {
+      const res = await apiFetch('/public/reservations/manage', {
+        method: 'POST',
+        body: JSON.stringify({
+          telephone: manageTel.trim(),
+          passagerNom: manageNom.trim(),
+          action: 'cancel',
+          reservationId,
+        }),
+      });
+      
+      if (res.ok) {
+        setManageResult(null);
+        loadPage();
+      }
+    } catch (e: any) {
+      setManageError(e.message);
+    }
   }
 
   async function handleReservation(e: React.FormEvent) {
@@ -219,6 +274,54 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
         </div>
       </section>
 
+      {/* Gérer ma réservation */}
+      <section className="py-8 bg-gray-50 border-t">
+        <div className="max-w-md mx-auto px-4">
+          <h2 className="text-xl font-bold text-center mb-4">🔍 Gérer ma réservation</h2>
+          <div className="space-y-3">
+            <input
+              type="tel"
+              placeholder="Votre téléphone"
+              value={manageTel}
+              onChange={e => setManageTel(e.target.value)}
+              className="w-full px-4 py-3 border rounded-lg text-sm"
+            />
+            <input
+              type="text"
+              placeholder="Nom du passager"
+              value={manageNom}
+              onChange={e => setManageNom(e.target.value)}
+              className="w-full px-4 py-3 border rounded-lg text-sm"
+            />
+            <button
+              onClick={handleManage}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+            >
+              Rechercher mes réservations
+            </button>
+            {manageError && <p className="text-red-500 text-sm text-center">{manageError}</p>}
+            {manageResult?.reservations && (
+              <div className="space-y-2 mt-4">
+                {manageResult.reservations.map((r: any) => (
+                  <div key={r.id} className="bg-white rounded-lg p-3 border flex justify-between items-center">
+                    <div>
+                      <p className="text-sm font-semibold">{r.depart?.pointDepart} → {r.depart?.destination}</p>
+                      <p className="text-xs text-gray-500">Place : {r.place}</p>
+                    </div>
+                    <button
+                      onClick={() => handleCancelReservation(r.id)}
+                      className="text-red-500 hover:underline text-xs"
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* Formulaire de réservation */}
       {showReservation && selectedDepart && (
         <section id="reservation-form" className="py-8 bg-white border-t">
@@ -240,6 +343,16 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
                   placesSelectionnees={selectedPlaces}
                   onPlaceClick={handlePlaceClick}
                 />
+                <div className="mt-4 text-center space-y-1 bg-gray-50 rounded-lg p-3">
+                  <p className="text-sm font-semibold text-gray-700">
+                    Places : <span className="text-emerald-600 font-bold">{selectedDepart.placesTotal}</span>
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Disponible(s) : <span className="font-bold text-green-600">{selectedDepart.placesTotal - (selectedDepart.reservations || []).length}</span>
+                    {' · '}
+                    Réservée(s) : <span className="font-bold text-red-600">{(selectedDepart.reservations || []).length}</span>
+                  </p>
+                </div>
               </div>
 
               {/* Formulaire */}

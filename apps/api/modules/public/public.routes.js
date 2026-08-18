@@ -288,4 +288,82 @@ router.post('/reservations/batch', async (req, res) => {
   }
 });
 
+// POST /api/public/reservations/manage - Gérer sa réservation (annuler ou modifier)
+router.post('/reservations/manage', async (req, res) => {
+  try {
+    const { telephone, passagerNom, action, reservationId, nouvellePlace } = req.body;
+    
+    if (!telephone || !passagerNom) {
+      return res.status(400).json({ error: 'Téléphone et nom du passager requis' });
+    }
+    
+    // Trouver les réservations du client
+    const reservations = await prisma.reservation.findMany({
+      where: {
+        telephone: String(telephone).trim(),
+        passagerNom: String(passagerNom).trim(),
+        statut: 'CONFIRMED',
+      },
+      include: { depart: true },
+    });
+    
+    if (reservations.length === 0) {
+      return res.status(404).json({ error: 'Aucune réservation trouvée avec ces informations' });
+    }
+    
+    // Action : ANNULER
+    if (action === 'cancel' && reservationId) {
+      const reservation = reservations.find(r => r.id === reservationId);
+      if (!reservation) {
+        return res.status(404).json({ error: 'Réservation introuvable' });
+      }
+      
+      await prisma.reservation.update({
+        where: { id: reservationId },
+        data: { statut: 'CANCELLED' },
+      });
+      
+      return res.json({ ok: true, message: 'Réservation annulée' });
+    }
+    
+    // Action : MODIFIER PLACE
+    if (action === 'modify' && reservationId && nouvellePlace) {
+      const reservation = reservations.find(r => r.id === reservationId);
+      if (!reservation) {
+        return res.status(404).json({ error: 'Réservation introuvable' });
+      }
+      
+      // Vérifier que la nouvelle place est disponible
+      const depart = await prisma.depart.findUnique({
+        where: { id: reservation.departId },
+        include: {
+          reservations: { where: { statut: 'CONFIRMED', NOT: { id: reservationId } }, select: { place: true } },
+        },
+      });
+      
+      if (!depart) {
+        return res.status(404).json({ error: 'Départ introuvable' });
+      }
+      
+      const placesReservees = depart.reservations.map(r => r.place);
+      if (placesReservees.includes(nouvellePlace)) {
+        return res.status(409).json({ error: 'Place déjà réservée' });
+      }
+      
+      await prisma.reservation.update({
+        where: { id: reservationId },
+        data: { place: String(nouvellePlace) },
+      });
+      
+      return res.json({ ok: true, message: 'Place modifiée' });
+    }
+    
+    // Sans action : retourner les réservations du client
+    return res.json({ reservations });
+  } catch (error) {
+    console.error('POST /public/reservations/manage:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 module.exports = router;
