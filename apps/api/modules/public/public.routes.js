@@ -21,6 +21,14 @@ router.get('/organizations', async (req, res) => {
         logo: true,
         plan: true,
         createdAt: true,
+        departs: {
+          where: {
+            statut: 'PUBLISHED',
+            date: { gte: new Date() },
+          },
+          select: { id: true, pointDepart: true, destination: true, date: true, heure: true, prix: true },
+          take: 5,
+        },
       },
     });
     res.json(organizations);

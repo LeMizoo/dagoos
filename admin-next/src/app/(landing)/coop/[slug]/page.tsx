@@ -146,6 +146,14 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
       <section className="py-8 max-w-5xl mx-auto px-4">
         <div className="flex flex-wrap gap-2 justify-center mb-6">
           <span className="text-sm text-gray-500 flex items-center gap-1"><MapPin size={14} /> Départ :</span>
+          <button
+            onClick={() => setVilleFiltre('')}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+              villeFiltre === '' ? 'bg-emerald-600 text-white' : 'bg-white text-gray-600 hover:bg-emerald-50 border'
+            }`}
+          >
+            Tous
+          </button>
           {villesDepart.map(ville => (
             <button
               key={ville}
