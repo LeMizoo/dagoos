@@ -1,7 +1,7 @@
 'use client';
 import { apiFetch } from '@/lib/api';
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, Calendar, Clock, MapPin, Users } from 'lucide-react';
+import { Plus, Pencil, Trash2, Calendar, Clock, MapPin, Users, Car } from 'lucide-react';
 
 export default function CoopDepartsPage() {
   const [departs, setDeparts] = useState<any[]>([]);
@@ -9,22 +9,28 @@ export default function CoopDepartsPage() {
   const [error, setError] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
-  const [form, setForm] = useState({ pointDepart: '', destination: '', date: '', heure: '', prix: '', placesTotal: '25' });
+  const [form, setForm] = useState({ pointDepart: '', destination: '', date: '', heure: '', prix: '', placesTotal: '25', vehiculeId: '' });
   const [saving, setSaving] = useState(false);
+
+  const [vehicles, setVehicles] = useState<any[]>([]);
 
   useEffect(() => { load(); }, []);
 
   async function load() {
     try {
-      const r = await apiFetch('/departs');
-      if (r.ok) setDeparts(await r.json());
+      const [dRes, vRes] = await Promise.all([
+        apiFetch('/departs'),
+        apiFetch('/vehicles'),
+      ]);
+      if (dRes.ok) setDeparts(await dRes.json());
+      if (vRes.ok) setVehicles(await vRes.json());
       else setError('Erreur chargement');
     } catch (e: any) { setError(e.message); } finally { setLoading(false); }
   }
 
   function openCreate() {
     setEditing(null);
-    setForm({ pointDepart: '', destination: '', date: '', heure: '', prix: '', placesTotal: '25' });
+    setForm({ pointDepart: '', destination: '', date: '', heure: '', prix: '', placesTotal: '25', vehiculeId: '' });
     setModalOpen(true);
   }
 
@@ -37,6 +43,7 @@ export default function CoopDepartsPage() {
       heure: d.heure || '',
       prix: String(d.prix || ''),
       placesTotal: String(d.placesTotal || '25'),
+      vehiculeId: d.vehiculeId || '',
     });
     setModalOpen(true);
   }
@@ -107,9 +114,12 @@ export default function CoopDepartsPage() {
                   {d.statut}
                 </span>
               </div>
-              <div className="flex justify-between items-center text-sm mb-3">
+              <div className="flex justify-between items-center text-sm mb-2">
                 <span className="font-bold text-emerald-600">{Number(d.prix || 0).toLocaleString()} Ar</span>
                 <span className="text-xs text-gray-500 flex items-center gap-1"><Users size={12} /> {d.placesTotal} places</span>
+              </div>
+              <div className="text-xs text-gray-500 mb-3 flex items-center gap-1">
+                <Car size={12} /> {d.vehicle ? `${d.vehicle.plate} - ${d.vehicle.model || ''}` : 'Aucun véhicule assigné'}
               </div>
               <div className="flex gap-2">
                 <button onClick={() => openEdit(d)} className="flex-1 px-3 py-1.5 text-xs border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-center gap-1"><Pencil size={12} /> Modifier</button>
@@ -135,6 +145,12 @@ export default function CoopDepartsPage() {
                 <input type="number" placeholder="Prix (Ar)" value={form.prix} onChange={e => setForm({...form, prix: e.target.value})} className="px-3 py-2 border rounded-lg text-sm" required />
                 <input type="number" placeholder="Places" value={form.placesTotal} onChange={e => setForm({...form, placesTotal: e.target.value})} className="px-3 py-2 border rounded-lg text-sm" required />
               </div>
+              <select value={form.vehiculeId} onChange={e => setForm({...form, vehiculeId: e.target.value})} className="w-full px-3 py-2 border rounded-lg text-sm">
+                <option value="">-- Sélectionner un véhicule --</option>
+                {vehicles.filter((v: any) => v.status === 'active').map((v: any) => (
+                  <option key={v.id} value={v.id}>{v.plate} - {v.model || v.type}</option>
+                ))}
+              </select>
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => setModalOpen(false)} className="flex-1 px-4 py-2 border rounded-lg text-sm">Annuler</button>
                 <button type="submit" disabled={saving} className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700 disabled:opacity-50">{saving ? '...' : 'Enregistrer'}</button>
