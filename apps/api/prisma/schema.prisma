@@ -80,6 +80,7 @@ model Driver {
 model Vehicle {
   id             String        @id @default(cuid())
   organizationId String?
+  placesTotal    Int           @default(0)
   departs        Depart[]
   organization   Organization? @relation(fields: [organizationId], references: [id])
   proprietaireId String?

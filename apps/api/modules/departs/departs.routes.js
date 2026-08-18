@@ -72,6 +72,17 @@ router.post('/', authMiddleware, async (req, res) => {
       if (!orgId) return res.status(403).json({ error: 'Organisation introuvable' });
     }
     
+    // Si placesTotal n'est pas fourni, utiliser celui du véhicule
+    let finalPlacesTotal = Number(placesTotal || 0);
+    if (!finalPlacesTotal && vehiculeId) {
+      const vehicle = await prisma.vehicle.findUnique({
+        where: { id: vehiculeId },
+        select: { placesTotal: true },
+      });
+      finalPlacesTotal = vehicle?.placesTotal || 0;
+    }
+    if (!finalPlacesTotal) finalPlacesTotal = 1;
+
     const depart = await prisma.depart.create({
       data: {
         organizationId: orgId,
@@ -81,7 +92,7 @@ router.post('/', authMiddleware, async (req, res) => {
         heure: String(heure).trim(),
         prix: Number(prix),
         vehiculeId: vehiculeId || null,
-        placesTotal: Number(placesTotal || 1),
+        placesTotal: finalPlacesTotal,
         statut: 'PUBLISHED',
       },
       include: {

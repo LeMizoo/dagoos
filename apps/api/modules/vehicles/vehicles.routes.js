@@ -100,6 +100,7 @@ router.post('/', authMiddleware, requirePermission('vehicles.manage'), async (re
       year,
       currentKm,
       status,
+      placesTotal,
     } = req.body;
 
     let organizationId = requestedOrganizationId;
