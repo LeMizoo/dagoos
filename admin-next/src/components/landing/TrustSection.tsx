@@ -72,7 +72,7 @@ export default function TrustSection() {
   };
 
   return (
-    <section className="py-20 bg-gray-900 overflow-hidden">
+    <section className="py-12 bg-gray-900 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 mb-12">
         <div className="text-center">
           <span className="text-sm font-semibold text-gray-400 uppercase tracking-[0.2em]">Nos</span>
@@ -130,9 +130,47 @@ export default function TrustSection() {
                 marginLeft: '-120px',
               }}
             >
-              <div className={`bg-gray-800 rounded-2xl p-5 text-center border border-gray-700 hover:border-gray-500 transition-colors ${
+              <div className={`relative bg-gray-800 rounded-2xl p-5 text-center border border-gray-700 hover:border-gray-500 transition-all duration-500 overflow-hidden group ${
                 position === 0 ? 'shadow-2xl shadow-primary/20 ring-1 ring-primary/30' : ''
               }`}>
+                {/* Motif unique par partenaire avec animation au survol */}
+                <div className="absolute inset-0 opacity-15 pointer-events-none transition-all duration-700 group-hover:opacity-40 group-hover:scale-110">
+                  {(() => {
+                    const patterns = [
+                      // Partenaire 1 : cercles concentriques
+                      <div key="p1" className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-40 h-40 rounded-full border-4 border-emerald-400 animate-spin" style={{ animationDuration: '8s' }} />
+                        <div className="absolute w-28 h-28 rounded-full border-4 border-blue-400 animate-spin" style={{ animationDuration: '6s', animationDirection: 'reverse' }} />
+                        <div className="absolute w-16 h-16 rounded-full border-4 border-secondary animate-spin" style={{ animationDuration: '4s' }} />
+                      </div>,
+                      // Partenaire 2 : vagues
+                      <div key="p2" className="absolute inset-0 overflow-hidden">
+                        <div className="absolute top-1/4 left-0 w-full h-2 bg-gradient-to-r from-transparent via-emerald-400 to-transparent animate-pulse" />
+                        <div className="absolute top-1/2 left-0 w-full h-2 bg-gradient-to-r from-transparent via-blue-400 to-transparent animate-pulse" style={{ animationDelay: '0.5s' }} />
+                        <div className="absolute top-3/4 left-0 w-full h-2 bg-gradient-to-r from-transparent via-purple-400 to-transparent animate-pulse" style={{ animationDelay: '1s' }} />
+                      </div>,
+                      // Partenaire 3 : diagonales
+                      <div key="p3" className="absolute inset-0">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-transparent rotate-12 animate-pulse" />
+                        <div className="absolute top-1/3 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-transparent rotate-12 animate-pulse" style={{ animationDelay: '0.3s' }} />
+                        <div className="absolute top-2/3 left-0 w-full h-1 bg-gradient-to-r from-secondary to-transparent rotate-12 animate-pulse" style={{ animationDelay: '0.6s' }} />
+                      </div>,
+                      // Partenaire 4 : points
+                      <div key="p4" className="absolute inset-0 flex flex-wrap items-center justify-center gap-3">
+                        {[...Array(9)].map((_, i) => (
+                          <div key={i} className="w-3 h-3 rounded-full bg-emerald-400 animate-ping" style={{ animationDelay: `${i * 0.3}s` }} />
+                        ))}
+                      </div>,
+                      // Partenaire 5 : carrés rotatifs
+                      <div key="p5" className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-20 h-20 border-4 border-blue-400 rotate-45 animate-spin" style={{ animationDuration: '5s' }} />
+                        <div className="absolute w-14 h-14 border-4 border-emerald-400 rotate-45 animate-spin" style={{ animationDuration: '4s', animationDirection: 'reverse' }} />
+                      </div>,
+                    ];
+                    const idx = orgs.indexOf(org) % patterns.length;
+                    return patterns[idx];
+                  })()}
+                </div>
                 {/* Icône */}
                 <div className={`w-16 h-16 bg-gradient-to-br ${gradients[orgs.indexOf(org) % gradients.length]} rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg`}>
                   <span className="text-white font-bold text-xl">{org.name.charAt(0)}</span>

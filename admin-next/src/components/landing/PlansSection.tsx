@@ -58,7 +58,7 @@ export default function PlansSection() {
         {loading ? (
           <div className="text-center text-gray-400 py-8">Chargement des plans...</div>
         ) : (
-          <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 justify-center max-w-4xl mx-auto">
             {filteredPlans.map(plan => (
               <div key={plan.name}
                 className={`bg-white rounded-2xl p-5 text-center border-2 transition hover:shadow-lg relative ${

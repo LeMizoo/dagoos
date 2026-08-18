@@ -27,15 +27,15 @@ export default async function LandingPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* HERO */}
-      <section className="relative min-h-screen flex items-center bg-dark overflow-hidden">
+      <section className="relative flex items-center justify-center bg-dark overflow-hidden py-16 md:py-20">
         <HeroParticles />
         <HeroSlider />
         <div className="absolute inset-0 bg-gradient-to-br from-dark/80 via-dark/70 to-primary/50 z-10" />
-        <div className="relative z-20 max-w-5xl mx-auto px-4 py-20 text-center">
+        <div className="relative z-20 max-w-5xl mx-auto px-4 text-center">
           <span className="inline-flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded-full text-sm mb-6 backdrop-blur-sm border border-white/20">
             <Rocket size={16} className="text-secondary" /> Dago Mobility
           </span>
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
             Voyagez malin,<br />
             <span className="text-secondary">réservez votre place en ligne.</span>
           </h1>
@@ -52,6 +52,9 @@ export default async function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* NOS PARTENAIRES */}
+      <TrustSection />
 
       {/* SECTION RÉSERVATION */}
       <section id="reservation" className="py-16 bg-gray-50">
@@ -117,9 +120,6 @@ export default async function LandingPage() {
 
       {/* PLANS */}
       <PlansSection />
-
-      {/* NOS PARTENAIRES */}
-      <TrustSection />
 
       {/* SERVICES */}
       <section className="py-20 bg-white">
