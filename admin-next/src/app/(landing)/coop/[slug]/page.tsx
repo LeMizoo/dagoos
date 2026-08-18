@@ -19,6 +19,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showReservation, setShowReservation] = useState(false);
+  const [editingReservation, setEditingReservation] = useState(false);
 
   useEffect(() => {
     loadPage();
@@ -34,10 +35,17 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
       if (orgRes.ok) setCooperative(await orgRes.json());
       if (departsRes.ok) {
         const data = await departsRes.json();
-        setDeparts(Array.isArray(data) ? data : []);
-        const villes = [...new Set((Array.isArray(data) ? data : []).map((d: any) => d.pointDepart))];
+        const departsArray = Array.isArray(data) ? data : [];
+        setDeparts(departsArray);
+        const villes = [...new Set(departsArray.map((d: any) => d.pointDepart))];
         setVillesDepart(villes);
         if (villes.length > 0) setVilleFiltre(villes[0]);
+        
+        // Mettre à jour le départ sélectionné avec les données fraîches
+        if (selectedDepart) {
+          const updated = departsArray.find((d: any) => d.id === selectedDepart.id);
+          if (updated) setSelectedDepart(updated);
+        }
       }
     } catch (e: any) {
       setError(e.message);
@@ -112,8 +120,12 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
         setSelectedPlaces([]);
         setPassagers({});
         setTelephone('');
-        setShowReservation(false);
-        loadPage();
+        setEditingReservation(false);
+        // Recharger les départs pour mettre à jour les places réservées
+        await loadPage();
+        // Garder le départ sélectionné
+        setShowReservation(true);
+        setSelectedDepart((prev: any) => prev);
       } else {
         const err = await res.json();
         setError(err.error || 'Erreur de réservation');
@@ -231,6 +243,18 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
               <div>
                 <h3 className="font-semibold mb-2 text-center">2. Informations passagers</h3>
                 <div className="space-y-3">
+                  {selectedPlaces.length > 0 && (
+                    <div className="bg-emerald-50 rounded-lg p-3 text-sm">
+                      <p className="font-semibold text-emerald-700 mb-2">Places sélectionnées :</p>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedPlaces.map(place => (
+                          <span key={place} className="bg-emerald-600 text-white px-3 py-1 rounded-full text-xs font-bold">
+                            {place}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <input
                     type="tel"
                     placeholder="Votre téléphone"
@@ -248,12 +272,21 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
                       className="w-full px-4 py-3 border rounded-lg text-sm"
                     />
                   ))}
-                  <button
-                    onClick={handleReservation}
-                    className="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition text-lg"
-                  >
-                    Confirmer ({selectedPlaces.length} place{selectedPlaces.length > 1 ? 's' : ''})
-                  </button>
+                  {!editingReservation ? (
+                    <button
+                      onClick={() => setEditingReservation(true)}
+                      className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition text-lg"
+                    >
+                      Modifier
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleReservation}
+                      className="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition text-lg"
+                    >
+                      💾 Enregistrer ({selectedPlaces.length} place{selectedPlaces.length > 1 ? 's' : ''})
+                    </button>
+                  )}
                   <button
                     onClick={() => setShowReservation(false)}
                     className="w-full text-gray-500 py-2 text-sm hover:underline"
