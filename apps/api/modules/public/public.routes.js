@@ -7,6 +7,29 @@ const router = express.Router();
 // ORGANISATION PUBLIQUE
 // =========================================================
 
+// GET /api/public/organizations - Liste publique des organisations
+router.get('/organizations', async (req, res) => {
+  try {
+    const organizations = await prisma.organization.findMany({
+      where: { status: 'active' },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        type: true,
+        phone: true,
+        logo: true,
+        plan: true,
+        createdAt: true,
+      },
+    });
+    res.json(organizations);
+  } catch (error) {
+    console.error('GET /public/organizations:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 // GET /api/public/organizations/:slug - Infos publiques de l'organisation
 router.get('/organizations/:slug', async (req, res) => {
   try {

@@ -42,7 +42,10 @@ export async function apiFetch(
     typeof window !== 'undefined' &&
     !window.location.pathname.endsWith('/login') &&
     !window.location.pathname.endsWith('/fleet-login') &&
-    !window.location.pathname.endsWith('/coop-login')
+    !window.location.pathname.endsWith('/coop-login') &&
+    !window.location.pathname.startsWith('/coop/') &&
+    !window.location.pathname.startsWith('/fleet/') &&
+    window.location.pathname !== '/'
   ) {
     const pathname = window.location.pathname;
 

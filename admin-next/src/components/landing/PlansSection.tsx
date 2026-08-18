@@ -19,7 +19,7 @@ export default function PlansSection() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiFetch('/plans')
+    apiFetch('/public/plans')
       .then(r => r.json())
       .then(data => setPlans(Array.isArray(data) ? data : []))
       .catch(console.error)

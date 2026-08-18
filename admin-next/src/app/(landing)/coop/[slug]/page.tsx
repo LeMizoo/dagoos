@@ -1,18 +1,16 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { Building2, Phone, Mail, Users, Car, Calendar, Clock, MapPin } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Calendar, Clock, MapPin, Phone, Users, ChevronDown, ChevronUp } from 'lucide-react';
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api';
 import PlanVehicule from '@/components/coop/PlanVehicule';
 
-export default function CooperativeLandingPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
+export default function CooperativeLandingPage({ params }: { params: { slug: string } }) {
   const [cooperative, setCooperative] = useState<any | null>(null);
   const [departs, setDeparts] = useState<any[]>([]);
+  const [villesDepart, setVillesDepart] = useState<string[]>([]);
+  const [villeFiltre, setVilleFiltre] = useState('');
   const [selectedDepart, setSelectedDepart] = useState<any | null>(null);
   const [selectedPlaces, setSelectedPlaces] = useState<string[]>([]);
   const [passagers, setPassagers] = useState<Record<string, string>>({});
@@ -20,6 +18,7 @@ export default function CooperativeLandingPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showReservation, setShowReservation] = useState(false);
 
   useEffect(() => {
     loadPage();
@@ -33,12 +32,31 @@ export default function CooperativeLandingPage({
       ]);
       
       if (orgRes.ok) setCooperative(await orgRes.json());
-      if (departsRes.ok) setDeparts(await departsRes.json());
+      if (departsRes.ok) {
+        const data = await departsRes.json();
+        setDeparts(Array.isArray(data) ? data : []);
+        const villes = [...new Set((Array.isArray(data) ? data : []).map((d: any) => d.pointDepart))];
+        setVillesDepart(villes);
+        if (villes.length > 0) setVilleFiltre(villes[0]);
+      }
     } catch (e: any) {
       setError(e.message);
     } finally {
       setLoading(false);
     }
+  }
+
+  const departsFiltres = villeFiltre ? departs.filter(d => d.pointDepart === villeFiltre) : departs;
+
+  function handleSelectDepart(d: any) {
+    setSelectedDepart(d);
+    setSelectedPlaces([]);
+    setPassagers({});
+    setShowReservation(true);
+    // Scroll vers le formulaire
+    setTimeout(() => {
+      document.getElementById('reservation-form')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   }
 
   function handlePlaceClick(place: string) {
@@ -49,9 +67,8 @@ export default function CooperativeLandingPage({
         delete newPassagers[place];
         setPassagers(newPassagers);
         return newPlaces;
-      } else {
-        return [...prev, place];
       }
+      return [...prev, place];
     });
   }
 
@@ -64,13 +81,11 @@ export default function CooperativeLandingPage({
       setError('Veuillez sélectionner au moins une place');
       return;
     }
-
     if (!telephone.trim()) {
       setError('Veuillez saisir votre téléphone');
       return;
     }
 
-    // Vérifier que chaque place a un nom de passager
     const passagersList = selectedPlaces.map(place => ({
       passagerNom: passagers[place]?.trim() || '',
       place,
@@ -78,7 +93,7 @@ export default function CooperativeLandingPage({
 
     const missing = passagersList.filter(p => !p.passagerNom);
     if (missing.length > 0) {
-      setError(`Veuillez saisir le nom du passager pour la place ${missing[0].place}`);
+      setError(`Nom du passager requis pour la place ${missing[0].place}`);
       return;
     }
 
@@ -97,6 +112,7 @@ export default function CooperativeLandingPage({
         setSelectedPlaces([]);
         setPassagers({});
         setTelephone('');
+        setShowReservation(false);
         loadPage();
       } else {
         const err = await res.json();
@@ -108,32 +124,17 @@ export default function CooperativeLandingPage({
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-400">Chargement...</div>
-      </div>
-    );
-  }
-
-  if (!cooperative) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">Coopérative introuvable</h1>
-          <Link href="/" className="text-primary hover:underline">Retour à l'accueil</Link>
-        </div>
-      </div>
-    );
+    return <div className="min-h-screen flex items-center justify-center"><p className="text-gray-400">Chargement...</p></div>;
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white py-16">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h1 className="text-3xl font-bold mb-2">{cooperative.name}</h1>
+      <header className="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white py-12">
+        <div className="max-w-5xl mx-auto px-4 text-center">
+          <h1 className="text-3xl font-bold mb-2">{cooperative?.name || 'Coopérative'}</h1>
           <p className="text-emerald-100">Réservez votre place en ligne</p>
-          {cooperative.phone && (
+          {cooperative?.phone && (
             <p className="text-emerald-100/80 mt-2 flex items-center justify-center gap-2">
               <Phone size={16} /> {cooperative.phone}
             </p>
@@ -141,73 +142,75 @@ export default function CooperativeLandingPage({
         </div>
       </header>
 
-      {/* Départs disponibles */}
-      <section className="py-12 max-w-5xl mx-auto px-4">
-        <h2 className="text-2xl font-bold text-center mb-8">🚌 Départs disponibles</h2>
+      {/* Filtres villes */}
+      <section className="py-8 max-w-5xl mx-auto px-4">
+        <div className="flex flex-wrap gap-2 justify-center mb-6">
+          <span className="text-sm text-gray-500 flex items-center gap-1"><MapPin size={14} /> Départ :</span>
+          {villesDepart.map(ville => (
+            <button
+              key={ville}
+              onClick={() => setVilleFiltre(ville)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+                villeFiltre === ville ? 'bg-emerald-600 text-white' : 'bg-white text-gray-600 hover:bg-emerald-50 border'
+              }`}
+            >
+              {ville}
+            </button>
+          ))}
+        </div>
 
-        {departs.length === 0 ? (
-          <p className="text-center text-gray-500">Aucun départ programmé pour le moment.</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-            {departs.map((d: any) => {
-              const placesReservees = (d.reservations || []).map((r: any) => r.place);
-              const placesDisponibles = d.placesTotal - placesReservees.length;
-              const isSelected = selectedDepart?.id === d.id;
+        {/* Liste des départs */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {departsFiltres.map((d: any) => {
+            const placesReservees = (d.reservations || []).map((r: any) => r.place);
+            const placesDisponibles = d.placesTotal - placesReservees.length;
+            const isSelected = selectedDepart?.id === d.id;
 
-              return (
-                <button
-                  key={d.id}
-                  type="button"
-                  onClick={() => {
-                    setSelectedDepart(d);
-                    setSelectedPlaces([]);
-                    setPassagers({});
-                  }}
-                  className={`text-left bg-white rounded-xl p-5 border-2 transition ${
-                    isSelected ? 'border-emerald-500 shadow-lg' : 'border-gray-200 hover:border-emerald-300'
-                  }`}
-                >
-                  <h3 className="font-bold text-gray-800">
-                    <MapPin size={14} className="inline mr-1" />
-                    {d.pointDepart} → {d.destination}
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-2">
-                    <Calendar size={12} className="inline mr-1" />
-                    {new Date(d.date).toLocaleDateString('fr-FR')}
-                    <Clock size={12} className="inline ml-2 mr-1" />
-                    {d.heure}
-                  </p>
-                  <p className="text-sm font-bold text-emerald-600 mt-2">
-                    {Number(d.prix).toLocaleString()} Ar
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {placesDisponibles} places disponibles
-                  </p>
-                  {d.vehicle && (
-                    <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                      <Car size={12} /> {d.vehicle.plate} - {d.vehicle.model}
-                    </p>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        )}
+            return (
+              <button
+                key={d.id}
+                onClick={() => handleSelectDepart(d)}
+                className={`text-left bg-white rounded-xl p-5 border-2 transition ${
+                  isSelected ? 'border-emerald-500 shadow-lg' : 'border-gray-200 hover:border-emerald-300'
+                }`}
+              >
+                <h3 className="font-bold text-gray-800 text-lg">
+                  {d.destination}
+                </h3>
+                <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
+                  <Calendar size={14} /> {new Date(d.date).toLocaleDateString('fr-FR')}
+                  <Clock size={14} /> {d.heure}
+                </p>
+                <p className="text-2xl font-bold text-emerald-600 mt-3">
+                  {Number(d.prix).toLocaleString()} Ar
+                </p>
+                <p className={`text-xs mt-2 ${placesDisponibles > 5 ? 'text-green-600' : 'text-red-600'}`}>
+                  {placesDisponibles} places disponibles
+                </p>
+              </button>
+            );
+          })}
+          {departsFiltres.length === 0 && (
+            <p className="col-span-full text-center text-gray-500 py-8">Aucun départ pour cette ville.</p>
+          )}
+        </div>
+      </section>
 
-        {/* Formulaire de réservation */}
-        {selectedDepart && (
-          <div className="bg-gray-50 rounded-xl p-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">
-              Réserver : {selectedDepart.pointDepart} → {selectedDepart.destination}
-            </h3>
+      {/* Formulaire de réservation */}
+      {showReservation && selectedDepart && (
+        <section id="reservation-form" className="py-8 bg-white border-t">
+          <div className="max-w-4xl mx-auto px-4">
+            <h2 className="text-2xl font-bold text-center mb-6">
+              Réserver : {selectedDepart.destination} - {selectedDepart.heure}
+            </h2>
 
-            {success && <div className="bg-green-50 text-green-700 p-3 rounded-lg mb-4">{success}</div>}
-            {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4">{error}</div>}
+            {success && <div className="bg-green-50 text-green-700 p-4 rounded-lg mb-4 text-center">{success}</div>}
+            {error && <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4 text-center">{error}</div>}
 
             <div className="grid md:grid-cols-2 gap-6">
-              {/* Plan du véhicule */}
+              {/* Plan */}
               <div>
-                <h4 className="font-semibold mb-2">Choisissez vos places</h4>
+                <h3 className="font-semibold mb-2 text-center">1. Choisissez vos places</h3>
                 <PlanVehicule
                   placesTotal={selectedDepart.placesTotal}
                   placesReservees={(selectedDepart.reservations || []).map((r: any) => r.place)}
@@ -216,16 +219,16 @@ export default function CooperativeLandingPage({
                 />
               </div>
 
-              {/* Formulaire passagers */}
+              {/* Formulaire */}
               <div>
-                <h4 className="font-semibold mb-2">Informations</h4>
+                <h3 className="font-semibold mb-2 text-center">2. Informations passagers</h3>
                 <div className="space-y-3">
                   <input
                     type="tel"
                     placeholder="Votre téléphone"
                     value={telephone}
                     onChange={e => setTelephone(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg text-sm"
+                    className="w-full px-4 py-3 border rounded-lg text-sm"
                   />
                   {selectedPlaces.map(place => (
                     <input
@@ -234,26 +237,30 @@ export default function CooperativeLandingPage({
                       placeholder={`Nom du passager - Place ${place}`}
                       value={passagers[place] || ''}
                       onChange={e => setPassagers({ ...passagers, [place]: e.target.value })}
-                      className="w-full px-3 py-2 border rounded-lg text-sm"
+                      className="w-full px-4 py-3 border rounded-lg text-sm"
                     />
                   ))}
                   <button
                     onClick={handleReservation}
-                    className="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition"
+                    className="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition text-lg"
                   >
-                    Confirmer la réservation ({selectedPlaces.length} place{selectedPlaces.length > 1 ? 's' : ''})
+                    Confirmer ({selectedPlaces.length} place{selectedPlaces.length > 1 ? 's' : ''})
+                  </button>
+                  <button
+                    onClick={() => setShowReservation(false)}
+                    className="w-full text-gray-500 py-2 text-sm hover:underline"
+                  >
+                    Annuler et retourner aux départs
                   </button>
                 </div>
               </div>
             </div>
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
-      {/* Footer */}
       <footer className="bg-gray-900 text-gray-400 py-8 text-center text-sm">
         <p>Propulsé par <Link href="/" className="text-secondary hover:underline">Dagoo Mobility</Link></p>
-        <p className="mt-1">Chez les potes, ça roule.</p>
       </footer>
     </div>
   );

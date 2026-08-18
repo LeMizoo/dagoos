@@ -9,7 +9,7 @@ import AnimatedSection from '@/components/landing/AnimatedSection';
 async function getStats() {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_URL || 'http://localhost:5001'}/api/public/organizations`,
+      '/api/proxy/public/organizations',
       { cache: 'no-store' }
     );
 
