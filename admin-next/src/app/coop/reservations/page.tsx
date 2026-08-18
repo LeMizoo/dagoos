@@ -2,12 +2,15 @@
 import { apiFetch } from '@/lib/api';
 import { useState, useEffect } from 'react';
 import { Users, Phone, CheckCircle, XCircle } from 'lucide-react';
+import PlanVehicule from '@/components/coop/PlanVehicule';
 
 export default function CoopReservationsPage() {
   const [reservations, setReservations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('all');
+  const [selectedDepart, setSelectedDepart] = useState<any | null>(null);
+  const [showPlan, setShowPlan] = useState(false);
 
   useEffect(() => { load(); }, []);
 
@@ -77,16 +80,33 @@ export default function CoopReservationsPage() {
                     }`}>{r.statut}</span>
                   </td>
                   <td className="px-4 py-3">
-                    {r.statut === 'CONFIRMED' ? (
-                      <button onClick={() => updateStatut(r.id, 'CANCELLED')} className="text-red-600 hover:underline text-xs flex items-center gap-1"><XCircle size={12} /> Annuler</button>
-                    ) : (
-                      <button onClick={() => updateStatut(r.id, 'CONFIRMED')} className="text-green-600 hover:underline text-xs flex items-center gap-1"><CheckCircle size={12} /> Confirmer</button>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => { setSelectedDepart(r.depart); setShowPlan(true); }} className="text-blue-600 hover:underline text-xs">Voir plan</button>
+                      {r.statut === 'CONFIRMED' ? (
+                        <button onClick={() => updateStatut(r.id, 'CANCELLED')} className="text-red-600 hover:underline text-xs flex items-center gap-1"><XCircle size={12} /> Annuler</button>
+                      ) : (
+                        <button onClick={() => updateStatut(r.id, 'CONFIRMED')} className="text-green-600 hover:underline text-xs flex items-center gap-1"><CheckCircle size={12} /> Confirmer</button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+      {showPlan && selectedDepart && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowPlan(false)}>
+          <div className="bg-white rounded-xl p-6 max-w-md w-full" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-semibold">Plan du véhicule</h3>
+              <button onClick={() => setShowPlan(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+            <PlanVehicule
+              placesTotal={selectedDepart.placesTotal || 25}
+              placesReservees={(reservations.filter((r: any) => r.depart?.id === selectedDepart.id)).map((r: any) => r.place)}
+            />
+          </div>
         </div>
       )}
     </div>

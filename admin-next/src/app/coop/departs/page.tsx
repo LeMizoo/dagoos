@@ -2,6 +2,7 @@
 import { apiFetch } from '@/lib/api';
 import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, Calendar, Clock, MapPin, Users, Car } from 'lucide-react';
+import PlanVehicule from '@/components/coop/PlanVehicule';
 
 export default function CoopDepartsPage() {
   const [departs, setDeparts] = useState<any[]>([]);
@@ -121,6 +122,14 @@ export default function CoopDepartsPage() {
               <div className="text-xs text-gray-500 mb-3 flex items-center gap-1">
                 <Car size={12} /> {d.vehicle ? `${d.vehicle.plate} - ${d.vehicle.model || ''}` : 'Aucun véhicule assigné'}
               </div>
+              {d.vehicle && (
+                <div className="mb-3">
+                  <PlanVehicule
+                    placesTotal={d.placesTotal}
+                    placesReservees={(d.reservations || []).map((r: any) => r.place)}
+                  />
+                </div>
+              )}
               <div className="flex gap-2">
                 <button onClick={() => openEdit(d)} className="flex-1 px-3 py-1.5 text-xs border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-center gap-1"><Pencil size={12} /> Modifier</button>
                 <button onClick={() => handleDelete(d.id)} className="flex-1 px-3 py-1.5 text-xs border border-red-200 text-red-600 rounded-lg hover:bg-red-50 flex items-center justify-center gap-1"><Trash2 size={12} /> Supprimer</button>
