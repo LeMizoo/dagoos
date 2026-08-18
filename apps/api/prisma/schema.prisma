@@ -381,6 +381,8 @@ model Depart {
   vehiculeId     String?
   vehicle        Vehicle?      @relation(fields: [vehiculeId], references: [id])
   placesTotal    Int           @default(1)
+  distanceKm     Float?
+  dureeEstimee   String?
   statut         String        @default("DRAFT")
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
