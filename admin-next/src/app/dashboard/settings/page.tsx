@@ -1,7 +1,7 @@
 'use client';
 export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
-import { Settings, User, Shield, Palette, Bell, Globe, Save, Crown, Coffee, Star, Zap, FileText } from 'lucide-react';
+import { Settings, User, Shield, Palette, Bell, Globe, Smartphone, Save, Crown, Coffee, Star, Zap, FileText } from 'lucide-react';
 import PasswordInput from '@/components/ui/PasswordInput';
 import { apiFetch } from '@/lib/api';
 
@@ -60,6 +60,8 @@ export default function SettingsPage() {
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('light');
   const [themeReady, setThemeReady] = useState(false);
   
+  const [mobileMoney, setMobileMoney] = useState({ mvola: '', orange: '', airtel: '' });
+
   // Charger les plans depuis l'API
   useEffect(() => {
     apiFetch('/plans')
@@ -105,7 +107,8 @@ export default function SettingsPage() {
     { id: 'security', icon: Shield, label: 'Sécurité' },
     { id: 'appearance', icon: Palette, label: 'Apparence' },
     { id: 'notifications', icon: Bell, label: 'Notifications' },
-    { id: 'api', icon: Globe, label: 'API' },
+    { id: 'api', icon: Globe, Smartphone, label: 'API' },
+    { id: 'mobile-money', icon: Smartphone, label: 'Mobile Money' },
   ];
 
   function handleSave() {
@@ -276,6 +279,28 @@ export default function SettingsPage() {
                       <button key={c} className="w-10 h-10 rounded-full border-2 border-white shadow ring-1 ring-gray-200 dark:ring-gray-600 hover:ring-blue-500 hover:scale-110 transition-all" style={{ backgroundColor: c }} title={c} />
                     ))}
                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Mobile Money */}
+          {tab === 'mobile-money' && (
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border">
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">📱 Numéros Mobile Money DAGOO'S</h2>
+              <p className="text-xs text-gray-500 mb-4">Numéros pour les paiements d'abonnement des organisations</p>
+              <div className="space-y-3 max-w-lg">
+                <div className="flex items-center gap-2 bg-yellow-400 rounded-lg p-3">
+                  <span className="font-bold text-black text-sm w-24">MVola</span>
+                  <input type="text" placeholder="034 00 000 00" value={mobileMoney.mvola} onChange={e => setMobileMoney({ ...mobileMoney, mvola: e.target.value })} className="flex-1 px-3 py-2 rounded bg-white text-black text-sm font-semibold" />
+                </div>
+                <div className="flex items-center gap-2 bg-black rounded-lg p-3">
+                  <span className="font-bold text-orange-500 text-sm w-24">Orange</span>
+                  <input type="text" placeholder="032 00 000 00" value={mobileMoney.orange} onChange={e => setMobileMoney({ ...mobileMoney, orange: e.target.value })} className="flex-1 px-3 py-2 rounded bg-gray-800 text-orange-400 text-sm font-semibold border border-orange-500/30" />
+                </div>
+                <div className="flex items-center gap-2 bg-red-600 rounded-lg p-3">
+                  <span className="font-bold text-white text-sm w-24">Airtel</span>
+                  <input type="text" placeholder="033 00 000 00" value={mobileMoney.airtel} onChange={e => setMobileMoney({ ...mobileMoney, airtel: e.target.value })} className="flex-1 px-3 py-2 rounded bg-white text-sm font-semibold" />
                 </div>
               </div>
             </div>

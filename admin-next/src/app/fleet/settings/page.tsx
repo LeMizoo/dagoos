@@ -22,6 +22,7 @@ const DEFAULT_TARIFS: any = {
 export default function FleetSettingsPage() {
   const [tarifs, setTarifs] = useState(DEFAULT_TARIFS);
   const [commission, setCommission] = useState(20);
+  const [mobileMoney, setMobileMoney] = useState({ mvola: '', orange: '', airtel: '' });
   const [orgId, setOrgId] = useState('');
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
@@ -43,6 +44,7 @@ export default function FleetSettingsPage() {
         const data = await tRes.json();
         if (data?.vehiculeTarifs) setTarifs(JSON.parse(data.vehiculeTarifs));
         if (data?.commissionChauffeur !== undefined) setCommission(data.commissionChauffeur);
+        if (data?.mobileMoney) setMobileMoney(data.mobileMoney);
       }
     } catch (e: any) { setError(e.message); } finally { setLoading(false); }
   }
@@ -67,7 +69,7 @@ export default function FleetSettingsPage() {
     try {
       const res = await apiFetch(`/tarifs/${orgId}`, {
         method: 'PUT',
-        body: JSON.stringify({ commissionChauffeur: commission, vehiculeTarifs: JSON.stringify(tarifs) }),
+        body: JSON.stringify({ commissionChauffeur: commission, vehiculeTarifs: JSON.stringify(tarifs), mobileMoney }),
       });
       if (res.ok) { setSaved(true); setTimeout(() => setSaved(false), 2000); }
       else { const err = await res.json(); setError(err.error || 'Erreur'); }
@@ -135,6 +137,25 @@ export default function FleetSettingsPage() {
             onToggle={(v) => updateLocationSpeciale('tricycle', 'active', v)}
             onPrix={(v) => updateLocationSpeciale('tricycle', 'prixJour', v)}
           />
+        </Card>
+
+        {/* Mobile Money */}
+        <Card>
+          <h2 className="text-lg font-semibold mb-4">📱 Numéros Mobile Money</h2>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 bg-yellow-400 rounded-lg p-3">
+              <span className="font-bold text-black text-sm w-24">MVola</span>
+              <input type="text" placeholder="034 00 000 00" value={mobileMoney.mvola} onChange={e => setMobileMoney({ ...mobileMoney, mvola: e.target.value })} className="flex-1 px-3 py-2 rounded bg-white text-black text-sm font-semibold" />
+            </div>
+            <div className="flex items-center gap-2 bg-black rounded-lg p-3">
+              <span className="font-bold text-orange-500 text-sm w-24">Orange</span>
+              <input type="text" placeholder="032 00 000 00" value={mobileMoney.orange} onChange={e => setMobileMoney({ ...mobileMoney, orange: e.target.value })} className="flex-1 px-3 py-2 rounded bg-gray-800 text-orange-400 text-sm font-semibold border border-orange-500/30" />
+            </div>
+            <div className="flex items-center gap-2 bg-red-600 rounded-lg p-3">
+              <span className="font-bold text-white text-sm w-24">Airtel</span>
+              <input type="text" placeholder="033 00 000 00" value={mobileMoney.airtel} onChange={e => setMobileMoney({ ...mobileMoney, airtel: e.target.value })} className="flex-1 px-3 py-2 rounded bg-white text-sm font-semibold" />
+            </div>
+          </div>
         </Card>
 
         {/* Commission */}
