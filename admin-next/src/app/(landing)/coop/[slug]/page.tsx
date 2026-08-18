@@ -20,6 +20,8 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
   const [success, setSuccess] = useState('');
   const [showReservation, setShowReservation] = useState(false);
   const [editingReservation, setEditingReservation] = useState(false);
+  const [captchaQuestion, setCaptchaQuestion] = useState({ a: 0, b: 0 });
+  const [captchaAnswer, setCaptchaAnswer] = useState('');
   const [manageTel, setManageTel] = useState('');
   const [manageNom, setManageNom] = useState('');
   const [manageResult, setManageResult] = useState<any | null>(null);
@@ -29,6 +31,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
 
   useEffect(() => {
     loadPage();
+    setCaptchaQuestion({ a: Math.floor(Math.random() * 10) + 1, b: Math.floor(Math.random() * 10) + 1 });
   }, [params.slug]);
 
   async function loadPage() {
@@ -205,6 +208,13 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
       return;
     }
 
+    if (Number(captchaAnswer) !== captchaQuestion.a + captchaQuestion.b) {
+      setError('Captcha incorrect. Veuillez résoudre le calcul.');
+      setCaptchaQuestion({ a: Math.floor(Math.random() * 10) + 1, b: Math.floor(Math.random() * 10) + 1 });
+      setCaptchaAnswer('');
+      return;
+    }
+
     const passagersList = selectedPlaces.map(place => ({
       passagerNom: passagers[place]?.trim() || '',
       place,
@@ -364,6 +374,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
                       <div>
                         <p className="text-sm font-semibold">{r.depart?.pointDepart} → {r.depart?.destination}</p>
                         <p className="text-xs text-gray-500">Place actuelle : <span className="font-bold text-emerald-600">{r.place}</span></p>
+                        <p className="text-xs text-gray-400">{new Date(r.depart?.date).toLocaleDateString('fr-FR')} à {r.depart?.heure}</p>
                       </div>
                       <button
                         onClick={() => handleCancelReservation(r.id)}
@@ -467,6 +478,16 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
                     onChange={e => setTelephone(e.target.value)}
                     className="w-full px-4 py-3 border rounded-lg text-sm"
                   />
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold whitespace-nowrap">{captchaQuestion.a} + {captchaQuestion.b} = ?</span>
+                    <input
+                      type="number"
+                      placeholder="?"
+                      value={captchaAnswer}
+                      onChange={e => setCaptchaAnswer(e.target.value)}
+                      className="flex-1 px-3 py-2 border rounded-lg text-sm"
+                    />
+                  </div>
                   {selectedPlaces.map(place => (
                     <input
                       key={place}

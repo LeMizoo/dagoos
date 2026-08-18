@@ -221,7 +221,7 @@ router.post('/reservations', async (req, res) => {
         passagerNom: String(passagerNom).trim(),
         telephone: String(telephone).trim(),
         place: String(place).trim(),
-        statut: 'CONFIRMED',
+        statut: 'PENDING',
       },
     });
     
@@ -269,6 +269,19 @@ router.post('/reservations/batch', async (req, res) => {
       });
     }
     
+    // Limite : 5 places maximum par téléphone
+    const existingReservations = await prisma.reservation.findMany({
+      where: {
+        telephone: String(telephone).trim(),
+        statut: { in: ['CONFIRMED', 'PENDING'] },
+        depart: { date: { gte: new Date() } },
+      },
+    });
+    
+    if (existingReservations.length + passagers.length > 5) {
+      return res.status(400).json({ error: 'Limite de 5 places par téléphone' });
+    }
+
     // Vérifier les doublons dans la demande
     const uniquePlaces = new Set(placesDemandees);
     if (uniquePlaces.size !== placesDemandees.length) {
@@ -284,7 +297,7 @@ router.post('/reservations/batch', async (req, res) => {
           passagerNom: String(passager.passagerNom).trim(),
           telephone: String(telephone).trim(),
           place: String(passager.place).trim(),
-          statut: 'CONFIRMED',
+          statut: 'PENDING',
         },
       });
       reservations.push(reservation);
@@ -314,7 +327,7 @@ router.post('/reservations/manage', async (req, res) => {
       where: {
         telephone: String(telephone).trim(),
         passagerNom: String(passagerNom).trim(),
-        statut: 'CONFIRMED',
+        statut: 'PENDING',
       },
       include: { depart: true },
     });
@@ -349,7 +362,7 @@ router.post('/reservations/manage', async (req, res) => {
       const depart = await prisma.depart.findUnique({
         where: { id: reservation.departId },
         include: {
-          reservations: { where: { statut: 'CONFIRMED', NOT: { id: reservationId } }, select: { place: true } },
+          reservations: { where: { statut: 'PENDING', NOT: { id: reservationId } }, select: { place: true } },
         },
       });
       
