@@ -31,11 +31,15 @@ export default function RegisterPage() {
     mvolaNumber: '',
     orangeNumber: '',
     airtelNumber: '',
+    paiementRef: '',
   });
+  const [captchaQ, setCaptchaQ] = useState({ a: 0, b: 0 });
+  const [captchaA, setCaptchaA] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
+    setCaptchaQ({ a: Math.floor(Math.random() * 10) + 1, b: Math.floor(Math.random() * 10) + 1 });
     apiFetch('/public/plans')
       .then(r => r.json())
       .then(data => {
@@ -77,6 +81,13 @@ export default function RegisterPage() {
 
     if (!form.planId) {
       setError('Veuillez sélectionner un plan');
+      return;
+    }
+
+    if (Number(captchaA) !== captchaQ.a + captchaQ.b) {
+      setError('Captcha incorrect');
+      setCaptchaQ({ a: Math.floor(Math.random() * 10) + 1, b: Math.floor(Math.random() * 10) + 1 });
+      setCaptchaA('');
       return;
     }
 
@@ -272,6 +283,29 @@ export default function RegisterPage() {
                     <input type="text" placeholder="033 00 000 00" value={form.airtelNumber} onChange={e => setForm({ ...form, airtelNumber: e.target.value })} className="flex-1 px-3 py-2 rounded bg-white text-sm font-semibold outline-none" />
                   </div>
                 </div>
+              </div>
+
+              {/* Réf de paiement */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Réf du transfert Mobile Money (optionnel)</label>
+                <input
+                  type="text"
+                  value={form.paiementRef}
+                  onChange={e => setForm({ ...form, paiementRef: e.target.value })}
+                  placeholder="Ex: MVOLA123456789"
+                  className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Captcha */}
+              <div className="flex items-center gap-2">
+                <span className="font-semibold whitespace-nowrap">{captchaQ.a} + {captchaQ.b} = ?</span>
+                <input
+                  type="number"
+                  value={captchaA}
+                  onChange={e => setCaptchaA(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-xl text-sm"
+                />
               </div>
 
               {error && (
