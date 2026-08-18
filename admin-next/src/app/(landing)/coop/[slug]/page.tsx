@@ -393,14 +393,14 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
                       onClick={() => setEditingReservation(true)}
                       className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition text-lg"
                     >
-                      Modifier
+                      ✅ Valider ma sélection
                     </button>
                   ) : (
                     <button
                       onClick={handleReservation}
                       className="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition text-lg"
                     >
-                      💾 Enregistrer ({selectedPlaces.length} place{selectedPlaces.length > 1 ? 's' : ''})
+                      💾 Enregistrer la réservation ({selectedPlaces.length} place{selectedPlaces.length > 1 ? 's' : ''})
                     </button>
                   )}
                   <button
