@@ -1,154 +1,126 @@
-import { Building2, Phone, Mail, Users, Car } from 'lucide-react';
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { Building2, Phone, Mail, Users, Car, Calendar, Clock, MapPin } from 'lucide-react';
 import Link from 'next/link';
-import { API_BASE_URL } from '@/lib/config';
+import { apiFetch } from '@/lib/api';
+import PlanVehicule from '@/components/coop/PlanVehicule';
 
-export const dynamic = 'force-dynamic';
-
-interface Cooperative {
-  id: string;
-  name: string;
-  code?: string;
-  slug: string;
-  type: string;
-  email?: string | null;
-  phone?: string | null;
-  logo?: string | null;
-  description?: string | null;
-  plan?: string | null;
-  status: string;
-  vehicles?: Array<{
-    id: string;
-    plate: string;
-    model?: string | null;
-    year?: number | null;
-    status: string;
-  }>;
-  drivers?: Array<{
-    id: string;
-    driverCode: string;
-    status: string;
-    user?: {
-      name?: string | null;
-    } | null;
-    vehicle?: {
-      id: string;
-      plate: string;
-      model?: string | null;
-    } | null;
-  }>;
-  _count?: {
-    vehicles: number;
-    drivers: number;
-  };
-}
-
-async function getCooperative(
-  slug: string
-): Promise<Cooperative | null> {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/api/organizations/coop/${encodeURIComponent(slug)}`,
-      {
-        cache: 'no-store',
-        headers: {
-          Accept: 'application/json',
-        },
-      }
-    );
-
-    if (!response.ok) {
-      return null;
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('[coop landing]', error);
-    return null;
-  }
-}
-
-export default async function CooperativeLandingPage({
+export default function CooperativeLandingPage({
   params,
 }: {
   params: { slug: string };
 }) {
-  const cooperative = await getCooperative(params.slug);
+  const [cooperative, setCooperative] = useState<any | null>(null);
+  const [departs, setDeparts] = useState<any[]>([]);
+  const [selectedDepart, setSelectedDepart] = useState<any | null>(null);
+  const [selectedPlaces, setSelectedPlaces] = useState<string[]>([]);
+  const [passagers, setPassagers] = useState<Record<string, string>>({});
+  const [telephone, setTelephone] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  if (!cooperative) {
+  useEffect(() => {
+    loadPage();
+  }, [params.slug]);
+
+  async function loadPage() {
+    try {
+      const [orgRes, departsRes] = await Promise.all([
+        apiFetch(`/public/organizations/${params.slug}`),
+        apiFetch(`/public/departs/${params.slug}`),
+      ]);
+      
+      if (orgRes.ok) setCooperative(await orgRes.json());
+      if (departsRes.ok) setDeparts(await departsRes.json());
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handlePlaceClick(place: string) {
+    setSelectedPlaces(prev => {
+      if (prev.includes(place)) {
+        const newPlaces = prev.filter(p => p !== place);
+        const newPassagers = { ...passagers };
+        delete newPassagers[place];
+        setPassagers(newPassagers);
+        return newPlaces;
+      } else {
+        return [...prev, place];
+      }
+    });
+  }
+
+  async function handleReservation(e: React.FormEvent) {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (!selectedDepart || selectedPlaces.length === 0) {
+      setError('Veuillez sélectionner au moins une place');
+      return;
+    }
+
+    if (!telephone.trim()) {
+      setError('Veuillez saisir votre téléphone');
+      return;
+    }
+
+    // Vérifier que chaque place a un nom de passager
+    const passagersList = selectedPlaces.map(place => ({
+      passagerNom: passagers[place]?.trim() || '',
+      place,
+    }));
+
+    const missing = passagersList.filter(p => !p.passagerNom);
+    if (missing.length > 0) {
+      setError(`Veuillez saisir le nom du passager pour la place ${missing[0].place}`);
+      return;
+    }
+
+    try {
+      const res = await apiFetch('/public/reservations/batch', {
+        method: 'POST',
+        body: JSON.stringify({
+          departId: selectedDepart.id,
+          telephone: telephone.trim(),
+          passagers: passagersList,
+        }),
+      });
+
+      if (res.ok) {
+        setSuccess('✅ Réservation confirmée !');
+        setSelectedPlaces([]);
+        setPassagers({});
+        setTelephone('');
+        loadPage();
+      } else {
+        const err = await res.json();
+        setError(err.error || 'Erreur de réservation');
+      }
+    } catch (e: any) {
+      setError(e.message);
+    }
+  }
+
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center px-4">
-          <Building2
-            size={48}
-            className="mx-auto text-gray-300 mb-4"
-          />
-
-          <h1 className="text-3xl font-bold text-gray-300 mb-2">
-            Coopérative introuvable
-          </h1>
-
-          <p className="text-gray-500 mb-6">
-            Cette page n&apos;existe pas ou a été déplacée.
-          </p>
-
-          <Link
-            href="/"
-            className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-emerald-800 transition"
-          >
-            Retour à l&apos;accueil
-          </Link>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-400">Chargement...</div>
       </div>
     );
   }
 
-  const eligible =
-    cooperative.plan === 'Premium' ||
-    cooperative.plan === 'Standard' ||
-    cooperative.plan === 'Sur devis';
-
-  if (!eligible) {
+  if (!cooperative) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-white">
-        <div className="max-w-md mx-auto text-center p-8">
-          <div className="w-20 h-20 bg-emerald-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
-            <Building2
-              size={40}
-              className="text-emerald-600"
-            />
-          </div>
-
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">
-            {cooperative.name}
-          </h1>
-
-          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mt-6">
-            <p className="text-yellow-800 font-semibold mb-2">
-              Landing page non disponible
-            </p>
-
-            <p className="text-yellow-700 text-sm mb-4">
-              Votre plan{' '}
-              <strong>{cooperative.plan || 'actuel'}</strong>{' '}
-              n&apos;inclut pas de landing page personnalisée.
-              Passez au plan <strong>Standard</strong> ou{' '}
-              <strong>Premium</strong> pour en bénéficier.
-            </p>
-
-            <Link
-              href="/register"
-              className="inline-block bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-emerald-800 transition text-sm"
-            >
-              Voir les plans
-            </Link>
-          </div>
-
-          <Link
-            href="/"
-            className="inline-block mt-6 text-gray-400 hover:text-gray-600 text-sm"
-          >
-            Retour à l&apos;accueil
-          </Link>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">Coopérative introuvable</h1>
+          <Link href="/" className="text-primary hover:underline">Retour à l'accueil</Link>
         </div>
       </div>
     );
@@ -156,206 +128,132 @@ export default async function CooperativeLandingPage({
 
   return (
     <div className="min-h-screen bg-white">
-      <header className="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white py-20">
+      {/* Header */}
+      <header className="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white py-16">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-6">
-            {cooperative.logo ? (
-              <img
-                src={cooperative.logo}
-                alt={cooperative.name}
-                className="w-full h-full object-cover rounded-3xl"
-              />
-            ) : (
-              <Building2
-                size={48}
-                className="text-white"
-              />
-            )}
-          </div>
-
-          <h1 className="text-4xl font-bold mb-3">
-            {cooperative.name}
-          </h1>
-
-          <p className="text-emerald-100 text-lg">
-            Coopérative Dagoo
-          </p>
-
-          {cooperative.description && (
-            <p className="text-emerald-100/80 max-w-2xl mx-auto mt-4">
-              {cooperative.description}
+          <h1 className="text-3xl font-bold mb-2">{cooperative.name}</h1>
+          <p className="text-emerald-100">Réservez votre place en ligne</p>
+          {cooperative.phone && (
+            <p className="text-emerald-100/80 mt-2 flex items-center justify-center gap-2">
+              <Phone size={16} /> {cooperative.phone}
             </p>
           )}
-
-          <div className="flex flex-wrap justify-center gap-6 mt-8">
-            {cooperative.phone && (
-              <div className="flex items-center gap-2 text-white/80">
-                <Phone size={18} />
-                {cooperative.phone}
-              </div>
-            )}
-
-            {cooperative.email && (
-              <div className="flex items-center gap-2 text-white/80">
-                <Mail size={18} />
-                {cooperative.email}
-              </div>
-            )}
-          </div>
         </div>
       </header>
 
-      <section className="py-20 max-w-5xl mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center mb-12">
-          Notre coopérative
-        </h2>
+      {/* Départs disponibles */}
+      <section className="py-12 max-w-5xl mx-auto px-4">
+        <h2 className="text-2xl font-bold text-center mb-8">🚌 Départs disponibles</h2>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-12">
-          <div className="bg-emerald-50 rounded-2xl p-6 text-center">
-            <Car
-              size={32}
-              className="mx-auto text-emerald-600 mb-3"
-            />
+        {departs.length === 0 ? (
+          <p className="text-center text-gray-500">Aucun départ programmé pour le moment.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            {departs.map((d: any) => {
+              const placesReservees = (d.reservations || []).map((r: any) => r.place);
+              const placesDisponibles = d.placesTotal - placesReservees.length;
+              const isSelected = selectedDepart?.id === d.id;
 
-            <div className="text-3xl font-bold text-gray-800">
-              {cooperative._count?.vehicles ??
-                cooperative.vehicles?.length ??
-                0}
-            </div>
-
-            <p className="text-gray-500 mt-1">
-              Véhicules actifs
-            </p>
+              return (
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedDepart(d);
+                    setSelectedPlaces([]);
+                    setPassagers({});
+                  }}
+                  className={`text-left bg-white rounded-xl p-5 border-2 transition ${
+                    isSelected ? 'border-emerald-500 shadow-lg' : 'border-gray-200 hover:border-emerald-300'
+                  }`}
+                >
+                  <h3 className="font-bold text-gray-800">
+                    <MapPin size={14} className="inline mr-1" />
+                    {d.pointDepart} → {d.destination}
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-2">
+                    <Calendar size={12} className="inline mr-1" />
+                    {new Date(d.date).toLocaleDateString('fr-FR')}
+                    <Clock size={12} className="inline ml-2 mr-1" />
+                    {d.heure}
+                  </p>
+                  <p className="text-sm font-bold text-emerald-600 mt-2">
+                    {Number(d.prix).toLocaleString()} Ar
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {placesDisponibles} places disponibles
+                  </p>
+                  {d.vehicle && (
+                    <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                      <Car size={12} /> {d.vehicle.plate} - {d.vehicle.model}
+                    </p>
+                  )}
+                </button>
+              );
+            })}
           </div>
+        )}
 
-          <div className="bg-blue-50 rounded-2xl p-6 text-center">
-            <Users
-              size={32}
-              className="mx-auto text-blue-600 mb-3"
-            />
+        {/* Formulaire de réservation */}
+        {selectedDepart && (
+          <div className="bg-gray-50 rounded-xl p-6">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">
+              Réserver : {selectedDepart.pointDepart} → {selectedDepart.destination}
+            </h3>
 
-            <div className="text-3xl font-bold text-gray-800">
-              {cooperative._count?.drivers ??
-                cooperative.drivers?.length ??
-                0}
-            </div>
+            {success && <div className="bg-green-50 text-green-700 p-3 rounded-lg mb-4">{success}</div>}
+            {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4">{error}</div>}
 
-            <p className="text-gray-500 mt-1">
-              Chauffeurs actifs
-            </p>
-          </div>
-        </div>
-
-        <h2 className="text-3xl font-bold text-center mb-12">
-          Nos services de transport
-        </h2>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            {
-              icon: Car,
-              title: 'Transport rapide',
-              desc: 'Courses urbaines et interurbaines',
-            },
-            {
-              icon: Building2,
-              title: 'Organisation coopérative',
-              desc: 'Une gestion structurée au service des membres',
-            },
-            {
-              icon: Users,
-              title: 'Chauffeurs qualifiés',
-              desc: 'Professionnels expérimentés',
-            },
-            {
-              icon: Car,
-              title: 'Véhicules entretenus',
-              desc: 'Parc régulièrement vérifié',
-            },
-            {
-              icon: Phone,
-              title: 'Support',
-              desc: 'Une équipe disponible pour vous accompagner',
-            },
-            {
-              icon: Building2,
-              title: 'Proximité',
-              desc: 'Un service adapté aux réalités locales',
-            },
-          ].map((service) => {
-            const Icon = service.icon;
-
-            return (
-              <div
-                key={service.title}
-                className="bg-gray-50 rounded-2xl p-6 text-center hover:shadow-lg transition"
-              >
-                <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-emerald-100 flex items-center justify-center">
-                  <Icon
-                    size={26}
-                    className="text-emerald-600"
-                  />
-                </div>
-
-                <h3 className="font-bold text-gray-800 mb-2">
-                  {service.title}
-                </h3>
-
-                <p className="text-gray-500 text-sm">
-                  {service.desc}
-                </p>
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Plan du véhicule */}
+              <div>
+                <h4 className="font-semibold mb-2">Choisissez vos places</h4>
+                <PlanVehicule
+                  placesTotal={selectedDepart.placesTotal}
+                  placesReservees={(selectedDepart.reservations || []).map((r: any) => r.place)}
+                  placesSelectionnees={selectedPlaces}
+                  onPlaceClick={handlePlaceClick}
+                />
               </div>
-            );
-          })}
-        </div>
-      </section>
 
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6">
-            Contactez-nous
-          </h2>
-
-          <div className="flex flex-col items-center gap-4 text-gray-600">
-            {cooperative.email && (
-              <p className="flex items-center gap-2">
-                <Mail size={18} />
-                {cooperative.email}
-              </p>
-            )}
-
-            {cooperative.phone && (
-              <p className="flex items-center gap-2">
-                <Phone size={18} />
-                {cooperative.phone}
-              </p>
-            )}
+              {/* Formulaire passagers */}
+              <div>
+                <h4 className="font-semibold mb-2">Informations</h4>
+                <div className="space-y-3">
+                  <input
+                    type="tel"
+                    placeholder="Votre téléphone"
+                    value={telephone}
+                    onChange={e => setTelephone(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg text-sm"
+                  />
+                  {selectedPlaces.map(place => (
+                    <input
+                      key={place}
+                      type="text"
+                      placeholder={`Nom du passager - Place ${place}`}
+                      value={passagers[place] || ''}
+                      onChange={e => setPassagers({ ...passagers, [place]: e.target.value })}
+                      className="w-full px-3 py-2 border rounded-lg text-sm"
+                    />
+                  ))}
+                  <button
+                    onClick={handleReservation}
+                    className="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition"
+                  >
+                    Confirmer la réservation ({selectedPlaces.length} place{selectedPlaces.length > 1 ? 's' : ''})
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </section>
 
+      {/* Footer */}
       <footer className="bg-gray-900 text-gray-400 py-8 text-center text-sm">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <Building2 size={16} />
-
-          <span className="font-bold text-white">
-            {cooperative.name}
-          </span>
-        </div>
-
-        <p>
-          Propulsé par{' '}
-          <Link
-            href="/"
-            className="text-secondary hover:underline"
-          >
-            Dagoo Mobility
-          </Link>
-        </p>
-
-        <p className="mt-1">
-          Chez les potes, ça roule.
-        </p>
+        <p>Propulsé par <Link href="/" className="text-secondary hover:underline">Dagoo Mobility</Link></p>
+        <p className="mt-1">Chez les potes, ça roule.</p>
       </footer>
     </div>
   );
