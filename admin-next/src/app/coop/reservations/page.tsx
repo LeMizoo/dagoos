@@ -67,6 +67,7 @@ export default function CoopReservationsPage() {
                 <th className="px-4 py-3">Trajet</th>
                 <th className="px-4 py-3">Date</th>
                 <th className="px-4 py-3">Place</th>
+                <th className="px-4 py-3">Véhicule</th>
                 <th className="px-4 py-3">Statut</th>
                 <th className="px-4 py-3">Actions</th>
               </tr>

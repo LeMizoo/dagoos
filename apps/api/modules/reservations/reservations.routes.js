@@ -58,6 +58,9 @@ router.get('/', authMiddleware, async (req, res) => {
             date: true,
             heure: true,
             prix: true,
+            vehicle: {
+              select: { id: true, plate: true, model: true },
+            },
           },
         },
       },
@@ -124,6 +127,9 @@ router.post('/', authMiddleware, async (req, res) => {
             date: true,
             heure: true,
             prix: true,
+            vehicle: {
+              select: { id: true, plate: true, model: true },
+            },
           },
         },
       },
