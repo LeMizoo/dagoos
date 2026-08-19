@@ -98,6 +98,28 @@ export default function CoopDepartsPage() {
     }
   }
 
+  function exportCSV() {
+    if (!manifest || !manifest.passagers) return;
+    
+    const rows = [
+      ['Place', 'Passager', 'Téléphone', 'Statut', 'Réf paiement'],
+      ...manifest.passagers.map((p: any) => [
+        p.place,
+        p.passagerNom,
+        p.telephone,
+        p.statut,
+        p.paiementRef || '-',
+      ]),
+    ];
+    
+    const csv = rows.map(r => r.join(';')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `manifest-${manifest.depart?.pointDepart}-${manifest.depart?.destination}.csv`;
+    link.click();
+  }
+
   async function handleMarquerParti(id: string) {
     if (!confirm('Marquer ce départ comme parti ?')) return;
     await apiFetch(`/departs/${id}`, {
@@ -259,7 +281,12 @@ export default function CoopDepartsPage() {
           <div className="bg-white rounded-xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-bold">📋 Manifest passagers</h2>
-              <button onClick={() => setShowManifest(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+              <div className="flex gap-2">
+                <button onClick={exportCSV} className="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700">
+                  📥 Export CSV
+                </button>
+                <button onClick={() => setShowManifest(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+              </div>
             </div>
             <div className="space-y-3">
               <div className="bg-gray-50 rounded-lg p-3">
