@@ -337,9 +337,15 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
               <button
                 key={d.id}
                 onClick={() => handleSelectDepart(d)}
+                disabled={(() => {
+                  const [h, m] = d.heure.split(':').map(Number);
+                  const dt = new Date(d.date);
+                  dt.setHours(h, m, 0, 0);
+                  return dt.getTime() <= Date.now();
+                })()}
                 className={`text-left bg-white rounded-xl p-5 border-2 transition ${
                   isSelected ? 'border-emerald-500 shadow-lg' : 'border-gray-200 hover:border-emerald-300'
-                }`}
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 <h3 className="font-bold text-gray-800 text-lg">
                   {d.destination}

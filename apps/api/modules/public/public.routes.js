@@ -209,6 +209,14 @@ router.post('/reservations', async (req, res) => {
       return res.status(400).json({ error: 'Départ non disponible' });
     }
     
+    // Vérifier si le départ est déjà parti
+    const [h, m] = depart.heure.split(':').map(Number);
+    const departTime = new Date(depart.date);
+    departTime.setHours(h, m, 0, 0);
+    if (departTime.getTime() <= Date.now()) {
+      return res.status(400).json({ error: 'Départ déjà parti' });
+    }
+    
     // Vérifier la place
     const placeReservee = depart.reservations.find(r => r.place === place);
     if (placeReservee) {
@@ -255,6 +263,14 @@ router.post('/reservations/batch', async (req, res) => {
     
     if (depart.statut !== 'PUBLISHED') {
       return res.status(400).json({ error: 'Départ non disponible' });
+    }
+    
+    // Vérifier si le départ est déjà parti
+    const [h, m] = depart.heure.split(':').map(Number);
+    const departTime = new Date(depart.date);
+    departTime.setHours(h, m, 0, 0);
+    if (departTime.getTime() <= Date.now()) {
+      return res.status(400).json({ error: 'Départ déjà parti' });
     }
     
     // Vérifier que toutes les places sont disponibles
