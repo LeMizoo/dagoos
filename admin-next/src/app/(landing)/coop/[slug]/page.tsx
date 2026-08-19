@@ -28,6 +28,10 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
   const [manageNom, setManageNom] = useState('');
   const [manageResult, setManageResult] = useState<any | null>(null);
   const [manageError, setManageError] = useState('');
+  const [contactNom, setContactNom] = useState('');
+  const [contactTel, setContactTel] = useState('');
+  const [contactMessage, setContactMessage] = useState('');
+  const [contactSent, setContactSent] = useState(false);
   const [changingPlace, setChangingPlace] = useState<string | null>(null);
   const [newPlace, setNewPlace] = useState('');
 
@@ -109,6 +113,42 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
       }
       return [...prev, place];
     });
+  }
+
+  async function handleContact(e: React.FormEvent) {
+    e.preventDefault();
+    setError('');
+    
+    if (!contactNom.trim() || !contactTel.trim() || !contactMessage.trim()) {
+      setError('Tous les champs sont requis');
+      return;
+    }
+    
+    try {
+      const res = await apiFetch('/public/actions', {
+        method: 'POST',
+        body: JSON.stringify({
+          organizationSlug: params.slug,
+          type: 'CONTACT',
+          clientNom: contactNom.trim(),
+          clientTel: contactTel.trim(),
+          details: { message: contactMessage.trim() },
+        }),
+      });
+      
+      if (res.ok) {
+        setContactSent(true);
+        setContactNom('');
+        setContactTel('');
+        setContactMessage('');
+        setTimeout(() => setContactSent(false), 3000);
+      } else {
+        const err = await res.json();
+        setError(err.error || 'Erreur envoi');
+      }
+    } catch (e: any) {
+      setError(e.message);
+    }
   }
 
   async function handleManage() {
@@ -581,6 +621,60 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
           </div>
         </section>
       )}
+
+      {/* Demande de livraison */}
+      <section className="py-8 bg-gray-50 border-t">
+        <div className="max-w-md mx-auto px-4">
+          <h2 className="text-xl font-bold text-center mb-4">📦 Demande de livraison</h2>
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            const res = await apiFetch('/public/actions', {
+              method: 'POST',
+              body: JSON.stringify({
+                organizationSlug: params.slug,
+                type: 'DELIVERY_REQUEST',
+                clientNom: (e.target as any).nom.value,
+                clientTel: (e.target as any).tel.value,
+                details: {
+                  depart: (e.target as any).depart.value,
+                  arrivee: (e.target as any).arrivee.value,
+                  description: (e.target as any).desc.value,
+                },
+              }),
+            });
+            if (res.ok) {
+              setError('');
+              (e.target as any).reset();
+              alert('✅ Demande envoyée !');
+            }
+          }} className="space-y-3">
+            <input name="nom" placeholder="Votre nom" className="w-full px-4 py-3 border rounded-lg text-sm" required />
+            <input name="tel" type="tel" placeholder="Votre téléphone" className="w-full px-4 py-3 border rounded-lg text-sm" required />
+            <input name="depart" placeholder="Adresse de ramassage" className="w-full px-4 py-3 border rounded-lg text-sm" required />
+            <input name="arrivee" placeholder="Adresse de livraison" className="w-full px-4 py-3 border rounded-lg text-sm" required />
+            <textarea name="desc" placeholder="Description du colis" rows={2} className="w-full px-4 py-3 border rounded-lg text-sm" />
+            <button type="submit" className="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition">
+              Envoyer la demande
+            </button>
+          </form>
+        </div>
+      </section>
+
+      {/* Contact */}
+      <section className="py-8 bg-white border-t">
+        <div className="max-w-md mx-auto px-4">
+          <h2 className="text-xl font-bold text-center mb-4">💬 Contactez-nous</h2>
+          {contactSent && <div className="bg-green-50 text-green-700 p-3 rounded-lg mb-3 text-center">✅ Message envoyé !</div>}
+          <form onSubmit={handleContact} className="space-y-3">
+            <input type="text" placeholder="Votre nom" value={contactNom} onChange={e => setContactNom(e.target.value)} className="w-full px-4 py-3 border rounded-lg text-sm" />
+            <input type="tel" placeholder="Votre téléphone" value={contactTel} onChange={e => setContactTel(e.target.value)} className="w-full px-4 py-3 border rounded-lg text-sm" />
+            <textarea placeholder="Votre message" value={contactMessage} onChange={e => setContactMessage(e.target.value)} rows={3} className="w-full px-4 py-3 border rounded-lg text-sm" />
+            <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+              Envoyer le message
+            </button>
+          </form>
+        </div>
+      </section>
 
       <footer className="bg-gray-900 text-gray-400 py-8 text-center text-sm">
         <p>Propulsé par <Link href="/" className="text-secondary hover:underline">Dagoo Mobility</Link></p>
