@@ -24,7 +24,7 @@ const menus: Record<string, any> = {
     { section: 'Gestion', items: [{ href: '/coop/drivers', icon: Users, label: 'Chauffeurs' }, { href: '/coop/vehicles', icon: Car, label: 'Véhicules' }] },
     { section: 'Opérations', items: [{ href: '/coop/departs', icon: Calendar, label: 'Départs' }, { href: '/coop/reservations', icon: Ticket, label: 'Réservations' }, { href: '/coop/demandes', icon: ClipboardList, label: 'Demandes clients' }, { href: '/coop/contrats', icon: FileCheck, label: 'Contrats' }, { href: '/coop/livraisons', icon: Truck, label: 'Livraisons' }, { href: '/coop/permutation', icon: ArrowRightLeft, label: 'Permutation' }, { href: '/coop/codes', icon: QrCode, label: 'Codes' }] },
     { section: 'Finances', items: [{ href: '/coop/finances', icon: DollarSign, label: 'Finances' }, { href: '/coop/versements', icon: Receipt, label: 'Versements' }, { href: '/coop/depenses', icon: DollarSign, label: 'Dépenses' }] },
-    { section: 'Autres', items: [{ href: '/coop/messages', icon: MessageSquare, label: 'Messages' }, { href: '/coop/rapports', icon: FileText, label: 'Rapports' }, { href: '/coop/profil', icon: User, label: 'Profil' }, { href: '/coop/settings', icon: Settings, label: 'Paramètres' }] },
+    { section: 'Autres', items: [{ href: '/coop/messages', icon: MessageSquare, label: 'Messages' }, { href: '/coop/notifications', icon: Bell, label: 'Notifications' }, { href: '/coop/rapports', icon: FileText, label: 'Rapports' }, { href: '/coop/profil', icon: User, label: 'Profil' }, { href: '/coop/settings', icon: Settings, label: 'Paramètres' }] },
   ],
 };
 
