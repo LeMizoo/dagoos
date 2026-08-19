@@ -84,6 +84,15 @@ export default function CoopDepartsPage() {
     } catch (e: any) { setError(e.message); } finally { setSaving(false); }
   }
 
+  async function handleMarquerParti(id: string) {
+    if (!confirm('Marquer ce départ comme parti ?')) return;
+    await apiFetch(`/departs/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ statut: 'LEFT' }),
+    });
+    load();
+  }
+
   async function handleDelete(id: string) {
     if (!confirm('Supprimer ce départ ?')) return;
     await apiFetch(`/departs/${id}`, { method: 'DELETE' });
@@ -183,9 +192,16 @@ export default function CoopDepartsPage() {
                   />
                 </div>
               )}
-              <div className="flex gap-2">
-                <button onClick={() => openEdit(d)} className="flex-1 px-3 py-1.5 text-xs border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-center gap-1"><Pencil size={12} /> Modifier</button>
-                <button onClick={() => handleDelete(d.id)} className="flex-1 px-3 py-1.5 text-xs border border-red-200 text-red-600 rounded-lg hover:bg-red-50 flex items-center justify-center gap-1"><Trash2 size={12} /> Supprimer</button>
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2">
+                  <button onClick={() => openEdit(d)} className="flex-1 px-3 py-1.5 text-xs border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-center gap-1"><Pencil size={12} /> Modifier</button>
+                  <button onClick={() => handleDelete(d.id)} className="flex-1 px-3 py-1.5 text-xs border border-red-200 text-red-600 rounded-lg hover:bg-red-50 flex items-center justify-center gap-1"><Trash2 size={12} /> Supprimer</button>
+                </div>
+                {!isDepartParti(d) && d.statut !== 'LEFT' && (
+                  <button onClick={() => handleMarquerParti(d.id)} className="w-full px-3 py-1.5 text-xs bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 flex items-center justify-center gap-1">
+                    🚌 Marquer comme parti
+                  </button>
+                )}
               </div>
             </div>
           ))}
