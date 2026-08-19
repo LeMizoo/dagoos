@@ -398,8 +398,13 @@ router.post('/reservations/batch', async (req, res) => {
       }).catch(() => {});
     }
 
+    // Générer un code OTP pour validation
+    const otpCode = String(Math.floor(100000 + Math.random() * 900000));
+
     res.status(201).json({
       ok: true,
+      otpCode,
+      message: `Code OTP simulé : ${otpCode}`,
       reservations,
     });
   } catch (error) {

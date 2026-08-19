@@ -24,6 +24,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
   const [captchaAnswer, setCaptchaAnswer] = useState('');
   const [now, setNow] = useState(new Date());
   const [paiementRef, setPaiementRef] = useState('');
+  const [otpCode, setOtpCode] = useState('');
   const [manageTel, setManageTel] = useState('');
   const [manageNom, setManageNom] = useState('');
   const [manageResult, setManageResult] = useState<any | null>(null);
@@ -300,7 +301,11 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
       });
 
       if (res.ok) {
-        setSuccess('✅ Réservation confirmée !');
+        const data = await res.json();
+        if (data.otpCode) {
+          setOtpCode(data.otpCode);
+        }
+        setSuccess(`✅ Réservation en attente ! Code OTP : ${data.otpCode || ''}`);
         setSelectedPlaces([]);
         setPassagers({});
         setTelephone('');
