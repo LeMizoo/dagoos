@@ -27,7 +27,15 @@ router.get('/organizations', async (req, res) => {
         departs: {
           where: {
             statut: 'PUBLISHED',
-            date: { gte: new Date() },
+            OR: [
+              { date: { gt: new Date() } },
+              {
+                date: {
+                  gte: new Date(new Date().setHours(0, 0, 0, 0)),
+                  lte: new Date(new Date().setHours(23, 59, 59, 999)),
+                },
+              },
+            ],
           },
           orderBy: [{ date: 'asc' }, { heure: 'asc' }],
           select: {
