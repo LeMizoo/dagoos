@@ -28,6 +28,23 @@ async function getUserOrganizationId(req) {
 // GET /api/departs - Liste des départs de l'organisation
 router.get('/', authMiddleware, async (req, res) => {
   try {
+    // Auto-archiver les départs partis
+    const departsExpires = await prisma.depart.findMany({
+      where: { statut: 'PUBLISHED', date: { lt: new Date() } },
+      select: { id: true, date: true, heure: true },
+    });
+    for (const d of departsExpires) {
+      const [h, m] = (d.heure || '').split(':').map(Number);
+      const dt = new Date(d.date);
+      dt.setHours(h, m, 0, 0);
+      if (dt.getTime() <= Date.now()) {
+        await prisma.depart.update({
+          where: { id: d.id },
+          data: { statut: 'LEFT' },
+        }).catch(() => {});
+      }
+    }
+
     const where = {};
     
     if (!GLOBAL_ROLES.includes(req.user.role)) {

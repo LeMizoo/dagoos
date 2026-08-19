@@ -84,6 +84,31 @@ router.get('/organizations/:slug', async (req, res) => {
 
 // GET /api/public/departs/:slug - Départs publiés d'une organisation
 router.get('/departs/:slug', async (req, res) => {
+  // Mettre à jour automatiquement les départs partis en LEFT
+  try {
+    const departsExpires = await prisma.depart.findMany({
+      where: {
+        statut: 'PUBLISHED',
+        date: { lt: new Date() },
+      },
+      select: { id: true, date: true, heure: true },
+    });
+
+    for (const d of departsExpires) {
+      const [h, m] = (d.heure || '').split(':').map(Number);
+      const dt = new Date(d.date);
+      dt.setHours(h, m, 0, 0);
+      if (dt.getTime() <= Date.now()) {
+        await prisma.depart.update({
+          where: { id: d.id },
+          data: { statut: 'LEFT' },
+        }).catch(() => {});
+      }
+    }
+  } catch (e) {
+    console.error('Auto-archivage départs:', e.message);
+  }
+
   try {
     const org = await prisma.organization.findUnique({
       where: { slug: req.params.slug },
