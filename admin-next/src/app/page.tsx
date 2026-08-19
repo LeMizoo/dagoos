@@ -3,6 +3,7 @@ import { Rocket, ArrowDown, Building2, Truck, Smartphone, Users, Shield, Zap, Ca
 import HeroSlider from '@/components/landing/HeroSlider';
 import HeroParticles from '@/components/landing/HeroParticles';
 import PlansSection from '@/components/landing/PlansSection';
+import DemandeTaxi from '@/components/landing/DemandeTaxi';
 import { API_BASE_URL } from '@/lib/config';
 import TrustSection from '@/components/landing/TrustSection';
 import AnimatedSection from '@/components/landing/AnimatedSection';
@@ -90,48 +91,7 @@ export default async function LandingPage() {
       <TrustSection />
 
       {/* DEMANDE DE TAXI */}
-      <section className="py-12 bg-white">
-        <div className="max-w-md mx-auto px-4">
-          <h2 className="text-2xl font-bold text-center mb-4">🚕 Demander un taxi</h2>
-          <p className="text-center text-gray-500 text-sm mb-6">Remplissez le formulaire, une flotte vous contactera</p>
-          <form onSubmit={async (e) => {
-            e.preventDefault();
-            const form = e.target as any;
-            // Envoyer à la première flotte disponible
-            const res = await fetch('/api/public/actions', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                organizationSlug: 'flotte-alasora',
-                type: 'COURSE_REQUEST',
-                clientNom: form.nom.value,
-                clientTel: form.tel.value,
-                details: {
-                  depart: form.depart.value,
-                  arrivee: form.arrivee.value,
-                  typeVehicule: form.type.value,
-                },
-              }),
-            });
-            if (res.ok) {
-              form.reset();
-              alert('✅ Demande envoyée ! Une flotte vous contactera.');
-            }
-          }} className="space-y-3 bg-gray-50 p-6 rounded-xl border">
-            <input name="nom" placeholder="Votre nom" className="w-full px-4 py-3 border rounded-lg text-sm" required />
-            <input name="tel" type="tel" placeholder="Votre téléphone" className="w-full px-4 py-3 border rounded-lg text-sm" required />
-            <input name="depart" placeholder="Adresse de départ" className="w-full px-4 py-3 border rounded-lg text-sm" required />
-            <input name="arrivee" placeholder="Adresse d'arrivée" className="w-full px-4 py-3 border rounded-lg text-sm" required />
-            <select name="type" className="w-full px-4 py-3 border rounded-lg text-sm">
-              <option value="moto">🏍️ Taxi Moto</option>
-              <option value="voiture">🚗 Taxi</option>
-            </select>
-            <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
-              Demander un taxi
-            </button>
-          </form>
-        </div>
-      </section>
+      <DemandeTaxi />
 
       {/* SECTION RÉSERVATION */}
       <section id="reservation" className="py-16 bg-gray-50">
