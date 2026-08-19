@@ -4,6 +4,8 @@ const { authMiddleware } = require('../../middleware/auth');
 const { requirePermission } = require('../../security/require-permission');
 const router = express.Router();
 router.get('/', authMiddleware, requirePermission('notifications.read'), async (req, res) => {
+  // Pour DRIVER : filtrer par userId
+  const where = req.user.role === 'DRIVER' ? { userId: req.user.id } : {};
   try { const data = await prisma.notification.findMany({ orderBy: { createdAt: 'desc' }, take: 50 }); res.json(data); } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.get('/unread-count', authMiddleware, requirePermission('notifications.read'), async (req, res) => {

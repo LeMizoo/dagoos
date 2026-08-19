@@ -216,6 +216,7 @@ const ROLES = Object.freeze({
   DRIVER: Object.freeze([
     PERMISSIONS.FINANCES_READ,
     PERMISSIONS.COURSES_CREATE,
+    PERMISSIONS.NOTIFICATIONS_READ,
   ]),
 });
 

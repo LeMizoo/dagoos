@@ -176,6 +176,7 @@ async function init_home() {
 async function loadStats(driverId) {
     try {
         var today = new Date().toISOString().split('T')[0];
+        var coursesDisponibles = await apiGet('/notifications?type=course_request&read=false').catch(() => []);
         var courses = await apiGet('/finances/courses?driverId=' + driverId);
         var arr = Array.isArray(courses) ? courses : [];
         var todayCourses = arr.filter(function(c) { return c.date && c.date.startsWith(today); });
@@ -288,6 +289,23 @@ async function changeStatus(status) {
     // Rafraîchir la page pour mettre à jour les boutons
     init_home();
     if (status === 'termine' && currentDriver) proposerVersement();
+}
+
+async function accepterCourse(notificationId) {
+  var user = JSON.parse(localStorage.getItem('dagoo_driver_user') || '{}');
+  if (!user.driverId) { alert('Chauffeur non identifié'); return; }
+  
+  try {
+    // Marquer la notification comme lue
+    await fetch(DAGOOS_CONFIG.apiUrl + '/notifications/' + notificationId + '/read', {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('dagoo_driver_token'), 'Content-Type': 'application/json' },
+    });
+    alert('✅ Course acceptée ! Le manager va vous contacter.');
+    loadPage('home');
+  } catch (e) {
+    alert('Erreur lors de l'acceptation');
+  }
 }
 
 async function proposerVersement() {
