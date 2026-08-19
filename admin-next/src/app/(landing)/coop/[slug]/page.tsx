@@ -90,7 +90,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
     departTime.setHours(h, m, 0, 0);
     
     const diff = departTime.getTime() - now.getTime();
-    if (diff <= 0) return 'Départ en cours';
+    if (diff <= 0) return 'Parti';
     
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
