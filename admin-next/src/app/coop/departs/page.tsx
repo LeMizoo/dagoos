@@ -13,6 +13,8 @@ export default function CoopDepartsPage() {
   const [form, setForm] = useState({ pointDepart: '', destination: '', date: '', heure: '', prix: '', placesTotal: '25', vehiculeId: '' });
   const [saving, setSaving] = useState(false);
   const [showArchives, setShowArchives] = useState(false);
+  const [manifest, setManifest] = useState<any | null>(null);
+  const [showManifest, setShowManifest] = useState(false);
 
   const [vehicles, setVehicles] = useState<any[]>([]);
 
@@ -82,6 +84,18 @@ export default function CoopDepartsPage() {
         setError(err.error || 'Erreur');
       }
     } catch (e: any) { setError(e.message); } finally { setSaving(false); }
+  }
+
+  async function handleVoirManifest(id: string) {
+    try {
+      const res = await apiFetch(`/departs/${id}/manifest`);
+      if (res.ok) {
+        setManifest(await res.json());
+        setShowManifest(true);
+      }
+    } catch (e: any) {
+      console.error(e);
+    }
   }
 
   async function handleMarquerParti(id: string) {
@@ -197,6 +211,9 @@ export default function CoopDepartsPage() {
                   <button onClick={() => openEdit(d)} className="flex-1 px-3 py-1.5 text-xs border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-center gap-1"><Pencil size={12} /> Modifier</button>
                   <button onClick={() => handleDelete(d.id)} className="flex-1 px-3 py-1.5 text-xs border border-red-200 text-red-600 rounded-lg hover:bg-red-50 flex items-center justify-center gap-1"><Trash2 size={12} /> Supprimer</button>
                 </div>
+                <button onClick={() => handleVoirManifest(d.id)} className="w-full px-3 py-1.5 text-xs bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 flex items-center justify-center gap-1">
+                  📋 Manifest ({d.reservations?.length || 0})
+                </button>
                 {!isDepartParti(d) && d.statut !== 'LEFT' && (
                   <button onClick={() => handleMarquerParti(d.id)} className="w-full px-3 py-1.5 text-xs bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 flex items-center justify-center gap-1">
                     🚌 Marquer comme parti
@@ -234,6 +251,46 @@ export default function CoopDepartsPage() {
                 <button type="submit" disabled={saving} className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700 disabled:opacity-50">{saving ? '...' : 'Enregistrer'}</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {showManifest && manifest && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowManifest(false)}>
+          <div className="bg-white rounded-xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold">📋 Manifest passagers</h2>
+              <button onClick={() => setShowManifest(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+            <div className="space-y-3">
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="font-semibold">{manifest.depart?.pointDepart} → {manifest.depart?.destination}</p>
+                <p className="text-sm text-gray-500">
+                  {manifest.depart?.date ? new Date(manifest.depart.date).toLocaleDateString('fr-FR') : '-'} à {manifest.depart?.heure}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Véhicule : {manifest.vehicle?.plate || 'N/A'} ({manifest.vehicle?.model || '-'})
+                </p>
+                <p className="text-sm font-semibold text-emerald-600 mt-1">
+                  {manifest.totalConfirmes} confirmé(s) · {manifest.placesRestantes} place(s) restante(s)
+                </p>
+              </div>
+              {manifest.passagers?.length > 0 ? (
+                <div className="divide-y">
+                  {manifest.passagers.map((p: any) => (
+                    <div key={p.id} className="py-2 flex justify-between items-center">
+                      <div>
+                        <span className="font-bold text-blue-600">{p.place}</span>
+                        <span className="ml-2 font-semibold">{p.passagerNom}</span>
+                        <p className="text-xs text-gray-500">{p.telephone}</p>
+                      </div>
+                      {p.paiementRef && <span className="text-xs text-green-600">Réf: {p.paiementRef}</span>}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-gray-400 py-4">Aucun passager confirmé</p>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -243,4 +243,58 @@ router.delete('/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// GET /api/departs/:id/manifest - Manifest des passagers
+router.get('/:id/manifest', authMiddleware, async (req, res) => {
+  try {
+    const depart = await prisma.depart.findUnique({
+      where: { id: req.params.id },
+      include: {
+        vehicle: { select: { id: true, plate: true, model: true } },
+        reservations: {
+          where: { statut: 'CONFIRMED' },
+          orderBy: { place: 'asc' },
+          select: {
+            id: true,
+            place: true,
+            passagerNom: true,
+            telephone: true,
+            statut: true,
+            paiementRef: true,
+          },
+        },
+      },
+    });
+    
+    if (!depart) return res.status(404).json({ error: 'Départ introuvable' });
+    
+    // Vérifier l'isolation
+    if (!GLOBAL_ROLES.includes(req.user.role)) {
+      const orgId = await getUserOrganizationId(req);
+      if (depart.organizationId !== orgId) {
+        return res.status(403).json({ error: 'Accès refusé' });
+      }
+    }
+    
+    res.json({
+      depart: {
+        id: depart.id,
+        pointDepart: depart.pointDepart,
+        destination: depart.destination,
+        date: depart.date,
+        heure: depart.heure,
+        prix: depart.prix,
+        placesTotal: depart.placesTotal,
+        statut: depart.statut,
+      },
+      vehicle: depart.vehicle,
+      passagers: depart.reservations,
+      totalConfirmes: depart.reservations.length,
+      placesRestantes: depart.placesTotal - depart.reservations.length,
+    });
+  } catch (error) {
+    console.error('GET /departs/:id/manifest:', error);
+    res.status(500).json({ error: 'Erreur manifest' });
+  }
+});
+
 module.exports = router;
