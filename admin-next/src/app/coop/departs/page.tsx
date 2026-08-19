@@ -103,12 +103,23 @@ export default function CoopDepartsPage() {
     return 'normal';
   }
 
+  function isDepartParti(d: any): boolean {
+    const [h, m] = (d.heure || '').split(':').map(Number);
+    const dt = new Date(d.date);
+    dt.setHours(h, m, 0, 0);
+    return dt.getTime() <= Date.now();
+  }
+
+  const departsActifs = departs.filter(d => !isDepartParti(d));
+  const departsArchives = departs.filter(d => isDepartParti(d));
+  const departsAffiches = showArchives ? departsArchives : departsActifs;
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white">🚌 Départs</h1>
-          <p className="text-sm text-gray-500">{departs.length} départ(s) programmé(s)</p>
+          <p className="text-sm text-gray-500">{departsAffiches.length} départ(s)</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -133,7 +144,7 @@ export default function CoopDepartsPage() {
         <div className="text-center py-12 text-gray-400">Aucun départ programmé</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {departs.map((d: any) => (
+          {departsAffiches.map((d: any) => (
             <div key={d.id} className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border">
               <div className="flex justify-between items-start mb-3">
                 <div>
