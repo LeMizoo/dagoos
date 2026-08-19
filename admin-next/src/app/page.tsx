@@ -39,9 +39,20 @@ function getCountdown(dateStr: string, heure: string): string {
 
 export default async function LandingPage() {
   const organizations = await getOrganizations();
-  const coopsAvecDeparts = organizations.filter((org: any) => 
-    org.type === 'COOPERATIVE' && org.departs && org.departs.length > 0
-  );
+  const coopsAvecDeparts = organizations.filter((org: any) => {
+    if (org.type !== 'COOPERATIVE' || !org.departs) return false;
+    
+    // Filtrer les départs déjà partis
+    const departsFuturs = org.departs.filter((d: any) => {
+      const [h, m] = (d.heure || '').split(':').map(Number);
+      const departTime = new Date(d.date);
+      departTime.setHours(h, m, 0, 0);
+      return departTime.getTime() > Date.now();
+    });
+    
+    org.departs = departsFuturs;
+    return departsFuturs.length > 0;
+  });
 
   return (
     <div className="min-h-screen bg-white">

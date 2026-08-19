@@ -12,6 +12,7 @@ export default function CoopDepartsPage() {
   const [editing, setEditing] = useState<any | null>(null);
   const [form, setForm] = useState({ pointDepart: '', destination: '', date: '', heure: '', prix: '', placesTotal: '25', vehiculeId: '' });
   const [saving, setSaving] = useState(false);
+  const [showArchives, setShowArchives] = useState(false);
 
   const [vehicles, setVehicles] = useState<any[]>([]);
 
@@ -109,9 +110,19 @@ export default function CoopDepartsPage() {
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white">🚌 Départs</h1>
           <p className="text-sm text-gray-500">{departs.length} départ(s) programmé(s)</p>
         </div>
-        <button onClick={openCreate} className="bg-emerald-600 text-white px-4 py-2.5 rounded-lg text-sm flex items-center gap-2 hover:bg-emerald-700">
-          <Plus size={16} /> Nouveau départ
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowArchives(!showArchives)}
+            className={`px-4 py-2.5 rounded-lg text-sm flex items-center gap-2 transition ${
+              showArchives ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            🗄️ {showArchives ? 'Départs actifs' : 'Archives'}
+          </button>
+          <button onClick={openCreate} className="bg-emerald-600 text-white px-4 py-2.5 rounded-lg text-sm flex items-center gap-2 hover:bg-emerald-700">
+            <Plus size={16} /> Nouveau départ
+          </button>
+        </div>
       </div>
 
       {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>}

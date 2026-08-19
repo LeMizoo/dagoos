@@ -26,6 +26,7 @@ router.get('/organizations', async (req, res) => {
             statut: 'PUBLISHED',
             date: { gte: new Date() },
           },
+          orderBy: [{ date: 'asc' }, { heure: 'asc' }],
           select: {
             id: true,
             pointDepart: true,
@@ -97,6 +98,7 @@ router.get('/departs/:slug', async (req, res) => {
         statut: 'PUBLISHED',
         date: { gte: new Date() },
       },
+      orderBy: [{ date: 'asc' }, { heure: 'asc' }],
       include: {
         vehicle: { select: { id: true, plate: true, model: true } },
         reservations: {
