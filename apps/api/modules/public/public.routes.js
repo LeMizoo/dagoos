@@ -186,19 +186,33 @@ router.post('/actions', async (req, res) => {
       },
     });
     
-    // Créer une notification pour l'organisation
-    await prisma.notification.create({
-      data: {
-        userId: req.body.userId || '',
-        organizationId: org.id,
-        type: 'lead_action',
-        title: `Nouvelle action : ${type}`,
-        message: `${clientNom} - ${clientTel}`,
-        read: false,
-      },
-    }).catch(() => {
-      // Ne pas bloquer si la notification échoue
+    // Créer une notification pour tous les managers de l'organisation
+    // Trouver les managers par l'email de l'organisation
+    const orgData = await prisma.organization.findUnique({
+      where: { id: org.id },
+      select: { email: true },
     });
+    
+    const managers = orgData?.email ? await prisma.user.findMany({
+      where: {
+        role: { in: ['FLEET_MANAGER', 'COOPERATIVE', 'COOP_MANAGER'] },
+        email: orgData.email,
+      },
+      select: { id: true },
+    }).catch(() => []) : [];
+
+    for (const manager of managers) {
+      await prisma.notification.create({
+        data: {
+          userId: manager.id,
+          organizationId: org.id,
+          type: 'lead_action',
+          title: `Nouvelle demande : ${type}`,
+          message: `${clientNom} - ${clientTel}`,
+          read: false,
+        },
+      }).catch(() => {});
+    }
     
     res.status(201).json({ ok: true, actionId: action.id });
   } catch (error) {
@@ -346,6 +360,33 @@ router.post('/reservations/batch', async (req, res) => {
       reservations.push(reservation);
     }
     
+    // Notifier les managers
+    const orgData = await prisma.organization.findUnique({
+      where: { id: depart.organizationId },
+      select: { email: true },
+    });
+    
+    const managers = orgData?.email ? await prisma.user.findMany({
+      where: {
+        role: { in: ['COOPERATIVE', 'COOP_MANAGER'] },
+        email: orgData.email,
+      },
+      select: { id: true },
+    }).catch(() => []) : [];
+
+    for (const manager of managers) {
+      await prisma.notification.create({
+        data: {
+          userId: manager.id,
+          organizationId: depart.organizationId,
+          type: 'reservation',
+          title: 'Nouvelle réservation',
+          message: `${passagers.length} place(s) réservée(s) sur ${depart.pointDepart} → ${depart.destination}`,
+          read: false,
+        },
+      }).catch(() => {});
+    }
+
     res.status(201).json({
       ok: true,
       reservations,
