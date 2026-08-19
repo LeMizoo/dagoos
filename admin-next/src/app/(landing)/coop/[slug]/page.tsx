@@ -563,15 +563,15 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
                     <p className="text-xs font-semibold text-gray-500">💰 Payez par Mobile Money :</p>
                     <div className="flex items-center gap-2 bg-yellow-400 rounded-lg px-3 py-2">
                       <span className="font-bold text-black text-sm">MVola</span>
-                      <span className="text-black font-extrabold text-sm tracking-wider">{cooperative?.phone || '034 00 000 00'}</span>
+                      <span className="text-black font-extrabold text-sm tracking-wider">{cooperative?.mvolaNumber || '034 00 000 00'}</span>
                     </div>
                     <div className="flex items-center gap-2 bg-black rounded-lg px-3 py-2">
                       <span className="font-bold text-orange-500 text-sm">Orange Money</span>
-                      <span className="text-orange-400 font-extrabold text-sm tracking-wider">{cooperative?.phone || '032 00 000 00'}</span>
+                      <span className="text-orange-400 font-extrabold text-sm tracking-wider">{cooperative?.orangeNumber || '032 00 000 00'}</span>
                     </div>
                     <div className="flex items-center gap-2 bg-red-600 rounded-lg px-3 py-2">
                       <span className="font-bold text-white text-sm">Airtel Money</span>
-                      <span className="text-white font-extrabold text-sm tracking-wider">{cooperative?.phone || '033 00 000 00'}</span>
+                      <span className="text-white font-extrabold text-sm tracking-wider">{cooperative?.airtelNumber || '033 00 000 00'}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

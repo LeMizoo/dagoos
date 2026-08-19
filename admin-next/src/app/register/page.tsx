@@ -35,11 +35,24 @@ export default function RegisterPage() {
   });
   const [captchaQ, setCaptchaQ] = useState({ a: 0, b: 0 });
   const [captchaA, setCaptchaA] = useState('');
+  const [dagoosMM, setDagoosMM] = useState({ mvola: '034 00 000 00', orange: '032 00 000 00', airtel: '033 00 000 00' });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     setCaptchaQ({ a: Math.floor(Math.random() * 10) + 1, b: Math.floor(Math.random() * 10) + 1 });
+    apiFetch('/public/dagoos-mobile-money')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d) {
+          setDagoosMM({
+            mvola: d.mvolaNumber || '034 00 000 00',
+            orange: d.orangeNumber || '032 00 000 00',
+            airtel: d.airtelNumber || '033 00 000 00',
+          });
+        }
+      })
+      .catch(() => {});
     apiFetch('/public/plans')
       .then(r => r.json())
       .then(data => {
@@ -272,15 +285,15 @@ export default function RegisterPage() {
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 bg-yellow-400 rounded px-3 py-2">
                     <span className="font-bold text-black text-sm w-16">MVola</span>
-                    <span className="text-black font-extrabold text-sm">034 00 000 00</span>
+                    <span className="text-black font-extrabold text-sm">{dagoosMM.mvola}</span>
                   </div>
                   <div className="flex items-center gap-2 bg-black rounded px-3 py-2">
                     <span className="font-bold text-orange-500 text-sm w-16">Orange</span>
-                    <span className="text-orange-400 font-extrabold text-sm">032 00 000 00</span>
+                    <span className="text-orange-400 font-extrabold text-sm">{dagoosMM.orange}</span>
                   </div>
                   <div className="flex items-center gap-2 bg-red-600 rounded px-3 py-2">
                     <span className="font-bold text-white text-sm w-16">Airtel</span>
-                    <span className="text-white font-extrabold text-sm">033 00 000 00</span>
+                    <span className="text-white font-extrabold text-sm">{dagoosMM.airtel}</span>
                   </div>
                 </div>
               </div>

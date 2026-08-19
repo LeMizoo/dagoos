@@ -18,6 +18,9 @@ router.get('/organizations', async (req, res) => {
         slug: true,
         type: true,
         phone: true,
+        mvolaNumber: true,
+        orangeNumber: true,
+        airtelNumber: true,
         logo: true,
         plan: true,
         createdAt: true,
@@ -471,6 +474,25 @@ router.post('/reservations/manage', async (req, res) => {
     return res.json({ reservations });
   } catch (error) {
     console.error('POST /public/reservations/manage:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// GET /api/public/dagoos-mobile-money - Numéros Mobile Money DAGOO'S
+router.get('/dagoos-mobile-money', async (req, res) => {
+  try {
+    const dagooOrg = await prisma.organization.findFirst({
+      where: { type: 'ADMIN' },
+      select: {
+        mvolaNumber: true,
+        orangeNumber: true,
+        airtelNumber: true,
+      },
+    });
+    
+    res.json(dagooOrg || { mvolaNumber: null, orangeNumber: null, airtelNumber: null });
+  } catch (error) {
+    console.error('GET /public/dagoos-mobile-money:', error);
     res.status(500).json({ error: 'Erreur serveur' });
   }
 });
