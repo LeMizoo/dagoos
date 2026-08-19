@@ -89,6 +89,19 @@ export default function CoopDepartsPage() {
     load();
   }
 
+  function getDepartStatus(d: any): 'imminent' | 'parti' | 'complet' | 'normal' {
+    const [h, m] = (d.heure || '').split(':').map(Number);
+    const departTime = new Date(d.date);
+    departTime.setHours(h, m, 0, 0);
+    const diff = departTime.getTime() - Date.now();
+    
+    const placesReservees = (d.reservations || []).length;
+    if (placesReservees >= d.placesTotal) return 'complet';
+    if (diff <= 0) return 'parti';
+    if (diff <= 60 * 60 * 1000) return 'imminent';
+    return 'normal';
+  }
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -121,9 +134,17 @@ export default function CoopDepartsPage() {
                     <Clock size={12} /> {d.heure}
                   </p>
                 </div>
-                <span className={`text-xs px-2 py-0.5 rounded-full ${d.statut === 'PUBLISHED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                  {d.statut}
-                </span>
+                {getDepartStatus(d) === 'complet' ? (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-semibold">✅ Complet</span>
+                ) : getDepartStatus(d) === 'parti' ? (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">🚌 Parti</span>
+                ) : getDepartStatus(d) === 'imminent' ? (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 animate-pulse">⏰ Imminent</span>
+                ) : (
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${d.statut === 'PUBLISHED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                    {d.statut}
+                  </span>
+                )}
               </div>
               <div className="flex justify-between items-center text-sm mb-2">
                 <span className="font-bold text-emerald-600">{Number(d.prix || 0).toLocaleString()} Ar</span>
