@@ -17,7 +17,7 @@ const menus: Record<string, any> = {
     { section: 'Gestion', items: [{ href: '/fleet/drivers', icon: Users, label: 'Chauffeurs' }, { href: '/fleet/vehicles', icon: Car, label: 'Véhicules' }] },
     { section: 'Opérations', items: [{ href: '/fleet/permutation', icon: ArrowRightLeft, label: 'Permutation' }, { href: '/fleet/codes', icon: QrCode, label: 'Codes' }] },
     { section: 'Finances', items: [{ href: '/fleet/finances', icon: DollarSign, label: 'Finances' }, { href: '/fleet/versements', icon: Receipt, label: 'Versements' }, { href: '/fleet/depenses', icon: DollarSign, label: 'Dépenses' }] },
-    { section: 'Autres', items: [{ href: '/fleet/messages', icon: MessageSquare, label: 'Messages' }, { href: '/fleet/rapports', icon: FileText, label: 'Rapports' }, { href: '/fleet/profil', icon: User, label: 'Profil' }, { href: '/fleet/settings', icon: Settings, label: 'Paramètres' }] },
+    { section: 'Autres', items: [{ href: '/fleet/messages', icon: MessageSquare, label: 'Messages' }, { href: '/fleet/notifications', icon: Bell, label: 'Notifications' }, { href: '/fleet/rapports', icon: FileText, label: 'Rapports' }, { href: '/fleet/profil', icon: User, label: 'Profil' }, { href: '/fleet/settings', icon: Settings, label: 'Paramètres' }] },
   ],
   coop: [
     { section: 'Principal', items: [{ href: '/coop', icon: LayoutDashboard, label: 'Tableau de bord' }] },
