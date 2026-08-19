@@ -7,6 +7,7 @@ export default function DemandeTaxi() {
   const [flottes, setFlottes] = useState<any[]>([]);
   const [mode, setMode] = useState<'choisir' | 'toutes' | 'proche'>('choisir');
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
+  const [adresse, setAdresse] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -22,9 +23,24 @@ export default function DemandeTaxi() {
   function getLocation() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setPosition({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        async (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          setPosition({ lat, lng });
           setMode('proche');
+          
+          // Reverse geocoding avec Nominatim (OpenStreetMap)
+          try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+            if (res.ok) {
+              const data = await res.json();
+              const addr = data.address;
+              const quartier = addr.neighbourhood || addr.suburb || addr.quarter || '';
+              const rue = addr.road || addr.pedestrian || '';
+              const ville = addr.city || addr.town || addr.village || '';
+              setAdresse(`${rue ? rue + ', ' : ''}${quartier ? quartier + ', ' : ''}${ville}`.trim() || 'Position détectée');
+            }
+          } catch {}
         },
         () => alert('❌ Géolocalisation refusée')
       );
@@ -146,9 +162,15 @@ export default function DemandeTaxi() {
           )}
 
           {mode === 'proche' && position && (
-            <p className="text-xs text-green-600 text-center">
-              📍 Position : {position.lat.toFixed(4)}, {position.lng.toFixed(4)}
-            </p>
+            <div className="bg-green-50 rounded-lg p-3 text-center">
+              <p className="text-sm font-semibold text-green-700">📍 Position détectée</p>
+              <p className="text-xs text-green-600">
+                {adresse || 'Antananarivo, Madagascar'}
+              </p>
+              <p className="text-[10px] text-gray-400 mt-1">
+                Coordonnées : {position.lat.toFixed(4)}°S, {position.lng.toFixed(4)}°E
+              </p>
+            </div>
           )}
 
           <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50">
