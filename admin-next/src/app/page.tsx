@@ -79,6 +79,9 @@ export default async function LandingPage() {
             <Link href="/register" className="border-2 border-white/30 text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/10 transition">
               🏢 Devenir partenaire
             </Link>
+            <a href="https://dago-driver.pages.dev" target="_blank" rel="noopener noreferrer" className="bg-emerald-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-emerald-700 transition">
+              🧑‍✈️ Espace Chauffeur
+            </a>
           </div>
         </div>
       </section>
@@ -216,6 +219,14 @@ export default async function LandingPage() {
       </section>
 
       <footer className="bg-gray-900 text-gray-400 py-8 text-center text-sm">
+        <div className="flex justify-center gap-6 mb-4">
+          <a href="https://dago-driver.pages.dev" target="_blank" rel="noopener noreferrer" className="text-white hover:text-emerald-400 transition font-semibold">
+            🧑‍✈️ Espace Chauffeur
+          </a>
+          <Link href="/register" className="text-white hover:text-emerald-400 transition font-semibold">
+            🏢 Devenir partenaire
+          </Link>
+        </div>
         <p>© {new Date().getFullYear()} Dagoo Mobility. Chez les potes, ça roule.</p>
       </footer>
     </div>
