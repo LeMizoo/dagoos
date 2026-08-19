@@ -9,12 +9,13 @@ export default function CoopHome() {
   const [loading, setLoading] = useState(true);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
+  const [reservations, setReservations] = useState<any[]>([]);
 
   useEffect(() => { load(); }, []);
 
   async function load() {
     try {
-      const [driversRes, vehiclesRes, societesRes, contratsRes, livraisonsRes, statsSummary, coursesData] = await Promise.all([
+      const [driversRes, vehiclesRes, societesRes, contratsRes, livraisonsRes, statsSummary, coursesData, reservationsRes] = await Promise.all([
         apiFetch('/drivers').then(r => r.json()).catch(() => []),
         apiFetch('/vehicles').then(r => r.json()).catch(() => []),
         apiFetch('/societes').then(r => r.json()).catch(() => []),
@@ -22,7 +23,9 @@ export default function CoopHome() {
         apiFetch('/livraisons').then(r => r.json()).catch(() => []),
         apiFetch('/finances/stats/summary').then(r => r.ok ? r.json() : null).catch(() => null),
         apiFetch('/finances/courses').then(r => r.ok ? r.json() : []).catch(() => []),
+        apiFetch('/reservations').then(r => r.ok ? r.json() : []).catch(() => []),
       ]);
+      setReservations(Array.isArray(reservationsRes) ? reservationsRes : []);
       
       setCourses(Array.isArray(coursesData) ? coursesData : []);
 
