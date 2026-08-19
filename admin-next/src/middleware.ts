@@ -10,7 +10,7 @@ export function middleware(request: NextRequest) {
   // Une landing page publique est /fleet/[slug] ou /coop/[slug]
   // où [slug] n'est PAS une page connue
   const isLandingPage = /^\/(fleet|coop)\/[a-z0-9-]+$/.test(pathname) &&
-    !['drivers','vehicles','finances','messages','settings','profil','depenses','versements','rapports','carburant','consommables','gps','historique','permutation','codes','proprietaires','abonnement','societes','contrats','livraisons'].includes(pathname.split('/')[2] || '');
+    !['drivers','vehicles','finances','messages','settings','profil','depenses','versements','rapports','carburant','consommables','gps','historique','permutation','codes','proprietaires','abonnement','societes','contrats','livraisons','notifications','demandes','departs','reservations'].includes(pathname.split('/')[2] || '');
 
   if (isLandingPage) {
     console.log('🔒 LANDING PUBLIQUE');
