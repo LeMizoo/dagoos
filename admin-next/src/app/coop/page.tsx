@@ -12,6 +12,13 @@ export default function CoopHome() {
   const [reservations, setReservations] = useState<any[]>([]);
 
   useEffect(() => { load(); }, []);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      load();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   async function load() {
     try {

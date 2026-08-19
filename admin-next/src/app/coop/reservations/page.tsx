@@ -13,6 +13,13 @@ export default function CoopReservationsPage() {
   const [showPlan, setShowPlan] = useState(false);
 
   useEffect(() => { load(); }, []);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      load();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   async function load() {
     try {

@@ -10,6 +10,13 @@ export default function CoopDemandesPage() {
   const [filter, setFilter] = useState('NEW');
 
   useEffect(() => { load(); }, []);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      load();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   async function load() {
     try {

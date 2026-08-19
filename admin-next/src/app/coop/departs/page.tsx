@@ -19,6 +19,13 @@ export default function CoopDepartsPage() {
   const [vehicles, setVehicles] = useState<any[]>([]);
 
   useEffect(() => { load(); }, []);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      load();
+    }, 30000); // Rafraîchir toutes les 30 secondes
+    return () => clearInterval(interval);
+  }, []);
 
   async function load() {
     try {
