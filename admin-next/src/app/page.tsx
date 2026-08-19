@@ -118,6 +118,14 @@ export default async function LandingPage() {
                           <MapPin size={14} className="inline mr-1" />
                           {d.pointDepart} → {d.destination}
                         </p>
+                        {d.vehicle && (
+                          <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
+                            🚐 <span className="font-semibold">{d.vehicle.model || 'Véhicule'}</span>
+                            <span className="text-gray-400">•</span>
+                            <span className="font-mono">{d.vehicle.plate}</span>
+                            <span className="text-[10px] bg-green-100 text-green-700 rounded-full px-1.5 py-0.5 ml-auto">✓ Récent</span>
+                          </p>
+                        )}
                         <p className="text-xs text-gray-500 mt-1 flex items-center gap-2">
                           <Calendar size={12} className="inline mr-1" />
                           {new Date(d.date).toLocaleDateString('fr-FR')} à {d.heure}

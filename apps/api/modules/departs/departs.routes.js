@@ -79,6 +79,10 @@ router.post('/', authMiddleware, async (req, res) => {
     if (!pointDepart || !destination || !date || !heure || !prix) {
       return res.status(400).json({ error: 'Tous les champs sont requis' });
     }
+
+    if (!vehiculeId) {
+      return res.status(400).json({ error: 'Véhicule obligatoire pour créer un départ' });
+    }
     
     let orgId;
     if (GLOBAL_ROLES.includes(req.user.role)) {

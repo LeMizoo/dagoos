@@ -80,6 +80,9 @@ export default function CoopReservationsPage() {
                   <td className="px-4 py-3 text-gray-500">{r.depart?.pointDepart} → {r.depart?.destination}</td>
                   <td className="px-4 py-3 text-gray-500">{r.depart?.date ? new Date(r.depart.date).toLocaleDateString('fr-FR') : '-'} {r.depart?.heure}</td>
                   <td className="px-4 py-3 font-bold">{r.place}</td>
+                  <td className="px-4 py-3 text-gray-500 text-xs">
+                    {r.depart?.vehicle?.model || 'Véhicule'} {r.depart?.vehicle?.plate || ''}
+                  </td>
                   <td className="px-4 py-3">
                     <span className={`text-xs px-2 py-0.5 rounded-full ${
                       r.statut === 'CONFIRMED' ? 'bg-green-100 text-green-700' :
