@@ -19,6 +19,24 @@ async function getOrganizations() {
   }
 }
 
+function getCountdown(dateStr: string, heure: string): string {
+  const [h, m] = heure.split(':').map(Number);
+  const departTime = new Date(dateStr);
+  departTime.setHours(h, m, 0, 0);
+  
+  const diff = departTime.getTime() - Date.now();
+  if (diff <= 0) return 'Départ en cours';
+  
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  
+  if (hours > 24) {
+    const days = Math.floor(hours / 24);
+    return `dans ${days}j ${hours % 24}h`;
+  }
+  return `dans ${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}min`;
+}
+
 export default async function LandingPage() {
   const organizations = await getOrganizations();
   const coopsAvecDeparts = organizations.filter((org: any) => 
@@ -89,9 +107,12 @@ export default async function LandingPage() {
                           <MapPin size={14} className="inline mr-1" />
                           {d.pointDepart} → {d.destination}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-500 mt-1 flex items-center gap-2">
                           <Calendar size={12} className="inline mr-1" />
                           {new Date(d.date).toLocaleDateString('fr-FR')} à {d.heure}
+                          <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 rounded-full px-2 py-0.5 ml-auto">
+                            {getCountdown(d.date, d.heure)}
+                          </span>
                         </p>
                         <p className="text-sm font-bold text-emerald-600 mt-1">{Number(d.prix).toLocaleString()} Ar</p>
                         <p className="text-xs text-gray-400 mt-1">

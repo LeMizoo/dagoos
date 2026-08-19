@@ -22,6 +22,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
   const [editingReservation, setEditingReservation] = useState(false);
   const [captchaQuestion, setCaptchaQuestion] = useState({ a: 0, b: 0 });
   const [captchaAnswer, setCaptchaAnswer] = useState('');
+  const [now, setNow] = useState(new Date());
   const [paiementRef, setPaiementRef] = useState('');
   const [manageTel, setManageTel] = useState('');
   const [manageNom, setManageNom] = useState('');
@@ -33,6 +34,8 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
   useEffect(() => {
     loadPage();
     setCaptchaQuestion({ a: Math.floor(Math.random() * 10) + 1, b: Math.floor(Math.random() * 10) + 1 });
+    const timer = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(timer);
   }, [params.slug]);
 
   async function loadPage() {
@@ -75,6 +78,24 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
     setTimeout(() => {
       document.getElementById('reservation-form')?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
+  }
+
+  function getCountdown(dateStr: string, heure: string): string {
+    const [h, m] = heure.split(':').map(Number);
+    const departTime = new Date(dateStr);
+    departTime.setHours(h, m, 0, 0);
+    
+    const diff = departTime.getTime() - now.getTime();
+    if (diff <= 0) return 'Départ en cours';
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours > 24) {
+      const days = Math.floor(hours / 24);
+      return `dans ${days}j ${hours % 24}h ${minutes}min`;
+    }
+    return `dans ${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}min`;
   }
 
   function handlePlaceClick(place: string) {
@@ -326,6 +347,9 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
                 <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
                   <Calendar size={14} /> {new Date(d.date).toLocaleDateString('fr-FR')}
                   <Clock size={14} /> {d.heure}
+                  <span className="text-xs font-semibold text-blue-600 bg-blue-50 rounded-full px-2 py-0.5 ml-auto">
+                    {getCountdown(d.date, d.heure)}
+                  </span>
                 </p>
                 <p className="text-2xl font-bold text-emerald-600 mt-3">
                   {Number(d.prix).toLocaleString()} Ar
