@@ -38,6 +38,10 @@
         if (!localStorage.getItem("dagoo_driver_token")) {
             window.location.replace("/");
         }
+        var driverType = localStorage.getItem('dagoo_driver_type') || 'FLEET';
+        if (driverType === 'COOP') {
+            document.title = "Dagoo's Coop Driver";
+        }
     </script>
     <main id="mainContent"></main>
     <script>

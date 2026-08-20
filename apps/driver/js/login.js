@@ -1,4 +1,25 @@
 var API_URL = DAGOOS_CONFIG.apiUrl;
+var selectedType = 'FLEET';
+
+function selectDriverType(type) {
+    selectedType = type;
+    var btnFleet = document.getElementById('btnFleet');
+    var btnCoop = document.getElementById('btnCoop');
+    
+    if (type === 'FLEET') {
+        btnFleet.style.background = '#DAA520';
+        btnFleet.style.color = '#1A1A2E';
+        btnCoop.style.background = '#1E293B';
+        btnCoop.style.color = '#DAA520';
+    } else {
+        btnCoop.style.background = '#DAA520';
+        btnCoop.style.color = '#1A1A2E';
+        btnFleet.style.background = '#1E293B';
+        btnFleet.style.color = '#DAA520';
+    }
+    
+    localStorage.setItem('dagoo_driver_type', type);
+}
 
 document.addEventListener('DOMContentLoaded', function() {
   var loginBtn = document.getElementById('loginBtn');
@@ -56,6 +77,7 @@ async function login() {
       localStorage.removeItem('dagoos_user');
       localStorage.setItem('dagoo_driver_token', data.token);
       localStorage.setItem('dagoo_driver_user', JSON.stringify(data.user));
+      localStorage.setItem('dagoo_driver_type', selectedType);
       window.location.href = '/dashboard';
     } else {
       alert(data.error || data.message || 'Identifiants invalides');

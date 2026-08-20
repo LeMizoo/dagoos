@@ -131,6 +131,18 @@
             Votre compte est créé par votre gestionnaire de flotte ou coopérative.
         </div>
         
+        <!-- Choix du type de chauffeur -->
+        <div style="display:flex;gap:10px;margin-bottom:16px;" id="driverTypeSelector">
+            <button type="button" onclick="selectDriverType('FLEET')" id="btnFleet" 
+                style="flex:1;padding:12px;background:#1E293B;border:2px solid #DAA520;border-radius:10px;color:#DAA520;font-weight:700;cursor:pointer;">
+                🚛 Fleet
+            </button>
+            <button type="button" onclick="selectDriverType('COOP')" id="btnCoop" 
+                style="flex:1;padding:12px;background:#1E293B;border:2px solid #DAA520;border-radius:10px;color:#DAA520;font-weight:700;cursor:pointer;">
+                🏢 Coop
+            </button>
+        </div>
+
         <form id="loginForm">
             
             <div class="form-group">
