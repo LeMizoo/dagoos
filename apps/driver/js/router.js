@@ -63,3 +63,29 @@ document.addEventListener('DOMContentLoaded', function() {
   var savedPage = localStorage.getItem('driver_current_page') || 'home';
   loadPage(savedPage);
 });
+
+function getHeaderHTML() {
+  var user = JSON.parse(localStorage.getItem('dagoo_driver_user') || '{}');
+  var driverStatus = currentDriver && currentDriver.status ? currentDriver.status : 'active';
+  var statusLabel = driverStatus === 'active' ? 'En service' : driverStatus === 'pause' ? 'En pause' : 'Absent';
+  var statusColor = driverStatus === 'active' ? '#22C55E' : driverStatus === 'pause' ? '#F59E0B' : '#E74C3C';
+  var plate = currentVehicle ? currentVehicle.plate : '';
+  
+  return '<div style="background:#1E293B;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid #DAA520;">' +
+    '<div style="display:flex;align-items:center;gap:8px;">' +
+      '<img src="' + DAGOOS_CONFIG.logoUrl + '" style="width:36px;height:36px;object-fit:contain;border-radius:8px;">' +
+      '<div>' +
+        '<div style="font-size:14px;font-weight:700;color:#DAA520;">' + (user.name || 'Chauffeur') + '</div>' +
+        '<div style="font-size:10px;color:#94A3B8;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">' +
+          '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:' + statusColor + ';color:#fff;">' + statusLabel + '</span>' +
+          (plate ? '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#DAA520;">🏍️ ' + plate + '</span>' : '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#E74C3C;color:#fff;">⚠️ Sans moto</span>') +
+          '<span style="color:#94A3B8;">' + (user.driverCode || '') + '</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div style="display:flex;gap:4px;">' +
+      '<button onclick="loadPage(\'profil\')" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:#DAA520;cursor:pointer;font-size:14px;">👤</button>' +
+      '<button onclick="logout()" style="background:rgba(239,68,68,0.15);border:none;width:32px;height:32px;border-radius:50%;color:#F87171;cursor:pointer;font-size:16px;">⏻</button>' +
+    '</div>' +
+  '</div>';
+}

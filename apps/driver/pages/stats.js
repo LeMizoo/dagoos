@@ -1,7 +1,7 @@
 async function init_stats() {
   var container = document.getElementById('pageContainer') || document.getElementById('mainContent') || document.querySelector('main');
   if (container) {
-    container.innerHTML = '<div style="padding:16px;">' +
+    container.innerHTML = getHeaderHTML() + '<div style="padding:16px;">' +
       '<h2 style="font-size:20px;font-weight:bold;margin-bottom:16px;">📊 Statistiques</h2>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
         '<div style="background:white;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +

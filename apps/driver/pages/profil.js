@@ -6,7 +6,7 @@ function init_profil() {
     var user = JSON.parse(localStorage.getItem("dagoo_driver_user") || "{}");
     var token = localStorage.getItem('dagoo_driver_token');
 
-    main.innerHTML = 
+    main.innerHTML = getHeaderHTML() +
         '<div style="padding:12px;max-width:500px;margin:0 auto;padding-bottom:80px;">' +
             // Carte infos chauffeur
             '<div class="card" style="background:#1E293B;border-radius:12px;padding:20px;margin-bottom:12px;">' +

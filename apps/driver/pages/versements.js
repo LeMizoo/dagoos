@@ -5,7 +5,7 @@ async function init_versements() {
     var main = document.getElementById('mainContent');
     var user = JSON.parse(localStorage.getItem("dagoo_driver_user") || "{}");
     
-    main.innerHTML = '<div style="padding:12px;max-width:500px;margin:0 auto;padding-bottom:80px;"><div style="text-align:center;padding:40px;color:#DAA520;">Chargement...</div></div>';
+    main.innerHTML = getHeaderHTML() + '<div style="padding:12px;max-width:500px;margin:0 auto;padding-bottom:80px;"><div style="text-align:center;padding:40px;color:#DAA520;">Chargement...</div></div>';
 
     try {
         var courses = await window.apiGet('/finances/courses?driverId=' + user.driverId);

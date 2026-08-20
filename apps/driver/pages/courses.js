@@ -1,7 +1,7 @@
 async function init_courses() {
   var container = document.getElementById('mainContent') || document.querySelector('main');
   if (container) {
-    container.innerHTML = '<div style="padding:16px;max-width:500px;margin:0 auto;padding-bottom:80px;">' +
+    container.innerHTML = getHeaderHTML() + '<div style="padding:16px;max-width:500px;margin:0 auto;padding-bottom:80px;">' +
       '<h2 style="font-size:20px;font-weight:bold;margin-bottom:16px;">📋 Mes Courses</h2>' +
       '<div id="coursesAccepteesContainer"></div>' +
       '<div style="background:#1E293B;border-radius:12px;padding:16px;margin-bottom:12px;">' +
