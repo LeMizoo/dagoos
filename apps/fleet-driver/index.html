@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script src="/config.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Apple PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Dagoo's Driver">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <title>Dagoo's Driver - Connexion</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#F1C40F">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #F1C40F 0%, #F39C12 50%, #E67E22 100%);
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .login-container {
+            background: #1A1A2E; border-radius: 16px; padding: 40px 32px;
+            width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            color: white;
+        }
+        .login-header { text-align: center; margin-bottom: 28px; }
+        .login-logo {
+            width: 56px; height: 56px; background: #F1C40F; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 12px; font-size: 28px; color: #1A1A2E;
+        }
+        .login-header h1 { font-size: 22px; margin-bottom: 4px; }
+        .login-header p { color: #AAA; font-size: 13px; }
+        .badge {
+            display: inline-block; background: #F1C40F; color: #1A1A2E;
+            padding: 4px 10px; border-radius: 50px; font-size: 11px; font-weight: 600; margin-top: 6px;
+        }
+        .note {
+            text-align: center; margin-bottom: 20px; padding: 10px; background: #2C2C44;
+            border-radius: 8px; font-size: 12px; color: #AAA;
+        }
+        .note i { color: #F1C40F; }
+        
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: #CCC; }
+        .form-group select {
+            width: 100%; padding: 12px;
+            border: 2px solid #333; background: #2C2C44; color: white;
+            border-radius: 8px; font-size: 15px; font-family: 'Inter', sans-serif;
+        }
+        .form-group select:focus { outline: none; border-color: #F1C40F; }
+        .form-group select option { background: #2C2C44; color: white; }
+        
+        .code-input-group {
+            display: flex; align-items: center; gap: 0;
+            border: 2px solid #333; border-radius: 8px; overflow: hidden;
+            transition: border-color 0.3s;
+        }
+        .code-input-group:focus-within { border-color: #F1C40F; }
+        .code-input-group .prefix {
+            background: #F1C40F; color: #1A1A2E; padding: 12px 14px;
+            font-weight: 700; font-size: 15px; white-space: nowrap;
+        }
+        .code-input-group input {
+            flex: 1; padding: 12px; border: none; background: #2C2C44; color: white;
+            font-size: 15px; font-family: 'Inter', sans-serif; outline: none;
+        }
+        .code-input-group input::placeholder { color: #555; font-size: 13px; }
+        
+        .pin-row { display: flex; gap: 8px; justify-content: center; }
+        .pin-row input {
+            width: 48px; height: 56px; text-align: center; font-size: 24px; font-weight: 700;
+            padding: 0; border: 2px solid #333; background: #2C2C44; color: #F1C40F;
+            border-radius: 8px;
+        }
+        .pin-row input:focus { border-color: #F1C40F; outline: none; }
+        
+        .btn-login {
+            width: 100%; padding: 14px; background: #F1C40F; color: #1A1A2E;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
+            cursor: pointer; transition: background 0.3s; font-family: 'Inter', sans-serif; margin-top: 20px;
+        }
+        .btn-login:hover { background: #F39C12; }
+        .btn-login:disabled { background: #555; color: #999; cursor: not-allowed; }
+        
+        .message {
+            text-align: center; margin-top: 12px; padding: 10px; border-radius: 8px;
+            font-size: 13px; display: none;
+        }
+        .message.error { background: #3B1111; color: #E74C3C; display: block; }
+        .message.success { background: #0B3D0B; color: #2ECC71; display: block; }
+        .message.info { background: #1A3D5C; color: #3498DB; display: block; }
+        
+        .links { text-align: center; margin-top: 20px; }
+        .links a { color: #AAA; text-decoration: none; font-size: 13px; }
+        .links a:hover { color: #F1C40F; }
+        
+        .code-hint { font-size: 11px; color: #777; margin-top: 4px; text-align: right; }
+        
+        @media (max-width: 400px) {
+            .login-container { padding: 28px 18px; }
+            .pin-row input { width: 42px; height: 50px; font-size: 20px; }
+        }
+    </style>
+    <script>
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("/sw.js")
+                .then(reg => console.log("SW enregistré !", reg))
+                .catch(err => console.error("Erreur SW:", err));
+        }
+    </script>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="login-logo"><i class="fas fa-motorcycle"></i></div>
+            <h1>Dagoo's Driver</h1>
+            <p>Espace Chauffeur</p>
+            <span class="badge">Application mobile</span>
+        </div>
+        
+        <div class="note">
+            <i class="fas fa-info-circle"></i> 
+            Votre compte est créé par votre gestionnaire de flotte ou coopérative.
+        </div>
+        
+        <script>
+            var selectedType = 'FLEET';
+            function selectDriverType(type) {
+                selectedType = type;
+                var btnFleet = document.getElementById('btnFleet');
+                var btnCoop = document.getElementById('btnCoop');
+                
+                if (type === 'FLEET') {
+                    btnFleet.style.background = '#DAA520';
+                    btnFleet.style.color = '#1A1A2E';
+                    btnCoop.style.background = '#1E293B';
+                    btnCoop.style.color = '#DAA520';
+                } else {
+                    btnCoop.style.background = '#DAA520';
+                    btnCoop.style.color = '#1A1A2E';
+                    btnFleet.style.background = '#1E293B';
+                    btnFleet.style.color = '#DAA520';
+                }
+                
+                localStorage.setItem('dagoo_driver_type', type);
+            }
+        </script>
+
+        <!-- Type fixe : FLEET -->
+        <div style="display:flex;gap:10px;margin-bottom:16px;" id="driverTypeSelector">
+            <button type="button" style="display:none;" id="btnFleet" 
+                style="flex:1;padding:12px;background:#1E293B;border:2px solid #DAA520;border-radius:10px;color:#DAA520;font-weight:700;cursor:pointer;">
+                🚛 Fleet
+            </button>
+            <button type="button" style="display:none;" id="btnCoop" 
+                style="flex:1;padding:12px;background:#1E293B;border:2px solid #DAA520;border-radius:10px;color:#DAA520;font-weight:700;cursor:pointer;">
+                🏢 Coop
+            </button>
+        </div>
+
+        <form id="loginForm">
+            
+            <div class="form-group">
+                <label>🔑 Votre code chauffeur</label>
+                <input type="text" id="driverCode" placeholder="Ex: FL-AL-001" required autocomplete="off" style="text-transform: uppercase; width: 100%; padding: 12px; font-size: 16px; text-align: center; letter-spacing: 2px; background: #1E293B; border: 2px solid #DAA520; border-radius: 10px; color: #DAA520;">
+                <div class="code-hint" id="codeHint" style="font-size: 11px; color: #888; margin-top: 5px; text-align: center;">Code fourni par votre gestionnaire</div>
+            </div>
+            
+            <!-- PIN -->
+            <div class="form-group">
+                <label><i class="fas fa-lock"></i> PIN (4 chiffres)</label>
+                <div class="pin-row" id="pinInputs">
+                    <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" placeholder="•">
+                    <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" placeholder="•">
+                    <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" placeholder="•">
+                    <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" placeholder="•">
+                </div>
+            </div>
+            
+            <div id="message" class="message"></div>
+            <button type="submit" class="btn-login" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Se connecter
+            </button>
+        </form>
+        
+        <div class="links">
+            <a href="#" onclick="location.reload()" title="Actualiser" style="font-size:18px;"><i class="fas fa-sync-alt"></i></a>
+        </div>
+    </div>
+    <script src="js/login.js?v=2"></script>
+</body>
+</html>
