@@ -42,6 +42,27 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
+async function waitForConfig() {
+  return new Promise((resolve) => {
+    if (window.DAGOOS_CONFIG && window.DAGOOS_CONFIG.apiUrl) {
+      resolve();
+      return;
+    }
+    var attempts = 0;
+    var maxAttempts = 20;
+    var interval = setInterval(function() {
+      attempts++;
+      if (window.DAGOOS_CONFIG && window.DAGOOS_CONFIG.apiUrl) {
+        clearInterval(interval);
+        resolve();
+      } else if (attempts >= maxAttempts) {
+        clearInterval(interval);
+        resolve();
+      }
+    }, 250);
+  });
+}
+
 async function login() {
   var codeInput = document.getElementById('driverCode');
   var loginBtn = document.getElementById('loginBtn');
@@ -61,6 +82,8 @@ async function login() {
   }
 
   try {
+    await waitForConfig();
+    API_URL = DAGOOS_CONFIG.apiUrl;
     loginBtn.disabled = true;
     loginBtn.textContent = 'Connexion en cours...';
 
