@@ -316,8 +316,18 @@ async function accepterCourse(notificationId) {
       method: 'PUT',
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('dagoo_driver_token'), 'Content-Type': 'application/json' },
     });
-    alert('✅ Course acceptée ! Le manager va vous contacter.');
-    loadPage('home');
+    
+    // Stocker localement la course acceptée
+    var coursesAcceptees = JSON.parse(localStorage.getItem('dagoo_courses_acceptees') || '[]');
+    coursesAcceptees.push({
+      notificationId,
+      date: new Date().toISOString(),
+      statut: 'ACCEPTED'
+    });
+    localStorage.setItem('dagoo_courses_acceptees', JSON.stringify(coursesAcceptees));
+    
+    alert('✅ Course acceptée !');
+    loadPage('courses');
   } catch (e) {
     alert('Erreur lors de l\'acceptation');
   }
