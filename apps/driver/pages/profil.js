@@ -47,7 +47,7 @@ async function changePin() {
     if (newPin.length !== 4 || !/^\d+$/.test(newPin)) { msg.innerHTML = '<span style="color:#F87171;">Le PIN doit être composé de 4 chiffres</span>'; return; }
 
     try {
-        var r = await fetch(DAGOOS_CONFIG.apiUrl + '/drivers/' + user.driverId, {
+        var r = await fetch(DAGOOS_CONFIG.apiUrl + '/drivers/me', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('dagoo_driver_token') },
             body: JSON.stringify({ pin: newPin })
