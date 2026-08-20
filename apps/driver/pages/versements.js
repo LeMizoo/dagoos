@@ -15,7 +15,7 @@ async function init_versements() {
         var totalCommission = Math.round(totalCA * 0.20);
         var totalVerse = Math.round(totalCA * 0.80);
 
-        var html = '<div style="padding:12px;max-width:500px;margin:0 auto;padding-bottom:80px;">' +
+        var html = getHeaderHTML() + '<div style="padding:12px;max-width:500px;margin:0 auto;padding-bottom:80px;">' +
             // Résumé
             '<div class="card" style="background:#1E293B;border-radius:12px;padding:20px;margin-bottom:12px;">' +
                 '<h3 style="color:#DAA520;margin-bottom:16px;">💰 Résumé des versements</h3>' +
@@ -44,7 +44,7 @@ async function init_versements() {
         '</div>';
         main.innerHTML = html;
     } catch(e) {
-        main.innerHTML = '<div style="text-align:center;padding:40px;color:#F87171;">Erreur de chargement</div>';
+        main.innerHTML = getHeaderHTML() + '<div style="text-align:center;padding:40px;color:#F87171;">Erreur de chargement</div>';
     }
 }
 
