@@ -41,7 +41,7 @@ async function init_home() {
         
         // Détecter le type d'organisation
         var orgType = currentDriver?.organization?.type || 'FLEET_MANAGER';
-        var isCoop = orgType === 'COOPERATIVE';
+        var isCoop = false; // Toujours Fleet dans cette application
         
         // Charger les données spécifiques selon le type
         if (isCoop) {

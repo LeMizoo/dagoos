@@ -41,7 +41,7 @@ async function init_home() {
         
         // Détecter le type d'organisation
         var orgType = currentDriver?.organization?.type || 'FLEET_MANAGER';
-        var isCoop = orgType === 'COOPERATIVE';
+        var isCoop = true; // Toujours Coop dans cette application
         
         // Charger les données spécifiques selon le type
         if (isCoop) {
@@ -173,9 +173,9 @@ async function init_home() {
                 '<h3 style="color:#10B981;margin-bottom:10px;font-size:13px;">➕ Nouvelle course</h3>' +
                 '<div style="display:flex;gap:8px;margin-bottom:8px;">' +
                     '<select id="typeCourse" onchange="updateCourseForm()" style="flex:1;padding:8px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;">' +
-                        '<option value="course">🚖 Course normale</option>' +
-                        '<option value="ady_varotra">🛺 Ady Varotra</option>' +
-                        '<option value="location">📅 Location journalière</option>' +
+                        '<option value="livraison">📦 Livraison</option>' +
+                        '<option value="transport">🚌 Transport</option>' +
+                        '<option value="marchandises">🚛 Marchandises</option>' +
                     '</select>' +
                 '</div>' +
                 '<div id="courseForm">' +
