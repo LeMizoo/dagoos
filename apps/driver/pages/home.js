@@ -177,6 +177,21 @@ async function loadStats(driverId) {
     try {
         var today = new Date().toISOString().split('T')[0];
         var coursesDisponibles = await apiGet('/notifications?type=course_request&read=false').catch(() => []);
+    
+    // Polling des notifications toutes les 30 secondes
+    setInterval(async function() {
+      try {
+        var notifs = await apiGet('/notifications?read=false').catch(() => []);
+        if (notifs && notifs.length > 0) {
+          // Badge dans la navigation
+          var badge = document.getElementById('notifBadge');
+          if (badge) {
+            badge.textContent = notifs.length;
+            badge.style.display = 'flex';
+          }
+        }
+      } catch(e) {}
+    }, 30000);
         var courses = await apiGet('/finances/courses?driverId=' + driverId);
         var arr = Array.isArray(courses) ? courses : [];
         var todayCourses = arr.filter(function(c) { return c.date && c.date.startsWith(today); });
@@ -304,7 +319,7 @@ async function accepterCourse(notificationId) {
     alert('✅ Course acceptée ! Le manager va vous contacter.');
     loadPage('home');
   } catch (e) {
-    alert('Erreur lors de l'acceptation');
+    alert('Erreur lors de l\'acceptation');
   }
 }
 

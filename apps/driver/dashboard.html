@@ -50,7 +50,8 @@
     <div class="bottom-nav">
         <button onclick="loadPage('courses')" data-page="courses"><i class="fas fa-history"></i> Courses</button>
         <button onclick="loadPage('stats')" data-page="stats"><i class="fas fa-chart-bar"></i> Stats</button>
-        <button onclick="loadPage('home')" data-page="home" class="main active"><span class="icon-circle"><i class="fas fa-home"></i></span> Accueil</button>
+        <button onclick="loadPage('home')" data-page="home" class="main active" style="position:relative;">
+            <span id="notifBadge" style="display:none;position:absolute;top:-5px;right:-5px;background:#EF4444;color:white;border-radius:50%;width:20px;height:20px;font-size:10px;align-items:center;justify-content:center;">0</span><span class="icon-circle"><i class="fas fa-home"></i></span> Accueil</button>
         <button onclick="loadPage('versements')" data-page="versements"><i class="fas fa-coins"></i> Versements</button>
         <button onclick="loadPage('profil')" data-page="profil"><i class="fas fa-user"></i> Profil</button>
     </div>
