@@ -50,9 +50,11 @@ async function init_home() {
         if (currentDriver && currentDriver.organizationId) {
             currentOrg = {
                 id: currentDriver.organizationId,
-                name: currentDriver.organizationName || '',
+                name: currentDriver.organization?.name || user.organization || 'Organisation',
                 code: currentDriver.organizationCode || ''
             };
+        } else if (user.organization) {
+            currentOrg = { id: '', name: user.organization, code: '' };
         }
     } catch(e) { console.error(e); }
 
@@ -61,10 +63,10 @@ async function init_home() {
     var logo = DAGOOS_CONFIG.logoUrl;
 
     // Déterminer le statut
-    var driverStatus = currentDriver && currentDriver.status ? currentDriver.status : 'inactive';
-    var statutPresence = driverStatus === 'active' ? 'present' : driverStatus === 'pause' ? 'pause' : 'absent';
-    var statusLabel = driverStatus === 'active' ? 'En service' : driverStatus === 'pause' ? 'En pause' : 'Absent';
-    var statusColor = driverStatus === 'active' ? '#22C55E' : driverStatus === 'pause' ? '#F59E0B' : '#E74C3C';
+    var driverStatus = currentDriver && currentDriver.status ? currentDriver.status : 'OFFLINE';
+    var statutPresence = driverStatus === 'AVAILABLE' || driverStatus === 'active' ? 'present' : driverStatus === 'ON_BREAK' || driverStatus === 'pause' ? 'pause' : 'absent';
+    var statusLabel = driverStatus === 'AVAILABLE' || driverStatus === 'active' ? 'En service' : driverStatus === 'ON_BREAK' || driverStatus === 'pause' ? 'En pause' : 'Absent';
+    var statusColor = driverStatus === 'AVAILABLE' || driverStatus === 'active' ? '#22C55E' : driverStatus === 'ON_BREAK' || driverStatus === 'pause' ? '#F59E0B' : '#E74C3C';
 
     main.innerHTML = 
         // HEADER
