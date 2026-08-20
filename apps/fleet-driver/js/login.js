@@ -71,18 +71,19 @@ async function login() {
   var pinInputs = document.querySelectorAll('#pinInputs input');
   var pin = '';
   pinInputs.forEach(function(input) {
-    // Ne prendre que le premier caractère de chaque champ
-    if (input.value && input.value.length > 0) {
-      pin += input.value.charAt(0);
-    }
+    pin += input.value;
   });
   
-  // Si le PIN est incomplet, essayer de le lire depuis un champ unique
+  // Nettoyer : ne garder que les chiffres
+  pin = pin.replace(/\D/g, '');
+  
+  // Si le PIN est incomplet, vérifier si un input contient plusieurs chiffres
   if (pin.length < 4) {
-    var singlePinInput = document.getElementById('singlePinInput');
-    if (singlePinInput && singlePinInput.value) {
-      pin = singlePinInput.value.trim();
-    }
+    pinInputs.forEach(function(input) {
+      if (input.value.length > 1) {
+        pin = input.value.replace(/\D/g, '');
+      }
+    });
   }
 
   var code = codeInput ? codeInput.value.trim() : '';
