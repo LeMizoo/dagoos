@@ -13,7 +13,7 @@ export default function CoopCodesPage() {
 
   async function loadDrivers() {
     try {
-      const r = await fetch('/api/proxy/drivers');
+      const r = await apiFetch('/drivers');
       setDrivers((await r.json()) || []);
     } catch (e) { console.error(e); } finally { setLoading(false); }
   }
@@ -25,7 +25,7 @@ export default function CoopCodesPage() {
       return;
     }
     try {
-      const r = await fetch(`/api/proxy/drivers/${driverId}`, {
+      const r = await apiFetch(`/drivers/${driverId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pin }),
