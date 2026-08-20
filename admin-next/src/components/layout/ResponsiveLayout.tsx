@@ -45,8 +45,7 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
   const handleLogout = async () => {
     await logout();
     const loginPaths: Record<string, string> = { admin: '/login', fleet: '/fleet-login', coop: '/coop-login' };
-    router.push(loginPaths[app] || '/login');
-    router.refresh();
+    window.location.href = loginPaths[app] || '/login';
   };
 
   const isActive = (href: string) => {
