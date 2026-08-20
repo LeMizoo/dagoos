@@ -130,7 +130,8 @@ async function init_home() {
                 '<button onclick="changeStatus(\'termine\')" style="flex:1;padding:12px 6px;background:#E74C3C;color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' + (estBloque || statutPresence === 'absent' || statutPresence === 'termine' ? 'disabled' : '') + '>⏹ Fin</button>' +
             '</div>' +
 
-            // STATS DU JOUR
+            // STATS DU JOUR (les deux types)
+            '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
             '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
                 '<h3 style="color:#DAA520;margin-bottom:10px;font-size:13px;">📅 Aujourd\'hui</h3>' +
                 '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;">' +
@@ -187,9 +188,10 @@ async function init_home() {
                 '</div>' +
                 '<button onclick="enregistrerCourse()" ' + (estBloque || statutPresence !== 'present' || !currentVehicle ? 'disabled' : '') + ' style="width:100%;padding:12px;background:#F1C40F;color:#1A1A2E;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;">✅ Enregistrer la course</button>' +
                 '<div id="courseMsg" style="margin-top:8px;text-align:center;font-size:11px;"></div>' +
-            '</div>' +
+            '</div>' : '') +
 
-            // DÉPENSES
+            // DÉPENSES (FLEET UNIQUEMENT)
+            (isCoop ? '' :
             '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
                 '<h3 style="color:#DAA520;margin-bottom:10px;font-size:13px;">💰 Dépenses du jour</h3>' +
                 '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;">' +
@@ -200,7 +202,7 @@ async function init_home() {
                 '</div>' +
                 '<div id="expensesList" style="max-height:120px;overflow-y:auto;font-size:11px;"></div>' +
                 '<div id="expensesTotal" style="margin-top:8px;text-align:right;font-weight:700;color:#EF4444;font-size:12px;"></div>' +
-            '</div>' +
+            '</div>' : '') +
 
             // ASSIGNATION
             '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
