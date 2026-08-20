@@ -294,7 +294,7 @@ async function changeStatus(status) {
     
     var user = JSON.parse(localStorage.getItem('dagoo_driver_user') || '{}');
     try {
-        await fetch(DAGOOS_CONFIG.apiUrl + '/drivers/' + user.driverId, {
+        await fetch(DAGOOS_CONFIG.apiUrl + '/drivers/me/status', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('dagoo_driver_token') },
             body: JSON.stringify({ status: status === 'active' || status === 'present' ? 'active' : status === 'pause' ? 'pause' : 'inactive' })

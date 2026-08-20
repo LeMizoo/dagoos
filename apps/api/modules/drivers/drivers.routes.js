@@ -539,4 +539,37 @@ router.post('/shift/end', authMiddleware, async (req, res) => {
   }
 });
 
+// PUT /api/drivers/me/status - Chauffeur change son propre statut
+router.put('/me/status', authMiddleware, async (req, res) => {
+  try {
+    if (req.user.role !== 'DRIVER') {
+      return res.status(403).json({ error: 'Réservé aux chauffeurs' });
+    }
+
+    if (!req.user.driverId) {
+      return res.status(400).json({ error: 'Chauffeur non associé' });
+    }
+
+    const { status } = req.body;
+    if (!status) {
+      return res.status(400).json({ error: 'Statut requis' });
+    }
+
+    const validStatuses = ['AVAILABLE', 'BUSY', 'OFFLINE', 'ON_BREAK'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Statut invalide' });
+    }
+
+    const driver = await prisma.driver.update({
+      where: { id: req.user.driverId },
+      data: { status },
+    });
+
+    res.json(driver);
+  } catch (error) {
+    console.error('PUT /drivers/me/status:', error);
+    res.status(500).json({ error: 'Erreur mise à jour statut' });
+  }
+});
+
 module.exports = router;
