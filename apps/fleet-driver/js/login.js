@@ -1,6 +1,41 @@
 var API_URL = DAGOOS_CONFIG.apiUrl;
 var selectedType = 'FLEET';
 
+// Vérifier si un code chauffeur est déjà mémorisé
+function checkSavedCode() {
+  var savedCode = localStorage.getItem('dagoo_driver_code');
+  var savedOrg = localStorage.getItem('dagoo_driver_org');
+  
+  if (savedCode && savedOrg) {
+    var codeSection = document.getElementById('codeSection');
+    var savedCodeSection = document.getElementById('savedCodeSection');
+    var savedCodeDisplay = document.getElementById('savedCodeDisplay');
+    
+    if (codeSection && savedCodeSection && savedCodeDisplay) {
+      codeSection.style.display = 'none';
+      savedCodeSection.style.display = 'block';
+      savedCodeDisplay.textContent = savedCode;
+    }
+  }
+}
+
+// Afficher le champ code pour changer de chauffeur
+function showCodeInput() {
+  var codeSection = document.getElementById('codeSection');
+  var savedCodeSection = document.getElementById('savedCodeSection');
+  
+  if (codeSection && savedCodeSection) {
+    codeSection.style.display = 'block';
+    savedCodeSection.style.display = 'none';
+    document.getElementById('driverCode').focus();
+  }
+}
+
+// Initialiser au chargement
+document.addEventListener('DOMContentLoaded', function() {
+  checkSavedCode();
+});
+
 function selectDriverType(type) {
     selectedType = type;
     var btnFleet = document.getElementById('btnFleet');
@@ -87,9 +122,20 @@ async function login() {
   }
 
   var code = codeInput ? codeInput.value.trim() : '';
+  
+  // Si le champ code est masqué, utiliser le code mémorisé
+  if (!code) {
+    code = localStorage.getItem('dagoo_driver_code') || '';
+  }
 
-  if (!code || pin.length < 4) {
-    alert('Veuillez saisir votre code chauffeur et votre code PIN.');
+  if (!code) {
+    alert('Veuillez saisir votre code chauffeur.');
+    showCodeInput();
+    return;
+  }
+  
+  if (pin.length < 4) {
+    alert('Veuillez saisir votre code PIN (4 chiffres).');
     return;
   }
 
@@ -113,6 +159,8 @@ async function login() {
       localStorage.setItem('dagoo_driver_token', data.token);
       localStorage.setItem('dagoo_driver_user', JSON.stringify(data.user));
       localStorage.setItem('dagoo_driver_type', selectedType);
+      localStorage.setItem('dagoo_driver_code', code);
+      localStorage.setItem('dagoo_driver_org', data.user.organization || '');
       window.location.href = '/dashboard';
     } else {
       alert(data.error || data.message || 'Identifiants invalides');
