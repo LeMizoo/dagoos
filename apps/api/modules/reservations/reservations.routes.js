@@ -142,6 +142,65 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 });
 
+// GET /api/reservations/mine - Réservations du véhicule du chauffeur connecté
+router.get('/mine', authMiddleware, async (req, res) => {
+  try {
+    if (req.user.role !== 'DRIVER' || !req.user.driverId) {
+      return res.status(403).json({ error: 'Réservé aux chauffeurs' });
+    }
+
+    // Trouver le chauffeur et son véhicule
+    const driver = await prisma.driver.findUnique({
+      where: { id: req.user.driverId },
+      select: { vehicleId: true, organizationId: true },
+    });
+
+    if (!driver || !driver.vehicleId) {
+      return res.json([]);
+    }
+
+    // Trouver les départs du véhicule
+    const departs = await prisma.depart.findMany({
+      where: {
+        vehiculeId: driver.vehicleId,
+        statut: { in: ['PUBLISHED', 'LEFT'] },
+      },
+      select: { id: true },
+    });
+
+    const departIds = departs.map(d => d.id);
+
+    if (departIds.length === 0) {
+      return res.json([]);
+    }
+
+    // Trouver les réservations pour ces départs
+    const reservations = await prisma.reservation.findMany({
+      where: {
+        departId: { in: departIds },
+        statut: { in: ['PENDING', 'CONFIRMED'] },
+      },
+      include: {
+        depart: {
+          select: {
+            pointDepart: true,
+            destination: true,
+            date: true,
+            heure: true,
+          },
+        },
+      },
+      orderBy: [{ place: 'asc' }],
+    });
+
+    res.json(reservations);
+  } catch (error) {
+    console.error('GET /reservations/mine:', error);
+    res.status(500).json({ error: 'Erreur manifest' });
+  }
+});
+
+
 // GET /api/reservations/:id - Détail d'une réservation
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
@@ -214,122 +273,6 @@ router.delete('/:id', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('DELETE /reservations/:id:', error);
     res.status(500).json({ error: 'Erreur suppression réservation' });
-  }
-});
-
-// GET /api/reservations/mine - Réservations du véhicule du chauffeur connecté
-router.get('/mine', authMiddleware, async (req, res) => {
-  try {
-    if (req.user.role !== 'DRIVER' || !req.user.driverId) {
-      return res.status(403).json({ error: 'Réservé aux chauffeurs' });
-    }
-
-    // Trouver le chauffeur et son véhicule
-    const driver = await prisma.driver.findUnique({
-      where: { id: req.user.driverId },
-      select: { vehicleId: true, organizationId: true },
-    });
-
-    if (!driver || !driver.vehicleId) {
-      return res.json([]);
-    }
-
-    // Trouver les départs du véhicule
-    const departs = await prisma.depart.findMany({
-      where: {
-        vehicleId: driver.vehicleId,
-        statut: { in: ['PUBLISHED', 'LEFT'] },
-      },
-      select: { id: true },
-    });
-
-    const departIds = departs.map(d => d.id);
-
-    if (departIds.length === 0) {
-      return res.json([]);
-    }
-
-    // Trouver les réservations pour ces départs
-    const reservations = await prisma.reservation.findMany({
-      where: {
-        departId: { in: departIds },
-        statut: { in: ['PENDING', 'CONFIRMED'] },
-      },
-      include: {
-        depart: {
-          select: {
-            pointDepart: true,
-            destination: true,
-            date: true,
-            heure: true,
-          },
-        },
-      },
-      orderBy: [{ place: 'asc' }],
-    });
-
-    res.json(reservations);
-  } catch (error) {
-    console.error('GET /reservations/mine:', error);
-    res.status(500).json({ error: 'Erreur manifest' });
-  }
-});
-
-// GET /api/reservations/mine - Réservations du véhicule du chauffeur connecté
-router.get('/mine', authMiddleware, async (req, res) => {
-  try {
-    if (req.user.role !== 'DRIVER' || !req.user.driverId) {
-      return res.status(403).json({ error: 'Réservé aux chauffeurs' });
-    }
-
-    // Trouver le chauffeur et son véhicule
-    const driver = await prisma.driver.findUnique({
-      where: { id: req.user.driverId },
-      select: { vehicleId: true, organizationId: true },
-    });
-
-    if (!driver || !driver.vehicleId) {
-      return res.json([]);
-    }
-
-    // Trouver les départs du véhicule
-    const departs = await prisma.depart.findMany({
-      where: {
-        vehicleId: driver.vehicleId,
-        statut: { in: ['PUBLISHED', 'LEFT'] },
-      },
-      select: { id: true },
-    });
-
-    const departIds = departs.map(d => d.id);
-
-    if (departIds.length === 0) {
-      return res.json([]);
-    }
-
-    // Trouver les réservations pour ces départs
-    const reservations = await prisma.reservation.findMany({
-      where: {
-        departId: { in: departIds },
-        statut: { in: ['PENDING', 'CONFIRMED'] },
-      },
-      include: {
-        depart: {
-          select: {
-            pointDepart: true,
-            destination: true,
-            date: true,
-            heure: true,
-          },
-        },
-      },
-      orderBy: [{ place: 'asc' }],
-    });
-
-    res.json(reservations);
-  } catch (error) {
-    console.error('GET /reservations/mine:', error);
-    res.status(500).json({ error: 'Erreur manifest' });
   }
 });
 
