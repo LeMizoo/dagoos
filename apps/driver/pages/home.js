@@ -47,7 +47,7 @@ async function init_home() {
         if (isCoop) {
             // Charger les réservations du véhicule (manifest)
             try {
-                var reservations = await apiGet('/reservations').catch(() => []);
+                var reservations = await apiGet('/reservations/mine').catch(() => []);
                 var myReservations = Array.isArray(reservations) ? reservations.filter(function(r) {
                     return r.depart?.vehicle?.id === currentDriver.vehicleId;
                 }) : [];
