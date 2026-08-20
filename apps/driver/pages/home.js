@@ -191,7 +191,7 @@ async function init_home() {
             '</div>' : '') +
 
             // DÉPENSES (FLEET UNIQUEMENT)
-            (isCoop ? '' :
+            
             '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
                 '<h3 style="color:#DAA520;margin-bottom:10px;font-size:13px;">💰 Dépenses du jour</h3>' +
                 '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;">' +
