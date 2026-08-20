@@ -64,9 +64,11 @@ async function init_home() {
 
     // Déterminer le statut
     var driverStatus = currentDriver && currentDriver.status ? currentDriver.status : 'OFFLINE';
-    var statutPresence = driverStatus === 'AVAILABLE' || driverStatus === 'active' ? 'present' : driverStatus === 'ON_BREAK' || driverStatus === 'pause' ? 'pause' : 'absent';
-    var statusLabel = driverStatus === 'AVAILABLE' || driverStatus === 'active' ? 'En service' : driverStatus === 'ON_BREAK' || driverStatus === 'pause' ? 'En pause' : 'Absent';
-    var statusColor = driverStatus === 'AVAILABLE' || driverStatus === 'active' ? '#22C55E' : driverStatus === 'ON_BREAK' || driverStatus === 'pause' ? '#F59E0B' : '#E74C3C';
+    var isAvailable = driverStatus === 'AVAILABLE' || driverStatus === 'active';
+    var isOnBreak = driverStatus === 'ON_BREAK' || driverStatus === 'pause';
+    var statutPresence = isAvailable ? 'present' : isOnBreak ? 'pause' : 'absent';
+    var statusLabel = isAvailable ? 'En service' : isOnBreak ? 'En pause' : 'Absent';
+    var statusColor = isAvailable ? '#22C55E' : isOnBreak ? '#F59E0B' : '#E74C3C';
 
     main.innerHTML = 
         // HEADER
