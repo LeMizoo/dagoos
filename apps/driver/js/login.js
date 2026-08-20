@@ -1,5 +1,5 @@
 var API_URL = DAGOOS_CONFIG.apiUrl;
-var selectedType = 'FLEET';
+var selectedType = localStorage.getItem('dagoo_driver_type') || 'FLEET';
 
 function selectDriverType(type) {
     selectedType = type;
