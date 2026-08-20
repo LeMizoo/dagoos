@@ -43,6 +43,18 @@ async function init_home() {
         var orgType = currentDriver?.organization?.type || 'FLEET_MANAGER';
         var isCoop = orgType === 'COOPERATIVE';
         
+        // Charger les données spécifiques selon le type
+        if (isCoop) {
+            // Charger les réservations du véhicule (manifest)
+            try {
+                var reservations = await apiGet('/reservations').catch(() => []);
+                var myReservations = Array.isArray(reservations) ? reservations.filter(function(r) {
+                    return r.depart?.vehicle?.id === currentDriver.vehicleId;
+                }) : [];
+                window.currentReservations = myReservations;
+            } catch(e) { window.currentReservations = []; }
+        }
+        
         // Stocker dans le contexte global
         window.DAGOOS_DRIVER_CONTEXT = {
           orgType: orgType,
@@ -139,6 +151,21 @@ async function init_home() {
                     '<div style="background:#252525;border-radius:10px;padding:8px;"><div style="font-size:16px;font-weight:800;color:#8B5CF6;" id="statNetSem">0</div><div style="font-size:9px;color:#888;">Net (Ar)</div></div>' +
                 '</div>' +
             '</div>' +
+
+            // MANIFEST PASSAGERS (COOP UNIQUEMENT)
+            (isCoop ? '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
+                '<h3 style="color:#DAA520;margin-bottom:10px;font-size:13px;">📋 Manifest passagers</h3>' +
+                '<div id="manifestContent">' +
+                    (window.currentReservations && window.currentReservations.length > 0 ? 
+                        window.currentReservations.map(function(r) {
+                            return '<div style="background:#252525;border-radius:8px;padding:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">' +
+                                '<span style="color:#fff;font-weight:600;">' + r.passagerNom + '</span>' +
+                                '<span style="color:#DAA520;font-weight:700;">' + r.place + '</span>' +
+                            '</div>';
+                        }).join('') : 
+                        '<p style="color:#94A3B8;text-align:center;padding:10px;">Aucun passager</p>') +
+                '</div>' +
+            '</div>' : '') +
 
             // NOUVELLE COURSE RAPIDE
             '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
