@@ -177,7 +177,10 @@
             <!-- PIN -->
             <div class="form-group">
                 <label><i class="fas fa-lock"></i> PIN (4 chiffres)</label>
-                <div class="pin-row" id="pinInputs">
+                <input type="tel" id="singlePinInput" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="••••" 
+                    style="width: 100%; padding: 12px; font-size: 24px; text-align: center; letter-spacing: 12px; background: #1E293B; border: 2px solid #DAA520; border-radius: 10px; color: #DAA520; display: block; margin-bottom: 10px;">
+                <div style="text-align: center; color: #888; font-size: 11px; margin-bottom: 8px;">— ou saisie rapide auto —</div>
+                <div class="pin-row" id="pinInputs" style="display: none;">
                     <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" placeholder="•">
                     <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" placeholder="•">
                     <input type="tel" maxlength="1" pattern="[0-9]" inputmode="numeric" placeholder="•">

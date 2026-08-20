@@ -71,8 +71,19 @@ async function login() {
   var pinInputs = document.querySelectorAll('#pinInputs input');
   var pin = '';
   pinInputs.forEach(function(input) {
-    pin += input.value;
+    // Ne prendre que le premier caractère de chaque champ
+    if (input.value && input.value.length > 0) {
+      pin += input.value.charAt(0);
+    }
   });
+  
+  // Si le PIN est incomplet, essayer de le lire depuis un champ unique
+  if (pin.length < 4) {
+    var singlePinInput = document.getElementById('singlePinInput');
+    if (singlePinInput && singlePinInput.value) {
+      pin = singlePinInput.value.trim();
+    }
+  }
 
   var code = codeInput ? codeInput.value.trim() : '';
 
