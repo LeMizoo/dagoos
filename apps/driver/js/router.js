@@ -77,6 +77,7 @@ function getHeaderHTML() {
       '<div>' +
         '<div style="font-size:14px;font-weight:700;color:#DAA520;">' + (user.name || 'Chauffeur') + '</div>' +
         '<div style="font-size:10px;color:#94A3B8;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">' +
+          (window.DAGOOS_DRIVER_CONTEXT && window.DAGOOS_DRIVER_CONTEXT.isCoop ? '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#22C55E;">🏢 Coopérative</span>' : '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#DAA520;">🚛 Flotte</span>') +
           '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:' + statusColor + ';color:#fff;">' + statusLabel + '</span>' +
           (plate ? '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#DAA520;">🏍️ ' + plate + '</span>' : '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#E74C3C;color:#fff;">⚠️ Sans moto</span>') +
           '<span style="color:#94A3B8;">' + (user.driverCode || '') + '</span>' +

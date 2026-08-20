@@ -37,6 +37,18 @@ async function init_home() {
     // Charger infos chauffeur
     try {
         currentDriver = await apiGet('/drivers/me');
+        
+        // Détecter le type d'organisation
+        var orgType = currentDriver?.organization?.type || 'FLEET_MANAGER';
+        var isCoop = orgType === 'COOPERATIVE';
+        
+        // Stocker dans le contexte global
+        window.DAGOOS_DRIVER_CONTEXT = {
+          orgType: orgType,
+          isCoop: isCoop,
+          orgName: currentDriver?.organization?.name || user.organization || '',
+          orgSlug: currentDriver?.organization?.slug || '',
+        };
 
         if (currentDriver && currentDriver.vehicleId) {
             var vehicles = await apiGet('/vehicles');
@@ -78,6 +90,7 @@ async function init_home() {
                 '<div>' +
                     '<div style="font-size:14px;font-weight:700;color:#DAA520;">' + (user.name || 'Chauffeur') + '</div>' +
                     '<div style="font-size:10px;color:#94A3B8;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">' +
+                (isCoop ? '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#22C55E;">🏢 Coopérative</span>' : '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#DAA520;">🚛 Flotte</span>') +
                         '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:' + statusColor + ';color:#fff;">' + statusLabel + '</span>' +
                         (plate ? '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#DAA520;">🏍️ ' + plate + '</span>' : '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#E74C3C;color:#fff;">⚠️ Sans moto</span>') +
                         '<span style="color:#94A3B8;">' + (user.driverCode || '') + '</span>' +
