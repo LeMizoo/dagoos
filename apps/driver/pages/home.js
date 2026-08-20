@@ -323,6 +323,19 @@ async function accepterCourse(notificationId) {
   }
 }
 
+async function refuserCourse(notificationId) {
+  try {
+    await fetch(DAGOOS_CONFIG.apiUrl + '/notifications/' + notificationId + '/read', {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('dagoo_driver_token'), 'Content-Type': 'application/json' },
+    });
+    alert('Course refusée');
+    loadPage('home');
+  } catch (e) {
+    alert('Erreur lors du refus');
+  }
+}
+
 async function proposerVersement() {
     var user = JSON.parse(localStorage.getItem('dagoo_driver_user') || '{}');
     try {
