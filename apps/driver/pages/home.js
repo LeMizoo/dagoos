@@ -297,7 +297,7 @@ async function changeStatus(status) {
         await fetch(DAGOOS_CONFIG.apiUrl + '/drivers/me/status', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('dagoo_driver_token') },
-            body: JSON.stringify({ status: status === 'active' || status === 'present' ? 'active' : status === 'pause' ? 'pause' : 'inactive' })
+            body: JSON.stringify({ status: status === 'present' ? 'AVAILABLE' : status === 'pause' ? 'ON_BREAK' : 'OFFLINE' })
         });
     } catch(e) { console.error(e); }
     
