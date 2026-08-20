@@ -3,7 +3,7 @@
 // ========================================
 function init_profil() {
     var main = document.getElementById('mainContent');
-    var user = JSON.parse(localStorage.getItem("dagoos_user") || "{}");
+    var user = JSON.parse(localStorage.getItem("dagoo_driver_user") || "{}");
     var token = localStorage.getItem('dagoo_driver_token');
 
     main.innerHTML = 
@@ -40,7 +40,7 @@ async function changePin() {
     var newPin = document.getElementById('newPin').value;
     var confirmPin = document.getElementById('confirmPin').value;
     var msg = document.getElementById('pinMessage');
-    var user = JSON.parse(localStorage.getItem("dagoos_user") || "{}");
+    var user = JSON.parse(localStorage.getItem("dagoo_driver_user") || "{}");
 
     if (!oldPin || !newPin || !confirmPin) { msg.innerHTML = '<span style="color:#F87171;">Tous les champs sont requis</span>'; return; }
     if (newPin !== confirmPin) { msg.innerHTML = '<span style="color:#F87171;">Les PIN ne correspondent pas</span>'; return; }

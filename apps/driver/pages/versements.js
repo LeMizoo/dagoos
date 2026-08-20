@@ -3,7 +3,7 @@
 // ========================================
 async function init_versements() {
     var main = document.getElementById('mainContent');
-    var user = JSON.parse(localStorage.getItem("dagoos_user") || "{}");
+    var user = JSON.parse(localStorage.getItem("dagoo_driver_user") || "{}");
     
     main.innerHTML = '<div style="padding:12px;max-width:500px;margin:0 auto;padding-bottom:80px;"><div style="text-align:center;padding:40px;color:#DAA520;">Chargement...</div></div>';
 
@@ -52,7 +52,7 @@ async function demanderVersement() {
     var montant = document.getElementById('versementMontant').value;
     var mode = document.getElementById('versementMode').value;
     var msg = document.getElementById('versementMsg');
-    var user = JSON.parse(localStorage.getItem("dagoos_user") || "{}");
+    var user = JSON.parse(localStorage.getItem("dagoo_driver_user") || "{}");
 
     if (!montant || parseInt(montant) <= 0) { msg.innerHTML = '<span style="color:#F87171;">Veuillez entrer un montant valide</span>'; return; }
 
