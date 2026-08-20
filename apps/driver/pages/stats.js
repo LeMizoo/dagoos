@@ -1,3 +1,7 @@
+async function init_stats() {
+  await refreshDailyStats();
+}
+
 async function refreshDailyStats() {
   try {
     var stats = await apiFetch('/finances/courses');
@@ -38,7 +42,4 @@ async function refreshDailyStats() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  refreshDailyStats();
-  setInterval(refreshDailyStats, 30000);
-});
+setInterval(refreshDailyStats, 30000);
