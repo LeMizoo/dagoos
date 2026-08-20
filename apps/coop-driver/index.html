@@ -7,12 +7,12 @@
     <!-- Apple PWA -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Dagoo's Driver">
+    <meta name="apple-mobile-web-app-title" content="Dagoo's Coop Driver">
     <link rel="apple-touch-icon" href="/icons/icon-192.png">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <title>Dagoo's Driver - Connexion</title>
+    <title>Dagoo's Coop Driver - Connexion</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#F1C40F">
+    <meta name="theme-color" content="#F59E0B">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -21,32 +21,32 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #F1C40F 0%, #F39C12 50%, #E67E22 100%);
+            background: linear-gradient(135deg, #F59E0B 0%, #F39C12 50%, #E67E22 100%);
             min-height: 100vh;
             display: flex; align-items: center; justify-content: center;
         }
         .login-container {
-            background: #1A1A2E; border-radius: 16px; padding: 40px 32px;
+            background: #0A1F18; border-radius: 16px; padding: 40px 32px;
             width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
             color: white;
         }
         .login-header { text-align: center; margin-bottom: 28px; }
         .login-logo {
-            width: 56px; height: 56px; background: #F1C40F; border-radius: 50%;
+            width: 56px; height: 56px; background: #F59E0B; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 12px; font-size: 28px; color: #1A1A2E;
+            margin: 0 auto 12px; font-size: 28px; color: #0A1F18;
         }
         .login-header h1 { font-size: 22px; margin-bottom: 4px; }
         .login-header p { color: #AAA; font-size: 13px; }
         .badge {
-            display: inline-block; background: #F1C40F; color: #1A1A2E;
+            display: inline-block; background: #F59E0B; color: #0A1F18;
             padding: 4px 10px; border-radius: 50px; font-size: 11px; font-weight: 600; margin-top: 6px;
         }
         .note {
             text-align: center; margin-bottom: 20px; padding: 10px; background: #2C2C44;
             border-radius: 8px; font-size: 12px; color: #AAA;
         }
-        .note i { color: #F1C40F; }
+        .note i { color: #F59E0B; }
         
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: #CCC; }
@@ -55,7 +55,7 @@
             border: 2px solid #333; background: #2C2C44; color: white;
             border-radius: 8px; font-size: 15px; font-family: 'Inter', sans-serif;
         }
-        .form-group select:focus { outline: none; border-color: #F1C40F; }
+        .form-group select:focus { outline: none; border-color: #F59E0B; }
         .form-group select option { background: #2C2C44; color: white; }
         
         .code-input-group {
@@ -63,9 +63,9 @@
             border: 2px solid #333; border-radius: 8px; overflow: hidden;
             transition: border-color 0.3s;
         }
-        .code-input-group:focus-within { border-color: #F1C40F; }
+        .code-input-group:focus-within { border-color: #F59E0B; }
         .code-input-group .prefix {
-            background: #F1C40F; color: #1A1A2E; padding: 12px 14px;
+            background: #F59E0B; color: #0A1F18; padding: 12px 14px;
             font-weight: 700; font-size: 15px; white-space: nowrap;
         }
         .code-input-group input {
@@ -77,13 +77,13 @@
         .pin-row { display: flex; gap: 8px; justify-content: center; }
         .pin-row input {
             width: 48px; height: 56px; text-align: center; font-size: 24px; font-weight: 700;
-            padding: 0; border: 2px solid #333; background: #2C2C44; color: #F1C40F;
+            padding: 0; border: 2px solid #333; background: #2C2C44; color: #F59E0B;
             border-radius: 8px;
         }
-        .pin-row input:focus { border-color: #F1C40F; outline: none; }
+        .pin-row input:focus { border-color: #F59E0B; outline: none; }
         
         .btn-login {
-            width: 100%; padding: 14px; background: #F1C40F; color: #1A1A2E;
+            width: 100%; padding: 14px; background: #F59E0B; color: #0A1F18;
             border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
             cursor: pointer; transition: background 0.3s; font-family: 'Inter', sans-serif; margin-top: 20px;
         }
@@ -100,7 +100,7 @@
         
         .links { text-align: center; margin-top: 20px; }
         .links a { color: #AAA; text-decoration: none; font-size: 13px; }
-        .links a:hover { color: #F1C40F; }
+        .links a:hover { color: #F59E0B; }
         
         .code-hint { font-size: 11px; color: #777; margin-top: 4px; text-align: right; }
         
@@ -121,8 +121,8 @@
     <div class="login-container">
         <div class="login-header">
             <div class="login-logo"><i class="fas fa-motorcycle"></i></div>
-            <h1>Dagoo's Driver</h1>
-            <p>Espace Chauffeur</p>
+            <h1>Dagoo's Coop Driver</h1>
+            <p>Espace Chauffeur Coop</p>
             <span class="badge">Application mobile</span>
         </div>
         
@@ -139,15 +139,15 @@
                 var btnCoop = document.getElementById('btnCoop');
                 
                 if (type === 'FLEET') {
-                    btnFleet.style.background = '#DAA520';
-                    btnFleet.style.color = '#1A1A2E';
-                    btnCoop.style.background = '#1E293B';
-                    btnCoop.style.color = '#DAA520';
+                    btnFleet.style.background = '#10B981';
+                    btnFleet.style.color = '#0A1F18';
+                    btnCoop.style.background = '#064E3B';
+                    btnCoop.style.color = '#10B981';
                 } else {
-                    btnCoop.style.background = '#DAA520';
-                    btnCoop.style.color = '#1A1A2E';
-                    btnFleet.style.background = '#1E293B';
-                    btnFleet.style.color = '#DAA520';
+                    btnCoop.style.background = '#10B981';
+                    btnCoop.style.color = '#0A1F18';
+                    btnFleet.style.background = '#064E3B';
+                    btnFleet.style.color = '#10B981';
                 }
                 
                 localStorage.setItem('dagoo_driver_type', type);
@@ -157,11 +157,11 @@
         <!-- Type fixe : COOP -->
         <div style="display:flex;gap:10px;margin-bottom:16px;" id="driverTypeSelector">
             <button type="button" style="display:none;" id="btnFleet" 
-                style="flex:1;padding:12px;background:#1E293B;border:2px solid #DAA520;border-radius:10px;color:#DAA520;font-weight:700;cursor:pointer;">
+                style="flex:1;padding:12px;background:#064E3B;border:2px solid #10B981;border-radius:10px;color:#10B981;font-weight:700;cursor:pointer;">
                 🚛 Fleet
             </button>
             <button type="button" style="display:none;" id="btnCoop" 
-                style="flex:1;padding:12px;background:#1E293B;border:2px solid #DAA520;border-radius:10px;color:#DAA520;font-weight:700;cursor:pointer;">
+                style="flex:1;padding:12px;background:#064E3B;border:2px solid #10B981;border-radius:10px;color:#10B981;font-weight:700;cursor:pointer;">
                 🏢 Coop
             </button>
         </div>
@@ -170,7 +170,7 @@
             
             <div class="form-group">
                 <label>🔑 Votre code chauffeur</label>
-                <input type="text" id="driverCode" placeholder="Ex: FL-AL-001" required autocomplete="off" style="text-transform: uppercase; width: 100%; padding: 12px; font-size: 16px; text-align: center; letter-spacing: 2px; background: #1E293B; border: 2px solid #DAA520; border-radius: 10px; color: #DAA520;">
+                <input type="text" id="driverCode" placeholder="Ex: FL-AL-001" required autocomplete="off" style="text-transform: uppercase; width: 100%; padding: 12px; font-size: 16px; text-align: center; letter-spacing: 2px; background: #064E3B; border: 2px solid #10B981; border-radius: 10px; color: #10B981;">
                 <div class="code-hint" id="codeHint" style="font-size: 11px; color: #888; margin-top: 5px; text-align: center;">Code fourni par votre gestionnaire</div>
             </div>
             

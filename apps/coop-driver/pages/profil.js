@@ -9,24 +9,24 @@ function init_profil() {
     main.innerHTML = getHeaderHTML() +
         '<div style="padding:12px;max-width:500px;margin:0 auto;padding-bottom:80px;">' +
             // Carte infos chauffeur
-            '<div class="card" style="background:#1E293B;border-radius:12px;padding:20px;margin-bottom:12px;">' +
-                '<h3 style="color:#DAA520;margin-bottom:16px;">👤 Profil Chauffeur</h3>' +
+            '<div class="card" style="background:#064E3B;border-radius:12px;padding:20px;margin-bottom:12px;">' +
+                '<h3 style="color:#10B981;margin-bottom:16px;">👤 Profil Chauffeur</h3>' +
                 '<div style="display:flex;flex-direction:column;gap:12px;">' +
                     '<div><span style="color:#94A3B8;font-size:11px;">Nom</span><div style="font-weight:600;color:#fff;">' + (user.name || 'Chauffeur') + '</div></div>' +
-                    '<div><span style="color:#94A3B8;font-size:11px;">Code</span><div style="font-weight:600;color:#DAA520;font-family:monospace;">' + (user.driverCode || '-') + '</div></div>' +
+                    '<div><span style="color:#94A3B8;font-size:11px;">Code</span><div style="font-weight:600;color:#10B981;font-family:monospace;">' + (user.driverCode || '-') + '</div></div>' +
                     '<div><span style="color:#94A3B8;font-size:11px;">Organisation</span><div style="font-weight:600;color:#fff;">' + (user.organization || '-') + '</div></div>' +
                     '<div><span style="color:#94A3B8;font-size:11px;">Email</span><div style="font-weight:600;color:#fff;font-size:12px;">' + (user.email || '-') + '</div></div>' +
                 '</div>' +
             '</div>' +
 
             // Changer PIN
-            '<div class="card" style="background:#1E293B;border-radius:12px;padding:20px;margin-bottom:12px;">' +
-                '<h3 style="color:#DAA520;margin-bottom:16px;">🔐 Changer mon PIN</h3>' +
+            '<div class="card" style="background:#064E3B;border-radius:12px;padding:20px;margin-bottom:12px;">' +
+                '<h3 style="color:#10B981;margin-bottom:16px;">🔐 Changer mon PIN</h3>' +
                 '<div style="display:flex;flex-direction:column;gap:10px;">' +
-                    '<input type="password" id="oldPin" placeholder="Ancien PIN" maxlength="4" style="padding:10px;border-radius:8px;border:1px solid #DAA520;background:#1A1A2E;color:#fff;text-align:center;font-size:18px;letter-spacing:8px;">' +
-                    '<input type="password" id="newPin" placeholder="Nouveau PIN" maxlength="4" style="padding:10px;border-radius:8px;border:1px solid #DAA520;background:#1A1A2E;color:#fff;text-align:center;font-size:18px;letter-spacing:8px;">' +
-                    '<input type="password" id="confirmPin" placeholder="Confirmer le PIN" maxlength="4" style="padding:10px;border-radius:8px;border:1px solid #DAA520;background:#1A1A2E;color:#fff;text-align:center;font-size:18px;letter-spacing:8px;">' +
-                    '<button onclick="changePin()" style="padding:12px;background:#F1C40F;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;">💾 Enregistrer le nouveau PIN</button>' +
+                    '<input type="password" id="oldPin" placeholder="Ancien PIN" maxlength="4" style="padding:10px;border-radius:8px;border:1px solid #10B981;background:#0A1F18;color:#fff;text-align:center;font-size:18px;letter-spacing:8px;">' +
+                    '<input type="password" id="newPin" placeholder="Nouveau PIN" maxlength="4" style="padding:10px;border-radius:8px;border:1px solid #10B981;background:#0A1F18;color:#fff;text-align:center;font-size:18px;letter-spacing:8px;">' +
+                    '<input type="password" id="confirmPin" placeholder="Confirmer le PIN" maxlength="4" style="padding:10px;border-radius:8px;border:1px solid #10B981;background:#0A1F18;color:#fff;text-align:center;font-size:18px;letter-spacing:8px;">' +
+                    '<button onclick="changePin()" style="padding:12px;background:#F59E0B;color:#0A1F18;border:none;border-radius:8px;font-weight:700;cursor:pointer;">💾 Enregistrer le nouveau PIN</button>' +
                 '</div>' +
                 '<div id="pinMessage" style="margin-top:10px;text-align:center;font-size:12px;"></div>' +
             '</div>' +

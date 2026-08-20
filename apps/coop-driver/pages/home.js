@@ -98,21 +98,21 @@ async function init_home() {
 
     main.innerHTML = 
         // HEADER
-        '<div style="background:#1E293B;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid #DAA520;">' +
+        '<div style="background:#064E3B;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid #10B981;">' +
             '<div style="display:flex;align-items:center;gap:8px;">' +
                 '<img src="' + logo + '" style="width:36px;height:36px;object-fit:contain;border-radius:8px;">' +
                 '<div>' +
-                    '<div style="font-size:14px;font-weight:700;color:#DAA520;">' + (user.name || 'Chauffeur') + '</div>' +
+                    '<div style="font-size:14px;font-weight:700;color:#10B981;">' + (user.name || 'Chauffeur') + '</div>' +
                     '<div style="font-size:10px;color:#94A3B8;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">' +
-                (isCoop ? '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#22C55E;">🏢 Coopérative</span>' : '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#DAA520;">🚛 Flotte</span>') +
+                (isCoop ? '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#22C55E;">🏢 Coopérative</span>' : '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#10B981;">🚛 Flotte</span>') +
                         '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:' + statusColor + ';color:#fff;">' + statusLabel + '</span>' +
-                        (plate ? '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#DAA520;">🏍️ ' + plate + '</span>' : '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#E74C3C;color:#fff;">⚠️ Sans moto</span>') +
+                        (plate ? '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#10B981;">🏍️ ' + plate + '</span>' : '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#E74C3C;color:#fff;">⚠️ Sans moto</span>') +
                         '<span style="color:#94A3B8;">' + (user.driverCode || '') + '</span>' +
                     '</div>' +
                 '</div>' +
             '</div>' +
             '<div style="display:flex;gap:4px;">' +
-                '<button onclick="loadPage(\'profil\')" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:#DAA520;cursor:pointer;font-size:14px;">👤</button>' +
+                '<button onclick="loadPage(\'profil\')" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:#10B981;cursor:pointer;font-size:14px;">👤</button>' +
                 '<button onclick="logout()" style="background:rgba(239,68,68,0.15);border:none;width:32px;height:32px;border-radius:50%;color:#F87171;cursor:pointer;font-size:16px;">⏻</button>' +
             '</div>' +
         '</div>' +
@@ -131,9 +131,9 @@ async function init_home() {
             '</div>' +
 
             // STATS DU JOUR (les deux types)
-            '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
-            '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
-                '<h3 style="color:#DAA520;margin-bottom:10px;font-size:13px;">📅 Aujourd\'hui</h3>' +
+            '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
+            '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
+                '<h3 style="color:#10B981;margin-bottom:10px;font-size:13px;">📅 Aujourd\'hui</h3>' +
                 '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;">' +
                     '<div style="background:#252525;border-radius:10px;padding:8px;"><div style="font-size:18px;font-weight:800;color:#fff;" id="statCoursesJour">0</div><div style="font-size:9px;color:#888;">Courses</div></div>' +
                     '<div style="background:#252525;border-radius:10px;padding:8px;"><div style="font-size:18px;font-weight:800;color:#22C55E;" id="statCAJour">0</div><div style="font-size:9px;color:#888;">CA (Ar)</div></div>' +
@@ -143,8 +143,8 @@ async function init_home() {
             '</div>' +
 
             // STATS SEMAINE
-            '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
-                '<h3 style="color:#DAA520;margin-bottom:10px;font-size:13px;">📆 Cette semaine</h3>' +
+            '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
+                '<h3 style="color:#10B981;margin-bottom:10px;font-size:13px;">📆 Cette semaine</h3>' +
                 '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;">' +
                     '<div style="background:#252525;border-radius:10px;padding:8px;"><div style="font-size:16px;font-weight:800;color:#fff;" id="statCoursesSem">0</div><div style="font-size:9px;color:#888;">Courses</div></div>' +
                     '<div style="background:#252525;border-radius:10px;padding:8px;"><div style="font-size:16px;font-weight:800;color:#22C55E;" id="statCASem">0</div><div style="font-size:9px;color:#888;">CA (Ar)</div></div>' +
@@ -154,14 +154,14 @@ async function init_home() {
             '</div>' +
 
             // MANIFEST PASSAGERS (COOP UNIQUEMENT)
-            (isCoop ? '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
-                '<h3 style="color:#DAA520;margin-bottom:10px;font-size:13px;">📋 Manifest passagers</h3>' +
+            (isCoop ? '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
+                '<h3 style="color:#10B981;margin-bottom:10px;font-size:13px;">📋 Manifest passagers</h3>' +
                 '<div id="manifestContent">' +
                     (window.currentReservations && window.currentReservations.length > 0 ? 
                         window.currentReservations.map(function(r) {
                             return '<div style="background:#252525;border-radius:8px;padding:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">' +
                                 '<span style="color:#fff;font-weight:600;">' + r.passagerNom + '</span>' +
-                                '<span style="color:#DAA520;font-weight:700;">' + r.place + '</span>' +
+                                '<span style="color:#10B981;font-weight:700;">' + r.place + '</span>' +
                             '</div>';
                         }).join('') : 
                         '<p style="color:#94A3B8;text-align:center;padding:10px;">Aucun passager</p>') +
@@ -169,8 +169,8 @@ async function init_home() {
             '</div>' : '') +
 
             // NOUVELLE COURSE RAPIDE
-            '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
-                '<h3 style="color:#DAA520;margin-bottom:10px;font-size:13px;">➕ Nouvelle course</h3>' +
+            '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
+                '<h3 style="color:#10B981;margin-bottom:10px;font-size:13px;">➕ Nouvelle course</h3>' +
                 '<div style="display:flex;gap:8px;margin-bottom:8px;">' +
                     '<select id="typeCourse" onchange="updateCourseForm()" style="flex:1;padding:8px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;">' +
                         '<option value="course">🚖 Course normale</option>' +
@@ -183,29 +183,29 @@ async function init_home() {
                         '<input type="number" id="kmDepart" placeholder="Km départ" step="0.1" oninput="calcCourse()" style="flex:1;padding:8px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;">' +
                         '<input type="number" id="kmArrivee" placeholder="Km arrivée" step="0.1" oninput="calcCourse()" style="flex:1;padding:8px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;">' +
                     '</div>' +
-                    '<div style="text-align:center;color:#94A3B8;font-size:11px;margin-bottom:8px;">📏 Distance : <span id="distanceCalc">0</span> km | 💰 Prix : <span id="prixCalc" style="color:#DAA520;font-weight:700;">0 Ar</span></div>' +
+                    '<div style="text-align:center;color:#94A3B8;font-size:11px;margin-bottom:8px;">📏 Distance : <span id="distanceCalc">0</span> km | 💰 Prix : <span id="prixCalc" style="color:#10B981;font-weight:700;">0 Ar</span></div>' +
                     '<div style="font-size:10px;color:#888;text-align:center;margin-bottom:8px;">💰 Vous gardez 20% · 📤 Vous versez 80%</div>' +
                 '</div>' +
-                '<button onclick="enregistrerCourse()" ' + (estBloque || statutPresence !== 'present' || !currentVehicle ? 'disabled' : '') + ' style="width:100%;padding:12px;background:#F1C40F;color:#1A1A2E;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;">✅ Enregistrer la course</button>' +
+                '<button onclick="enregistrerCourse()" ' + (estBloque || statutPresence !== 'present' || !currentVehicle ? 'disabled' : '') + ' style="width:100%;padding:12px;background:#F59E0B;color:#0A1F18;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;">✅ Enregistrer la course</button>' +
                 '<div id="courseMsg" style="margin-top:8px;text-align:center;font-size:11px;"></div>' +
             '</div>' +
 
             // DÉPENSES (les deux types)
-            '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
-                '<h3 style="color:#DAA520;margin-bottom:10px;font-size:13px;">💰 Dépenses du jour</h3>' +
+            '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
+                '<h3 style="color:#10B981;margin-bottom:10px;font-size:13px;">💰 Dépenses du jour</h3>' +
                 '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;">' +
-                    '<button onclick="addExpense(\'carburant\')" style="padding:10px 4px;background:#1A1A2E;color:#DAA520;border:1px solid #DAA520;border-radius:8px;cursor:pointer;font-size:10px;">⛽ Carburant</button>' +
-                    '<button onclick="addExpense(\'entretien\')" style="padding:10px 4px;background:#1A1A2E;color:#DAA520;border:1px solid #DAA520;border-radius:8px;cursor:pointer;font-size:10px;">🔧 Entretien</button>' +
-                    '<button onclick="addExpense(\'pneu\')" style="padding:10px 4px;background:#1A1A2E;color:#DAA520;border:1px solid #DAA520;border-radius:8px;cursor:pointer;font-size:10px;">🛞 Pneus</button>' +
-                    '<button onclick="addExpense(\'autre\')" style="padding:10px 4px;background:#1A1A2E;color:#DAA520;border:1px solid #DAA520;border-radius:8px;cursor:pointer;font-size:10px;">📝 Autre</button>' +
+                    '<button onclick="addExpense(\'carburant\')" style="padding:10px 4px;background:#0A1F18;color:#10B981;border:1px solid #10B981;border-radius:8px;cursor:pointer;font-size:10px;">⛽ Carburant</button>' +
+                    '<button onclick="addExpense(\'entretien\')" style="padding:10px 4px;background:#0A1F18;color:#10B981;border:1px solid #10B981;border-radius:8px;cursor:pointer;font-size:10px;">🔧 Entretien</button>' +
+                    '<button onclick="addExpense(\'pneu\')" style="padding:10px 4px;background:#0A1F18;color:#10B981;border:1px solid #10B981;border-radius:8px;cursor:pointer;font-size:10px;">🛞 Pneus</button>' +
+                    '<button onclick="addExpense(\'autre\')" style="padding:10px 4px;background:#0A1F18;color:#10B981;border:1px solid #10B981;border-radius:8px;cursor:pointer;font-size:10px;">📝 Autre</button>' +
                 '</div>' +
                 '<div id="expensesList" style="max-height:120px;overflow-y:auto;font-size:11px;"></div>' +
                 '<div id="expensesTotal" style="margin-top:8px;text-align:right;font-weight:700;color:#EF4444;font-size:12px;"></div>' +
             '</div>' +
 
             // ASSIGNATION
-            '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
-                '<h3 style="color:#DAA520;margin-bottom:8px;font-size:13px;">🔗 Assignation</h3>' +
+            '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
+                '<h3 style="color:#10B981;margin-bottom:8px;font-size:13px;">🔗 Assignation</h3>' +
                 '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">' +
                     '<div><span style="color:#94A3B8;">Véhicule</span><br><span style="font-weight:600;color:#fff;" id="assignedVehicle">' + (plate || 'Aucun') + '</span></div>' +
                     '<div><span style="color:#94A3B8;">Organisation</span><br><span style="font-weight:600;color:#fff;">' + orgName + '</span></div>' +
@@ -310,11 +310,11 @@ function updateCourseForm() {
     var type = document.getElementById('typeCourse')?.value;
     var form = document.getElementById('courseForm');
     if (type === 'location') {
-        if (form) form.innerHTML = '<div style="text-align:center;color:#DAA520;padding:10px;">📅 Tarif location : 13 500 Ar/jour</div>';
+        if (form) form.innerHTML = '<div style="text-align:center;color:#10B981;padding:10px;">📅 Tarif location : 13 500 Ar/jour</div>';
     } else if (type === 'ady_varotra') {
         if (form) form.innerHTML = '<input type="number" id="montantAdy" placeholder="Montant négocié (Ar)" style="width:100%;padding:8px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;margin-bottom:8px;"><div style="font-size:10px;color:#888;text-align:center;">💰 Vous gardez 20% · 📤 Vous versez 80%</div>';
     } else {
-        if (form) form.innerHTML = '<div style="display:flex;gap:8px;margin-bottom:8px;"><input type="number" id="kmDepart" placeholder="Km départ" step="0.1" oninput="calcCourse()" style="flex:1;padding:8px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;"><input type="number" id="kmArrivee" placeholder="Km arrivée" step="0.1" oninput="calcCourse()" style="flex:1;padding:8px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;"></div><div style="text-align:center;color:#94A3B8;font-size:11px;margin-bottom:8px;">📏 Distance : <span id="distanceCalc">0</span> km | 💰 Prix : <span id="prixCalc" style="color:#DAA520;font-weight:700;">0 Ar</span></div><div style="font-size:10px;color:#888;text-align:center;margin-bottom:8px;">💰 Vous gardez 20% · 📤 Vous versez 80%</div>';
+        if (form) form.innerHTML = '<div style="display:flex;gap:8px;margin-bottom:8px;"><input type="number" id="kmDepart" placeholder="Km départ" step="0.1" oninput="calcCourse()" style="flex:1;padding:8px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;"><input type="number" id="kmArrivee" placeholder="Km arrivée" step="0.1" oninput="calcCourse()" style="flex:1;padding:8px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;"></div><div style="text-align:center;color:#94A3B8;font-size:11px;margin-bottom:8px;">📏 Distance : <span id="distanceCalc">0</span> km | 💰 Prix : <span id="prixCalc" style="color:#10B981;font-weight:700;">0 Ar</span></div><div style="font-size:10px;color:#888;text-align:center;margin-bottom:8px;">💰 Vous gardez 20% · 📤 Vous versez 80%</div>';
     }
 }
 

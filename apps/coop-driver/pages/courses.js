@@ -4,10 +4,10 @@ async function init_courses() {
     container.innerHTML = getHeaderHTML() + '<div style="padding:16px;max-width:500px;margin:0 auto;padding-bottom:80px;">' +
       '<h2 style="font-size:20px;font-weight:bold;margin-bottom:16px;">📋 Mes Courses</h2>' +
       '<div id="coursesAccepteesContainer"></div>' +
-      '<div style="background:#1E293B;border-radius:12px;padding:16px;margin-bottom:12px;">' +
-        '<h3 style="color:#DAA520;margin-bottom:12px;font-size:14px;">➕ Enregistrer une course</h3>' +
+      '<div style="background:#064E3B;border-radius:12px;padding:16px;margin-bottom:12px;">' +
+        '<h3 style="color:#10B981;margin-bottom:12px;font-size:14px;">➕ Enregistrer une course</h3>' +
         '<input type="number" id="courseAmountInput" placeholder="Montant (Ar)" style="width:100%;padding:10px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:14px;margin-bottom:8px;">' +
-        '<button onclick="submitCourse()" id="btnSaveCourse" style="width:100%;padding:12px;background:#F1C40F;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;">✅ Enregistrer</button>' +
+        '<button onclick="submitCourse()" id="btnSaveCourse" style="width:100%;padding:12px;background:#F59E0B;color:#0A1F18;border:none;border-radius:8px;font-weight:700;cursor:pointer;">✅ Enregistrer</button>' +
       '</div>' +
     '</div>';
   }
