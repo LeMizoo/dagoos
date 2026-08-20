@@ -48,10 +48,7 @@ async function init_home() {
             // Charger les réservations du véhicule (manifest)
             try {
                 var reservations = await apiGet('/reservations/mine').catch(() => []);
-                var myReservations = Array.isArray(reservations) ? reservations.filter(function(r) {
-                    return r.depart?.vehicle?.id === currentDriver.vehicleId;
-                }) : [];
-                window.currentReservations = myReservations;
+                window.currentReservations = Array.isArray(reservations) ? reservations : [];
             } catch(e) { window.currentReservations = []; }
         }
         
