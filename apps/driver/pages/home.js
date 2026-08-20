@@ -185,6 +185,33 @@ async function init_home() {
             '</div>' +
         '</div>';
 
+    // Afficher les courses disponibles
+    try {
+        var notifs = await apiGet('/notifications?type=course_request&read=false').catch(() => []);
+        if (notifs && notifs.length > 0) {
+            var notifHtml = '<div style="background:#FEF3C7;border-radius:12px;padding:12px;margin-bottom:12px;">' +
+                '<p style="font-weight:bold;color:#92400E;margin-bottom:8px;">🔔 Nouvelles courses disponibles</p>';
+            notifs.forEach(function(n) {
+                notifHtml += '<div style="background:white;border-radius:8px;padding:10px;margin-bottom:6px;">' +
+                    '<p style="font-weight:bold;color:#1F2937;">' + (n.title || 'Course disponible') + '</p>' +
+                    '<p style="font-size:12px;color:#6B7280;margin-top:2px;">' + (n.message || '') + '</p>' +
+                    '<div style="display:flex;gap:8px;margin-top:8px;">' +
+                        '<button onclick="accepterCourse(\'' + n.id + '\')" style="flex:1;background:#10B981;color:white;border:none;padding:8px 12px;border-radius:6px;font-weight:bold;">✅ Accepter</button>' +
+                        '<button onclick="refuserCourse(\'' + n.id + '\')" style="flex:1;background:#EF4444;color:white;border:none;padding:8px 12px;border-radius:6px;font-weight:bold;">❌ Refuser</button>' +
+                    '</div>' +
+                '</div>';
+            });
+            notifHtml += '</div>';
+            
+            // Insérer dans le main après le header
+            var main = document.getElementById('mainContent');
+            var contentDiv = main.querySelector('div[style*="max-width"]');
+            if (contentDiv) {
+                contentDiv.insertAdjacentHTML('afterbegin', notifHtml);
+            }
+        }
+    } catch(e) { console.log('Pas de notifications'); }
+
     loadStats(driverId);
     loadExpenses();
     if (refreshInterval) clearInterval(refreshInterval);
