@@ -44,16 +44,7 @@ async function init_home() {
         var isCoop = false; // Toujours Fleet dans cette application
         
         // Charger les données spécifiques selon le type
-        if (isCoop) {
-            // Charger les réservations du véhicule (manifest)
-            try {
-                var reservations = await apiGet('/reservations/mine').catch(() => []);
-                var myReservations = Array.isArray(reservations) ? reservations.filter(function(r) {
-                    return r.depart?.vehicle?.id === currentDriver.vehicleId;
-                }) : [];
-                window.currentReservations = myReservations;
-            } catch(e) { window.currentReservations = []; }
-        }
+        // Fleet : pas de réservations passagers
         
         // Stocker dans le contexte global
         window.DAGOOS_DRIVER_CONTEXT = {
