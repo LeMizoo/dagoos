@@ -66,10 +66,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function getHeaderHTML() {
   var user = JSON.parse(localStorage.getItem('dagoo_driver_user') || '{}');
-  var driverStatus = currentDriver && currentDriver.status ? currentDriver.status : 'active';
+  var driverStatus = window.currentDriver && window.currentDriver.status ? window.currentDriver.status : 'active';
   var statusLabel = driverStatus === 'active' ? 'En service' : driverStatus === 'pause' ? 'En pause' : 'Absent';
   var statusColor = driverStatus === 'active' ? '#22C55E' : driverStatus === 'pause' ? '#F59E0B' : '#E74C3C';
-  var plate = currentVehicle ? currentVehicle.plate : '';
+  var plate = window.currentVehicle ? window.currentVehicle.plate : '';
   
   return '<div style="background:#1E293B;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid #DAA520;">' +
     '<div style="display:flex;align-items:center;gap:8px;">' +

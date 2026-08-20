@@ -37,6 +37,7 @@ async function init_home() {
     // Charger infos chauffeur
     try {
         currentDriver = await apiGet('/drivers/me');
+        window.currentDriver = currentDriver;
         
         // Détecter le type d'organisation
         var orgType = currentDriver?.organization?.type || 'FLEET_MANAGER';
@@ -56,6 +57,7 @@ async function init_home() {
                 currentVehicle = vehicles.find(function(v) {
                     return v.id === currentDriver.vehicleId;
                 });
+                window.currentVehicle = currentVehicle;
             }
         }
 
