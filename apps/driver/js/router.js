@@ -89,3 +89,5 @@ function getHeaderHTML() {
     '</div>' +
   '</div>';
 }
+
+window.getHeaderHTML = getHeaderHTML;
