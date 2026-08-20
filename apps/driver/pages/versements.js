@@ -8,7 +8,7 @@ async function init_versements() {
     main.innerHTML = '<div style="padding:12px;max-width:500px;margin:0 auto;padding-bottom:80px;"><div style="text-align:center;padding:40px;color:#DAA520;">Chargement...</div></div>';
 
     try {
-        var courses = await apiGet('/finances/courses?driverId=' + user.driverId);
+        var courses = await window.apiGet('/finances/courses?driverId=' + user.driverId);
         var arr = Array.isArray(courses) ? courses : [];
         
         var totalCA = arr.reduce(function(s, c) { return s + (c.price || 0); }, 0);

@@ -11,7 +11,7 @@ async function submitCourse(amount, type) {
   try {
     if (submitBtn) submitBtn.disabled = true;
 
-    var res = await apiFetch('/finances/courses', {
+    var res = await window.apiFetch('/finances/courses', {
       method: 'POST',
       body: { amount: amount, type: type, date: new Date().toISOString() }
     });
@@ -35,7 +35,7 @@ async function submitExpense(category, amount) {
   if (!amount || amount <= 0) return;
 
   try {
-    var res = await apiFetch('/finances/expenses', {
+    var res = await window.apiFetch('/finances/expenses', {
       method: 'POST',
       body: { category: category, amount: amount }
     });

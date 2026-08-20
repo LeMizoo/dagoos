@@ -39,7 +39,7 @@ async function init_stats() {
 
 async function refreshDailyStats() {
   try {
-    var stats = await apiFetch('/finances/courses');
+    var stats = await window.apiFetch('/finances/courses');
     
     if (stats && Array.isArray(stats)) {
       var today = new Date().toISOString().split('T')[0];
