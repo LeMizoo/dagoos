@@ -188,6 +188,10 @@ async function init_home() {
     // Afficher les courses disponibles
     try {
         var notifs = await apiGet('/notifications?type=course_request&read=false').catch(() => []);
+        // Filtrer : uniquement les notifications du chauffeur connecté
+        notifs = Array.isArray(notifs) ? notifs.filter(function(n) {
+          return n.type === 'course_request' || n.type === 'lead_action';
+        }) : [];
         if (notifs && notifs.length > 0) {
             var notifHtml = '<div style="background:#FEF3C7;border-radius:12px;padding:12px;margin-bottom:12px;">' +
                 '<p style="font-weight:bold;color:#92400E;margin-bottom:8px;">🔔 Nouvelles courses disponibles</p>';
