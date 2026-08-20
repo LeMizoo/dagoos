@@ -263,7 +263,7 @@ async function enregistrerCourse() {
     if (!confirm('Confirmer la course ?\n' + (type === 'location' ? '📅 Location : ' : distance > 0 ? '📏 ' + distance.toFixed(1) + ' km - ' : '') + '💰 ' + montant.toLocaleString() + ' Ar\n💵 Vous gardez : ' + Math.round(montant * 0.20).toLocaleString() + ' Ar\n📤 Vous versez : ' + Math.round(montant * 0.80).toLocaleString() + ' Ar')) return;
 
     try {
-        var r = await fetch(DAGOOS_CONFIG.apiUrl + '/courses', {
+        var r = await fetch(DAGOOS_CONFIG.apiUrl + '/finances/courses', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('dagoo_driver_token') },
             body: JSON.stringify({ driverId: user.driverId, vehicleId: currentVehicle?.id, type: type, distanceKm: distance, price: montant, commission: Math.round(montant * 0.80) })
