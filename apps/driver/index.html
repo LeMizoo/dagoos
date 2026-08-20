@@ -131,6 +131,29 @@
             Votre compte est créé par votre gestionnaire de flotte ou coopérative.
         </div>
         
+        <script>
+            var selectedType = 'FLEET';
+            function selectDriverType(type) {
+                selectedType = type;
+                var btnFleet = document.getElementById('btnFleet');
+                var btnCoop = document.getElementById('btnCoop');
+                
+                if (type === 'FLEET') {
+                    btnFleet.style.background = '#DAA520';
+                    btnFleet.style.color = '#1A1A2E';
+                    btnCoop.style.background = '#1E293B';
+                    btnCoop.style.color = '#DAA520';
+                } else {
+                    btnCoop.style.background = '#DAA520';
+                    btnCoop.style.color = '#1A1A2E';
+                    btnFleet.style.background = '#1E293B';
+                    btnFleet.style.color = '#DAA520';
+                }
+                
+                localStorage.setItem('dagoo_driver_type', type);
+            }
+        </script>
+
         <!-- Choix du type de chauffeur -->
         <div style="display:flex;gap:10px;margin-bottom:16px;" id="driverTypeSelector">
             <button type="button" onclick="selectDriverType('FLEET')" id="btnFleet" 
