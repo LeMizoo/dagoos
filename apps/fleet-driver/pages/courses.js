@@ -237,6 +237,14 @@ function renderSummary(courses, container) {
 // CARTE COURSE
 // ========================================
 
+
+function getCourseDate(course) {
+    if (!course) return '-';
+    if (course.date) return String(course.date).split('T')[0];
+    if (course.createdAt) return String(course.createdAt).split('T')[0];
+    return '-';
+}
+
 function renderCourseCard(course) {
     var amount = getCourseAmount(course);
     var commission = getCourseCommission(course);
