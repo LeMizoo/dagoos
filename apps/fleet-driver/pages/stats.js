@@ -1,4 +1,3 @@
-```javascript
 // ========================================
 // DRIVER - STATISTIQUES
 // ========================================
@@ -364,4 +363,3 @@ function destroyStatsPage() {
 window.init_stats = init_stats;
 window.refreshDailyStats = refreshDailyStats;
 window.destroyStatsPage = destroyStatsPage;
-```
