@@ -58,7 +58,7 @@ export default function TrustSection() {
 
   const getTransform = (position: number) => {
     const angle = position * 25; // degrés entre chaque carte
-    const translateX = position * 180; // espacement horizontal
+    const translateX = position * 140; // espacement horizontal
     const translateZ = -Math.abs(position) * 150; // profondeur
     const scale = position === 0 ? 1 : 0.75;
     const opacity = position === 0 ? 1 : 0.5;
@@ -72,11 +72,11 @@ export default function TrustSection() {
   };
 
   return (
-    <section className="py-12 bg-gray-900 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 mb-12">
+    <section className="py-6 bg-gray-900 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 mb-4">
         <div className="text-center">
           <span className="text-sm font-semibold text-gray-400 uppercase tracking-[0.2em]">Nos</span>
-          <h2 className="text-4xl md:text-5xl font-bold text-white mt-2 mb-4">partenaires</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-white mt-1 mb-2">partenaires</h2>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
             Des établissements d&apos;exception soigneusement choisis pour vous
           </p>
@@ -85,7 +85,7 @@ export default function TrustSection() {
 
       {/* Carrousel 3D */}
       <div
-        className="relative h-[420px] flex items-center justify-center overflow-hidden"
+        className="relative h-[280px] flex items-center justify-center overflow-hidden"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         style={{ perspective: '1200px' }}
@@ -115,22 +115,22 @@ export default function TrustSection() {
             transformStyle: 'preserve-3d',
             transform: 'rotateY(0deg)',
             width: '800px',
-            height: '350px',
+            height: '220px',
           }}
         >
           {visibleOrgs.map(({ org, position }) => (
             <a
               key={org.id}
               href={`/${org.type === 'FLEET_MANAGER' ? 'fleet' : 'coop'}/${org.slug}`}
-              className="absolute w-60 cursor-pointer transition-all duration-700 ease-out"
+              className="absolute w-48 cursor-pointer transition-all duration-700 ease-out"
               style={{
                 ...getTransform(position),
                 transformStyle: 'preserve-3d',
                 left: '50%',
-                marginLeft: '-120px',
+                marginLeft: '-96px',
               }}
             >
-              <div className={`relative bg-gray-800 rounded-2xl p-5 text-center border border-gray-700 hover:border-gray-500 transition-all duration-500 overflow-hidden group ${
+              <div className={`relative bg-gray-800 rounded-2xl p-3 text-center border border-gray-700 hover:border-gray-500 transition-all duration-500 overflow-hidden group ${
                 position === 0 ? 'shadow-2xl shadow-primary/20 ring-1 ring-primary/30' : ''
               }`}>
                 {/* Motif unique par partenaire avec animation au survol */}
@@ -172,7 +172,7 @@ export default function TrustSection() {
                   })()}
                 </div>
                 {/* Icône */}
-                <div className={`w-16 h-16 bg-gradient-to-br ${gradients[orgs.indexOf(org) % gradients.length]} rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg`}>
+                <div className={`w-12 h-12 bg-gradient-to-br ${gradients[orgs.indexOf(org) % gradients.length]} rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg`}>
                   <span className="text-white font-bold text-xl">{org.name.charAt(0)}</span>
                 </div>
 
@@ -201,7 +201,7 @@ export default function TrustSection() {
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center gap-2 mt-8">
+      <div className="flex justify-center gap-2 mt-3">
         {orgs.map((_, i) => (
           <button
             key={i}
@@ -216,7 +216,7 @@ export default function TrustSection() {
         ))}
       </div>
 
-      <div className="text-center mt-8">
+      <div className="text-center mt-3">
         <p className="text-gray-500 text-sm">
           <span className="text-white font-bold text-lg">{orgs.length}</span> organisations partenaires
         </p>
