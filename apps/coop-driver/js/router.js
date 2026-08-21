@@ -32,6 +32,11 @@ async function apiFetch(endpoint, options) {
 window.apiFetch = apiFetch;
 window.apiGet = function(endpoint) { return apiFetch(endpoint); };
 
+window.apiPost = function(endpoint, body) { 
+  return apiFetch(endpoint, { method: 'POST', body: body }); 
+};
+
+
 window.logout = function() {
   localStorage.removeItem('dagoo_driver_token');
   localStorage.removeItem('dagoo_driver_user');
