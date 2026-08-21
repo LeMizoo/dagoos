@@ -1,4 +1,3 @@
-```javascript
 // ========================================
 // DRIVER - DÉPENSES
 // ========================================
@@ -285,4 +284,3 @@ async function saveDriverExpense() {
 window.init_expenses = init_expenses;
 window.loadDriverExpenses = loadDriverExpenses;
 window.saveDriverExpense = saveDriverExpense;
-```
