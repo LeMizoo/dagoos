@@ -1,4 +1,3 @@
-```javascript
 // ========================================
 // DAGOOS FLEET DRIVER - DASHBOARD HOME
 // ========================================
@@ -2045,4 +2044,3 @@ document.addEventListener(
         loadDriverVehicleInfo();
     }
 );
-```
