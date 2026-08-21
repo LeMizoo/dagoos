@@ -1,3 +1,4 @@
+```javascript
 // ========================================
 // DRIVER FLEET — COURSES
 // Historique + courses acceptées
@@ -689,3 +690,4 @@ window.loadCourses = loadCourses;
 window.filterCourses = filterCourses;
 window.demarrerCourse = demarrerCourse;
 window.terminerCourse = terminerCourse;
+```
