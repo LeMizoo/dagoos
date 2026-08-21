@@ -3,7 +3,7 @@ import { Rocket, ArrowDown, Building2, Truck, Smartphone, Users, Shield, Zap, Ca
 import HeroSlider from '@/components/landing/HeroSlider';
 import HeroParticles from '@/components/landing/HeroParticles';
 import PlansSection from '@/components/landing/PlansSection';
-import DemandeTaxi from '@/components/landing/DemandeTaxi';
+import ServiceCards from '@/components/landing/ServiceCards';
 import { API_BASE_URL } from '@/lib/config';
 import TrustSection from '@/components/landing/TrustSection';
 import AnimatedSection from '@/components/landing/AnimatedSection';
@@ -90,86 +90,8 @@ export default async function LandingPage() {
       {/* NOS PARTENAIRES */}
       <TrustSection />
 
-      {/* DEMANDE DE TAXI */}
-      <DemandeTaxi />
-
-      {/* SECTION RÉSERVATION */}
-      <section id="reservation" className="py-16 bg-gray-50">
-        <div className="max-w-5xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-4">🚌 Départs disponibles</h2>
-          <p className="text-center text-gray-500 mb-8">Choisissez une coopérative pour voir les départs et réserver</p>
-
-          {coopsAvecDeparts.length === 0 ? (
-            <p className="text-center text-gray-400">Aucun départ disponible pour le moment.</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {coopsAvecDeparts.map((org: any) => (
-                <Link
-                  key={org.id}
-                  href={`/coop/${org.slug}`}
-                  className="bg-white rounded-2xl p-6 border-2 border-gray-200 hover:border-emerald-500 hover:shadow-xl transition group"
-                >
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
-                      <Building2 size={24} className="text-emerald-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-gray-800 group-hover:text-emerald-600 transition">{org.name}</h3>
-                      {org.phone && <p className="text-xs text-gray-500 flex items-center gap-1"><Phone size={12} /> {org.phone}</p>}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    {org.departs?.slice(0, 3).map((d: any) => (
-                      <div key={d.id} className="bg-gray-50 rounded-lg p-3">
-                        <p className="text-sm font-semibold text-gray-800">
-                          <MapPin size={14} className="inline mr-1" />
-                          {d.pointDepart} → {d.destination}
-                        </p>
-                        {d.vehicle && (
-                          <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
-                            🚐 <span className="font-semibold">{d.vehicle.model || 'Véhicule'}</span>
-                            <span className="text-gray-400">•</span>
-                            <span className="font-mono">{d.vehicle.plate}</span>
-                            <span className="text-[10px] bg-green-100 text-green-700 rounded-full px-1.5 py-0.5 ml-auto">✓ Récent</span>
-                          </p>
-                        )}
-                        <p className="text-xs text-gray-500 mt-1 flex items-center gap-2">
-                          <Calendar size={12} className="inline mr-1" />
-                          {new Date(d.date).toLocaleDateString('fr-FR')} à {d.heure}
-                          <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 rounded-full px-2 py-0.5 ml-auto">
-                            {getCountdown(d.date, d.heure)}
-                          </span>
-                        </p>
-                        <p className="text-sm font-bold text-emerald-600 mt-1">{Number(d.prix).toLocaleString()} Ar</p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          Places : {d.placesTotal || 26} · Disponible(s) : {(d.placesTotal || 26) - (d.reservations?.length || 0)} · Réservée(s) : {d.reservations?.length || 0}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                  <button className="w-full mt-4 bg-emerald-600 text-white py-2 rounded-lg font-semibold hover:bg-emerald-700 transition text-sm">
-                    Réserver maintenant →
-                  </button>
-                  <div className="mt-3 space-y-1">
-                    <div className="flex items-center gap-1 bg-yellow-400 rounded px-2 py-1">
-                      <span className="font-bold text-black text-[10px]">MVola</span>
-                      <span className="text-black font-extrabold text-[10px]">{org.phone || '034 00 000 00'}</span>
-                    </div>
-                    <div className="flex items-center gap-1 bg-black rounded px-2 py-1">
-                      <span className="font-bold text-orange-500 text-[10px]">Orange</span>
-                      <span className="text-orange-400 font-extrabold text-[10px]">{org.phone || '032 00 000 00'}</span>
-                    </div>
-                    <div className="flex items-center gap-1 bg-red-600 rounded px-2 py-1">
-                      <span className="font-bold text-white text-[10px]">Airtel</span>
-                      <span className="text-white font-extrabold text-[10px]">{org.phone || '033 00 000 00'}</span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+      {/* SECTION SERVICES AVEC CARTES */}
+      <ServiceCards organizations={organizations} coopsAvecDeparts={coopsAvecDeparts} />
 
       {/* CHIFFRES CLÉS */}
       <section className="py-16 bg-gradient-to-r from-blue-600 to-primary text-white">
