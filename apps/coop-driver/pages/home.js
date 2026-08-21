@@ -113,6 +113,7 @@ async function init_home() {
                 '</div>' +
             '</div>' +
             '<div style="display:flex;gap:4px;">' +
+                '<button onclick="loadPage(\'notifications\')" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:#10B981;cursor:pointer;font-size:14px;position:relative;" aria-label="Notifications">🔔</button>' +
                 '<button onclick="goToProfil()" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:#10B981;cursor:pointer;font-size:14px;">👤</button>' +
                 '<button onclick="logout()" style="background:rgba(239,68,68,0.15);border:none;width:32px;height:32px;border-radius:50%;color:#F87171;cursor:pointer;font-size:16px;">⏻</button>' +
             '</div>' +
