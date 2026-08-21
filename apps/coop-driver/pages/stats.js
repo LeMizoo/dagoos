@@ -21,12 +21,12 @@ async function init_stats() {
             '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">' +
                 '<h2 style="font-size:20px;font-weight:bold;margin:0;">Statistiques</h2>' +
                 '<button onclick="refreshStats()" id="btnRefreshStats" ' +
-                    'style="border:1px solid #D1D5DB;background:white;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;">' +
+                    'style="border:1px solid #D1D5DB;background:#064E3B;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;">' +
                     'Actualiser' +
                 '</button>' +
             '</div>' +
 
-            '<div id="statsLoading" style="text-align:center;padding:30px;color:#6B7280;">' +
+            '<div id="statsLoading" style="text-align:center;padding:30px;color:#94A3B8;">' +
                 'Chargement des statistiques...' +
             '</div>' +
 
@@ -36,23 +36,23 @@ async function init_stats() {
 
                 '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px;">' +
 
-                    '<div style="background:white;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
-                        '<p style="font-size:12px;color:#6B7280;margin:0 0 6px;">Courses</p>' +
+                    '<div style="background:#064E3B;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
+                        '<p style="font-size:12px;color:#94A3B8;margin:0 0 6px;">Départs</p>' +
                         '<p id="statTodayCourses" style="font-size:24px;font-weight:bold;color:#10B981;margin:0;">0</p>' +
                     '</div>' +
 
-                    '<div style="background:white;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
-                        '<p style="font-size:12px;color:#6B7280;margin:0 0 6px;">CA</p>' +
+                    '<div style="background:#064E3B;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
+                        '<p style="font-size:12px;color:#94A3B8;margin:0 0 6px;">Passagers</p>' +
                         '<p id="statTodayCA" style="font-size:24px;font-weight:bold;color:#10B981;margin:0;">0 Ar</p>' +
                     '</div>' +
 
-                    '<div style="background:white;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
-                        '<p style="font-size:12px;color:#6B7280;margin:0 0 6px;">Commission</p>' +
+                    '<div style="background:#064E3B;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
+                        '<p style="font-size:12px;color:#94A3B8;margin:0 0 6px;">Recette</p>' +
                         '<p id="statTodayCom" style="font-size:24px;font-weight:bold;color:#EF4444;margin:0;">0 Ar</p>' +
                     '</div>' +
 
-                    '<div style="background:white;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
-                        '<p style="font-size:12px;color:#6B7280;margin:0 0 6px;">Net</p>' +
+                    '<div style="background:#064E3B;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
+                        '<p style="font-size:12px;color:#94A3B8;margin:0 0 6px;">Recette</p>' +
                         '<p id="statTodayNet" style="font-size:24px;font-weight:bold;color:#3B82F6;margin:0;">0 Ar</p>' +
                     '</div>' +
 
@@ -62,23 +62,23 @@ async function init_stats() {
 
                 '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
 
-                    '<div style="background:white;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
-                        '<p style="font-size:12px;color:#6B7280;margin:0 0 6px;">Courses</p>' +
+                    '<div style="background:#064E3B;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
+                        '<p style="font-size:12px;color:#94A3B8;margin:0 0 6px;">Départs</p>' +
                         '<p id="statWeekCourses" style="font-size:24px;font-weight:bold;color:#10B981;margin:0;">0</p>' +
                     '</div>' +
 
-                    '<div style="background:white;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
-                        '<p style="font-size:12px;color:#6B7280;margin:0 0 6px;">CA</p>' +
+                    '<div style="background:#064E3B;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
+                        '<p style="font-size:12px;color:#94A3B8;margin:0 0 6px;">Passagers</p>' +
                         '<p id="statWeekCA" style="font-size:24px;font-weight:bold;color:#10B981;margin:0;">0 Ar</p>' +
                     '</div>' +
 
-                    '<div style="background:white;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
-                        '<p style="font-size:12px;color:#6B7280;margin:0 0 6px;">Commission</p>' +
+                    '<div style="background:#064E3B;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
+                        '<p style="font-size:12px;color:#94A3B8;margin:0 0 6px;">Recette</p>' +
                         '<p id="statWeekCom" style="font-size:24px;font-weight:bold;color:#EF4444;margin:0;">0 Ar</p>' +
                     '</div>' +
 
-                    '<div style="background:white;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
-                        '<p style="font-size:12px;color:#6B7280;margin:0 0 6px;">Net</p>' +
+                    '<div style="background:#064E3B;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
+                        '<p style="font-size:12px;color:#94A3B8;margin:0 0 6px;">Commission</p>' +
                         '<p id="statWeekNet" style="font-size:24px;font-weight:bold;color:#3B82F6;margin:0;">0 Ar</p>' +
                     '</div>' +
 

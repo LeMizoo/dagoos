@@ -50,13 +50,15 @@ async function init_finances() {
         }
 
         contentEl.innerHTML =
-            '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
+            '<div onclick="loadPage(\'versements\')" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;border:1px solid #10B981;">' +
                 '<h3 style="color:#10B981;margin-bottom:10px;font-size:13px;">📤 Versements</h3>' +
                 versementsHtml +
+                '<div style="text-align:right;font-size:10px;color:#94A3B8;">Voir tout →</div>' +
             '</div>' +
-            '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
+            '<div onclick="loadPage(\'expenses\')" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;border:1px solid #EF4444;">' +
                 '<h3 style="color:#EF4444;margin-bottom:10px;font-size:13px;">💸 Dépenses</h3>' +
                 expensesHtml +
+                '<div style="text-align:right;font-size:10px;color:#94A3B8;">Voir tout →</div>' +
             '</div>';
     } catch (e) {
         var contentEl = document.getElementById('financesContent');
