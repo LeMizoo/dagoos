@@ -143,6 +143,74 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 });
 
+
+// GET /api/departs/mine - Départ du jour du chauffeur connecté
+router.get('/mine', authMiddleware, async (req, res) => {
+  try {
+    if (req.user.role !== 'DRIVER' || !req.user.driverId) {
+      return res.status(403).json({ error: 'Réservé aux chauffeurs' });
+    }
+
+    const driver = await prisma.driver.findUnique({
+      where: { id: req.user.driverId },
+      select: { vehicleId: true, organizationId: true },
+    });
+
+    if (!driver || !driver.vehicleId) {
+      return res.json({ depart: null });
+    }
+
+    const now = new Date();
+    const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const tomorrow = new Date(today);
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+
+    const depart = await prisma.depart.findFirst({
+      where: {
+        vehiculeId: driver.vehicleId,
+        date: { gte: today, lt: tomorrow },
+        statut: { in: ['PUBLISHED', 'EMBARQUEMENT', 'TERMINÉ'] },
+      },
+      include: {
+        vehicle: { select: { id: true, plate: true, model: true } },
+        reservations: {
+          orderBy: { place: 'asc' },
+          select: {
+            id: true, place: true, passagerNom: true, telephone: true,
+            statut: true, paiementRef: true, paiementInfo: true,
+          },
+        },
+      },
+    });
+
+    if (!depart) return res.json({ depart: null });
+
+    const passagersPayes = depart.reservations.filter(r => r.statut === 'CONFIRMED').length;
+    const recette = passagersPayes * depart.prix;
+    const versementCoop = recette * 0.8;
+    const commissionChauffeur = recette * 0.2;
+
+    res.json({
+      depart: {
+        id: depart.id, pointDepart: depart.pointDepart, destination: depart.destination,
+        date: depart.date, heure: depart.heure, prix: depart.prix,
+        placesTotal: depart.placesTotal, statut: depart.statut,
+      },
+      vehicle: depart.vehicle,
+      passagers: depart.reservations,
+      finance: {
+        tarifUnitaire: depart.prix, passagersPayes,
+        passagersTotal: depart.reservations.length,
+        placesRestantes: depart.placesTotal - depart.reservations.length,
+        recette, versementCoop, commissionChauffeur,
+      },
+    });
+  } catch (error) {
+    console.error('GET /departs/mine:', error);
+    res.status(500).json({ error: 'Erreur récupération départ' });
+  }
+});
+
 // GET /api/departs/:id - Détail d'un départ
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
@@ -168,6 +236,41 @@ router.get('/:id', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('GET /departs/:id:', error);
     res.status(500).json({ error: 'Erreur récupération départ' });
+  }
+});
+
+
+// POST /api/departs/:id/transition - Changer le statut du départ (chauffeur)
+router.post('/:id/transition', authMiddleware, async (req, res) => {
+  try {
+    if (req.user.role !== 'DRIVER' || !req.user.driverId) {
+      return res.status(403).json({ error: 'Réservé aux chauffeurs' });
+    }
+    const { action } = req.body;
+    const driver = await prisma.driver.findUnique({
+      where: { id: req.user.driverId },
+      select: { vehicleId: true, organizationId: true },
+    });
+    if (!driver || !driver.vehicleId) return res.status(403).json({ error: 'Aucun véhicule assigné' });
+    const depart = await prisma.depart.findUnique({ where: { id: req.params.id } });
+    if (!depart) return res.status(404).json({ error: 'Départ introuvable' });
+    if (depart.vehiculeId !== driver.vehicleId) return res.status(403).json({ error: 'Ce départ ne vous est pas assigné' });
+    if (depart.organizationId !== driver.organizationId) return res.status(403).json({ error: 'Accès refusé' });
+
+    let nouveauStatut;
+    if (action === 'start_embarquement' && depart.statut === 'PUBLISHED') nouveauStatut = 'EMBARQUEMENT';
+    else if (action === 'terminer' && depart.statut === 'EMBARQUEMENT') nouveauStatut = 'TERMINÉ';
+    else return res.status(400).json({ error: `Transition invalide : ${depart.statut} → ${action}` });
+
+    const updated = await prisma.depart.update({
+      where: { id: depart.id },
+      data: { statut: nouveauStatut },
+      include: { vehicle: { select: { id: true, plate: true, model: true } } },
+    });
+    res.json({ ok: true, depart: updated, message: `Départ passé à ${nouveauStatut}` });
+  } catch (error) {
+    console.error('POST /departs/:id/transition:', error);
+    res.status(500).json({ error: 'Erreur transition' });
   }
 });
 
@@ -255,7 +358,7 @@ router.get('/:id/manifest', authMiddleware, async (req, res) => {
       include: {
         vehicle: { select: { id: true, plate: true, model: true } },
         reservations: {
-          where: { statut: 'CONFIRMED' },
+          where: { statut: { in: ['PENDING', 'CONFIRMED', 'CANCELLED'] } },
           orderBy: { place: 'asc' },
           select: {
             id: true,

@@ -43,13 +43,18 @@ async function init_home() {
         var orgType = currentDriver?.organization?.type || 'FLEET_MANAGER';
         var isCoop = true; // Toujours Coop dans cette application
         
-        // Charger les données spécifiques selon le type
-        if (isCoop) {
-            // Charger les réservations du véhicule (manifest)
-            try {
-                var reservations = await apiGet('/reservations/mine').catch(() => []);
-                window.currentReservations = Array.isArray(reservations) ? reservations : [];
-            } catch(e) { window.currentReservations = []; }
+        // Charger le départ du jour et le manifest
+        try {
+            var departData = await apiGet('/departs/mine').catch(() => ({ depart: null }));
+            window.currentDepart = departData.depart || null;
+            window.currentVehicle = departData.vehicle || null;
+            window.currentPassagers = departData.passagers || [];
+            window.currentFinance = departData.finance || null;
+        } catch(e) {
+            window.currentDepart = null;
+            window.currentVehicle = null;
+            window.currentPassagers = [];
+            window.currentFinance = null;
         }
         
         // Stocker dans le contexte global
@@ -101,100 +106,87 @@ async function init_home() {
                 '<div>' +
                     '<div style="font-size:14px;font-weight:700;color:#10B981;">' + (user.name || 'Chauffeur') + '</div>' +
                     '<div style="font-size:10px;color:#94A3B8;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">' +
-                (isCoop ? '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#22C55E;">🏢 Coopérative</span>' : '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#10B981;">🚛 Flotte</span>') +
+                        '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#22C55E;">🏢 Coopérative</span>' +
                         '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:' + statusColor + ';color:#fff;">' + statusLabel + '</span>' +
-                        (plate ? '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#10B981;">🏍️ ' + plate + '</span>' : '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#E74C3C;color:#fff;">⚠️ Sans moto</span>') +
+                        (plate ? '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#10B981;">🏍️ ' + plate + '</span>' : '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#E74C3C;color:#fff;">⚠️ Sans véhicule</span>') +
                         '<span style="color:#94A3B8;">' + (user.driverCode || '') + '</span>' +
                     '</div>' +
                 '</div>' +
             '</div>' +
             '<div style="display:flex;gap:4px;">' +
-                '<button onclick="loadPage(\'profil\')" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:#10B981;cursor:pointer;font-size:14px;">👤</button>' +
+                '<button onclick="goToProfil()" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:#10B981;cursor:pointer;font-size:14px;">👤</button>' +
                 '<button onclick="logout()" style="background:rgba(239,68,68,0.15);border:none;width:32px;height:32px;border-radius:50%;color:#F87171;cursor:pointer;font-size:16px;">⏻</button>' +
             '</div>' +
         '</div>' +
 
-        // CONTENU
-        '<div style="padding:12px;max-width:500px;margin:0 auto;padding-bottom:80px;">' +
-            
-            // ALERTE COMPTE BLOQUÉ
-            (estBloque ? '<div style="background:#E74C3C;color:#fff;padding:10px;border-radius:10px;text-align:center;margin-bottom:10px;animation:pulse 1.5s infinite;">🔒 Compte bloqué - Régularisez vos versements</div>' : '') +
+        '<div style="padding:14px;max-width:600px;margin:auto;">' +
 
-            // BOUTONS STATUT
-            '<div style="display:flex;gap:8px;margin-bottom:10px;">' +
-                '<button onclick="changeStatus(\'present\')" style="flex:1;padding:12px 6px;background:#22C55E;color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' + (estBloque ? 'disabled' : '') + '>▶ Début</button>' +
-                '<button onclick="changeStatus(\'pause\')" style="flex:1;padding:12px 6px;background:#F59E0B;color:#000;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' + (estBloque || statutPresence !== 'present' ? 'disabled' : '') + '>⏸ Pause</button>' +
-                '<button onclick="changeStatus(\'termine\')" style="flex:1;padding:12px 6px;background:#E74C3C;color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' + (estBloque || statutPresence === 'absent' || statutPresence === 'termine' ? 'disabled' : '') + '>⏹ Fin</button>' +
-            '</div>' +
-
-            // STATS DU JOUR (les deux types)
-            '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
-            '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
-                '<h3 style="color:#10B981;margin-bottom:10px;font-size:13px;">📅 Aujourd\'hui</h3>' +
-                '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;">' +
-                    '<div style="background:#252525;border-radius:10px;padding:8px;"><div style="font-size:18px;font-weight:800;color:#fff;" id="statCoursesJour">0</div><div style="font-size:9px;color:#888;">Courses</div></div>' +
-                    '<div style="background:#252525;border-radius:10px;padding:8px;"><div style="font-size:18px;font-weight:800;color:#22C55E;" id="statCAJour">0</div><div style="font-size:9px;color:#888;">CA (Ar)</div></div>' +
-                    '<div style="background:#252525;border-radius:10px;padding:8px;"><div style="font-size:18px;font-weight:800;color:#3B82F6;" id="statCommissionJour">0</div><div style="font-size:9px;color:#888;">Com. (Ar)</div></div>' +
-                    '<div style="background:#252525;border-radius:10px;padding:8px;"><div style="font-size:18px;font-weight:800;color:#8B5CF6;" id="statNetJour">0</div><div style="font-size:9px;color:#888;">Net (Ar)</div></div>' +
-                '</div>' +
-            '</div>' +
-
-            // STATS SEMAINE
-            '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
-                '<h3 style="color:#10B981;margin-bottom:10px;font-size:13px;">📆 Cette semaine</h3>' +
-                '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;">' +
-                    '<div style="background:#252525;border-radius:10px;padding:8px;"><div style="font-size:16px;font-weight:800;color:#fff;" id="statCoursesSem">0</div><div style="font-size:9px;color:#888;">Courses</div></div>' +
-                    '<div style="background:#252525;border-radius:10px;padding:8px;"><div style="font-size:16px;font-weight:800;color:#22C55E;" id="statCASem">0</div><div style="font-size:9px;color:#888;">CA (Ar)</div></div>' +
-                    '<div style="background:#252525;border-radius:10px;padding:8px;"><div style="font-size:16px;font-weight:800;color:#3B82F6;" id="statCommissionSem">0</div><div style="font-size:9px;color:#888;">Com. (Ar)</div></div>' +
-                    '<div style="background:#252525;border-radius:10px;padding:8px;"><div style="font-size:16px;font-weight:800;color:#8B5CF6;" id="statNetSem">0</div><div style="font-size:9px;color:#888;">Net (Ar)</div></div>' +
-                '</div>' +
-            '</div>' +
-
-            // MANIFEST PASSAGERS (COOP UNIQUEMENT)
-            (isCoop ? '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
-                '<h3 style="color:#10B981;margin-bottom:10px;font-size:13px;">📋 Manifest passagers</h3>' +
-                '<div id="manifestContent">' +
-                    (window.currentReservations && window.currentReservations.length > 0 ? 
-                        window.currentReservations.map(function(r) {
-                            return '<div style="background:#252525;border-radius:8px;padding:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">' +
-                                '<span style="color:#fff;font-weight:600;">' + r.passagerNom + '</span>' +
-                                '<span style="color:#10B981;font-weight:700;">' + r.place + '</span>' +
-                            '</div>';
-                        }).join('') : 
-                        '<p style="color:#94A3B8;text-align:center;padding:10px;">Aucun passager</p>') +
-                '</div>' +
-            '</div>' : '') +
-
-            // NOUVELLE COURSE RAPIDE
-            '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
-                '<h3 style="color:#10B981;margin-bottom:10px;font-size:13px;">➕ Nouvelle course</h3>' +
-                '<div style="display:flex;gap:8px;margin-bottom:8px;">' +
-                    '<select id="typeCourse" onchange="updateCourseForm()" style="flex:1;padding:8px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;">' +
-                        '<option value="livraison">📦 Livraison</option>' +
-                        '<option value="transport">🚌 Transport</option>' +
-                        '<option value="marchandises">🚛 Marchandises</option>' +
-                    '</select>' +
-                '</div>' +
-                '<div id="courseForm">' +
-                    '<div style="display:flex;gap:8px;margin-bottom:8px;">' +
-                        '<input type="number" id="kmDepart" placeholder="Km départ" step="0.1" oninput="calcCourse()" style="flex:1;padding:8px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;">' +
-                        '<input type="number" id="kmArrivee" placeholder="Km arrivée" step="0.1" oninput="calcCourse()" style="flex:1;padding:8px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;">' +
+            // DÉPART DU JOUR
+            (window.currentDepart ? 
+                '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #10B981;">' +
+                    '<h3 style="color:#10B981;margin-bottom:10px;font-size:13px;">📍 DÉPART DU JOUR</h3>' +
+                    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">' +
+                        '<div><span style="color:#94A3B8;">Départ</span><br><span style="color:#fff;font-weight:600;">' + (window.currentDepart.pointDepart || '') + '</span></div>' +
+                        '<div><span style="color:#94A3B8;">Destination</span><br><span style="color:#fff;font-weight:600;">' + (window.currentDepart.destination || '') + '</span></div>' +
+                        '<div><span style="color:#94A3B8;">Heure</span><br><span style="color:#fff;font-weight:600;">' + (window.currentDepart.heure || '') + '</span></div>' +
+                        '<div><span style="color:#94A3B8;">Véhicule</span><br><span style="color:#fff;font-weight:600;">' + (window.currentVehicle?.plate || 'N/A') + '</span></div>' +
+                        '<div><span style="color:#94A3B8;">Tarif fixe</span><br><span style="color:#10B981;font-weight:700;">' + (window.currentDepart.prix || 0) + ' Ar</span></div>' +
+                        '<div><span style="color:#94A3B8;">Occupation</span><br><span style="color:#fff;font-weight:600;">' + (window.currentFinance?.passagersTotal || 0) + '/' + (window.currentDepart.placesTotal || 0) + ' places</span></div>' +
                     '</div>' +
-                    '<div style="text-align:center;color:#94A3B8;font-size:11px;margin-bottom:8px;">📏 Distance : <span id="distanceCalc">0</span> km | 💰 Prix : <span id="prixCalc" style="color:#10B981;font-weight:700;">0 Ar</span></div>' +
-                    '<div style="font-size:10px;color:#888;text-align:center;margin-bottom:8px;">💰 Vous gardez 20% · 📤 Vous versez 80%</div>' +
-                '</div>' +
-                '<button onclick="enregistrerCourse()" ' + (estBloque || statutPresence !== 'present' || !currentVehicle ? 'disabled' : '') + ' style="width:100%;padding:12px;background:#F59E0B;color:#0A1F18;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;">✅ Enregistrer la course</button>' +
-                '<div id="courseMsg" style="margin-top:8px;text-align:center;font-size:11px;"></div>' +
-            '</div>' +
+                    '<div style="margin-top:10px;text-align:center;">' +
+                        '<span style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;' + 
+                            (window.currentDepart.statut === 'PUBLISHED' ? 'background:#F59E0B;color:#0A1F18;' : 
+                             window.currentDepart.statut === 'EMBARQUEMENT' ? 'background:#10B981;color:#0A1F18;' : 
+                             'background:#EF4444;color:#fff;') + '">' + window.currentDepart.statut + '</span>' +
+                    '</div>' +
+                    '<div style="display:flex;gap:8px;margin-top:10px;">' +
+                        (window.currentDepart.statut === 'PUBLISHED' ? 
+                            '<button onclick="startEmbarquement()" style="flex:1;padding:10px;background:#10B981;color:#0A1F18;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:12px;">🚀 Commencer l\'embarquement</button>' : '') +
+                        (window.currentDepart.statut === 'EMBARQUEMENT' ? 
+                            '<button onclick="terminerDepart()" style="flex:1;padding:10px;background:#EF4444;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:12px;">✅ Clôturer le départ</button>' : '') +
+                    '</div>' +
+                '</div>' : 
+                '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;text-align:center;">' +
+                    '<p style="color:#94A3B8;font-size:13px;">Aucun départ assigné aujourd\'hui</p>' +
+                '</div>') +
 
-            // DÉPENSES (les deux types)
+            // MANIFEST PASSAGERS
+            (window.currentPassagers && window.currentPassagers.length > 0 ? 
+                '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
+                    '<h3 style="color:#10B981;margin-bottom:10px;font-size:13px;">📋 MANIFEST PASSAGERS (' + window.currentPassagers.length + ')</h3>' +
+                    window.currentPassagers.map(function(p) {
+                        var statutColor = p.statut === 'CONFIRMED' ? '#22C55E' : p.statut === 'PENDING' ? '#F59E0B' : '#EF4444';
+                        var statutLabel = p.statut === 'CONFIRMED' ? 'PAYÉ' : p.statut === 'PENDING' ? 'EN ATTENTE' : 'NON PAYÉ';
+                        return '<div style="background:#0A1F18;border-radius:8px;padding:10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">' +
+                            '<div>' +
+                                '<div style="color:#fff;font-weight:600;font-size:12px;">' + p.passagerNom + '</div>' +
+                                '<div style="color:#94A3B8;font-size:10px;">Place ' + p.place + ' · ' + (p.telephone || '') + '</div>' +
+                            '</div>' +
+                            '<span style="padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;background:' + statutColor + ';color:#0A1F18;">' + statutLabel + '</span>' +
+                        '</div>';
+                    }).join('') +
+                '</div>' : '') +
+
+            // RÉCAPITULATIF FINANCIER
+            (window.currentFinance ? 
+                '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
+                    '<h3 style="color:#10B981;margin-bottom:10px;font-size:13px;">💰 RÉCAPITULATIF FINANCIER</h3>' +
+                    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">' +
+                        '<div style="background:#0A1F18;border-radius:8px;padding:8px;"><span style="color:#94A3B8;">Passagers payés</span><br><span style="color:#fff;font-weight:700;font-size:16px;">' + window.currentFinance.passagersPayes + '/' + window.currentFinance.passagersTotal + '</span></div>' +
+                        '<div style="background:#0A1F18;border-radius:8px;padding:8px;"><span style="color:#94A3B8;">Recette</span><br><span style="color:#22C55E;font-weight:700;font-size:16px;">' + window.currentFinance.recette + ' Ar</span></div>' +
+                        '<div style="background:#0A1F18;border-radius:8px;padding:8px;"><span style="color:#94A3B8;">Versement Coop (80%)</span><br><span style="color:#F59E0B;font-weight:700;">' + window.currentFinance.versementCoop + ' Ar</span></div>' +
+                        '<div style="background:#0A1F18;border-radius:8px;padding:8px;"><span style="color:#94A3B8;">Commission (20%)</span><br><span style="color:#10B981;font-weight:700;">' + window.currentFinance.commissionChauffeur + ' Ar</span></div>' +
+                    '</div>' +
+                '</div>' : '') +
+
+            // DÉPENSES
             '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
                 '<h3 style="color:#10B981;margin-bottom:10px;font-size:13px;">💰 Dépenses du jour</h3>' +
                 '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;">' +
-                    '<button onclick="addExpense(\'carburant\')" style="padding:10px 4px;background:#0A1F18;color:#10B981;border:1px solid #10B981;border-radius:8px;cursor:pointer;font-size:10px;">⛽ Carburant</button>' +
-                    '<button onclick="addExpense(\'entretien\')" style="padding:10px 4px;background:#0A1F18;color:#10B981;border:1px solid #10B981;border-radius:8px;cursor:pointer;font-size:10px;">🔧 Entretien</button>' +
-                    '<button onclick="addExpense(\'pneu\')" style="padding:10px 4px;background:#0A1F18;color:#10B981;border:1px solid #10B981;border-radius:8px;cursor:pointer;font-size:10px;">🛞 Pneus</button>' +
-                    '<button onclick="addExpense(\'autre\')" style="padding:10px 4px;background:#0A1F18;color:#10B981;border:1px solid #10B981;border-radius:8px;cursor:pointer;font-size:10px;">📝 Autre</button>' +
+                    '<button onclick="addCarburant()" style="padding:10px 4px;background:#0A1F18;color:#10B981;border:1px solid #10B981;border-radius:8px;cursor:pointer;font-size:10px;">⛽ Carburant</button>' +
+                    '<button onclick="addEntretien()" style="padding:10px 4px;background:#0A1F18;color:#10B981;border:1px solid #10B981;border-radius:8px;cursor:pointer;font-size:10px;">🔧 Entretien</button>' +
+                    '<button onclick="addPneu()" style="padding:10px 4px;background:#0A1F18;color:#10B981;border:1px solid #10B981;border-radius:8px;cursor:pointer;font-size:10px;">🛞 Pneus</button>' +
+                    '<button onclick="addAutre()" style="padding:10px 4px;background:#0A1F18;color:#10B981;border:1px solid #10B981;border-radius:8px;cursor:pointer;font-size:10px;">📝 Autre</button>' +
                 '</div>' +
                 '<div id="expensesList" style="max-height:120px;overflow-y:auto;font-size:11px;"></div>' +
                 '<div id="expensesTotal" style="margin-top:8px;text-align:right;font-weight:700;color:#EF4444;font-size:12px;"></div>' +
@@ -208,178 +200,7 @@ async function init_home() {
                     '<div><span style="color:#94A3B8;">Organisation</span><br><span style="font-weight:600;color:#fff;">' + orgName + '</span></div>' +
                 '</div>' +
             '</div>' +
-        '</div>';
-
-    // Afficher les courses disponibles
-    try {
-        var notifs = await apiGet('/notifications?type=course_request&read=false').catch(() => []);
-        // Filtrer : uniquement les notifications du chauffeur connecté
-        notifs = Array.isArray(notifs) ? notifs.filter(function(n) {
-          return n.type === 'course_request' || n.type === 'lead_action';
-        }) : [];
-        if (notifs && notifs.length > 0) {
-            var notifHtml = '<div style="background:#FEF3C7;border-radius:12px;padding:12px;margin-bottom:12px;">' +
-                '<p style="font-weight:bold;color:#92400E;margin-bottom:8px;">🔔 Nouvelles courses disponibles</p>';
-            notifs.forEach(function(n) {
-                notifHtml += '<div style="background:white;border-radius:8px;padding:10px;margin-bottom:6px;">' +
-                    '<p style="font-weight:bold;color:#1F2937;">' + (n.title || 'Course disponible') + '</p>' +
-                    '<p style="font-size:12px;color:#6B7280;margin-top:2px;">' + (n.message || '') + '</p>' +
-                    '<div style="display:flex;gap:8px;margin-top:8px;">' +
-                        '<button onclick="accepterCourse(\'' + n.id + '\')" style="flex:1;background:#10B981;color:white;border:none;padding:8px 12px;border-radius:6px;font-weight:bold;">✅ Accepter</button>' +
-                        '<button onclick="refuserCourse(\'' + n.id + '\')" style="flex:1;background:#EF4444;color:white;border:none;padding:8px 12px;border-radius:6px;font-weight:bold;">❌ Refuser</button>' +
-                    '</div>' +
-                '</div>';
-            });
-            notifHtml += '</div>';
-            
-            // Insérer dans le main après le header
-            var main = document.getElementById('mainContent');
-            var contentDiv = main.querySelector('div[style*="max-width"]');
-            if (contentDiv) {
-                contentDiv.insertAdjacentHTML('afterbegin', notifHtml);
-            }
-        }
-    } catch(e) { console.log('Pas de notifications'); }
-
-    loadStats(driverId);
-    loadExpenses();
-    if (refreshInterval) clearInterval(refreshInterval);
-    refreshInterval = setInterval(function() { loadStats(driverId); }, 30000);
-}
-
-// ========== STATS ==========
-async function loadStats(driverId) {
-    try {
-        var today = new Date().toISOString().split('T')[0];
-        var coursesDisponibles = await apiGet('/notifications?type=course_request&read=false').catch(() => []);
-    
-    // Polling des notifications toutes les 30 secondes
-    setInterval(async function() {
-      try {
-        var notifs = await apiGet('/notifications?read=false').catch(() => []);
-        if (notifs && notifs.length > 0) {
-          // Badge dans la navigation
-          var badge = document.getElementById('notifBadge');
-          if (badge) {
-            badge.textContent = notifs.length;
-            badge.style.display = 'flex';
-          }
-        }
-      } catch(e) {}
-    }, 30000);
-        var courses = await apiGet('/finances/courses?driverId=' + driverId);
-        var arr = Array.isArray(courses) ? courses : [];
-        var todayCourses = arr.filter(function(c) { return c.date && c.date.startsWith(today); });
-        
-        var caJour = todayCourses.reduce(function(s, c) { return s + (c.price || 0); }, 0);
-        var comJour = Math.round(caJour * 0.20);
-        var netJour = Math.round(caJour * 0.80);
-        var caSem = arr.reduce(function(s, c) { return s + (c.price || 0); }, 0);
-        var comSem = Math.round(caSem * 0.20);
-        var netSem = Math.round(caSem * 0.80);
-
-        setText('statCoursesJour', todayCourses.length);
-        setText('statCAJour', caJour.toLocaleString());
-        setText('statCommissionJour', comJour.toLocaleString());
-        setText('statNetJour', netJour.toLocaleString());
-        setText('statCoursesSem', arr.length);
-        setText('statCASem', caSem.toLocaleString());
-        setText('statCommissionSem', comSem.toLocaleString());
-        setText('statNetSem', netSem.toLocaleString());
-    } catch(e) { console.error('Stats:', e); }
-}
-
-function setText(id, val) { var el = document.getElementById(id); if (el) el.textContent = val; }
-
-// ========== COURSE ==========
-function calcCourse() {
-    var d = parseFloat(document.getElementById('kmDepart')?.value) || 0;
-    var a = parseFloat(document.getElementById('kmArrivee')?.value) || 0;
-    if (a > d && d > 0) {
-        var dist = a - d;
-        var prix = Math.round(2000 + (dist * 500));
-        setText('distanceCalc', dist.toFixed(1));
-        setText('prixCalc', prix.toLocaleString() + ' Ar');
-    }
-}
-
-function updateCourseForm() {
-    var type = document.getElementById('typeCourse')?.value;
-    var form = document.getElementById('courseForm');
-    if (type === 'location') {
-        if (form) form.innerHTML = '<div style="text-align:center;color:#10B981;padding:10px;">📅 Tarif location : 13 500 Ar/jour</div>';
-    } else if (type === 'ady_varotra') {
-        if (form) form.innerHTML = '<input type="number" id="montantAdy" placeholder="Montant négocié (Ar)" style="width:100%;padding:8px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;margin-bottom:8px;"><div style="font-size:10px;color:#888;text-align:center;">💰 Vous gardez 20% · 📤 Vous versez 80%</div>';
-    } else {
-        if (form) form.innerHTML = '<div style="display:flex;gap:8px;margin-bottom:8px;"><input type="number" id="kmDepart" placeholder="Km départ" step="0.1" oninput="calcCourse()" style="flex:1;padding:8px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;"><input type="number" id="kmArrivee" placeholder="Km arrivée" step="0.1" oninput="calcCourse()" style="flex:1;padding:8px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;"></div><div style="text-align:center;color:#94A3B8;font-size:11px;margin-bottom:8px;">📏 Distance : <span id="distanceCalc">0</span> km | 💰 Prix : <span id="prixCalc" style="color:#10B981;font-weight:700;">0 Ar</span></div><div style="font-size:10px;color:#888;text-align:center;margin-bottom:8px;">💰 Vous gardez 20% · 📤 Vous versez 80%</div>';
-    }
-}
-
-async function enregistrerCourse() {
-    var type = document.getElementById('typeCourse')?.value || 'course';
-    var user = JSON.parse(localStorage.getItem('dagoo_driver_user') || '{}');
-    var msg = document.getElementById('courseMsg');
-    var token = localStorage.getItem('dagoo_driver_token');
-    var distance = 0, montant = 0;
-
-    if (type === 'course') {
-        var d = parseFloat(document.getElementById('kmDepart')?.value) || 0;
-        var a = parseFloat(document.getElementById('kmArrivee')?.value) || 0;
-        if (a <= d || d <= 0) { if (msg) msg.innerHTML = '<span style="color:#F87171;">Km invalides</span>'; return; }
-        distance = a - d;
-        montant = Math.round(2000 + (distance * 500));
-    } else if (type === 'ady_varotra') {
-        montant = parseFloat(document.getElementById('montantAdy')?.value) || 0;
-        if (montant <= 0) { if (msg) msg.innerHTML = '<span style="color:#F87171;">Montant requis</span>'; return; }
-    } else if (type === 'location') {
-        montant = 13500;
-    }
-
-    if (!confirm('Confirmer la course ?\n' + (type === 'location' ? '📅 Location : ' : distance > 0 ? '📏 ' + distance.toFixed(1) + ' km - ' : '') + '💰 ' + montant.toLocaleString() + ' Ar\n💵 Vous gardez : ' + Math.round(montant * 0.20).toLocaleString() + ' Ar\n📤 Vous versez : ' + Math.round(montant * 0.80).toLocaleString() + ' Ar')) return;
-
-    try {
-        var r = await fetch(DAGOOS_CONFIG.apiUrl + '/finances/courses', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('dagoo_driver_token') },
-            body: JSON.stringify({ driverId: user.driverId, vehicleId: currentVehicle?.id, type: type, distanceKm: distance, price: montant, commission: Math.round(montant * 0.80) })
-        });
-        if (r.ok) {
-            if (msg) msg.innerHTML = '<span style="color:#22C55E;">✅ Course enregistrée !</span>';
-            loadStats(user.driverId);
-            // Vider les champs
-            var kmD = document.getElementById('kmDepart'); if (kmD) kmD.value = '';
-            var kmA = document.getElementById('kmArrivee'); if (kmA) kmA.value = '';
-            var mAdy = document.getElementById('montantAdy'); if (mAdy) mAdy.value = '';
-            setText('distanceCalc', '0');
-            setText('prixCalc', '0 Ar');
-        } else {
-            var err = await r.json();
-            if (msg) msg.innerHTML = '<span style="color:#F87171;">❌ ' + (err.error || 'Erreur') + '</span>';
-        }
-    } catch(e) {
-        if (msg) msg.innerHTML = '<span style="color:#F87171;">❌ Erreur réseau</span>';
-    }
-}
-
-// ========== STATUT ==========
-async function changeStatus(status) {
-    var labels = { present: 'En service', pause: 'En pause', termine: 'Terminé' };
-    var colors = { present: '#22C55E', pause: '#F59E0B', termine: '#E74C3C' };
-    statutPresence = status;
-    
-    var user = JSON.parse(localStorage.getItem('dagoo_driver_user') || '{}');
-    try {
-        await fetch(DAGOOS_CONFIG.apiUrl + '/drivers/me/status', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('dagoo_driver_token') },
-            body: JSON.stringify({ status: status === 'present' ? 'AVAILABLE' : status === 'pause' ? 'ON_BREAK' : 'OFFLINE' })
-        });
-    } catch(e) { console.error(e); }
-    
-    // Rafraîchir la page pour mettre à jour les boutons
-    init_home();
-    if (status === 'termine' && currentDriver) proposerVersement();
-}
+        '</div>';};
 
 async function accepterCourse(notificationId) {
   var user = JSON.parse(localStorage.getItem('dagoo_driver_user') || '{}');
@@ -441,6 +262,58 @@ async function proposerVersement() {
 }
 
 // ========== DÉPENSES ==========
+
+
+// Fonction pour changer le statut du départ
+
+// Fonctions wrapper pour les boutons
+function startEmbarquement() { transitionDepart('start_embarquement'); }
+function terminerDepart() { transitionDepart('terminer'); }
+function goToProfil() { loadPage('profil'); }
+function addCarburant() { addExpense('carburant'); }
+function addEntretien() { addExpense('entretien'); }
+function addPneu() { addExpense('pneu'); }
+function addAutre() { addExpense('autre'); }
+
+async function transitionDepart(action) {
+    if (!window.currentDepart) return;
+    
+    const btn = event?.target;
+    if (btn) btn.disabled = true;
+    
+    try {
+        const result = await apiPost('/departs/' + window.currentDepart.id + '/transition', { action });
+        if (result.ok) {
+            alert('✅ ' + result.message);
+            // Recharger les données
+            await loadHomeData();
+            await init_home();
+        } else {
+            alert('❌ ' + (result.error || 'Erreur transition'));
+        }
+    } catch(e) {
+        alert('❌ Erreur : ' + e.message);
+    }
+    
+    if (btn) btn.disabled = false;
+}
+
+// Fonction pour recharger les données du Home
+async function loadHomeData() {
+    try {
+        var departData = await apiGet('/departs/mine').catch(() => ({ depart: null }));
+        window.currentDepart = departData.depart || null;
+        window.currentVehicle = departData.vehicle || null;
+        window.currentPassagers = departData.passagers || [];
+        window.currentFinance = departData.finance || null;
+    } catch(e) {
+        window.currentDepart = null;
+        window.currentVehicle = null;
+        window.currentPassagers = [];
+        window.currentFinance = null;
+    }
+}
+
 function addExpense(type) {
     var amount = prompt('Montant (' + type + ') en Ar :');
     if (!amount || isNaN(amount)) return;
@@ -482,11 +355,6 @@ function loadExpenses() {
 
 window.init_home = init_home;
 window.addExpense = addExpense;
-window.changeStatus = changeStatus;
-window.enregistrerCourse = enregistrerCourse;
-window.calcCourse = calcCourse;
-window.updateCourseForm = updateCourseForm;
-window.loadStats = loadStats;
 
 // Chargement des infos du véhicule
 async function loadDriverVehicleInfo() {
