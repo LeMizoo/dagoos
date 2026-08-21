@@ -13,7 +13,6 @@ var refreshInterval = null;
 async function init_home() {
     var main = document.getElementById('mainContent');
     var user = JSON.parse(localStorage.getItem("dagoo_driver_user") || "{}");
-    var token = localStorage.getItem('dagoo_driver_token');
     var driverId = user.driverId;
 
     // Charger les tarifs/types de l'organisation
@@ -181,8 +180,8 @@ async function init_home() {
                     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">' +
                         '<div style="background:#0A1F18;border-radius:8px;padding:8px;"><span style="color:#94A3B8;">Passagers payés</span><br><span style="color:#fff;font-weight:700;font-size:16px;">' + window.currentFinance.passagersPayes + '/' + window.currentFinance.passagersTotal + '</span></div>' +
                         '<div style="background:#0A1F18;border-radius:8px;padding:8px;"><span style="color:#94A3B8;">Recette</span><br><span style="color:#22C55E;font-weight:700;font-size:16px;">' + window.currentFinance.recette + ' Ar</span></div>' +
-                        '<div style="background:#0A1F18;border-radius:8px;padding:8px;"><span style="color:#94A3B8;">Versement Coop (80%)</span><br><span style="color:#F59E0B;font-weight:700;">' + window.currentFinance.versementCoop + ' Ar</span></div>' +
-                        '<div style="background:#0A1F18;border-radius:8px;padding:8px;"><span style="color:#94A3B8;">Commission (20%)</span><br><span style="color:#10B981;font-weight:700;">' + window.currentFinance.commissionChauffeur + ' Ar</span></div>' +
+                        '<div style="background:#0A1F18;border-radius:8px;padding:8px;"><span style="color:#94A3B8;">Versement Coop</span><br><span style="color:#F59E0B;font-weight:700;">' + window.currentFinance.versementCoop + ' Ar</span></div>' +
+                        '<div style="background:#0A1F18;border-radius:8px;padding:8px;"><span style="color:#94A3B8;">Commission chauffeur</span><br><span style="color:#10B981;font-weight:700;">' + window.currentFinance.commissionChauffeur + ' Ar</span></div>' +
                     '</div>' +
                 '</div>' : '') +
 
@@ -215,19 +214,9 @@ async function accepterCourse(notificationId) {
   
   try {
     // Marquer la notification comme lue
-    await fetch(DAGOOS_CONFIG.apiUrl + '/notifications/' + notificationId + '/read', {
-      method: 'PUT',
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('dagoo_driver_token'), 'Content-Type': 'application/json' },
+    await apiFetch('/notifications/' + notificationId + '/read', {
+      method: 'PUT'
     });
-    
-    // Stocker localement la course acceptée
-    var coursesAcceptees = JSON.parse(localStorage.getItem('dagoo_courses_acceptees') || '[]');
-    coursesAcceptees.push({
-      notificationId,
-      date: new Date().toISOString(),
-      statut: 'ACCEPTED'
-    });
-    localStorage.setItem('dagoo_courses_acceptees', JSON.stringify(coursesAcceptees));
     
     alert('✅ Course acceptée !');
     loadPage('courses');
@@ -238,9 +227,8 @@ async function accepterCourse(notificationId) {
 
 async function refuserCourse(notificationId) {
   try {
-    await fetch(DAGOOS_CONFIG.apiUrl + '/notifications/' + notificationId + '/read', {
-      method: 'PUT',
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('dagoo_driver_token'), 'Content-Type': 'application/json' },
+    await apiFetch('/notifications/' + notificationId + '/read', {
+      method: 'PUT'
     });
     alert('Course refusée');
     loadPage('home');
@@ -249,24 +237,6 @@ async function refuserCourse(notificationId) {
   }
 }
 
-async function proposerVersement() {
-    var user = JSON.parse(localStorage.getItem('dagoo_driver_user') || '{}');
-    try {
-        var courses = await apiGet('/finances/courses?driverId=' + user.driverId);
-        var arr = Array.isArray(courses) ? courses : [];
-        var today = new Date().toISOString().split('T')[0];
-        var todayCourses = arr.filter(function(c) { return c.date && c.date.startsWith(today); });
-        var caJour = todayCourses.reduce(function(s, c) { return s + (c.price || 0); }, 0);
-        var netJour = Math.round(caJour * 0.80);
-        
-        if (netJour > 0 && confirm('🏁 Service terminé !\n\n📊 Gain net du jour : ' + netJour.toLocaleString() + ' Ar\n\nSouhaitez-vous demander un versement ?')) {
-            var montant = prompt('Montant à verser (max ' + netJour.toLocaleString() + ' Ar) :', netJour);
-            if (montant && parseInt(montant) > 0) {
-                alert('✅ Demande de versement de ' + parseInt(montant).toLocaleString() + ' Ar envoyée.');
-            }
-        }
-    } catch(e) { console.error(e); }
-}
 
 // ========== DÉPENSES ==========
 
