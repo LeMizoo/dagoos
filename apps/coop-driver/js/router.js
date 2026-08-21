@@ -91,10 +91,30 @@ function getHeaderHTML() {
     '</div>' +
     '<div style="display:flex;gap:4px;">' +
       '<button onclick="loadPage(\'notifications\')" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:#10B981;cursor:pointer;font-size:14px;">🔔</button>' +
-      '<button onclick="loadPage(\'profil\')" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:#DAA520;cursor:pointer;font-size:14px;">👤</button>' +
+      '<button onclick="loadPage(\'profil\')" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:#10B981;cursor:pointer;font-size:14px;">📶</button>' +
       '<button onclick="logout()" style="background:rgba(239,68,68,0.15);border:none;width:32px;height:32px;border-radius:50%;color:#F87171;cursor:pointer;font-size:16px;">⏻</button>' +
     '</div>' +
   '</div>';
 }
+
+
+
+// État de connexion
+window.updateConnectionState = function() {
+    var online = navigator.onLine;
+    var btn = document.querySelector('[aria-label="Profil"]');
+    if (btn) {
+        btn.innerHTML = online ? '📶' : '📴';
+        btn.style.color = online ? '#22C55E' : '#E74C3C';
+    }
+};
+
+window.addEventListener('online', function() {
+    window.updateConnectionState();
+});
+
+window.addEventListener('offline', function() {
+    window.updateConnectionState();
+});
 
 window.getHeaderHTML = getHeaderHTML;
