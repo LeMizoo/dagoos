@@ -154,6 +154,7 @@ async function init_home() {
             (window.currentPassagers && window.currentPassagers.length > 0 ? 
                 '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
                     '<h3 style="color:#10B981;margin-bottom:10px;font-size:13px;">📋 MANIFEST PASSAGERS (' + window.currentPassagers.length + ')</h3>' +
+                    '<div style="max-height:300px;overflow-y:auto;padding-right:4px;">' +
                     window.currentPassagers.map(function(p) {
                         var statutColor = p.statut === 'CONFIRMED' ? '#22C55E' : p.statut === 'PENDING' ? '#F59E0B' : '#EF4444';
                         var statutLabel = p.statut === 'CONFIRMED' ? 'PAYÉ' : p.statut === 'PENDING' ? 'EN ATTENTE' : 'NON PAYÉ';
@@ -171,7 +172,7 @@ async function init_home() {
                                 actionBtn +
                             '</div>' +
                         '</div>';
-                    }).join('') +
+                    }).join('') + '</div>' +
                 '</div>' : '') +
 
             // RÉCAPITULATIF FINANCIER
