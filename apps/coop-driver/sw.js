@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dagoos-driver-v9';
+const CACHE_NAME = 'dagoos-driver-v10';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
