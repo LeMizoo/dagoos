@@ -12,16 +12,16 @@ datasource db {
 // UTILISATEURS
 // ========================================
 model User {
-  id             String        @id @default(cuid())
+  id             String         @id @default(cuid())
   name           String?
-  email          String        @unique
+  email          String         @unique
   password       String
-  role           String        @default("USER")
+  role           String         @default("USER")
   phone          String?
   organizationId String?
-  organization   Organization? @relation(fields: [organizationId], references: [id])
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  organization   Organization?  @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
   driver         Driver?
   logs           Log[]
   notifications  Notification[]
@@ -59,6 +59,7 @@ model Organization {
   proprietaires   Proprietaire[]
   departs         Depart[]
   leadActions     LeadAction[]
+  expenses        Expense[]
 }
 
 // ========================================
@@ -79,6 +80,7 @@ model Driver {
   createdAt      DateTime     @default(now())
   courses        Course[]
   trips          Trip[]
+  expenses       Expense[]
 }
 
 // ========================================
@@ -105,6 +107,7 @@ model Vehicle {
   vignettes      Vignette[]
   courses        Course[]
   trips          Trip[]
+  expenses       Expense[]
 }
 
 // ========================================
@@ -241,6 +244,29 @@ model Course {
 }
 
 // ========================================
+// DÉPENSE CHAUFFEUR
+// ========================================
+model Expense {
+  id             String       @id @default(cuid())
+  driverId       String
+  driver         Driver       @relation(fields: [driverId], references: [id])
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  vehicleId      String?
+  vehicle        Vehicle?     @relation(fields: [vehicleId], references: [id])
+  category       String
+  amount         Float
+  description    String?
+  date           DateTime     @default(now())
+  createdAt      DateTime     @default(now())
+
+  @@index([driverId])
+  @@index([organizationId])
+  @@index([vehicleId])
+  @@index([date])
+}
+
+// ========================================
 // TRIP (trajet/service)
 // ========================================
 model Trip {
@@ -374,7 +400,6 @@ model Log {
   createdAt DateTime @default(now())
 }
 
-
 // ========================================
 // V7 PRO — DÉPARTS
 // ========================================
@@ -402,17 +427,17 @@ model Depart {
 // V7 PRO — RÉSERVATIONS
 // ========================================
 model Reservation {
-  id            String   @id @default(cuid())
-  departId      String
-  depart        Depart   @relation(fields: [departId], references: [id])
-  passagerNom   String
-  telephone     String
-  place         String
-  statut        String   @default("PENDING")
-  paiementRef   String?
-  paiementInfo  String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           String   @id @default(cuid())
+  departId     String
+  depart       Depart   @relation(fields: [departId], references: [id])
+  passagerNom  String
+  telephone    String
+  place        String
+  statut       String   @default("PENDING")
+  paiementRef  String?
+  paiementInfo String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@unique([departId, place])
 }

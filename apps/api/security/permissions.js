@@ -32,6 +32,8 @@ const PERMISSIONS = Object.freeze({
 
   FINANCES_READ: 'finances.read',
   FINANCES_MANAGE: 'finances.manage',
+  FINANCES_EXPENSES_READ: 'finances.expenses.read',
+  FINANCES_EXPENSES_CREATE: 'finances.expenses.create',
   COURSES_CREATE: 'courses.create',
 
   TARIFS_READ: 'tarifs.read',

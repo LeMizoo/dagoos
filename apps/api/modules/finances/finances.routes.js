@@ -476,31 +476,266 @@ router.post('/versements', authMiddleware, async (req, res) => {
 // DÉPENSES
 // =========================================================
 
-// POST /api/finances/expenses
-router.post('/expenses', authMiddleware, requirePermission('finances.manage'), async (req, res) => {
+// GET /api/finances/expenses
+router.get('/expenses', authMiddleware, requirePermission('finances.expenses.read'), async (req, res) => {
   try {
-    const { category, amount } = req.body;
+    const where = {};
 
-    if (!amount || Number(amount) <= 0) {
+    if (isAdmin(req)) {
+      if (req.query.driverId) {
+        where.driverId = req.query.driverId;
+      }
+
+      if (req.query.organizationId) {
+        where.organizationId = req.query.organizationId;
+      }
+    } else if (req.user.role === 'DRIVER') {
+      if (!req.user.driverId) {
+        return res.status(400).json({
+          success: false,
+          error: 'Chauffeur non associé'
+        });
+      }
+
+      where.driverId = req.user.driverId;
+    } else {
+      const organizationId = await getOrganizationId(req);
+
+      if (!organizationId) {
+        return res.json([]);
+      }
+
+      where.organizationId = organizationId;
+
+      if (req.query.driverId) {
+        const driver = await prisma.driver.findFirst({
+          where: {
+            id: req.query.driverId,
+            organizationId
+          },
+          select: {
+            id: true
+          }
+        });
+
+        if (!driver) {
+          return res.status(403).json({
+            success: false,
+            error: 'Accès refusé à ce chauffeur'
+          });
+        }
+
+        where.driverId = driver.id;
+      }
+    }
+
+    if (req.query.category) {
+      where.category = req.query.category;
+    }
+
+    if (req.query.from || req.query.to) {
+      where.date = {};
+
+      if (req.query.from) {
+        const from = new Date(req.query.from);
+
+        if (Number.isNaN(from.getTime())) {
+          return res.status(400).json({
+            success: false,
+            error: 'Date de début invalide'
+          });
+        }
+
+        where.date.gte = from;
+      }
+
+      if (req.query.to) {
+        const to = new Date(req.query.to);
+
+        if (Number.isNaN(to.getTime())) {
+          return res.status(400).json({
+            success: false,
+            error: 'Date de fin invalide'
+          });
+        }
+
+        where.date.lte = to;
+      }
+    }
+
+    const expenses = await prisma.expense.findMany({
+      where,
+      include: {
+        driver: {
+          select: {
+            id: true,
+            driverCode: true,
+            user: {
+              select: {
+                name: true
+              }
+            }
+          }
+        },
+        vehicle: {
+          select: {
+            id: true,
+            plate: true,
+            model: true
+          }
+        }
+      },
+      orderBy: {
+        date: 'desc'
+      },
+      take: 500
+    });
+
+    res.json(expenses);
+  } catch (error) {
+    console.error('GET /finances/expenses:', error);
+
+    res.status(500).json({
+      success: false,
+      error: 'Erreur lors de la récupération des dépenses'
+    });
+  }
+});
+
+// POST /api/finances/expenses
+router.post('/expenses', authMiddleware, requirePermission('finances.expenses.create'), async (req, res) => {
+  try {
+    if (!req.user.driverId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Chauffeur non associé'
+      });
+    }
+
+    const driver = await prisma.driver.findUnique({
+      where: {
+        id: req.user.driverId
+      },
+      select: {
+        id: true,
+        organizationId: true,
+        vehicleId: true
+      }
+    });
+
+    if (!driver) {
+      return res.status(404).json({
+        success: false,
+        error: 'Chauffeur introuvable'
+      });
+    }
+
+    const {
+      category,
+      amount,
+      description,
+      vehicleId
+    } = req.body;
+
+    const allowedCategories = [
+      'carburant',
+      'entretien',
+      'pneu',
+      'autre'
+    ];
+
+    const normalizedCategory = String(category || 'autre').trim().toLowerCase();
+
+    if (!allowedCategories.includes(normalizedCategory)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Catégorie de dépense invalide'
+      });
+    }
+
+    const parsedAmount = Number(amount);
+
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
       return res.status(400).json({
         success: false,
         error: 'Montant invalide'
       });
     }
 
-    // Pas encore de modèle Expense dans Prisma.
-    // Cette route reste temporairement informative.
-    res.json({
-      success: true,
-      category: category || 'autre',
-      amount: Number(amount)
+    const finalVehicleId = vehicleId || driver.vehicleId || null;
+
+    if (finalVehicleId) {
+      const vehicle = await prisma.vehicle.findUnique({
+        where: {
+          id: finalVehicleId
+        },
+        select: {
+          id: true,
+          organizationId: true
+        }
+      });
+
+      if (!vehicle) {
+        return res.status(404).json({
+          success: false,
+          error: 'Véhicule introuvable'
+        });
+      }
+
+      if (
+        vehicle.organizationId &&
+        vehicle.organizationId !== driver.organizationId
+      ) {
+        return res.status(403).json({
+          success: false,
+          error: 'Véhicule non autorisé pour ce chauffeur'
+        });
+      }
+    }
+
+    const cleanDescription =
+      description !== undefined && description !== null
+        ? String(description).trim().slice(0, 500)
+        : null;
+
+    const expense = await prisma.expense.create({
+      data: {
+        driverId: driver.id,
+        organizationId: driver.organizationId,
+        vehicleId: finalVehicleId,
+        category: normalizedCategory,
+        amount: parsedAmount,
+        description: cleanDescription || null
+      },
+      include: {
+        driver: {
+          select: {
+            id: true,
+            driverCode: true,
+            user: {
+              select: {
+                name: true
+              }
+            }
+          }
+        },
+        vehicle: {
+          select: {
+            id: true,
+            plate: true,
+            model: true
+          }
+        }
+      }
     });
+
+    res.status(201).json(expense);
   } catch (error) {
     console.error('POST /finances/expenses:', error);
 
     res.status(500).json({
       success: false,
-      error: 'Erreur dépense'
+      error: 'Erreur lors de l’enregistrement de la dépense'
     });
   }
 });
