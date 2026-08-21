@@ -157,12 +157,19 @@ async function init_home() {
                     window.currentPassagers.map(function(p) {
                         var statutColor = p.statut === 'CONFIRMED' ? '#22C55E' : p.statut === 'PENDING' ? '#F59E0B' : '#EF4444';
                         var statutLabel = p.statut === 'CONFIRMED' ? 'PAYÉ' : p.statut === 'PENDING' ? 'EN ATTENTE' : 'NON PAYÉ';
+                        var actionBtn = '';
+                        if (p.statut === 'PENDING') {
+                            actionBtn = '<button onclick="marquerPaye(\'' + p.id + '\')" style="margin-left:6px;padding:4px 8px;background:#10B981;color:#0A1F18;border:none;border-radius:6px;cursor:pointer;font-size:10px;font-weight:700;">💰 Marquer payé</button>';
+                        }
                         return '<div style="background:#0A1F18;border-radius:8px;padding:10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">' +
                             '<div>' +
                                 '<div style="color:#fff;font-weight:600;font-size:12px;">' + p.passagerNom + '</div>' +
                                 '<div style="color:#94A3B8;font-size:10px;">Place ' + p.place + ' · ' + (p.telephone || '') + '</div>' +
                             '</div>' +
-                            '<span style="padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;background:' + statutColor + ';color:#0A1F18;">' + statutLabel + '</span>' +
+                            '<div style="display:flex;align-items:center;">' +
+                                '<span style="padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;background:' + statutColor + ';color:#0A1F18;">' + statutLabel + '</span>' +
+                                actionBtn +
+                            '</div>' +
                         '</div>';
                     }).join('') +
                 '</div>' : '') +
@@ -298,6 +305,31 @@ async function transitionDepart(action) {
     if (btn) btn.disabled = false;
 }
 
+
+// Fonction pour marquer un passager comme payé
+async function marquerPaye(reservationId) {
+    if (!reservationId) return;
+    
+    if (!confirm('Confirmer le paiement de ce passager ?')) return;
+    
+    try {
+        const result = await apiFetch('/reservations/' + reservationId, {
+            method: 'PUT',
+            body: { statut: 'CONFIRMED' }
+        });
+        
+        if (result && result.id) {
+            // Recharger les données du Home
+            await loadHomeData();
+            init_home();
+        } else {
+            alert('❌ Erreur lors de la confirmation');
+        }
+    } catch(e) {
+        alert('❌ Erreur : ' + e.message);
+    }
+}
+
 // Fonction pour recharger les données du Home
 async function loadHomeData() {
     try {
@@ -354,6 +386,7 @@ function loadExpenses() {
 }
 
 window.init_home = init_home;
+window.marquerPaye = marquerPaye;
 window.addExpense = addExpense;
 
 // Chargement des infos du véhicule
