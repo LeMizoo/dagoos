@@ -1,5 +1,6 @@
 import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 import PortalGuard from '@/components/auth/PortalGuard';
+import { AuthProvider } from '@/lib/auth-context';
 
 export const metadata = {
   title: 'Dagoo Admin - Tableau de bord',
@@ -11,12 +12,14 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <PortalGuard
-      allowedRoles={['SUPER_ADMIN', 'ADMIN']}
-    >
+    <AuthProvider>
+      <PortalGuard
+        allowedRoles={['SUPER_ADMIN', 'ADMIN']}
+      >
       <ResponsiveLayout app="admin">
         {children}
       </ResponsiveLayout>
     </PortalGuard>
+    </AuthProvider>
   );
 }
