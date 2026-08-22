@@ -49,10 +49,32 @@ async function proxyRequest(req: NextRequest) {
   const apiUrl = `${API_BASE_URL}${apiPath}${searchParams}`;
 
   const cookieStore = cookies();
-  const cookieToken = 
-    cookieStore.get('dagoos_fleet_token')?.value ||
-    cookieStore.get('dagoos_coop_token')?.value ||
-    cookieStore.get('dagoos_token')?.value;
+  
+  // Déterminer l'espace à partir du chemin de la requête
+  const requestPath = req.nextUrl.pathname.replace('/api/proxy', '');
+  const isFleetPath = requestPath.startsWith('/fleet') || requestPath.includes('/fleet');
+  const isCoopPath = requestPath.startsWith('/coop') || requestPath.includes('/coop');
+  const isDashboardPath = requestPath.startsWith('/dashboard') || requestPath.includes('/dashboard');
+  
+  // L'espace peut être explicitement indiqué par le frontend
+  const authSpace = req.headers.get('x-auth-space');
+  
+  // Sélectionner le cookie selon l'espace
+  let cookieToken = null;
+  
+  if (authSpace === 'fleet' || isFleetPath) {
+    cookieToken = cookieStore.get('dagoos_fleet_token')?.value;
+  } else if (authSpace === 'coop' || isCoopPath) {
+    cookieToken = cookieStore.get('dagoos_coop_token')?.value;
+  } else if (authSpace === 'admin' || isDashboardPath) {
+    cookieToken = cookieStore.get('dagoos_token')?.value;
+  } else {
+    // Fallback : utiliser le premier cookie disponible
+    cookieToken = 
+      cookieStore.get('dagoos_fleet_token')?.value ||
+      cookieStore.get('dagoos_coop_token')?.value ||
+      cookieStore.get('dagoos_token')?.value;
+  }
 
   const authorization =
     req.headers.get('authorization') ||

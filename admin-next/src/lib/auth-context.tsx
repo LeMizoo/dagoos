@@ -50,6 +50,13 @@ async function fetchCurrentUser(): Promise<AuthUser | null> {
   try {
     const data = await apiJson<{ user?: AuthUser }>(
       '/api/auth/me',
+      {
+        headers: {
+          'X-Auth-Space': window.location.pathname.startsWith('/fleet') ? 'fleet'
+            : window.location.pathname.startsWith('/coop') ? 'coop'
+            : 'admin'
+        }
+      }
     );
 
     return data?.user ?? null;
