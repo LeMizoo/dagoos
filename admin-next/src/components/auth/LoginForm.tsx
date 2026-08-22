@@ -121,6 +121,14 @@ export default function LoginForm({ config }: LoginFormProps) {
         }),
       });
 
+      // Stocker le token selon l'espace
+      if (response.token) {
+        const tokenKey = config.endpoint === '/api/auth/login'
+          ? 'dagoos_admin_token'
+          : 'dagoos_org_token';
+        localStorage.setItem(tokenKey, response.token);
+      }
+
       window.location.href = redirect;
     } catch (error) {
       setError(
