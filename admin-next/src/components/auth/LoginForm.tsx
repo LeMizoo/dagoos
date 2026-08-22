@@ -121,7 +121,9 @@ export default function LoginForm({ config }: LoginFormProps) {
         }),
       });
 
-      window.location.href = redirect;
+      setTimeout(function() {
+          window.location.href = redirect;
+        }, 300);
     } catch (error) {
       setError(
         error instanceof Error
