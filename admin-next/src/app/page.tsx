@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Link from 'next/link';
 import { Rocket, ArrowDown, Building2, Truck, Smartphone, Users, Shield, Zap, Car, MapPin, Calendar, Search, Phone, CheckCircle } from 'lucide-react';
 import HeroSlider from '@/components/landing/HeroSlider';
@@ -74,20 +75,12 @@ export default async function LandingPage() {
             Réservez votre trajet en toute simplicité auprès des coopératives partenaires.
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
-            <a href="#reservation" className="bg-secondary text-dark px-8 py-4 rounded-xl font-bold text-lg hover:bg-yellow-400 transition">
-              🎫 Réserver un voyage
-            </a>
             <Link href="/register" className="border-2 border-white/30 text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/10 transition">
               🏢 Devenir partenaire
             </Link>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <a href="https://dago-driver.pages.dev" target="_blank" rel="noopener noreferrer" className="bg-amber-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-amber-600 transition text-center">
-                🚕 Chauffeur Fleet
-              </a>
-              <a href="https://dago-coop-driver.pages.dev" target="_blank" rel="noopener noreferrer" className="bg-emerald-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-emerald-700 transition text-center">
-                🚌 Chauffeur Coop
-              </a>
-            </div>
+            <button onClick={() => setShowDriverModal(true)} className="bg-emerald-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-emerald-700 transition">
+              🧑‍✈️ Espace Chauffeur
+            </button>
           </div>
         </div>
       </section>
@@ -151,12 +144,9 @@ export default async function LandingPage() {
 
       <footer className="bg-gray-900 text-gray-400 py-8 text-center text-sm">
         <div className="flex justify-center gap-6 mb-4">
-          <a href="https://dago-driver.pages.dev" target="_blank" rel="noopener noreferrer" className="text-white hover:text-amber-400 transition font-semibold">
-            🚕 Espace Fleet
-          </a>
-          <a href="https://dago-coop-driver.pages.dev" target="_blank" rel="noopener noreferrer" className="text-white hover:text-emerald-400 transition font-semibold">
-            🚌 Espace Coop
-          </a>
+          <button onClick={() => setShowDriverModal(true)} className="text-white hover:text-emerald-400 transition font-semibold">
+            🧑‍✈️ Espace Chauffeur
+          </button>
           <Link href="/register" className="text-white hover:text-emerald-400 transition font-semibold">
             🏢 Devenir partenaire
           </Link>
@@ -165,4 +155,27 @@ export default async function LandingPage() {
       </footer>
     </div>
   );
+
+      {/* Modale Espace Chauffeur */}
+      {showDriverModal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => setShowDriverModal(false)}>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full text-center" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">🧑‍✈️ Espace Chauffeur</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">Choisissez votre espace de travail</p>
+            <div className="flex flex-col gap-4">
+              <a href="https://dago-driver.pages.dev" target="_blank" rel="noopener noreferrer" className="bg-amber-500 text-white px-6 py-4 rounded-xl font-bold text-lg hover:bg-amber-600 transition">
+                🚕 Chauffeur Fleet
+                <span className="block text-xs font-normal mt-1">Courses à la demande</span>
+              </a>
+              <a href="https://dago-coop-driver.pages.dev" target="_blank" rel="noopener noreferrer" className="bg-emerald-600 text-white px-6 py-4 rounded-xl font-bold text-lg hover:bg-emerald-700 transition">
+                🚌 Chauffeur Coop
+                <span className="block text-xs font-normal mt-1">Transport commun & départs</span>
+              </a>
+            </div>
+            <button onClick={() => setShowDriverModal(false)} className="mt-6 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition">
+              Fermer
+            </button>
+          </div>
+        </div>
+      )}
 }
