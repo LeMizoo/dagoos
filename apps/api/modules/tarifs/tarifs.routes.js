@@ -11,7 +11,8 @@ router.get('/:organizationId', authMiddleware, requirePermission('tarifs.read'),
     let tarifs = await prisma.tarif.findUnique({ where: { organizationId } });
     if (!tarifs) {
       // Valeurs par défaut
-      tarifs = {
+      // Valeurs par défaut centralisées (à déplacer dans une table de config)
+      const DEFAULT_TARIFS = {
         prixBase: 2000,
         prixKm: 500,
         locationJournalier: 13500,
@@ -34,7 +35,7 @@ router.put('/:organizationId', authMiddleware, requirePermission('tarifs.manage'
     const tarif = await prisma.tarif.upsert({
       where: { organizationId },
       update: { prixBase, prixKm, locationJournalier, commissionChauffeur, adyVarotraActif, courseNormalActif, locationActif },
-      create: { organizationId, prixBase: prixBase || 2000, prixKm: prixKm || 500, locationJournalier: locationJournalier || 13500, commissionChauffeur: commissionChauffeur || 20 },
+      create: { organizationId, prixBase: prixBase || 2000, prixKm: prixKm || 500, locationJournalier: locationJournalier || DEFAULT_TARIFS.locationJournalier || 13500, commissionChauffeur: commissionChauffeur || DEFAULT_TARIFS.commissionChauffeur || 20 },
     });
     
     res.json(tarif);

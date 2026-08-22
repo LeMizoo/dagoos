@@ -68,7 +68,7 @@ export default function RegisterPage() {
           { type: 'FLEET_MANAGER', name: 'Premium', price: 75000, vehiclesMax: 100, driversMax: 200 },
           { type: 'COOPERATIVE', name: 'Freemium', price: 0, vehiclesMax: 1, driversMax: 2 },
           { type: 'COOPERATIVE', name: 'Basic', price: 20000, vehiclesMax: 5, driversMax: 15 },
-          { type: 'COOPERATIVE', name: 'Standard', price: 45000, vehiclesMax: 20, driversMax: 60 },
+          { type: 'COOPERATIVE', name: 'Standard', price: Number(process.env.NEXT_PUBLIC_DEFAULT_PLAN_PRICE || 45000), vehiclesMax: 20, driversMax: 60 },
           { type: 'COOPERATIVE', name: 'Premium', price: 90000, vehiclesMax: 100, driversMax: 300 },
         ]);
         setLoading(false);

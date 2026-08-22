@@ -15,7 +15,7 @@ const DEFAULT_TARIFS: any = {
     locationJournalier: { prixJour: 35000 },
   },
   bus: { tarifFixe: { prixTrajet: 6000 }, locationSpeciale: { disponible: false, prixJour: 50000 } },
-  minivan: { tarifFixe: { prixTrajet: 5000 }, locationSpeciale: { disponible: false, prixJour: 45000 } },
+  minivan: { tarifFixe: { prixTrajet: Number(process.env.NEXT_PUBLIC_DEFAULT_PRIX_TRAJET || 5000) }, locationSpeciale: { disponible: false, prixJour: Number(process.env.NEXT_PUBLIC_DEFAULT_PRIX_JOUR || 45000) } },
   tricycle: { tarifFixe: { prixTrajet: 1500 }, locationSpeciale: { disponible: false, prixJour: 12000 } },
 };
 

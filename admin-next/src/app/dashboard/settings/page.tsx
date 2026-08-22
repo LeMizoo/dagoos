@@ -28,7 +28,7 @@ const defaultFleetPlans: Record<PlanKey, Plan> = {
 const defaultCoopPlans: Record<PlanKey, Plan> = {
   freemium: { name: 'Freemium', price: 0, vehiclesMax: 1, driversMax: 2, landingPage: false },
   basic: { name: 'Basic', price: 20000, vehiclesMax: 5, driversMax: 15, landingPage: false },
-  standard: { name: 'Standard', price: 45000, vehiclesMax: 20, driversMax: 60, landingPage: true },
+  standard: { name: 'Standard', price: Number(process.env.NEXT_PUBLIC_DEFAULT_PLAN_PRICE || 45000), vehiclesMax: 20, driversMax: 60, landingPage: true },
   premium: { name: 'Premium', price: 90000, vehiclesMax: 100, driversMax: 300, landingPage: true },
   surdevis: { name: 'Sur devis', price: -1, vehiclesMax: 999, driversMax: 999, landingPage: true },
 };

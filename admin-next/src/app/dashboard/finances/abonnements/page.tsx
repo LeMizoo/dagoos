@@ -22,7 +22,7 @@ const planConfig: Record<string, { icon: any; color: string; bg: string; label: 
 };
 
 const fleetPrices: Record<string, number> = { freemium: 0, basic: 15000, standard: 35000, premium: 75000, surdevis: -1 };
-const coopPrices: Record<string, number> = { freemium: 0, basic: 20000, standard: 45000, premium: 90000, surdevis: -1 };
+const coopPrices: Record<string, number> = { freemium: 0, basic: 20000, standard: Number(process.env.NEXT_PUBLIC_PLAN_STANDARD || 45000), premium: 90000, surdevis: -1 };
 
 export default function AbonnementsPage() {
   const [orgs, setOrgs] = useState<Organization[]>([]);

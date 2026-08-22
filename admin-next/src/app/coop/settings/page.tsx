@@ -24,7 +24,7 @@ const DEFAULT_TARIFS: any = {
   },
   locationVoiture: {
     touristique: { tarifJour: 60000 },
-    familiale: { tarifJour: 45000 },
+    familiale: { tarifJour: Number(process.env.NEXT_PUBLIC_DEFAULT_TARIF_JOUR || 45000) },
     autres: { tarifJour: 35000 },
   },
 };
