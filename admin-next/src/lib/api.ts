@@ -12,9 +12,7 @@ export async function apiFetch(
     ? endpoint
     : `/${endpoint}`;
 
-  const url = normalizedEndpoint.startsWith('/api/proxy')
-    ? normalizedEndpoint
-    : `/api/proxy${normalizedEndpoint}`;
+  const url = `/api/proxy${normalizedEndpoint}`;
 
   const headers = new Headers(options.headers);
 
