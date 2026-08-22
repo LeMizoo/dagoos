@@ -415,10 +415,10 @@ async function init_home() {
 
     var statusColor =
         isAvailable
-            ? '#22C55E'
+            ? ''+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +''
             : isOnBreak
-                ? '#F59E0B'
-                : '#E74C3C';
+                ? ''+ (window.FLEET_THEME ? window.FLEET_THEME.warning : '#F59E0B') +''
+                : ''+ (window.FLEET_THEME ? window.FLEET_THEME.danger : '#E74C3C') +'';
 
     var plate =
         currentVehicle &&
@@ -452,7 +452,7 @@ async function init_home() {
 
     main.innerHTML =
         // HEADER
-        '<div style="background:#1E293B;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid #DAA520;">' +
+        '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid '+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';">' +
 
             '<div style="display:flex;align-items:center;gap:8px;">' +
 
@@ -461,18 +461,18 @@ async function init_home() {
                         ? '<img src="' +
                           escapeHtml(logo) +
                           '" style="width:36px;height:36px;object-fit:contain;border-radius:8px;">'
-                        : '<div style="width:36px;height:36px;border-radius:8px;background:#252525;"></div>'
+                        : '<div style="width:36px;height:36px;border-radius:8px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';"></div>'
                 ) +
 
                 '<div>' +
 
-                    '<div style="font-size:14px;font-weight:700;color:#DAA520;">' +
+                    '<div style="font-size:14px;font-weight:700;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';">' +
                         escapeHtml(user.name || 'Chauffeur') +
                     '</div>' +
 
                     '<div style="font-size:10px;color:#94A3B8;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">' +
 
-                        '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#DAA520;">' +
+                        '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';">' +
                             'Flotte' +
                         '</span>' +
 
@@ -484,10 +484,10 @@ async function init_home() {
 
                         (
                             plate
-                                ? '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#DAA520;">' +
+                                ? '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';">' +
                                   escapeHtml(plate) +
                                   '</span>'
-                                : '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#E74C3C;color:#fff;">Sans véhicule</span>'
+                                : '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.danger : '#E74C3C') +';color:#fff;">Sans véhicule</span>'
                         ) +
 
                         '<span style="color:#94A3B8;">' +
@@ -500,8 +500,8 @@ async function init_home() {
 
             '<div style="display:flex;gap:4px;">' +
 
-                '<button onclick="loadPage(\'notifications\')" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:#DAA520;cursor:pointer;font-size:14px;position:relative;" aria-label="Notifications">🔔</button>' +
-                '<button onclick="loadPage(\'profil\')" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:#DAA520;cursor:pointer;font-size:14px;" aria-label="Profil">📶</button>' +
+                '<button onclick="loadPage(\'notifications\')" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';cursor:pointer;font-size:14px;position:relative;" aria-label="Notifications">🔔</button>' +
+                '<button onclick="loadPage(\'profil\')" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';cursor:pointer;font-size:14px;" aria-label="Profil">📶</button>' +
 
                 '<button onclick="logout()" style="background:rgba(239,68,68,0.15);border:none;width:32px;height:32px;border-radius:50%;color:#F87171;cursor:pointer;font-size:16px;" aria-label="Déconnexion">⏻</button>' +
 
@@ -514,7 +514,7 @@ async function init_home() {
             // COMPTE BLOQUE
             (
                 estBloque
-                    ? '<div style="background:#E74C3C;color:#fff;padding:10px;border-radius:10px;text-align:center;margin-bottom:10px;">' +
+                    ? '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.danger : '#E74C3C') +';color:#fff;padding:10px;border-radius:10px;text-align:center;margin-bottom:10px;">' +
                         'Compte bloqué - Régularisez vos versements' +
                       '</div>'
                     : ''
@@ -523,19 +523,19 @@ async function init_home() {
             // STATUT
             '<div style="display:flex;gap:8px;margin-bottom:10px;">' +
 
-                '<button onclick="changeStatus(\'present\')" style="flex:1;padding:12px 6px;background:#22C55E;color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
+                '<button onclick="changeStatus(\'present\')" style="flex:1;padding:12px 6px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
                     (estBloque ? 'disabled' : '') +
                 '>' +
                     'Début' +
                 '</button>' +
 
-                '<button onclick="changeStatus(\'pause\')" style="flex:1;padding:12px 6px;background:#F59E0B;color:#000;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
+                '<button onclick="changeStatus(\'pause\')" style="flex:1;padding:12px 6px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.warning : '#F59E0B') +';color:#000;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
                     (estBloque || statutPresence !== 'present' ? 'disabled' : '') +
                 '>' +
                     'Pause' +
                 '</button>' +
 
-                '<button onclick="changeStatus(\'termine\')" style="flex:1;padding:12px 6px;background:#E74C3C;color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
+                '<button onclick="changeStatus(\'termine\')" style="flex:1;padding:12px 6px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.danger : '#E74C3C') +';color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
                     (
                         estBloque ||
                         statutPresence === 'absent' ||
@@ -550,28 +550,28 @@ async function init_home() {
             '</div>' +
 
             // STATISTIQUES JOUR
-            '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
+            '<div class="card" style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:14px;margin-bottom:10px;">' +
 
-                '<h3 style="color:#DAA520;margin-bottom:10px;font-size:13px;">Aujourd\'hui</h3>' +
+                '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';margin-bottom:10px;font-size:13px;">Aujourd\'hui</h3>' +
 
                 '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;">' +
 
-                    '<div style="background:#252525;border-radius:10px;padding:8px;">' +
+                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:10px;padding:8px;">' +
                         '<div style="font-size:18px;font-weight:800;color:#fff;" id="statCoursesJour">0</div>' +
                         '<div style="font-size:9px;color:#888;">Courses</div>' +
                     '</div>' +
 
-                    '<div style="background:#252525;border-radius:10px;padding:8px;">' +
-                        '<div style="font-size:18px;font-weight:800;color:#22C55E;" id="statCAJour">0</div>' +
+                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:10px;padding:8px;">' +
+                        '<div style="font-size:18px;font-weight:800;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';" id="statCAJour">0</div>' +
                         '<div style="font-size:9px;color:#888;">CA</div>' +
                     '</div>' +
 
-                    '<div style="background:#252525;border-radius:10px;padding:8px;">' +
+                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:10px;padding:8px;">' +
                         '<div style="font-size:18px;font-weight:800;color:#3B82F6;" id="statCommissionJour">0</div>' +
                         '<div style="font-size:9px;color:#888;">Part chauffeur</div>' +
                     '</div>' +
 
-                    '<div style="background:#252525;border-radius:10px;padding:8px;">' +
+                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:10px;padding:8px;">' +
                         '<div style="font-size:18px;font-weight:800;color:#8B5CF6;" id="statNetJour">0</div>' +
                         '<div style="font-size:9px;color:#888;">À verser</div>' +
                     '</div>' +
@@ -580,28 +580,28 @@ async function init_home() {
             '</div>' +
 
             // STATISTIQUES SEMAINE
-            '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
+            '<div class="card" style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:14px;margin-bottom:10px;">' +
 
-                '<h3 style="color:#DAA520;margin-bottom:10px;font-size:13px;">Cette semaine</h3>' +
+                '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';margin-bottom:10px;font-size:13px;">Cette semaine</h3>' +
 
                 '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;">' +
 
-                    '<div style="background:#252525;border-radius:10px;padding:8px;">' +
+                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:10px;padding:8px;">' +
                         '<div style="font-size:16px;font-weight:800;color:#fff;" id="statCoursesSem">0</div>' +
                         '<div style="font-size:9px;color:#888;">Courses</div>' +
                     '</div>' +
 
-                    '<div style="background:#252525;border-radius:10px;padding:8px;">' +
-                        '<div style="font-size:16px;font-weight:800;color:#22C55E;" id="statCASem">0</div>' +
+                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:10px;padding:8px;">' +
+                        '<div style="font-size:16px;font-weight:800;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';" id="statCASem">0</div>' +
                         '<div style="font-size:9px;color:#888;">CA</div>' +
                     '</div>' +
 
-                    '<div style="background:#252525;border-radius:10px;padding:8px;">' +
+                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:10px;padding:8px;">' +
                         '<div style="font-size:16px;font-weight:800;color:#3B82F6;" id="statCommissionSem">0</div>' +
                         '<div style="font-size:9px;color:#888;">Part chauffeur</div>' +
                     '</div>' +
 
-                    '<div style="background:#252525;border-radius:10px;padding:8px;">' +
+                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:10px;padding:8px;">' +
                         '<div style="font-size:16px;font-weight:800;color:#8B5CF6;" id="statNetSem">0</div>' +
                         '<div style="font-size:9px;color:#888;">À verser</div>' +
                     '</div>' +
@@ -610,13 +610,13 @@ async function init_home() {
             '</div>' +
 
             // NOUVELLE COURSE
-            '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
+            '<div class="card" style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:14px;margin-bottom:10px;">' +
 
-                '<h3 style="color:#DAA520;margin-bottom:10px;font-size:13px;">Nouvelle course</h3>' +
+                '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';margin-bottom:10px;font-size:13px;">Nouvelle course</h3>' +
 
                 '<div style="display:flex;gap:8px;margin-bottom:8px;">' +
 
-                    '<select id="typeCourse" onchange="updateCourseForm()" style="flex:1;padding:8px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;">' +
+                    '<select id="typeCourse" onchange="updateCourseForm()" style="flex:1;padding:8px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;">' +
                         typeOptions +
                     '</select>' +
 
@@ -641,19 +641,19 @@ async function init_home() {
             '</div>' +
 
             // DEPENSES
-            '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
+            '<div class="card" style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:14px;margin-bottom:10px;">' +
 
-                '<h3 style="color:#DAA520;margin-bottom:10px;font-size:13px;">Dépenses du jour</h3>' +
+                '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';margin-bottom:10px;font-size:13px;">Dépenses du jour</h3>' +
 
                 '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;">' +
 
-                    '<button onclick="addExpense(\'carburant\')" style="padding:10px 4px;background:#1A1A2E;color:#DAA520;border:1px solid #DAA520;border-radius:8px;cursor:pointer;font-size:10px;">Carburant</button>' +
+                    '<button onclick="addExpense(\'carburant\')" style="padding:10px 4px;background:#1A1A2E;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';border:1px solid '+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';border-radius:8px;cursor:pointer;font-size:10px;">Carburant</button>' +
 
-                    '<button onclick="addExpense(\'entretien\')" style="padding:10px 4px;background:#1A1A2E;color:#DAA520;border:1px solid #DAA520;border-radius:8px;cursor:pointer;font-size:10px;">Entretien</button>' +
+                    '<button onclick="addExpense(\'entretien\')" style="padding:10px 4px;background:#1A1A2E;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';border:1px solid '+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';border-radius:8px;cursor:pointer;font-size:10px;">Entretien</button>' +
 
-                    '<button onclick="addExpense(\'pneu\')" style="padding:10px 4px;background:#1A1A2E;color:#DAA520;border:1px solid #DAA520;border-radius:8px;cursor:pointer;font-size:10px;">Pneus</button>' +
+                    '<button onclick="addExpense(\'pneu\')" style="padding:10px 4px;background:#1A1A2E;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';border:1px solid '+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';border-radius:8px;cursor:pointer;font-size:10px;">Pneus</button>' +
 
-                    '<button onclick="addExpense(\'autre\')" style="padding:10px 4px;background:#1A1A2E;color:#DAA520;border:1px solid #DAA520;border-radius:8px;cursor:pointer;font-size:10px;">Autre</button>' +
+                    '<button onclick="addExpense(\'autre\')" style="padding:10px 4px;background:#1A1A2E;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';border:1px solid '+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';border-radius:8px;cursor:pointer;font-size:10px;">Autre</button>' +
 
                 '</div>' +
 
@@ -664,9 +664,9 @@ async function init_home() {
             '</div>' +
 
             // ASSIGNATION
-            '<div class="card" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
+            '<div class="card" style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:14px;margin-bottom:10px;">' +
 
-                '<h3 style="color:#DAA520;margin-bottom:8px;font-size:13px;">Assignation</h3>' +
+                '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';margin-bottom:8px;font-size:13px;">Assignation</h3>' +
 
                 '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">' +
 
@@ -739,7 +739,7 @@ async function init_home() {
 
 function getHeaderLoadingHTML() {
     return (
-        '<div style="background:#1E293B;padding:14px;color:#DAA520;text-align:center;border-bottom:1px solid #DAA520;">' +
+        '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';padding:14px;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';text-align:center;border-bottom:1px solid '+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';">' +
             'Dagoo\'s Fleet Driver' +
         '</div>'
     );
@@ -1041,7 +1041,7 @@ function updateCourseForm() {
             getLocationTarif(type);
 
         form.innerHTML =
-            '<div style="text-align:center;color:#DAA520;padding:10px;">' +
+            '<div style="text-align:center;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';padding:10px;">' +
 
                 (
                     locationTarif > 0
@@ -1063,7 +1063,7 @@ function updateCourseForm() {
     if (type === 'ady_varotra') {
 
         form.innerHTML =
-            '<input type="number" id="montantAdy" placeholder="Montant négocié (Ar)" min="1" style="width:100%;padding:8px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;margin-bottom:8px;">' +
+            '<input type="number" id="montantAdy" placeholder="Montant négocié (Ar)" min="1" style="width:100%;padding:8px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;margin-bottom:8px;">' +
 
             '<div style="font-size:10px;color:#888;text-align:center;">' +
                 'Part chauffeur : 20 % · À verser : 80 %' +
@@ -1075,9 +1075,9 @@ function updateCourseForm() {
     form.innerHTML =
         '<div style="display:flex;gap:8px;margin-bottom:8px;">' +
 
-            '<input type="number" id="kmDepart" placeholder="Km départ" step="0.1" min="0" oninput="calcCourse()" style="flex:1;padding:8px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;">' +
+            '<input type="number" id="kmDepart" placeholder="Km départ" step="0.1" min="0" oninput="calcCourse()" style="flex:1;padding:8px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;">' +
 
-            '<input type="number" id="kmArrivee" placeholder="Km arrivée" step="0.1" min="0" oninput="calcCourse()" style="flex:1;padding:8px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;">' +
+            '<input type="number" id="kmArrivee" placeholder="Km arrivée" step="0.1" min="0" oninput="calcCourse()" style="flex:1;padding:8px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;">' +
 
         '</div>' +
 
@@ -1085,7 +1085,7 @@ function updateCourseForm() {
 
             'Distance : <span id="distanceCalc">0</span> km' +
 
-            ' | Prix : <span id="prixCalc" style="color:#DAA520;font-weight:700;">0 Ar</span>' +
+            ' | Prix : <span id="prixCalc" style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';font-weight:700;">0 Ar</span>' +
 
         '</div>' +
 
@@ -1304,7 +1304,7 @@ async function enregistrerCourse() {
 
         if (msg) {
             msg.innerHTML =
-                '<span style="color:#22C55E;">' +
+                '<span style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';">' +
                     'Course enregistrée avec succès' +
                 '</span>';
         }

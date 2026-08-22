@@ -25,7 +25,7 @@ async function init_courses() {
                     '<h2 style="font-size:20px;font-weight:800;margin:0;color:#fff;">Courses</h2>' +
                     '<div style="font-size:11px;color:#94A3B8;margin-top:3px;">Historique de vos courses</div>' +
                 '</div>' +
-                '<button onclick="init_courses()" style="background:#1E293B;border:1px solid #334155;color:#DAA520;border-radius:8px;padding:8px 10px;cursor:pointer;font-size:11px;">' +
+                '<button onclick="init_courses()" style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border:1px solid #334155;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';border-radius:8px;padding:8px 10px;cursor:pointer;font-size:11px;">' +
                     'Actualiser' +
                 '</button>' +
             '</div>' +
@@ -34,7 +34,7 @@ async function init_courses() {
             '<div id="coursesAccepteesContainer"></div>' +
 
             // FILTRES
-            '<div style="background:#1E293B;border-radius:12px;padding:10px;margin-bottom:10px;">' +
+            '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:10px;margin-bottom:10px;">' +
                 '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">' +
                     '<button onclick="filterCourses(\'all\')" id="filterAll" style="' + filterButtonStyle('all') + '">Toutes</button>' +
                     '<button onclick="filterCourses(\'today\')" id="filterToday" style="' + filterButtonStyle('today') + '">Aujourd’hui</button>' +
@@ -65,8 +65,8 @@ function filterButtonStyle(filter) {
     var active = coursesFilter === filter;
 
     return active
-        ? 'padding:8px 4px;border:none;border-radius:8px;background:#DAA520;color:#1A1A2E;font-size:11px;font-weight:700;cursor:pointer;'
-        : 'padding:8px 4px;border:1px solid #334155;border-radius:8px;background:#252525;color:#94A3B8;font-size:11px;font-weight:600;cursor:pointer;';
+        ? 'padding:8px 4px;border:none;border-radius:8px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';color:#1A1A2E;font-size:11px;font-weight:700;cursor:pointer;'
+        : 'padding:8px 4px;border:1px solid #334155;border-radius:8px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';color:#94A3B8;font-size:11px;font-weight:600;cursor:pointer;';
 }
 
 
@@ -164,7 +164,7 @@ function renderCourses() {
 
     if (filtered.length === 0) {
         history.innerHTML =
-            '<div style="background:#1E293B;border-radius:12px;padding:30px 15px;text-align:center;">' +
+            '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:30px 15px;text-align:center;">' +
                 '<div style="font-size:28px;margin-bottom:8px;">📋</div>' +
                 '<div style="color:#fff;font-weight:700;margin-bottom:4px;">Aucune course</div>' +
                 '<div style="color:#94A3B8;font-size:11px;">Aucune course pour cette période.</div>' +
@@ -203,25 +203,25 @@ function renderSummary(courses, container) {
     }, 0);
 
     container.innerHTML =
-        '<div style="background:#1E293B;border-radius:12px;padding:12px;">' +
+        '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:12px;">' +
             '<div style="font-size:11px;color:#94A3B8;margin-bottom:8px;">Résumé de la période</div>' +
             '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center;">' +
 
-                '<div style="background:#252525;border-radius:9px;padding:9px 4px;">' +
+                '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:9px;padding:9px 4px;">' +
                     '<div style="font-size:16px;font-weight:800;color:#fff;">' +
                         courses.length +
                     '</div>' +
                     '<div style="font-size:9px;color:#94A3B8;">Courses</div>' +
                 '</div>' +
 
-                '<div style="background:#252525;border-radius:9px;padding:9px 4px;">' +
-                    '<div style="font-size:14px;font-weight:800;color:#22C55E;">' +
+                '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:9px;padding:9px 4px;">' +
+                    '<div style="font-size:14px;font-weight:800;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';">' +
                         formatAr(total) +
                     '</div>' +
                     '<div style="font-size:9px;color:#94A3B8;">CA</div>' +
                 '</div>' +
 
-                '<div style="background:#252525;border-radius:9px;padding:9px 4px;">' +
+                '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:9px;padding:9px 4px;">' +
                     '<div style="font-size:14px;font-weight:800;color:#8B5CF6;">' +
                         formatAr(net) +
                     '</div>' +
@@ -265,7 +265,7 @@ function renderCourseCard(course) {
     var statusColor = getStatusColor(status);
 
     return (
-        '<div style="background:#1E293B;border-radius:12px;padding:13px;margin-bottom:8px;">' +
+        '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:13px;margin-bottom:8px;">' +
 
             '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">' +
 
@@ -288,21 +288,21 @@ function renderCourseCard(course) {
 
             '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px;">' +
 
-                '<div style="background:#252525;border-radius:8px;padding:8px;text-align:center;">' +
-                    '<div style="font-size:13px;font-weight:800;color:#22C55E;">' +
+                '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:8px;padding:8px;text-align:center;">' +
+                    '<div style="font-size:13px;font-weight:800;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';">' +
                         formatAr(amount) +
                     '</div>' +
                     '<div style="font-size:8px;color:#94A3B8;">CA</div>' +
                 '</div>' +
 
-                '<div style="background:#252525;border-radius:8px;padding:8px;text-align:center;">' +
+                '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:8px;padding:8px;text-align:center;">' +
                     '<div style="font-size:13px;font-weight:800;color:#3B82F6;">' +
                         formatAr(commission) +
                     '</div>' +
                     '<div style="font-size:8px;color:#94A3B8;">Versement</div>' +
                 '</div>' +
 
-                '<div style="background:#252525;border-radius:8px;padding:8px;text-align:center;">' +
+                '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:8px;padding:8px;text-align:center;">' +
                     '<div style="font-size:13px;font-weight:800;color:#8B5CF6;">' +
                         formatAr(net) +
                     '</div>' +
@@ -313,7 +313,7 @@ function renderCourseCard(course) {
 
             (
                 distance > 0
-                    ? '<div style="font-size:10px;color:#94A3B8;margin-top:8px;">Distance : <strong style="color:#DAA520;">' +
+                    ? '<div style="font-size:10px;color:#94A3B8;margin-top:8px;">Distance : <strong style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';">' +
                         distance.toFixed(1) +
                         ' km</strong></div>'
                     : ''
@@ -341,9 +341,9 @@ function renderAcceptedCourses() {
     }
 
     var html =
-        '<div style="background:#1E293B;border-radius:12px;padding:13px;margin-bottom:10px;">' +
+        '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:13px;margin-bottom:10px;">' +
             '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
-                '<div style="font-size:13px;font-weight:700;color:#DAA520;">Courses acceptées</div>' +
+                '<div style="font-size:13px;font-weight:700;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';">Courses acceptées</div>' +
                 '<span style="font-size:9px;color:#94A3B8;">' + acceptees.length + '</span>' +
             '</div>';
 
@@ -361,13 +361,13 @@ function renderAcceptedCourses() {
 
         var statusColor =
             status === 'ACCEPTED'
-                ? '#F59E0B'
+                ? ''+ (window.FLEET_THEME ? window.FLEET_THEME.warning : '#F59E0B') +''
                 : status === 'IN_PROGRESS'
                     ? '#3B82F6'
-                    : '#22C55E';
+                    : ''+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +'';
 
         html +=
-            '<div style="background:#252525;border-radius:9px;padding:10px;margin-bottom:6px;">' +
+            '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:9px;padding:10px;margin-bottom:6px;">' +
 
                 '<div style="display:flex;justify-content:space-between;align-items:center;">' +
                     '<div>' +
@@ -620,18 +620,18 @@ function getStatusLabel(status) {
 
 function getStatusColor(status) {
     var colors = {
-        COMPLETED: '#22C55E',
-        COMPLETE: '#22C55E',
-        FINISHED: '#22C55E',
-        DONE: '#22C55E',
+        COMPLETED: ''+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +'',
+        COMPLETE: ''+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +'',
+        FINISHED: ''+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +'',
+        DONE: ''+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +'',
         IN_PROGRESS: '#3B82F6',
-        PENDING: '#F59E0B',
+        PENDING: ''+ (window.FLEET_THEME ? window.FLEET_THEME.warning : '#F59E0B') +'',
         CANCELLED: '#EF4444',
         CANCELED: '#EF4444',
-        ACCEPTED: '#F59E0B'
+        ACCEPTED: ''+ (window.FLEET_THEME ? window.FLEET_THEME.warning : '#F59E0B') +''
     };
 
-    return colors[status] || '#22C55E';
+    return colors[status] || ''+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +'';
 }
 
 

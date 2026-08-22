@@ -19,19 +19,19 @@ async function init_expenses() {
       '<h2 style="font-size:20px;font-weight:bold;margin-bottom:16px;">Dépenses</h2>' +
 
       // FORMULAIRE
-      '<div style="background:#1E293B;border-radius:12px;padding:16px;margin-bottom:12px;">' +
-        '<h3 style="color:#DAA520;margin-bottom:12px;font-size:14px;">Nouvelle dépense</h3>' +
+      '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:16px;margin-bottom:12px;">' +
+        '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';margin-bottom:12px;font-size:14px;">Nouvelle dépense</h3>' +
 
-        '<select id="expenseCategory" style="width:100%;padding:10px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:13px;margin-bottom:8px;">' +
+        '<select id="expenseCategory" style="width:100%;padding:10px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border:1px solid #333;border-radius:8px;color:#fff;font-size:13px;margin-bottom:8px;">' +
           '<option value="carburant">Carburant</option>' +
           '<option value="entretien">Entretien</option>' +
           '<option value="pneu">Pneus</option>' +
           '<option value="autre">Autre</option>' +
         '</select>' +
 
-        '<input type="number" id="expenseAmount" placeholder="Montant (Ar)" min="1" style="width:100%;padding:10px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:13px;margin-bottom:8px;">' +
+        '<input type="number" id="expenseAmount" placeholder="Montant (Ar)" min="1" style="width:100%;padding:10px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border:1px solid #333;border-radius:8px;color:#fff;font-size:13px;margin-bottom:8px;">' +
 
-        '<input type="text" id="expenseDescription" placeholder="Description (facultatif)" style="width:100%;padding:10px;background:#252525;border:1px solid #333;border-radius:8px;color:#fff;font-size:13px;margin-bottom:10px;">' +
+        '<input type="text" id="expenseDescription" placeholder="Description (facultatif)" style="width:100%;padding:10px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border:1px solid #333;border-radius:8px;color:#fff;font-size:13px;margin-bottom:10px;">' +
 
         '<button onclick="saveDriverExpense()" id="btnSaveExpense" style="width:100%;padding:12px;background:#F1C40F;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;">' +
           'Enregistrer la dépense' +
@@ -41,8 +41,8 @@ async function init_expenses() {
       '</div>' +
 
       // LISTE
-      '<div style="background:#1E293B;border-radius:12px;padding:16px;">' +
-        '<h3 style="color:#DAA520;margin-bottom:12px;font-size:14px;">Dépenses récentes</h3>' +
+      '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:16px;">' +
+        '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';margin-bottom:12px;font-size:14px;">Dépenses récentes</h3>' +
         '<div id="driverExpensesList">' +
           '<div style="color:#94A3B8;text-align:center;padding:15px;">Chargement...</div>' +
         '</div>' +
@@ -145,7 +145,7 @@ function renderDriverExpenses() {
         : '';
 
       html +=
-        '<div style="background:#252525;border-radius:8px;padding:10px;margin-bottom:7px;">' +
+        '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:8px;padding:10px;margin-bottom:7px;">' +
 
           '<div style="display:flex;justify-content:space-between;gap:8px;">' +
 
@@ -233,7 +233,7 @@ async function saveDriverExpense() {
     if (result && !result.error) {
       if (message) {
         message.innerHTML =
-          '<span style="color:#22C55E;">Dépense enregistrée.</span>';
+          '<span style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';">Dépense enregistrée.</span>';
       }
 
       var amountInput =

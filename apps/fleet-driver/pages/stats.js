@@ -4,32 +4,32 @@ async function init_stats() {
     container.innerHTML = getHeaderHTML() + '<div style="padding:16px;">' +
       '<h2 style="font-size:20px;font-weight:bold;margin-bottom:16px;">📊 Statistiques</h2>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
-        '<div style="background:#1E293B;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
+        '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
           '<p style="font-size:12px;color:#94A3B8;">Courses aujourd\'hui</p>' +
-          '<p id="statTodayCourses" style="font-size:24px;font-weight:bold;color:#DAA520;">0</p>' +
+          '<p id="statTodayCourses" style="font-size:24px;font-weight:bold;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';">0</p>' +
         '</div>' +
-        '<div style="background:#1E293B;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
+        '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
           '<p style="font-size:12px;color:#94A3B8;">CA aujourd\'hui</p>' +
-          '<p id="statTodayCA" style="font-size:24px;font-weight:bold;color:#DAA520;">0 Ar</p>' +
+          '<p id="statTodayCA" style="font-size:24px;font-weight:bold;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';">0 Ar</p>' +
         '</div>' +
-        '<div style="background:#1E293B;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
+        '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
           '<p style="font-size:12px;color:#94A3B8;">Commission</p>' +
           '<p id="statTodayCom" style="font-size:24px;font-weight:bold;color:#EF4444;">0 Ar</p>' +
         '</div>' +
-        '<div style="background:#1E293B;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
+        '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
           '<p style="font-size:12px;color:#94A3B8;">Net aujourd\'hui</p>' +
           '<p id="statTodayNet" style="font-size:24px;font-weight:bold;color:#3B82F6;">0 Ar</p>' +
         '</div>' +
       '</div>' +
       '<h3 style="font-size:16px;font-weight:bold;margin:20px 0 12px;">📅 Cette semaine</h3>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
-        '<div style="background:#1E293B;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
+        '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
           '<p style="font-size:12px;color:#94A3B8;">Courses</p>' +
-          '<p id="statWeekCourses" style="font-size:24px;font-weight:bold;color:#DAA520;">0</p>' +
+          '<p id="statWeekCourses" style="font-size:24px;font-weight:bold;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';">0</p>' +
         '</div>' +
-        '<div style="background:#1E293B;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
+        '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
           '<p style="font-size:12px;color:#94A3B8;">CA semaine</p>' +
-          '<p id="statWeekCA" style="font-size:24px;font-weight:bold;color:#DAA520;">0 Ar</p>' +
+          '<p id="statWeekCA" style="font-size:24px;font-weight:bold;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';">0 Ar</p>' +
         '</div>' +
       '</div>' +
     '</div>';

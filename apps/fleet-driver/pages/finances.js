@@ -28,10 +28,10 @@ async function init_finances() {
         var versementsHtml = '';
         if (Array.isArray(versements) && versements.length > 0) {
             versementsHtml = versements.map(function(v) {
-                return '<div style="background:#1E293B;border-radius:8px;padding:10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">' +
+                return '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:8px;padding:10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">' +
                     '<div><span style="color:#fff;font-weight:600;font-size:12px;">' + (v.montant || v.amount || 0).toLocaleString() + ' Ar</span>' +
                     '<br><span style="color:#94A3B8;font-size:10px;">' + (v.statut || v.status || '') + '</span></div>' +
-                    '<span style="color:#F59E0B;font-weight:700;">📤</span></div>';
+                    '<span style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.warning : '#F59E0B') +';font-weight:700;">📤</span></div>';
             }).join('');
         } else {
             versementsHtml = '<p style="color:#94A3B8;text-align:center;padding:10px;">Aucune demande de versement.</p>';
@@ -40,7 +40,7 @@ async function init_finances() {
         var expensesHtml = '';
         if (Array.isArray(expenses) && expenses.length > 0) {
             expensesHtml = expenses.map(function(e) {
-                return '<div style="background:#1E293B;border-radius:8px;padding:10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">' +
+                return '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:8px;padding:10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">' +
                     '<div><span style="color:#fff;font-weight:600;font-size:12px;">' + (e.category || '') + '</span>' +
                     '<br><span style="color:#94A3B8;font-size:10px;">' + (e.description || '') + '</span></div>' +
                     '<span style="color:#EF4444;font-weight:700;">-' + (e.amount || 0).toLocaleString() + ' Ar</span></div>';
@@ -50,12 +50,12 @@ async function init_finances() {
         }
 
         contentEl.innerHTML =
-            '<div onclick="loadPage(\'versements\')" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;border:1px solid #F59E0B;">' +
-                '<h3 style="color:#F59E0B;margin-bottom:10px;font-size:13px;">📤 Versements</h3>' +
+            '<div onclick="loadPage(\'versements\')" style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;border:1px solid '+ (window.FLEET_THEME ? window.FLEET_THEME.warning : '#F59E0B') +';">' +
+                '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.warning : '#F59E0B') +';margin-bottom:10px;font-size:13px;">📤 Versements</h3>' +
                 versementsHtml +
                 '<div style="text-align:right;font-size:10px;color:#94A3B8;">Voir tout →</div>' +
             '</div>' +
-            '<div onclick="loadPage(\'expenses\')" style="background:#1E293B;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;border:1px solid #EF4444;">' +
+            '<div onclick="loadPage(\'expenses\')" style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;border:1px solid #EF4444;">' +
                 '<h3 style="color:#EF4444;margin-bottom:10px;font-size:13px;">💸 Dépenses</h3>' +
                 expensesHtml +
                 '<div style="text-align:right;font-size:10px;color:#94A3B8;">Voir tout →</div>' +
