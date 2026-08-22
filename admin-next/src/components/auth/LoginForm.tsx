@@ -168,7 +168,7 @@ export default function LoginForm({ config }: LoginFormProps) {
           </span>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <div>
           <div className="mb-4">
             <label
               htmlFor="login-email"
@@ -210,14 +210,14 @@ export default function LoginForm({ config }: LoginFormProps) {
           )}
 
           <button
-            type="submit"
+            type="button"
             disabled={loading}
             onClick={handleSubmit}
             className={`w-full text-white py-3 rounded-lg font-semibold disabled:bg-gray-400 transition ${styles.button}`}
           >
             {loading ? config.loadingLabel : config.submitLabel}
           </button>
-        </form>
+        </div>
 
         {config.registration && (
           <p className="text-center text-xs text-gray-400 mt-6">
