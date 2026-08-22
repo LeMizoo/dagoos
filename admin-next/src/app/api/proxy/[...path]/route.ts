@@ -14,10 +14,12 @@ function resolveApiPath(proxyPath: string): string {
     return pathMapping[proxyPath];
   }
 
+  // Si le chemin commence déjà par /api/, le garder tel quel
   if (proxyPath.startsWith('/api/')) {
     return proxyPath;
   }
 
+  // Ajouter /api pour les chemins publics
   return `/api${proxyPath}`;
 }
 

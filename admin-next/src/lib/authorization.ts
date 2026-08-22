@@ -2,7 +2,7 @@ export type UserRole =
   | 'SUPER_ADMIN'
   | 'ADMIN'
   | 'FLEET_MANAGER'
-  | 'COOPERATIVE'
+  | 'COOP_MANAGER'
   | 'DRIVER';
 
 export type UserScope =
@@ -31,7 +31,7 @@ export function getUserScope(
       return 'GLOBAL';
 
     case 'FLEET_MANAGER':
-    case 'COOPERATIVE':
+    case 'COOP_MANAGER':
       return 'ORGANIZATION';
 
     case 'DRIVER':
@@ -69,7 +69,7 @@ export function isFleetManager(
 export function isCooperative(
   user: AuthorizationUser | null | undefined
 ): boolean {
-  return user?.role === 'COOPERATIVE';
+  return user?.role === 'COOP_MANAGER';
 }
 
 export function canAccessOrganization(
@@ -115,7 +115,7 @@ export function getDefaultArea(
     case 'FLEET_MANAGER':
       return '/fleet';
 
-    case 'COOPERATIVE':
+    case 'COOP_MANAGER':
       return '/coop';
 
     case 'DRIVER':

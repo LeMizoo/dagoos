@@ -102,8 +102,8 @@ export default function LoginForm({ config }: LoginFormProps) {
 
   const styles = accentStyles[config.accent];
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function handleSubmit(event?: FormEvent<HTMLFormElement> | React.MouseEvent) {
+    if (event && 'preventDefault' in event) event.preventDefault();
 
     if (loading) {
       return;
@@ -113,13 +113,13 @@ export default function LoginForm({ config }: LoginFormProps) {
     setError('');
 
     try {
-      const response = await apiJson<LoginResponse>(config.endpoint, {
+      const proxyUrl = config.endpoint.replace('/api/', '/api/proxy/');
+      const response = await fetch(proxyUrl, {
         method: 'POST',
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
+      }).then(r => r.json());
 
       // Stocker le token selon l'espace
       if (response.token) {
@@ -127,9 +127,14 @@ export default function LoginForm({ config }: LoginFormProps) {
           ? 'dagoos_admin_token'
           : 'dagoos_org_token';
         localStorage.setItem(tokenKey, response.token);
+        // Aussi stocker dans un cookie non-HttpOnly pour le middleware
+        document.cookie = tokenKey + '=' + response.token + '; path=/; max-age=604800; SameSite=Lax';
       }
 
-      window.location.href = redirect;
+      // Attendre que le cookie soit défini avant de rediriger
+      setTimeout(function() {
+        window.location.href = window.location.origin + redirect;
+      }, 100);
     } catch (error) {
       setError(
         error instanceof Error
@@ -208,6 +213,7 @@ export default function LoginForm({ config }: LoginFormProps) {
           <button
             type="submit"
             disabled={loading}
+            onClick={handleSubmit}
             className={`w-full text-white py-3 rounded-lg font-semibold disabled:bg-gray-400 transition ${styles.button}`}
           >
             {loading ? config.loadingLabel : config.submitLabel}
