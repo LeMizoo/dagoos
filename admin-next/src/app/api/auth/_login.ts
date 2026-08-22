@@ -72,7 +72,9 @@ export async function login(
     const cookieName =
       endpoint === 'login'
         ? 'dagoos_admin_token'
-        : 'dagoos_org_token';
+        : endpoint === 'fleet-login'
+          ? 'dagoos_fleet_token'
+          : 'dagoos_coop_token';
 
     response.cookies.set(
       cookieName,

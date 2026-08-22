@@ -57,9 +57,12 @@ async function proxyRequest(req: NextRequest) {
   const cookieToken =
     authSpace === 'admin'
       ? cookieStore.get('dagoos_admin_token')?.value
-      : authSpace === 'fleet' || authSpace === 'coop' || authSpace === 'org'
-        ? cookieStore.get('dagoos_org_token')?.value
-        : null;
+      : authSpace === 'fleet'
+        ? cookieStore.get('dagoos_fleet_token')?.value
+        : authSpace === 'coop'
+          ? cookieStore.get('dagoos_coop_token')?.value
+          : cookieStore.get('dagoos_fleet_token')?.value ||
+            cookieStore.get('dagoos_coop_token')?.value;
 
   const authorization =
     req.headers.get('authorization') ||

@@ -70,8 +70,10 @@ export function middleware(request: NextRequest) {
 
   if (isAdminPath) {
     token = request.cookies.get('dagoos_admin_token')?.value;
-  } else if (isFleetPath || isCoopPath) {
-    token = request.cookies.get('dagoos_org_token')?.value;
+  } else if (isFleetPath) {
+    token = request.cookies.get('dagoos_fleet_token')?.value;
+  } else if (isCoopPath) {
+    token = request.cookies.get('dagoos_coop_token')?.value;
   }
 
   // ============================================================

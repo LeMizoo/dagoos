@@ -147,7 +147,9 @@ export default function LoginForm({ config }: LoginFormProps) {
       if (response.token) {
         const tokenKey = config.endpoint === '/api/auth/login'
           ? 'dagoos_admin_token'
-          : 'dagoos_org_token';
+          : config.endpoint.includes('fleet')
+            ? 'dagoos_fleet_token'
+            : 'dagoos_coop_token';
         localStorage.setItem(tokenKey, response.token);
         // Aussi stocker dans un cookie non-HttpOnly pour le middleware
         document.cookie = tokenKey + '=' + response.token + '; path=/; max-age=604800; SameSite=Lax';
