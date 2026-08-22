@@ -97,8 +97,7 @@ export default function LoginForm({ config }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const redirect =
-    searchParams.get('redirect') || config.defaultRedirect;
+  const redirect = config.defaultRedirect;
 
   const styles = accentStyles[config.accent];
 
