@@ -33,11 +33,22 @@ async function init_notifications() {
             var message = n.message || '';
             var dateStr = n.createdAt ? new Date(n.createdAt).toLocaleString('fr-FR') : '';
             
-            return '<div style="background:#1E293B;border-radius:8px;padding:12px;margin-bottom:8px;">' +
+            // Extraire les champs du message
+            var montant = '';
+            var commentaire = '';
+            var montantMatch = message.match(/Montant\s*:\s*([^\-]+?)(?:\s*-\s*Commentaire|$)/);
+            var commentaireMatch = message.match(/Commentaire\s*:\s*(.+)$/);
+            
+            if (montantMatch) montant = montantMatch[1].trim();
+            if (commentaireMatch) commentaire = commentaireMatch[1].trim();
+            
+            return '<div style="background:#1E293B;border-radius:8px;padding:12px;margin-bottom:8px;border-left:3px solid #DAA520;">' +
                 '<div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">' +
                     '<div style="flex:1;">' +
                         '<div style="color:#fff;font-weight:600;font-size:13px;">' + title + '</div>' +
                         '<div style="color:#94A3B8;font-size:11px;margin-top:4px;">' + message + '</div>' +
+                        (montant ? '<div style="color:#22C55E;font-weight:700;font-size:12px;margin-top:4px;">💰 ' + montant + '</div>' : '') +
+                        (commentaire ? '<div style="color:#F59E0B;font-size:11px;margin-top:2px;font-style:italic;">💬 ' + commentaire + '</div>' : '') +
                         '<div style="color:#64748B;font-size:10px;margin-top:4px;">' + dateStr + '</div>' +
                     '</div>' +
                     '<button onclick="marquerLueNotification(\'' + n.id + '\')" style="background:rgba(255,255,255,0.1);border:none;padding:4px 8px;border-radius:6px;color:#DAA520;cursor:pointer;font-size:10px;white-space:nowrap;">Marquer lue</button>' +
