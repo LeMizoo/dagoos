@@ -6,7 +6,10 @@ export const dynamic = 'force-dynamic';
 
 export async function PUT(req: NextRequest) {
   try {
-    const token = cookies().get('dagoos_token')?.value;
+    const token = (
+      cookies().get('dagoos_admin_token')?.value ||
+      cookies().get('dagoos_org_token')?.value
+    );
 
     if (!token) {
       return NextResponse.json(

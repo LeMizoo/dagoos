@@ -16,11 +16,18 @@ export async function apiFetch(
 
   const headers = new Headers(options.headers);
 
-  // Ajouter le token localStorage comme fallback au cookie
   if (typeof window !== 'undefined') {
-    const localToken = localStorage.getItem('dagoos_token');
-    if (localToken && !headers.has('Authorization')) {
-      headers.set('Authorization', 'Bearer ' + localToken);
+    const pathname = window.location.pathname;
+
+    if (pathname === '/dashboard' || pathname.startsWith('/dashboard/')) {
+      headers.set('x-auth-space', 'admin');
+    } else if (
+      pathname === '/fleet' ||
+      pathname.startsWith('/fleet/') ||
+      pathname === '/coop' ||
+      pathname.startsWith('/coop/')
+    ) {
+      headers.set('x-auth-space', 'org');
     }
   }
 

@@ -121,11 +121,6 @@ export default function LoginForm({ config }: LoginFormProps) {
         }),
       });
 
-      // Stocker le token dans localStorage comme fallback
-      if (response.token) {
-        localStorage.setItem('dagoos_token', response.token);
-      }
-
       window.location.href = redirect;
     } catch (error) {
       setError(

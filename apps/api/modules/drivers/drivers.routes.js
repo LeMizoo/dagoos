@@ -197,8 +197,9 @@ router.post('/', authMiddleware, requirePermission('drivers.manage'), async (req
      * Le compte User du chauffeur possède lui aussi un mot de passe.
      * On le hash systématiquement.
      */
-    const plainPassword = password || pin || '1234';
-    const hashedPassword = await bcrypt.hash(plainPassword, 10);
+    const plainPassword = password || pin || "1234";
+    const hashedPassword = await bcrypt.hash(plainPassword, 12);
+    const hashedPin = await bcrypt.hash(pin || "1234", 12);
 
     const user = await prisma.user.upsert({
       where: { email: generatedEmail },
@@ -226,13 +227,13 @@ router.post('/', authMiddleware, requirePermission('drivers.manage'), async (req
         vehicleId: vehicleId || null,
         status: status || 'active',
         license: license || null,
-        pin: pin || '1234',
+        pin: hashedPin,
       },
       create: {
         userId: user.id,
         organizationId,
         driverCode: driverCode || `DRV-${user.id}`,
-        pin: pin || '1234',
+        pin: hashedPin,
         vehicleId: vehicleId || null,
         status: status || 'active',
         license: license || null,
@@ -301,7 +302,7 @@ router.put('/:id', authMiddleware, requirePermission('drivers.manage'), async (r
     const data = {};
 
     if (driverCode !== undefined) data.driverCode = driverCode;
-    if (pin !== undefined) data.pin = pin;
+    if (pin !== undefined) data.pin = await bcrypt.hash(String(pin), 12);
     if (status !== undefined) data.status = status;
     if (license !== undefined) data.license = license;
 

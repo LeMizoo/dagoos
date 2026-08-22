@@ -6,34 +6,31 @@ const { authMiddleware, JWT_SECRET } = require('../../middleware/auth');
 
 const router = express.Router();
 
-// Inscription
-router.post('/register', async (req, res) => {
+const crypto = require("crypto");
+const PUBLIC_ORGANIZATION_ROLES = new Set(["FLEET_MANAGER", "COOPERATIVE"]);
+
+// Public organization registration only.
+router.post("/register", async (req, res) => {
   try {
-    const { name, email, phone, password, role, plan } = req.body;
-    if (!name || !email || !password) return res.status(400).json({ error: 'Nom, email et mot de passe requis' });
-    const hashed = await bcrypt.hash(password, 10);
-    
-    const user = await prisma.user.create({
-      data: { name, email, phone, password: hashed, role: role || 'USER' }
+    const { name, email, phone, password, role, plan, organizationName } = req.body;
+    const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
+    if (!name || !normalizedEmail || typeof password !== "string" || password.length < 12) return res.status(400).json({ error: "Nom, email et mot de passe de 12 caracteres minimum requis" });
+    if (!PUBLIC_ORGANIZATION_ROLES.has(role)) return res.status(400).json({ error: "Type organisation invalide" });
+    const organizationLabel = String(organizationName || name).trim();
+    if (!organizationLabel) return res.status(400).json({ error: "Nom organisation requis" });
+    const suffix = crypto.randomBytes(4).toString("hex");
+    const slug = organizationLabel.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) + "-" + suffix;
+    const code = (role === "FLEET_MANAGER" ? "FL-" : "CO-") + crypto.randomBytes(3).toString("hex").toUpperCase();
+    const hashedPassword = await bcrypt.hash(password, 12);
+    await prisma.$transaction(async (tx) => {
+      const organization = await tx.organization.create({ data: { name: organizationLabel, email: normalizedEmail, phone: phone || null, code, slug, type: role, plan: plan || "Freemium" } });
+      await tx.user.create({ data: { name: String(name).trim(), email: normalizedEmail, phone: phone || null, password: hashedPassword, role, organizationId: organization.id } });
     });
-
-    // Créer l'organisation si fleet ou coop
-    if (role === 'FLEET_MANAGER' || role === 'COOPERATIVE') {
-      const code = role === 'FLEET_MANAGER' ? 'FL-' : 'CO-';
-      await prisma.organization.create({
-        data: {
-          name, email, phone,
-          code: code + Math.random().toString(36).substring(2,6).toUpperCase(),
-          slug: name.toLowerCase().replace(/ /g, '-'),
-          type: role, plan: plan || 'Freemium'
-        }
-      });
-    }
-
-    res.status(201).json({ message: 'Compte créé avec succès !' });
+    res.status(201).json({ message: "Compte cree avec succes" });
   } catch (e) {
-    if (e.code === 'P2002') return res.status(409).json({ error: 'Un compte utilise déjà cet email' });
-    res.status(500).json({ error: e.message });
+    if (e.code === "P2002") return res.status(409).json({ error: "Un compte ou une organisation utilise deja cet email" });
+    console.error("POST /auth/register", e);
+    res.status(500).json({ error: "Erreur creation compte" });
   }
 });
 
@@ -132,7 +129,13 @@ router.post('/driver-login', async (req, res) => {
       include: { user: true, organization: true }
     });
     if (!driver) return res.status(401).json({ error: 'Code chauffeur introuvable' });
-    if (driver.pin !== pin) return res.status(401).json({ error: 'PIN incorrect' });
+    const validPin = driver.pin.startsWith("$2")
+      ? await bcrypt.compare(pin, driver.pin)
+      : driver.pin === pin;
+    if (!validPin) return res.status(401).json({ error: "PIN incorrect" });
+    if (!driver.pin.startsWith("$2")) {
+      await prisma.driver.update({ where: { id: driver.id }, data: { pin: await bcrypt.hash(pin, 12) } });
+    }
     const token = jwt.sign(
       {
         id: driver.user.id,

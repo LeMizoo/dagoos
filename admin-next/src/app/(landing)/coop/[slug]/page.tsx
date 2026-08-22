@@ -167,6 +167,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
         body: JSON.stringify({
           telephone: manageTel.trim(),
           passagerNom: manageNom.trim(),
+          otpCode: otpCode.trim(),
         }),
       });
       
@@ -194,6 +195,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
         body: JSON.stringify({
           telephone: manageTel.trim(),
           passagerNom: manageNom.trim(),
+          otpCode: otpCode.trim(),
           action: 'modify',
           reservationId,
           nouvellePlace: newPlace.trim(),
@@ -209,6 +211,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
           body: JSON.stringify({
             telephone: manageTel.trim(),
             passagerNom: manageNom.trim(),
+          otpCode: otpCode.trim(),
           }),
         });
         if (manageRes.ok) {
@@ -232,6 +235,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
         body: JSON.stringify({
           telephone: manageTel.trim(),
           passagerNom: manageNom.trim(),
+          otpCode: otpCode.trim(),
           action: 'cancel',
           reservationId,
         }),
@@ -244,6 +248,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
           body: JSON.stringify({
             telephone: manageTel.trim(),
             passagerNom: manageNom.trim(),
+          otpCode: otpCode.trim(),
           }),
         });
         if (manageRes.ok) {
@@ -442,6 +447,15 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
               placeholder="Nom du passager"
               value={manageNom}
               onChange={e => setManageNom(e.target.value)}
+              className="w-full px-4 py-3 border rounded-lg text-sm"
+            />
+            <input
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              placeholder="Code OTP de reservation"
+              value={otpCode}
+              onChange={e => setOtpCode(e.target.value)}
               className="w-full px-4 py-3 border rounded-lg text-sm"
             />
             <button

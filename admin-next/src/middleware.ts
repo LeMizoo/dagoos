@@ -2,8 +2,23 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get('dagoos_token')?.value;
   const { pathname } = request.nextUrl;
+
+  const isAdminPath =
+    pathname === '/dashboard' ||
+    pathname.startsWith('/dashboard/');
+
+  const isOrgPath =
+    pathname === '/fleet' ||
+    pathname.startsWith('/fleet/') ||
+    pathname === '/coop' ||
+    pathname.startsWith('/coop/');
+
+  const token = isAdminPath
+    ? request.cookies.get('dagoos_admin_token')?.value
+    : isOrgPath
+      ? request.cookies.get('dagoos_org_token')?.value
+      : null;
 
   console.log('🔒 PATHNAME:', JSON.stringify(pathname));
 

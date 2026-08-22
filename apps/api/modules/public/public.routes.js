@@ -1,5 +1,7 @@
 const express = require('express');
 const prisma = require('../../lib/prisma');
+const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const router = express.Router();
 
@@ -357,6 +359,9 @@ router.post('/reservations/batch', async (req, res) => {
     }
     
     // Créer une réservation par passager
+    const otpCode = String(crypto.randomInt(100000, 1000000));
+    const otpHash = await bcrypt.hash(otpCode, 12);
+    const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
     const reservations = [];
     for (const passager of passagers) {
       const reservation = await prisma.reservation.create({
@@ -366,6 +371,8 @@ router.post('/reservations/batch', async (req, res) => {
           telephone: String(telephone).trim(),
           place: String(passager.place).trim(),
           statut: 'PENDING',
+          otpHash,
+          otpExpiresAt,
         },
       });
       reservations.push(reservation);
@@ -399,7 +406,7 @@ router.post('/reservations/batch', async (req, res) => {
     }
 
     // Générer un code OTP pour validation
-    const otpCode = String(Math.floor(100000 + Math.random() * 900000));
+    
 
     res.status(201).json({
       ok: true,
@@ -416,10 +423,10 @@ router.post('/reservations/batch', async (req, res) => {
 // POST /api/public/reservations/manage - Gérer sa réservation (annuler ou modifier)
 router.post('/reservations/manage', async (req, res) => {
   try {
-    const { telephone, passagerNom, action, reservationId, nouvellePlace } = req.body;
+    const { telephone, passagerNom, otpCode, action, reservationId, nouvellePlace } = req.body;
     
-    if (!telephone || !passagerNom) {
-      return res.status(400).json({ error: 'Téléphone et nom du passager requis' });
+    if (!telephone || !passagerNom || !otpCode) {
+      return res.status(400).json({ error: 'Telephone, nom et code OTP requis' });
     }
     
     // Trouver les réservations du client
@@ -435,6 +442,9 @@ router.post('/reservations/manage', async (req, res) => {
     if (reservations.length === 0) {
       return res.status(404).json({ error: 'Aucune réservation trouvée avec ces informations' });
     }
+
+    const otpValid = reservations[0].otpHash && reservations[0].otpExpiresAt && reservations[0].otpExpiresAt > new Date() && await bcrypt.compare(String(otpCode), reservations[0].otpHash);
+    if (!otpValid) return res.status(403).json({ error: 'Code OTP invalide ou expire' });
     
     // Action : ANNULER
     if (action === 'cancel' && reservationId) {
@@ -462,7 +472,7 @@ router.post('/reservations/manage', async (req, res) => {
       const depart = await prisma.depart.findUnique({
         where: { id: reservation.departId },
         include: {
-          reservations: { where: { statut: 'PENDING', NOT: { id: reservationId } }, select: { place: true } },
+          reservations: { where: { statut: { in: ['PENDING', 'CONFIRMED'] }, NOT: { id: reservationId } }, select: { place: true } },
         },
       });
       

@@ -1,11 +1,28 @@
 const express = require('express');
 const cors = require('cors');
 const prisma = require('./lib/prisma');
+const { authMiddleware } = require('./middleware/auth');
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+const allowedOrigins = (process.env.CORS_ORIGINS || "http://localhost:5001")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Origine non autorisée par CORS"));
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Auth-Space"],
+  maxAge: 86400,
+}));
+app.use(express.json({ limit: "100kb" }));
 
 // =========================================================
 // ROUTES API
@@ -61,7 +78,7 @@ app.get('/api', async (req, res) => {
 // =========================================================
 
 // Informations publiques d'un chauffeur
-app.get('/api/public/driver/:id', async (req, res) => {
+app.get('/api/public/driver/:id', authMiddleware, async (req, res) => {
   try {
     const driver = await prisma.driver.findUnique({
       where: { id: req.params.id },
@@ -89,7 +106,7 @@ app.get('/api/public/driver/:id', async (req, res) => {
 });
 
 // Véhicule affecté à un chauffeur
-app.get('/api/public/vehicles/:driverId', async (req, res) => {
+app.get('/api/public/vehicles/:driverId', authMiddleware, async (req, res) => {
   try {
     const driver = await prisma.driver.findUnique({
       where: { id: req.params.driverId },
@@ -146,7 +163,7 @@ app.get('/api/public/plans', async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
-app.get('/api/public/trips/:driverId', async (req, res) => {
+app.get('/api/public/trips/:driverId', authMiddleware, async (req, res) => {
   try {
     const where = {
       driverId: req.params.driverId
