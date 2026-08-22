@@ -16,6 +16,7 @@ export async function apiFetch(
 
   const headers = new Headers(options.headers);
 
+  // Indiquer l'espace au proxy pour qu'il sélectionne le bon cookie
   if (typeof window !== 'undefined') {
     const pathname = window.location.pathname;
 
