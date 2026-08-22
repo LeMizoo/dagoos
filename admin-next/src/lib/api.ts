@@ -16,6 +16,14 @@ export async function apiFetch(
 
   const headers = new Headers(options.headers);
 
+  // Ajouter le token localStorage comme fallback au cookie
+  if (typeof window !== 'undefined') {
+    const localToken = localStorage.getItem('dagoos_token');
+    if (localToken && !headers.has('Authorization')) {
+      headers.set('Authorization', 'Bearer ' + localToken);
+    }
+  }
+
   if (
     options.body &&
     !headers.has('Content-Type') &&

@@ -113,7 +113,7 @@ export default function LoginForm({ config }: LoginFormProps) {
     setError('');
 
     try {
-      await apiJson<LoginResponse>(config.endpoint, {
+      const response = await apiJson<LoginResponse>(config.endpoint, {
         method: 'POST',
         body: JSON.stringify({
           email,
@@ -121,9 +121,12 @@ export default function LoginForm({ config }: LoginFormProps) {
         }),
       });
 
-      setTimeout(function() {
-          window.location.href = redirect;
-        }, 300);
+      // Stocker le token dans localStorage comme fallback
+      if (response.token) {
+        localStorage.setItem('dagoos_token', response.token);
+      }
+
+      window.location.href = redirect;
     } catch (error) {
       setError(
         error instanceof Error
