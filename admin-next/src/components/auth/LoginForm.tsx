@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Building2, Truck } from 'lucide-react';
 import Link from 'next/link';
@@ -93,6 +93,18 @@ export default function LoginForm({ config }: LoginFormProps) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const btn = submitButtonRef.current;
+    if (btn) {
+      const listener = () => handleSubmit();
+      btn.addEventListener('click', listener);
+      return () => {
+        btn.removeEventListener('click', listener);
+      };
+    }
+  }, [email, password, loading]);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -210,6 +222,7 @@ export default function LoginForm({ config }: LoginFormProps) {
           )}
 
           <button
+            ref={submitButtonRef}
             type="button"
             disabled={loading}
             onClick={handleSubmit}
