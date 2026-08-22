@@ -106,6 +106,17 @@ export default function LoginForm({ config }: LoginFormProps) {
     }
   }, [email, password, loading]);
 
+  // Fallback : si le bouton ne fonctionne pas, utiliser un timer
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const btn = submitButtonRef.current;
+      if (btn) {
+        console.log('Bouton login prêt');
+      }
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const router = useRouter();
   const searchParams = useSearchParams();
 

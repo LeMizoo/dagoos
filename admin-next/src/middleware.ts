@@ -4,56 +4,94 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Pages publiques : landing /fleet/[slug] et /coop/[slug]
-  // Ces pages n'ont PAS de sous-routes connues
-  const isLandingPage =
-    /^\/(fleet|coop)\/[a-z0-9-]+$/.test(pathname) &&
-    !pathname.includes('/drivers') &&
-    !pathname.includes('/vehicles') &&
-    !pathname.includes('/finances') &&
-    !pathname.includes('/settings') &&
-    !pathname.includes('/departs') &&
-    !pathname.includes('/reservations') &&
-    !pathname.includes('/contrats') &&
-    !pathname.includes('/livraisons') &&
-    !pathname.includes('/messages') &&
-    !pathname.includes('/notifications') &&
-    !pathname.includes('/profil') &&
-    !pathname.includes('/societes') &&
-    !pathname.includes('/versements') &&
-    !pathname.includes('/depenses') &&
-    !pathname.includes('/rapports') &&
-    !pathname.includes('/permutation') &&
-    !pathname.includes('/codes') &&
-    !pathname.includes('/proprietaires') &&
-    !pathname.includes('/demandes');
+  // ============================================================
+  // PAGES PUBLIQUES
+  // ============================================================
 
-  if (isLandingPage) {
+  const isPublicPage =
+    pathname === '/' ||
+    pathname === '/login' ||
+    pathname === '/fleet-login' ||
+    pathname === '/coop-login' ||
+    pathname === '/register';
+
+  if (isPublicPage) {
     return NextResponse.next();
   }
+
+  // ============================================================
+  // LANDINGS PUBLIQUES DES ORGANISATIONS
+  // ============================================================
+  //
+  // /fleet/[slug] et /coop/[slug] sont publiques.
+  //
+  // Attention :
+  // /fleet-login et /coop-login ont déjà été traitées
+  // ci-dessus et ne peuvent donc jamais être interprétées
+  // comme des routes de portail.
+  //
+
+  const isPublicOrganizationLanding =
+    /^\/(fleet|coop)\/[a-z0-9-]+$/.test(pathname);
+
+  if (isPublicOrganizationLanding) {
+    return NextResponse.next();
+  }
+
+  // ============================================================
+  // PORTAIL ADMIN
+  // ============================================================
 
   const isAdminPath =
     pathname === '/dashboard' ||
     pathname.startsWith('/dashboard/');
 
+  // ============================================================
+  // PORTAIL FLEET
+  // ============================================================
+
   const isFleetPath =
     pathname === '/fleet' ||
     pathname.startsWith('/fleet/');
+
+  // ============================================================
+  // PORTAIL COOP
+  // ============================================================
 
   const isCoopPath =
     pathname === '/coop' ||
     pathname.startsWith('/coop/');
 
-  const token = isAdminPath
-    ? request.cookies.get('dagoos_admin_token')?.value
-    : isFleetPath || isCoopPath
-      ? request.cookies.get('dagoos_org_token')?.value
-      : null;
+  // ============================================================
+  // AUTHENTIFICATION
+  // ============================================================
+
+  let token: string | undefined;
+
+  if (isAdminPath) {
+    token = request.cookies.get('dagoos_admin_token')?.value;
+  } else if (isFleetPath || isCoopPath) {
+    token = request.cookies.get('dagoos_org_token')?.value;
+  }
+
+  // ============================================================
+  // REDIRECTION VERS LE LOGIN APPROPRIÉ
+  // ============================================================
 
   if ((isAdminPath || isFleetPath || isCoopPath) && !token) {
-    const loginPath = isAdminPath ? '/login' : isFleetPath ? '/fleet-login' : '/coop-login';
+    const loginPath = isAdminPath
+      ? '/login'
+      : isFleetPath
+        ? '/fleet-login'
+        : '/coop-login';
+
     const loginUrl = new URL(loginPath, request.url);
-    loginUrl.searchParams.set('redirect', pathname);
+
+    loginUrl.searchParams.set(
+      'redirect',
+      `${pathname}${request.nextUrl.search}`
+    );
+
     return NextResponse.redirect(loginUrl);
   }
 
@@ -61,5 +99,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|b-trans.svg|b-trans.png|icons/|images/).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|b-trans.svg|b-trans.png|icons/|images/).*)',
+  ],
 };

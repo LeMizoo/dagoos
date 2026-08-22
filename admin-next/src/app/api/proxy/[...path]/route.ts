@@ -57,7 +57,7 @@ async function proxyRequest(req: NextRequest) {
   const cookieToken =
     authSpace === 'admin'
       ? cookieStore.get('dagoos_admin_token')?.value
-      : authSpace === 'org'
+      : authSpace === 'fleet' || authSpace === 'coop' || authSpace === 'org'
         ? cookieStore.get('dagoos_org_token')?.value
         : null;
 
@@ -110,9 +110,17 @@ async function proxyRequest(req: NextRequest) {
       };
     }
 
-    return NextResponse.json(data, {
+    const proxyResponse = NextResponse.json(data, {
       status: upstream.status,
     });
+
+    // Transmettre les cookies Set-Cookie du backend
+    const setCookieHeaders = upstream.headers.getSetCookie?.() || [];
+    setCookieHeaders.forEach(cookie => {
+      proxyResponse.headers.append('Set-Cookie', cookie);
+    });
+
+    return proxyResponse;
   } catch (error) {
     console.error('[Proxy] API indisponible:', error);
 
