@@ -1,34 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: '/api/proxy/:path*',
-        destination: 'https://dagoos-api.onrender.com/api/:path*',
-      },
-      {
-        source: '/api/auth/:path*',
-        destination: 'https://dagoos-api.onrender.com/api/auth/:path*',
-      },
-      {
-        source: '/api/departs/:path*',
-        destination: 'https://dagoos-api.onrender.com/api/departs/:path*',
-      },
-      {
-        source: '/api/reservations/:path*',
-        destination: 'https://dagoos-api.onrender.com/api/reservations/:path*',
-      },
-      {
-        source: '/api/finances/:path*',
-        destination: 'https://dagoos-api.onrender.com/api/finances/:path*',
-      },
-      {
-        source: '/api/:path*',
-        destination: 'https://dagoos-api.onrender.com/api/:path*',
-      },
-    ];
-  },
-
   async headers() {
     return [
       {
