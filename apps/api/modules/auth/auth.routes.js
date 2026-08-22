@@ -7,7 +7,7 @@ const { authMiddleware, JWT_SECRET } = require('../../middleware/auth');
 const router = express.Router();
 
 const crypto = require("crypto");
-const PUBLIC_ORGANIZATION_ROLES = new Set(["FLEET_MANAGER", "COOPERATIVE"]);
+const PUBLIC_ORGANIZATION_ROLES = new Set(["FLEET_MANAGER", "COOP_MANAGER", "COOPERATIVE"]);
 
 // Public organization registration only.
 router.post("/register", async (req, res) => {
@@ -96,7 +96,7 @@ router.post('/coop-login', async (req, res) => {
     if (!user) return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
     
     // Vérifier le rôle : seuls COOPERATIVE peuvent se connecter ici
-    if (user.role !== 'COOPERATIVE') {
+    if (user.role !== 'COOP_MANAGER' && user.role !== 'COOPERATIVE') {
       return res.status(403).json({ error: 'Accès réservé aux gestionnaires de coopérative.' });
     }
     

@@ -13,7 +13,7 @@ export default function CoopLayout({
 }) {
   return (
     <AuthProvider>
-      <PortalGuard allowedRoles={['COOPERATIVE']}>
+      <PortalGuard allowedRoles={['COOP_MANAGER', 'COOPERATIVE']}>
       <ResponsiveLayout app="coop">
         {children}
       </ResponsiveLayout>
