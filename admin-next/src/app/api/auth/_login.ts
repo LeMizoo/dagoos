@@ -69,8 +69,13 @@ export async function login(
       { status: 200 }
     );
 
+    // Cookie séparé par espace
+    const cookieName = endpoint === 'fleet-login' ? 'dagoos_fleet_token'
+      : endpoint === 'coop-login' ? 'dagoos_coop_token'
+      : 'dagoos_token';
+
     response.cookies.set(
-      'dagoos_token',
+      cookieName,
       data.token,
       {
         httpOnly: true,

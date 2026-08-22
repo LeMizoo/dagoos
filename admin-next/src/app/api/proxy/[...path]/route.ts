@@ -49,7 +49,10 @@ async function proxyRequest(req: NextRequest) {
   const apiUrl = `${API_BASE_URL}${apiPath}${searchParams}`;
 
   const cookieStore = cookies();
-  const cookieToken = cookieStore.get('dagoos_token')?.value;
+  const cookieToken = 
+    cookieStore.get('dagoos_fleet_token')?.value ||
+    cookieStore.get('dagoos_coop_token')?.value ||
+    cookieStore.get('dagoos_token')?.value;
 
   const authorization =
     req.headers.get('authorization') ||
