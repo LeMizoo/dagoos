@@ -17,7 +17,7 @@ function getUserScope(user) {
       return SCOPES.GLOBAL;
 
     case 'FLEET_MANAGER':
-    case 'COOPERATIVE':
+    case 'COOP_MANAGER':
       return SCOPES.ORGANIZATION;
 
     case 'DRIVER':

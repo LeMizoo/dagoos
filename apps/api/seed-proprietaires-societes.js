@@ -55,7 +55,7 @@ async function seed() {
 
   // 2. Créer une Societe pour chaque utilisateur Coop
   const coopUsers = await prisma.user.findMany({
-    where: { role: 'COOPERATIVE' },
+    where: { role: 'COOP_MANAGER' },
   });
 
   const societesData = {

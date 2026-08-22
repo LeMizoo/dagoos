@@ -66,7 +66,7 @@ export function isFleetManager(
   return user?.role === 'FLEET_MANAGER';
 }
 
-export function isCooperative(
+export function isCoopManager(
   user: AuthorizationUser | null | undefined
 ): boolean {
   return user?.role === 'COOP_MANAGER';

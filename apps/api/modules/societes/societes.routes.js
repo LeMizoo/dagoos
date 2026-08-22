@@ -48,7 +48,7 @@ async function getUserOrganizationId(req) {
  * SUPER_ADMIN / ADMIN :
  *   accès global.
  *
- * FLEET_MANAGER / COOPERATIVE :
+ * FLEET_MANAGER / COOP_MANAGER :
  *   uniquement leur organisation.
  */
 router.get(

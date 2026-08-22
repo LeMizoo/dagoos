@@ -51,7 +51,7 @@ async function getUserOrganizationId(req) {
  * SUPER_ADMIN / ADMIN :
  *   accès global.
  *
- * FLEET_MANAGER / COOPERATIVE :
+ * FLEET_MANAGER / COOP_MANAGER :
  *   accès uniquement à leur organisation.
  */
 router.get(
@@ -101,7 +101,7 @@ router.get(
  * SUPER_ADMIN / ADMIN :
  *   peuvent cibler explicitement une organisation.
  *
- * FLEET_MANAGER / COOPERATIVE :
+ * FLEET_MANAGER / COOP_MANAGER :
  *   organizationId du body est ignoré.
  *   L'organisation est imposée par le contexte serveur.
  */

@@ -11,7 +11,7 @@ const GLOBAL_ROLES = ['SUPER_ADMIN', 'ADMIN'];
 /*
  * Retourne l'organisation associée à l'utilisateur.
  *
- * FLEET_MANAGER / COOPERATIVE :
+ * FLEET_MANAGER / COOP_MANAGER :
  * résolution via l'email du compte utilisateur.
  *
  * DRIVER :
@@ -26,7 +26,7 @@ async function getUserOrganizationId(req) {
   }
 
   /*
-   * FLEET_MANAGER / COOPERATIVE :
+   * FLEET_MANAGER / COOP_MANAGER :
    * l'organisation est actuellement liée au compte par son email.
    *
    * On ne lit volontairement PAS user.organizationId :
@@ -34,7 +34,7 @@ async function getUserOrganizationId(req) {
    */
   if (
     req.user.role === 'FLEET_MANAGER' ||
-    req.user.role === 'COOPERATIVE'
+    req.user.role === 'COOP_MANAGER'
   ) {
     const organization = await prisma.organization.findFirst({
       where: {
@@ -91,7 +91,7 @@ async function getSocieteWithOrganization(societeId) {
  * SUPER_ADMIN / ADMIN :
  *   accès global selon leur permission.
  *
- * FLEET_MANAGER / COOPERATIVE :
+ * FLEET_MANAGER / COOP_MANAGER :
  *   uniquement les contrats de leur organisation.
  */
 router.get(
@@ -148,7 +148,7 @@ router.get(
  *
  * Création autorisée uniquement avec contracts.manage.
  *
- * FLEET_MANAGER / COOPERATIVE :
+ * FLEET_MANAGER / COOP_MANAGER :
  *   la société doit appartenir à leur organisation.
  *
  * SUPER_ADMIN :

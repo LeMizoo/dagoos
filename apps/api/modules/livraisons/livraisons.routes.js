@@ -14,7 +14,7 @@ async function getUserOrganizationId(req) {
 
   if (
     req.user.role === 'FLEET_MANAGER' ||
-    req.user.role === 'COOPERATIVE'
+    req.user.role === 'COOP_MANAGER'
   ) {
     const organization = await prisma.organization.findFirst({
       where: {

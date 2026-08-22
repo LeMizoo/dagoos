@@ -25,13 +25,10 @@ export async function apiFetch(
 
     if (pathname === '/dashboard' || pathname.startsWith('/dashboard/')) {
       headers.set('x-auth-space', 'admin');
-    } else if (
-      pathname === '/fleet' ||
-      pathname.startsWith('/fleet/') ||
-      pathname === '/coop' ||
-      pathname.startsWith('/coop/')
-    ) {
-      headers.set('x-auth-space', 'org');
+    } else if (pathname === '/fleet' || pathname.startsWith('/fleet/')) {
+      headers.set('x-auth-space', 'fleet');
+    } else if (pathname === '/coop' || pathname.startsWith('/coop/')) {
+      headers.set('x-auth-space', 'coop');
     }
   }
 
