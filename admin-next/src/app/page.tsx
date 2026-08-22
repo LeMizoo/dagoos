@@ -59,10 +59,10 @@ export default async function LandingPage() {
       </section>
 
       {/* PLANS */}
-      <PlansSection />
+      <div id="plans"><PlansSection /></div>
 
       {/* SERVICES */}
-      <section className="py-20 bg-white">
+      <section id="services" className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Nos services</h2>
           <p className="text-gray-500 mb-12">Tout pour gérer votre mobilité</p>
@@ -97,16 +97,60 @@ export default async function LandingPage() {
         </Link>
       </section>
 
-      <footer className="bg-gray-900 text-gray-400 py-8 text-center text-sm">
-        <div className="flex justify-center gap-6 mb-4">
-          <a href="#hero" className="text-white hover:text-emerald-400 transition font-semibold">
-            Espace Chauffeur
-          </a>
-          <Link href="/register" className="text-white hover:text-emerald-400 transition font-semibold">
-            Devenir partenaire
-          </Link>
+      <footer className="bg-gray-900 text-gray-400 py-12 text-sm">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            {/* Logo + description */}
+            <div>
+              <div className="text-white font-bold text-lg mb-3">DAGO MOBILITY</div>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                La mobilité connectée... Chez les potes, ça roule.
+              </p>
+            </div>
+
+            {/* Produit */}
+            <div>
+              <h4 className="text-white font-semibold mb-3">Produit</h4>
+              <ul className="space-y-2">
+                <li><a href="#services" className="hover:text-emerald-400 transition">Fonctionnalités</a></li>
+                <li><a href="#plans" className="hover:text-emerald-400 transition">Tarifs</a></li>
+                <li><a href="#faq" className="hover:text-emerald-400 transition">FAQ</a></li>
+              </ul>
+            </div>
+
+            {/* Entreprise */}
+            <div>
+              <h4 className="text-white font-semibold mb-3">Entreprise</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="hover:text-emerald-400 transition">À propos</a></li>
+                <li><a href="#" className="hover:text-emerald-400 transition">Blog</a></li>
+                <li><a href="#" className="hover:text-emerald-400 transition">Carrières</a></li>
+              </ul>
+            </div>
+
+            {/* Support */}
+            <div>
+              <h4 className="text-white font-semibold mb-3">Support</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="hover:text-emerald-400 transition">Centre d'aide</a></li>
+                <li><a href="#" className="hover:text-emerald-400 transition">Contact</a></li>
+                <li><a href="#" className="hover:text-emerald-400 transition">Statut</a></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bas de page */}
+          <div className="border-t border-gray-700 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p>© {new Date().getFullYear()} Dago Mobility. Tous droits réservés.</p>
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="bg-emerald-600 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-emerald-700 transition"
+              aria-label="Revenir en haut"
+            >
+              ↑
+            </button>
+          </div>
         </div>
-        <p>© {new Date().getFullYear()} Dagoo Mobility. Chez les potes, ça roule.</p>
       </footer>
     </div>
   );
