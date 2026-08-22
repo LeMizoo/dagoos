@@ -53,10 +53,11 @@ async function fetchCurrentUser(): Promise<AuthUser | null> {
       {
         headers: {
           'x-auth-space':
-            window.location.pathname.startsWith('/fleet') ||
-            window.location.pathname.startsWith('/coop')
-              ? 'org'
-              : 'admin',
+            window.location.pathname.startsWith('/fleet')
+              ? 'fleet'
+              : window.location.pathname.startsWith('/coop')
+                ? 'coop'
+                : 'admin',
         }
       }
     );
