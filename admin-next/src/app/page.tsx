@@ -10,10 +10,26 @@ export const dynamic = 'force-dynamic';
 
 async function getOrganizations() {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/public/organizations`, { cache: 'no-store' });
-    if (!res.ok) return [];
-    return await res.json();
-  } catch {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+
+    const res = await fetch(`${API_BASE_URL}/api/public/organizations`, {
+      cache: 'no-store',
+      signal: controller.signal,
+      headers: { 'Accept': 'application/json' }
+    });
+
+    clearTimeout(timeout);
+
+    if (!res.ok) {
+      console.error('API organisations:', res.status);
+      return [];
+    }
+
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.error('Erreur fetch organisations:', e);
     return [];
   }
 }
@@ -22,7 +38,7 @@ export default async function LandingPage() {
   const organizations = await getOrganizations();
   const coopsAvecDeparts = organizations.filter((org: { type?: string; departs?: any[] }) => {
     if (org.type !== 'COOPERATIVE' || !org.departs) return false;
-    
+
     // Filtrer les départs déjà partis
     const departsFuturs = org.departs.filter((d: { heure?: string; date: string }) => {
       const [h, m] = (d.heure || '').split(':').map(Number);
@@ -30,13 +46,13 @@ export default async function LandingPage() {
       departTime.setHours(h, m, 0, 0);
       return departTime.getTime() > Date.now();
     });
-    
+
     org.departs = departsFuturs;
     return departsFuturs.length > 0;
   });
 
   return (
-    <div className="min-h-screen bg-white">
+    <div id="top" className="min-h-screen bg-white">
       {/* HERO */}
       <HeroWithDriverModal />
 
@@ -142,13 +158,13 @@ export default async function LandingPage() {
           {/* Bas de page */}
           <div className="border-t border-gray-700 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <p>© {new Date().getFullYear()} Dago Mobility. Tous droits réservés.</p>
-            <button
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            <a
+              href="#top"
               className="bg-emerald-600 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-emerald-700 transition"
               aria-label="Revenir en haut"
             >
               ↑
-            </button>
+            </a>
           </div>
         </div>
       </footer>
