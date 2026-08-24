@@ -47,7 +47,7 @@ export default function PlansSection() {
             className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition text-sm ${
               activeTab === 'COOPERATIVE' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-100 border'
             }`}>
-            <Building2 size={18} /> Coopérative
+            <Building2 size={18} /> Inter-urbain
           </button>
         </div>
 
@@ -109,7 +109,7 @@ export default function PlansSection() {
                         }`}>
                         Créer un compte
                       </Link>
-                      <Link href={activeTab === 'FLEET_MANAGER' ? '/fleet-login' : '/coop-login'}
+                      <Link href="/flotte-login"
                         className="block w-full py-2 rounded-lg text-sm border border-gray-200 text-gray-600 hover:bg-gray-50 transition">
                         Se connecter
                       </Link>

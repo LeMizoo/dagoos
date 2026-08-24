@@ -23,14 +23,17 @@ export default function HeroWithDriverModal() {
           <span className="text-secondary">réservez votre place en ligne.</span>
         </h1>
         <p className="text-gray-400 text-lg mb-8 max-w-xl mx-auto">
-          Réservez votre trajet en toute simplicité auprès des coopératives partenaires.
+          La gestion intelligente de votre activité de transport. Chauffeurs, véhicules, courses, départs, réservations et finances dans un seul espace.
         </p>
         <div className="flex gap-4 justify-center flex-wrap">
-          <Link href="/register" className="border-2 border-white/30 text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/10 transition">
-            🏢 Devenir partenaire
+          <Link href="/flotte-login" className="bg-emerald-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-emerald-700 transition">
+            Accéder à mon espace
           </Link>
-          <button onClick={() => setShowDriverModal(true)} className="bg-emerald-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-emerald-700 transition">
-            🧑‍✈️ Espace Chauffeur
+          <Link href="/register" className="border-2 border-white/30 text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/10 transition">
+            Devenir partenaire
+          </Link>
+          <button onClick={() => setShowDriverModal(true)} className="border-2 border-secondary/50 text-secondary px-8 py-4 rounded-xl font-semibold hover:bg-secondary/10 transition">
+            Espace Chauffeur
           </button>
         </div>
       </div>
@@ -40,14 +43,14 @@ export default function HeroWithDriverModal() {
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => setShowDriverModal(false)}>
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full text-center" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">🧑‍✈️ Espace Chauffeur</h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">Choisissez votre espace de travail</p>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">Connectez-vous avec votre code chauffeur</p>
             <div className="flex flex-col gap-4">
               <a href="https://dago-driver.pages.dev" target="_blank" rel="noopener noreferrer" className="bg-amber-500 text-white px-6 py-4 rounded-xl font-bold text-lg hover:bg-amber-600 transition">
-                🚕 Chauffeur Fleet
+                🚕 Chauffeur Urbain
                 <span className="block text-xs font-normal mt-1">Courses à la demande</span>
               </a>
               <a href="https://dago-coop-driver.pages.dev" target="_blank" rel="noopener noreferrer" className="bg-emerald-600 text-white px-6 py-4 rounded-xl font-bold text-lg hover:bg-emerald-700 transition">
-                🚌 Chauffeur Coop
+                🚌 Chauffeur Inter-urbain
                 <span className="block text-xs font-normal mt-1">Transport commun & départs</span>
               </a>
             </div>

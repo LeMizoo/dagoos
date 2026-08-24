@@ -181,7 +181,7 @@ export default function TrustSection() {
 
                 {/* Type */}
                 <p className="text-gray-400 text-xs capitalize mb-2">
-                  {org.type === 'FLEET_MANAGER' ? 'Flotte' : 'Coopérative'}
+                  {org.type === 'FLEET_MANAGER' ? 'Urbain' : 'Inter-urbain'}
                 </p>
 
                 {/* Badge */}

@@ -1,3 +1,6 @@
 import { NextRequest } from 'next/server';
-import { login } from '../_login';
-export async function POST(request: NextRequest) { return login(request, 'fleet-login'); }
+import { POST as flotteLogin } from '../flotte-login/route';
+
+export async function POST(request: NextRequest) {
+  return flotteLogin(request);
+}

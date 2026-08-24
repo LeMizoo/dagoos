@@ -36,7 +36,7 @@ export default function ServiceCards({ organizations, coopsAvecDeparts }: Servic
   return (
     <>
       {/* SECTION DES DEUX CARTES */}
-      <section id="services" className="py-16 bg-gray-50">
+      <section id="services-de-mobilite" className="py-16 bg-gray-50">
         <div className="max-w-5xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-4">Nos Services</h2>
           <p className="text-center text-gray-500 mb-12">Choisissez un service pour commencer</p>
@@ -53,9 +53,9 @@ export default function ServiceCards({ organizations, coopsAvecDeparts }: Servic
               <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4">
                 <Car size={32} className="text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-2">🚕 Demander un Taxi</h3>
+              <h3 className="text-2xl font-bold text-white mb-2">🚕 Taxi Urbain</h3>
               <p className="text-white/90 mb-4">
-                Besoin d'un véhicule rapidement ? Commandez un taxi ou une moto en quelques clics.
+                Demandez un taxi ou une moto à proximité et suivez votre course.
               </p>
               <div className="flex items-center gap-2 text-white/80 text-sm">
                 <span className="bg-white/20 px-3 py-1 rounded-full">📍 Géolocalisation</span>
@@ -74,9 +74,9 @@ export default function ServiceCards({ organizations, coopsAvecDeparts }: Servic
               <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4">
                 <Bus size={32} className="text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-2">🚌 Départs Disponibles</h3>
+              <h3 className="text-2xl font-bold text-white mb-2">🚌 Départs Inter-urbains</h3>
               <p className="text-white/90 mb-4">
-                Consultez les départs des coopératives partenaires et réservez votre place.
+                Consultez les départs inter-urbains et réservez votre place.
               </p>
               <div className="flex items-center gap-2 text-white/80 text-sm">
                 <span className="bg-white/20 px-3 py-1 rounded-full">🎫 Réservation</span>
@@ -93,7 +93,7 @@ export default function ServiceCards({ organizations, coopsAvecDeparts }: Servic
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setActiveModal(null)} />
           <div className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
-              <h3 className="text-xl font-bold text-gray-800">🚕 Demander un Taxi</h3>
+              <h3 className="text-xl font-bold text-gray-800">🚕 Taxi Urbain</h3>
               <button
                 onClick={() => setActiveModal(null)}
                 className="p-2 hover:bg-gray-100 rounded-lg transition"
@@ -114,7 +114,7 @@ export default function ServiceCards({ organizations, coopsAvecDeparts }: Servic
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setActiveModal(null)} />
           <div className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
-              <h3 className="text-xl font-bold text-gray-800">🚌 Départs Disponibles</h3>
+              <h3 className="text-xl font-bold text-gray-800">🚌 Départs Inter-urbains</h3>
               <button
                 onClick={() => setActiveModal(null)}
                 className="p-2 hover:bg-gray-100 rounded-lg transition"

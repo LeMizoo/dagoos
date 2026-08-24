@@ -1,20 +1,40 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { API_BASE_URL } from '@/lib/config';
+import { getSessionToken } from '@/lib/session/registry';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     const cookieStore = cookies();
+    const sessionId = request.headers.get('x-session-id');
+    const space = request.headers.get('x-auth-space') || 'admin';
 
-    const space =
-      request.headers.get('x-auth-space') || 'admin';
+    let token: string | null = null;
 
-    const token =
-      space === 'org'
-        ? cookieStore.get('dagoos_org_token')?.value
-        : cookieStore.get('dagoos_admin_token')?.value;
+    /*
+     * Priorité à la session serveur si elle existe.
+     */
+    if (sessionId) {
+      token = getSessionToken(sessionId);
+    }
+
+    /*
+     * Sinon, utiliser le cookie correspondant à l'espace.
+     */
+    if (!token) {
+      if (space === 'fleet') {
+        token =
+          cookieStore.get('dagoos_fleet_token')?.value ?? null;
+      } else if (space === 'coop') {
+        token =
+          cookieStore.get('dagoos_coop_token')?.value ?? null;
+      } else {
+        token =
+          cookieStore.get('dagoos_admin_token')?.value ?? null;
+      }
+    }
 
     if (!token) {
       return NextResponse.json(

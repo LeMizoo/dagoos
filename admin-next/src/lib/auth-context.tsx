@@ -17,16 +17,12 @@ export interface AuthUser {
   name?: string;
   email?: string;
   phone?: string;
-
   role?: UserRole | string;
-
   organizationId?: string;
   organizationCode?: string;
   organizationName?: string;
-
   driverId?: string;
   driverCode?: string;
-
   [key: string]: unknown;
 }
 
@@ -48,37 +44,19 @@ const AuthContext = createContext<AuthContextType>({
 
 async function fetchCurrentUser(): Promise<AuthUser | null> {
   try {
-    const data = await apiJson<{ user?: AuthUser }>(
-      '/api/auth/me',
-      {
-        headers: {
-          'x-auth-space':
-            window.location.pathname.startsWith('/fleet')
-              ? 'fleet'
-              : window.location.pathname.startsWith('/coop')
-                ? 'coop'
-                : 'admin',
-        }
-      }
-    );
-
+    const data = await apiJson<{ user?: AuthUser }>('/api/auth/me');
     return data?.user ?? null;
   } catch {
     return null;
   }
 }
 
-export function AuthProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   const refreshUser = useCallback(async () => {
     setLoading(true);
-
     try {
       const currentUser = await fetchCurrentUser();
       setUser(currentUser);
@@ -92,11 +70,7 @@ export function AuthProvider({
 
     async function initialize() {
       const currentUser = await fetchCurrentUser();
-
-      if (!mounted) {
-        return;
-      }
-
+      if (!mounted) return;
       setUser(currentUser);
       setLoading(false);
     }
@@ -110,9 +84,7 @@ export function AuthProvider({
 
   const logout = useCallback(async () => {
     try {
-      await apiFetch('/api/auth/logout', {
-        method: 'POST',
-      });
+      await apiFetch('/api/auth/logout', { method: 'POST' });
     } finally {
       setUser(null);
     }

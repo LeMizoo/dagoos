@@ -41,9 +41,9 @@ export default async function LandingPage() {
 
     // Filtrer les départs déjà partis
     const departsFuturs = org.departs.filter((d: { heure?: string; date: string }) => {
-      const [h, m] = (d.heure || '').split(':').map(Number);
-      const departTime = new Date(d.date);
-      departTime.setHours(h, m, 0, 0);
+      const [year, month, day] = d.date.slice(0, 10).split('-').map(Number);
+      const [h, m] = (d.heure || '00:00').split(':').map(Number);
+      const departTime = new Date(year, month - 1, day, h, m, 0, 0);
       return departTime.getTime() > Date.now();
     });
 
@@ -67,8 +67,8 @@ export default async function LandingPage() {
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-8">Chiffres clés</h2>
           <div className="grid grid-cols-3 gap-8">
-            <div><div className="text-4xl font-bold">{organizations.filter((o: { type?: string }) => o.type === 'FLEET_MANAGER').length}</div><div className="text-white/70 text-sm">Flottes</div></div>
-            <div><div className="text-4xl font-bold">{organizations.filter((o: { type?: string }) => o.type === 'COOPERATIVE').length}</div><div className="text-white/70 text-sm">Coopératives</div></div>
+            <div><div className="text-4xl font-bold">{organizations.filter((o: { type?: string }) => o.type === 'FLEET_MANAGER').length}</div><div className="text-white/70 text-sm">Services urbains</div></div>
+            <div><div className="text-4xl font-bold">{organizations.filter((o: { type?: string }) => o.type === 'COOPERATIVE').length}</div><div className="text-white/70 text-sm">Services inter-urbains</div></div>
             <div><div className="text-4xl font-bold">{coopsAvecDeparts.length}</div><div className="text-white/70 text-sm">Avec départs</div></div>
           </div>
         </div>
@@ -77,15 +77,15 @@ export default async function LandingPage() {
       {/* PLANS */}
       <div id="plans"><PlansSection /></div>
 
-      {/* SERVICES */}
-      <section id="services" className="py-20 bg-white">
+      {/* POURQUOI DAGOOS */}
+      <section id="pourquoi" className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Nos services</h2>
-          <p className="text-gray-500 mb-12">Tout pour gérer votre mobilité</p>
+          <h2 className="text-3xl font-bold mb-4">Pourquoi Dagoos ?</h2>
+          <p className="text-gray-500 mb-12">Une plateforme unique pour votre mobilité</p>
           <div className="grid md:grid-cols-3 gap-6">
             {[
               { icon: Car, title: 'Réservation en ligne', desc: 'Réservez vos places en quelques clics' },
-              { icon: Users, title: 'Coopératives fiables', desc: 'Des partenaires de confiance' },
+              { icon: Users, title: 'Services inter-urbains fiables', desc: 'Des partenaires de confiance' },
               { icon: Shield, title: 'Sécurité garantie', desc: 'Vos données protégées' },
               { icon: Zap, title: 'Rapide', desc: 'Confirmation immédiate' },
               { icon: Smartphone, title: 'Mobile', desc: 'Accessible sur tous les appareils' },
@@ -107,9 +107,9 @@ export default async function LandingPage() {
       {/* CTA */}
       <section className="py-16 bg-gradient-to-r from-primary to-blue-800 text-white text-center">
         <h2 className="text-3xl font-bold mb-4">Rejoignez l'aventure</h2>
-        <p className="text-white/80 mb-8">Créez votre compte et commencez à gérer votre activité</p>
-        <Link href="/register" className="inline-block bg-secondary text-dark px-8 py-4 rounded-xl font-bold text-lg hover:bg-yellow-400 transition">
-          S'inscrire en tant qu'organisation
+        <p className="text-white/80 mb-8">Gérez votre activité de transport depuis un espace unique</p>
+        <Link href="/flotte-login" className="inline-block bg-secondary text-dark px-8 py-4 rounded-xl font-bold text-lg hover:bg-yellow-400 transition">
+          Accéder à mon espace
         </Link>
       </section>
 
@@ -128,7 +128,7 @@ export default async function LandingPage() {
             <div>
               <h4 className="text-white font-semibold mb-3">Produit</h4>
               <ul className="space-y-2">
-                <li><a href="#services" className="hover:text-emerald-400 transition">Fonctionnalités</a></li>
+                <li><a href="#services-de-mobilite" className="hover:text-emerald-400 transition">Fonctionnalités</a></li>
                 <li><a href="#plans" className="hover:text-emerald-400 transition">Tarifs</a></li>
                 <li><a href="#faq" className="hover:text-emerald-400 transition">FAQ</a></li>
               </ul>

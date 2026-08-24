@@ -211,3 +211,53 @@ router.get('/me', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
+
+// Login unifié Flotte (FLEET_MANAGER + COOP_MANAGER)
+router.post('/flotte-login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
+    
+    // Vérifier le rôle : FLEET_MANAGER ou COOP_MANAGER
+    if (user.role !== 'FLEET_MANAGER' && user.role !== 'COOP_MANAGER') {
+      return res.status(403).json({ error: 'Accès réservé aux gestionnaires de flotte.' });
+    }
+    
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
+    
+    // Chercher l'organisation liée
+    const org = await prisma.organization.findFirst({ where: { email: user.email } });
+    
+    const token = jwt.sign(
+      { 
+        id: user.id, 
+        email: user.email, 
+        role: user.role, 
+        organizationId: org?.id, 
+        organizationCode: org?.code, 
+        organizationName: org?.name,
+        organizationType: org?.type 
+      },
+      JWT_SECRET, { expiresIn: '7d' }
+    );
+    
+    res.json({ 
+      message: 'Connexion réussie !', 
+      token, 
+      user: { 
+        id: user.id, 
+        name: user.name, 
+        email: user.email, 
+        role: user.role, 
+        organizationId: org?.id, 
+        organizationCode: org?.code, 
+        organizationName: org?.name,
+        organizationType: org?.type
+      }
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});

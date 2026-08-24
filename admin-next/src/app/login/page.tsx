@@ -15,7 +15,8 @@ const config: LoginFormConfig = {
   emailPlaceholder: 'votre-email@exemple.mg',
   submitLabel: 'Se connecter',
   loadingLabel: 'Connexion...',
-  accent: 'primary',
+  accent: 'blue',
+  icon: 'shield',
 };
 
 export default function LoginPage() {

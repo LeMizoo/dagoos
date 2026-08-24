@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { API_BASE_URL } from '@/lib/config';
+import { createSession } from '@/lib/session/registry';
 
 type LoginEndpoint =
   | 'login'
@@ -31,6 +32,7 @@ export async function login(
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Accept: 'application/json',
         },
         body: JSON.stringify({
           email: email.trim().toLowerCase(),
@@ -54,20 +56,10 @@ export async function login(
             'Email ou mot de passe incorrect',
         },
         {
-          status: upstream.ok
-            ? 502
-            : upstream.status,
+          status: upstream.ok ? 502 : upstream.status,
         }
       );
     }
-
-    const response = NextResponse.json(
-      {
-        token: data.token,
-        user: data.user,
-      },
-      { status: 200 }
-    );
 
     const cookieName =
       endpoint === 'login'
@@ -76,24 +68,32 @@ export async function login(
           ? 'dagoos_fleet_token'
           : 'dagoos_coop_token';
 
-    response.cookies.set(
-      cookieName,
-      data.token,
+    /*
+     * Session serveur propre à l'onglet.
+     * Le cookie reste également en place comme mécanisme
+     * de secours et de compatibilité.
+     */
+    const sessionId = createSession(data.token);
+
+    const response = NextResponse.json(
       {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60,
-        path: '/',
-      }
+        user: data.user,
+        sessionId,
+      },
+      { status: 200 }
     );
+
+    response.cookies.set(cookieName, data.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60,
+      path: '/',
+    });
 
     return response;
   } catch (error) {
-    console.error(
-      `[auth/${endpoint}]`,
-      error
-    );
+    console.error(`[auth/${endpoint}]`, error);
 
     return NextResponse.json(
       {

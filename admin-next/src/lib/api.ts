@@ -4,6 +4,69 @@ export interface ApiError {
   [key: string]: unknown;
 }
 
+const SESSION_STORAGE_KEY = 'dagoos_session_id';
+
+function getSessionId(): string | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  return window.sessionStorage.getItem(SESSION_STORAGE_KEY);
+}
+
+export function setSessionId(sessionId: string): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.sessionStorage.setItem(
+    SESSION_STORAGE_KEY,
+    sessionId
+  );
+}
+
+export function clearSessionId(): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.sessionStorage.removeItem(
+    SESSION_STORAGE_KEY
+  );
+}
+
+function getAuthSpace(pathname: string): string | null {
+  if (
+    pathname === '/dashboard' ||
+    pathname.startsWith('/dashboard/')
+  ) {
+    return 'admin';
+  }
+
+  if (
+    pathname === '/flotte' ||
+    pathname.startsWith('/flotte/')
+  ) {
+    return 'fleet';
+  }
+
+  if (
+    pathname === '/fleet' ||
+    pathname.startsWith('/fleet/')
+  ) {
+    return 'fleet';
+  }
+
+  if (
+    pathname === '/coop' ||
+    pathname.startsWith('/coop/')
+  ) {
+    return 'coop';
+  }
+
+  return null;
+}
+
 export async function apiFetch(
   endpoint: string,
   options: RequestInit = {}
@@ -12,23 +75,28 @@ export async function apiFetch(
     ? endpoint
     : `/${endpoint}`;
 
-  const proxyEndpoint = normalizedEndpoint.startsWith('/api/')
-    ? normalizedEndpoint.substring(4)  // Retire '/api'
-    : normalizedEndpoint;
+  const proxyEndpoint =
+    normalizedEndpoint.startsWith('/api/')
+      ? normalizedEndpoint.substring(4)
+      : normalizedEndpoint;
+
   const url = `/api/proxy${proxyEndpoint}`;
 
   const headers = new Headers(options.headers);
 
-  // Indiquer l'espace au proxy pour qu'il sélectionne le bon cookie
   if (typeof window !== 'undefined') {
     const pathname = window.location.pathname;
 
-    if (pathname === '/dashboard' || pathname.startsWith('/dashboard/')) {
-      headers.set('x-auth-space', 'admin');
-    } else if (pathname === '/fleet' || pathname.startsWith('/fleet/')) {
-      headers.set('x-auth-space', 'fleet');
-    } else if (pathname === '/coop' || pathname.startsWith('/coop/')) {
-      headers.set('x-auth-space', 'coop');
+    const authSpace = getAuthSpace(pathname);
+
+    if (authSpace) {
+      headers.set('x-auth-space', authSpace);
+    }
+
+    const sessionId = getSessionId();
+
+    if (sessionId) {
+      headers.set('x-session-id', sessionId);
     }
   }
 
@@ -37,11 +105,17 @@ export async function apiFetch(
     !headers.has('Content-Type') &&
     !(options.body instanceof FormData)
   ) {
-    headers.set('Content-Type', 'application/json');
+    headers.set(
+      'Content-Type',
+      'application/json'
+    );
   }
 
   if (!headers.has('Accept')) {
-    headers.set('Accept', 'application/json');
+    headers.set(
+      'Accept',
+      'application/json'
+    );
   }
 
   const response = await fetch(url, {
@@ -55,18 +129,21 @@ export async function apiFetch(
     response.status === 401 &&
     typeof window !== 'undefined' &&
     !window.location.pathname.endsWith('/login') &&
+    !window.location.pathname.endsWith('/flotte-login') &&
     !window.location.pathname.endsWith('/fleet-login') &&
     !window.location.pathname.endsWith('/coop-login') &&
     !window.location.pathname.endsWith('/register') &&
-    !window.location.pathname.startsWith('/coop/') &&
-    !window.location.pathname.startsWith('/fleet/') &&
     window.location.pathname !== '/'
   ) {
+    clearSessionId();
+
     const pathname = window.location.pathname;
 
     let loginPath = '/login';
 
-    if (pathname.startsWith('/fleet')) {
+    if (pathname.startsWith('/flotte')) {
+      loginPath = '/flotte-login';
+    } else if (pathname.startsWith('/fleet')) {
       loginPath = '/fleet-login';
     } else if (pathname.startsWith('/coop')) {
       loginPath = '/coop-login';
@@ -76,7 +153,8 @@ export async function apiFetch(
       `${pathname}${window.location.search}`
     );
 
-    window.location.href = `${loginPath}?redirect=${redirect}`;
+    window.location.href =
+      `${loginPath}?redirect=${redirect}`;
   }
 
   return response;
@@ -86,13 +164,19 @@ export async function apiJson<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const response = await apiFetch(endpoint, options);
+  const response = await apiFetch(
+    endpoint,
+    options
+  );
 
-  const data = await response.json().catch(() => null);
+  const data = await response
+    .json()
+    .catch(() => null);
 
   if (!response.ok) {
     const errorData =
-      data && typeof data === 'object'
+      data &&
+      typeof data === 'object'
         ? (data as ApiError)
         : {};
 

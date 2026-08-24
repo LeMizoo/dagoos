@@ -1,20 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { deleteSession } from '@/lib/session/registry';
 
 export async function POST(request: NextRequest) {
-  const res = NextResponse.json({ ok: true });
+  const cookieStore = cookies();
+  const sessionId = request.headers.get('x-session-id');
 
-  const space = request.headers.get('x-auth-space');
+  if (sessionId) {
+    deleteSession(sessionId);
+  }
 
-  const cookieName =
-    space === 'admin'
-      ? 'dagoos_admin_token'
-      : 'dagoos_org_token';
+  const space = request.headers.get('x-auth-space') || 'admin';
 
-  res.cookies.set(cookieName, '', {
-    httpOnly: true,
-    maxAge: 0,
-    path: '/',
-  });
+  const cookieNames =
+    space === 'fleet'
+      ? ['dagoos_fleet_token']
+      : space === 'coop'
+        ? ['dagoos_coop_token']
+        : ['dagoos_admin_token'];
 
-  return res;
+  for (const cookieName of cookieNames) {
+    cookieStore.set(cookieName, '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 0,
+      path: '/',
+    });
+  }
+
+  return NextResponse.json({ ok: true });
 }

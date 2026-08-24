@@ -9,15 +9,15 @@ import LoginForm, {
 const config: LoginFormConfig = {
   endpoint: '/api/auth/coop-login',
   defaultRedirect: '/coop',
-  title: 'Dagoo Coop',
-  description: 'Gérez votre coopérative de chauffeurs',
-  badge: 'Coopérative',
-  emailPlaceholder: 'coop@exemple.mg',
+  title: "Dagoo's Coopérative",
+  description: 'Administration de votre coopérative',
+  badge: 'Espace Coopérative',
+  emailPlaceholder: 'votre@email.mg',
   submitLabel: 'Accéder à mon espace',
   loadingLabel: 'Connexion...',
   accent: 'emerald',
   icon: 'building',
-  registration: true,
+  registration: false,
 };
 
 export default function CoopLoginPage() {
