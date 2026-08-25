@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { apiFetch } from '@/lib/api';
 import { useOrganization } from '@/lib/organization-context';
 import { Plus, Pencil, Trash2, Calendar, Clock, MapPin, Users, Car, Search, ClipboardList, X } from 'lucide-react';
-import PlanVehicule from '@/components/coop/PlanVehicule';
+import PlanVehicule from '@/components/flotte/PlanVehicule';
 
 export default function InterurbainDeparts() {
   const { organization } = useOrganization();

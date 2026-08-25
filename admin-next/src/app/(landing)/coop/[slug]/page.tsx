@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Calendar, Clock, MapPin, Phone, Users, ChevronDown, ChevronUp } from 'lucide-react';
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api';
-import PlanVehicule from '@/components/coop/PlanVehicule';
+import PlanVehicule from '@/components/flotte/PlanVehicule';
 
 export default function CooperativeLandingPage({ params }: { params: { slug: string } }) {
   const [cooperative, setCooperative] = useState<any | null>(null);
