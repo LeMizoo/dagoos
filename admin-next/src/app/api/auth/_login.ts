@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { API_BASE_URL } from '@/lib/config';
-import { createSession } from '@/lib/session/registry';
 
 type LoginEndpoint =
   | 'login'
-  | 'flotte-login';
+  | 'urbain-login'
+  | 'interurbain-login';
 
 export async function login(
   request: NextRequest,
@@ -60,24 +60,22 @@ export async function login(
       );
     }
 
-    const cookieName =
-      endpoint === 'login'
-        ? 'dagoos_admin_token'
-        : endpoint === 'flotte-login'
-          ? 'dagoos_flotte_token'
-          : 'dagoos_coop_token';
+    // Déterminer le cookie selon le rôle métier
+    let cookieName = 'dagoos_admin_token';
+    let redirectPath = '/dashboard';
 
-    /*
-     * Session serveur propre à l'onglet.
-     * Le cookie reste également en place comme mécanisme
-     * de secours et de compatibilité.
-     */
-    const sessionId = createSession(data.token);
+    if (endpoint === 'urbain-login') {
+      cookieName = 'dagoos_urbain_token';
+      redirectPath = '/flotte/urbain';
+    } else if (endpoint === 'interurbain-login') {
+      cookieName = 'dagoos_interurbain_token';
+      redirectPath = '/flotte/interurbain';
+    }
 
     const response = NextResponse.json(
       {
         user: data.user,
-        sessionId,
+        redirectPath,
       },
       { status: 200 }
     );

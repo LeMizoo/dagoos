@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { API_BASE_URL } from '@/lib/config';
-import { getSessionToken } from '@/lib/session/registry';
 
 const pathMapping: Record<string, string> = {
   '/finances/transactions': '/api/finances/transactions',
@@ -74,33 +73,31 @@ async function proxyRequest(
   const authSpace =
     req.headers.get('x-auth-space');
 
-  const sessionId =
-    req.headers.get('x-session-id');
-
   let token: string | null = null;
 
   /*
-   * PRIORITÉ ABSOLUE :
-   * sessionStorage -> sessionId -> registre serveur
-   *
-   * Ainsi chaque onglet possède son propre token.
+   * Authentification exclusivement par cookie HttpOnly
+   * selon l'espace métier courant.
    */
-  if (sessionId) {
-    token = await getSessionToken(sessionId);
+  if (authSpace === 'admin' || authSpace === 'dashboard') {
+    token = cookieStore.get('dagoos_admin_token')?.value ?? null;
+  } else if (authSpace === 'urbain') {
+    token = cookieStore.get('dagoos_urbain_token')?.value ?? null;
+  } else if (authSpace === 'interurbain') {
+    token = cookieStore.get('dagoos_interurbain_token')?.value ?? null;
   }
 
   /*
-   * Fallback uniquement pour l'espace ADMIN.
+   * Fallback cookies selon l'espace.
    */
-  if (
-    !token &&
-    (authSpace === 'admin' ||
-      authSpace === 'dashboard')
-  ) {
-    token =
-      cookieStore.get(
-        'dagoos_admin_token'
-      )?.value ?? null;
+  if (!token) {
+    if (authSpace === 'admin' || authSpace === 'dashboard') {
+      token = cookieStore.get('dagoos_admin_token')?.value ?? null;
+    } else if (authSpace === 'fleet' || authSpace === 'flotte') {
+      token = cookieStore.get('dagoos_urbain_token')?.value ?? null;
+    } else if (authSpace === 'coop') {
+      token = cookieStore.get('dagoos_interurbain_token')?.value ?? null;
+    }
   }
 
   const authorization =
@@ -110,12 +107,7 @@ async function proxyRequest(
 
   console.log(
     `[Proxy] ${req.method} ${apiPath} ` +
-      `${authorization ? '(auth)' : '(no auth)'}` +
-      `${
-        sessionId
-          ? ` [session:${sessionId.slice(0, 8)}]`
-          : ''
-      }`
+      `${authorization ? '(auth)' : '(no auth)'}`
   );
 
   try {

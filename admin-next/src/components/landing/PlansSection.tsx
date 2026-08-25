@@ -109,7 +109,7 @@ export default function PlansSection() {
                         }`}>
                         Créer un compte
                       </Link>
-                      <Link href="/flotte-login"
+                      <Link href="/urbain-login"
                         className="block w-full py-2 rounded-lg text-sm border border-gray-200 text-gray-600 hover:bg-gray-50 transition">
                         Se connecter
                       </Link>

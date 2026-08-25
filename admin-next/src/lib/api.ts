@@ -1,5 +1,3 @@
-import { getSessionId } from '@/lib/client/session';
-
 export interface ApiError {
   error?: string;
   message?: string;
@@ -14,25 +12,17 @@ function getAuthSpace(pathname: string): string | null {
     return 'admin';
   }
 
-  if (
-    pathname === '/flotte' ||
-    pathname.startsWith('/flotte/')
-  ) {
-    return 'fleet';
+  if (pathname === '/flotte/urbain' || pathname.startsWith('/flotte/urbain/')) {
+    return 'urbain';
   }
 
-  if (
-    pathname === '/fleet' ||
-    pathname.startsWith('/fleet/')
-  ) {
-    return 'fleet';
+  if (pathname === '/flotte/interurbain' || pathname.startsWith('/flotte/interurbain/')) {
+    return 'interurbain';
   }
 
-  if (
-    pathname === '/coop' ||
-    pathname.startsWith('/coop/')
-  ) {
-    return 'coop';
+  // Pages communes : /flotte/chauffeurs, /flotte/vehicules, etc.
+  if (pathname === '/flotte' || pathname.startsWith('/flotte/')) {
+    return 'flotte';
   }
 
   return null;
@@ -63,11 +53,6 @@ export async function apiFetch(
       headers.set('x-auth-space', authSpace);
     }
 
-    const sessionId = getSessionId();
-
-    if (sessionId) {
-      headers.set('x-session-id', sessionId);
-    }
   }
 
   if (
@@ -93,7 +78,8 @@ export async function apiFetch(
     response.status === 401 &&
     typeof window !== 'undefined' &&
     !window.location.pathname.endsWith('/login') &&
-    !window.location.pathname.endsWith('/flotte-login') &&
+    !window.location.pathname.endsWith('/urbain-login') &&
+    !window.location.pathname.endsWith('/interurbain-login') &&
     !window.location.pathname.endsWith('/fleet-login') &&
     !window.location.pathname.endsWith('/coop-login') &&
     !window.location.pathname.endsWith('/register') &&
@@ -103,8 +89,10 @@ export async function apiFetch(
 
     let loginPath = '/login';
 
-    if (pathname.startsWith('/flotte')) {
-      loginPath = '/flotte-login';
+    if (pathname.startsWith('/flotte/urbain')) {
+      loginPath = '/urbain-login';
+    } else if (pathname.startsWith('/flotte/interurbain')) {
+      loginPath = '/interurbain-login';
     } else if (pathname.startsWith('/fleet')) {
       loginPath = '/fleet-login';
     } else if (pathname.startsWith('/coop')) {

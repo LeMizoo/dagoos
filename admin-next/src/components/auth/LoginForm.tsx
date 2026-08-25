@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { setSessionId } from '@/lib/client/session';
 import {
   Eye,
   EyeOff,
@@ -89,18 +88,15 @@ export default function LoginForm({
 
       if (!data.user) {
         setError(
-          'Réponse de connexion invalide. Veuillez réessayer.'
+          'RÃ©ponse de connexion invalide. Veuillez rÃ©essayer.'
         );
         return;
       }
 
-      if (typeof data.sessionId === 'string' && data.sessionId) {
-        sessionStorage.setItem('dagoos_session_id', data.sessionId);
-        console.log('SessionId stocké:', sessionStorage.getItem('dagoos_session_id'));
-      }
+      const redirectPath = data.redirectPath || config.defaultRedirect;
 
       setTimeout(() => {
-        window.location.href = config.defaultRedirect;
+        window.location.href = redirectPath;
       }, 200);
     } catch (error) {
       setError(

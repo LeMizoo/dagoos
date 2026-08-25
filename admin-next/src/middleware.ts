@@ -8,7 +8,8 @@ export function middleware(request: NextRequest) {
   const isPublicPage =
     pathname === '/' ||
     pathname === '/login' ||
-    pathname === '/flotte-login' ||
+    pathname === '/urbain-login' ||
+    pathname === '/interurbain-login' ||
     pathname === '/fleet-login' ||
     pathname === '/coop-login' ||
     pathname === '/register';
@@ -27,7 +28,6 @@ export function middleware(request: NextRequest) {
 
   // Le middleware ne gère plus l'authentification.
   // L'authentification est gérée par le proxy et le AuthContext côté client.
-  // Chaque onglet a sa propre session via sessionStorage + registre serveur.
 
   return NextResponse.next();
 }

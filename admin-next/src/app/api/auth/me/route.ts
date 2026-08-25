@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { API_BASE_URL } from '@/lib/config';
-import { getSessionToken } from '@/lib/session/registry';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,39 +10,22 @@ export async function GET(
   try {
     const cookieStore = cookies();
 
-    const sessionId =
-      request.headers.get(
-        'x-session-id'
-      );
-
-    let token: string | null = null;
-
-    /*
-     * Chaque onglet récupère exclusivement
-     * son propre token via son sessionId.
-     */
-    if (sessionId) {
-      token =
-        await getSessionToken(sessionId);
-    }
-
-    /*
-     * Fallback ADMIN uniquement.
-     */
     const space =
       request.headers.get(
         'x-auth-space'
       ) || 'admin';
 
-    if (
-      !token &&
-      (space === 'admin' ||
-        space === 'dashboard')
-    ) {
-      token =
-        cookieStore.get(
-          'dagoos_admin_token'
-        )?.value ?? null;
+    let token: string | null = null;
+
+    if (space === 'admin' || space === 'dashboard') {
+      token = cookieStore.get('dagoos_admin_token')?.value ?? null;
+    } else if (space === 'urbain') {
+      token = cookieStore.get('dagoos_urbain_token')?.value ?? null;
+    } else if (space === 'interurbain') {
+      token = cookieStore.get('dagoos_interurbain_token')?.value ?? null;
+    } else if (space === 'flotte') {
+      token = cookieStore.get('dagoos_urbain_token')?.value ??
+        cookieStore.get('dagoos_interurbain_token')?.value ?? null;
     }
 
     if (!token) {

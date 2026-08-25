@@ -58,7 +58,7 @@ router.post('/login', async (req, res) => {
 });
 
 // Login Fleet Manager
-router.post('/fleet-login', async (req, res) => {
+router.post('/urbain-login', async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await prisma.user.findUnique({ where: { email } });
@@ -66,7 +66,7 @@ router.post('/fleet-login', async (req, res) => {
     
     // Vérifier le rôle : seuls FLEET_MANAGER peuvent se connecter ici
     if (user.role !== 'FLEET_MANAGER') {
-      return res.status(403).json({ error: 'Accès réservé aux gestionnaires de flotte.' });
+      return res.status(403).json({ error: 'Accès réservé au transport urbain (FLEET_MANAGER).' });
     }
     
     const valid = await bcrypt.compare(password, user.password);
@@ -81,7 +81,8 @@ router.post('/fleet-login', async (req, res) => {
     );
     res.json({ 
       message: 'Connexion réussie !', token, 
-      user: { id: user.id, name: user.name, email: user.email, role: user.role, organizationId: org?.id, organizationCode: org?.code, organizationName: org?.name }
+      redirectPath: '/flotte/urbain',
+      user: { id: user.id, name: user.name, email: user.email, role: user.role, organizationId: org?.id, organizationCode: org?.code, organizationName: org?.name, organizationType: org?.type }
     });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -89,7 +90,7 @@ router.post('/fleet-login', async (req, res) => {
 });
 
 // Login Coop Manager
-router.post('/coop-login', async (req, res) => {
+router.post('/interurbain-login', async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await prisma.user.findUnique({ where: { email } });
@@ -97,7 +98,7 @@ router.post('/coop-login', async (req, res) => {
     
     // Vérifier le rôle : seuls COOPERATIVE peuvent se connecter ici
     if (user.role !== 'COOP_MANAGER') {
-      return res.status(403).json({ error: 'Accès réservé aux gestionnaires de coopérative.' });
+      return res.status(403).json({ error: 'Accès réservé au transport interurbain (COOP_MANAGER).' });
     }
     
     const valid = await bcrypt.compare(password, user.password);
@@ -112,7 +113,8 @@ router.post('/coop-login', async (req, res) => {
     );
     res.json({ 
       message: 'Connexion réussie !', token, 
-      user: { id: user.id, name: user.name, email: user.email, role: user.role, organizationId: org?.id, organizationCode: org?.code, organizationName: org?.name }
+      redirectPath: '/flotte/interurbain',
+      user: { id: user.id, name: user.name, email: user.email, role: user.role, organizationId: org?.id, organizationCode: org?.code, organizationName: org?.name, organizationType: org?.type }
     });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -120,7 +122,6 @@ router.post('/coop-login', async (req, res) => {
 });
 
 
-// Connexion chauffeur (par code + PIN)
 router.post('/driver-login', async (req, res) => {
   try {
     const { code, pin } = req.body;
@@ -211,53 +212,3 @@ router.get('/me', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
-
-// Login unifié Flotte (FLEET_MANAGER + COOP_MANAGER)
-router.post('/flotte-login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
-    
-    // Vérifier le rôle : FLEET_MANAGER ou COOP_MANAGER
-    if (user.role !== 'FLEET_MANAGER' && user.role !== 'COOP_MANAGER') {
-      return res.status(403).json({ error: 'Accès réservé aux gestionnaires de flotte.' });
-    }
-    
-    const valid = await bcrypt.compare(password, user.password);
-    if (!valid) return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
-    
-    // Chercher l'organisation liée
-    const org = await prisma.organization.findFirst({ where: { email: user.email } });
-    
-    const token = jwt.sign(
-      { 
-        id: user.id, 
-        email: user.email, 
-        role: user.role, 
-        organizationId: org?.id, 
-        organizationCode: org?.code, 
-        organizationName: org?.name,
-        organizationType: org?.type 
-      },
-      JWT_SECRET, { expiresIn: '7d' }
-    );
-    
-    res.json({ 
-      message: 'Connexion réussie !', 
-      token, 
-      user: { 
-        id: user.id, 
-        name: user.name, 
-        email: user.email, 
-        role: user.role, 
-        organizationId: org?.id, 
-        organizationCode: org?.code, 
-        organizationName: org?.name,
-        organizationType: org?.type
-      }
-    });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});

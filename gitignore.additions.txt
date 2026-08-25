@@ -1,0 +1,10 @@
+# À ajouter au .gitignore existant à la racine du projet
+# (colle ces lignes à la suite du fichier actuel)
+
+# Dossier de travail temporaire — ne doit jamais contenir de secrets versionnés
+tmp/
+
+# Filets de sécurité par nom de fichier, au cas où tmp/ ne serait pas utilisé
+*login.json
+*token*.json
+*credentials*.json

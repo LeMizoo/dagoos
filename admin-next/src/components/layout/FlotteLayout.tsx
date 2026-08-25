@@ -81,7 +81,7 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
 
   const handleLogout = async () => {
     await logout();
-    window.location.href = '/flotte-login';
+    window.location.href = '/urbain-login';
   };
 
   const isActive = (href: string) => {
