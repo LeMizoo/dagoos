@@ -1,56 +1,35 @@
-type SessionEntry = {
-  token: string;
-  createdAt: number;
-  expiresAt: number;
-};
+// ============================================================
+// DAGOOS SESSION REGISTRY
+// Permet de stocker les tokens par sessionId (onglet)
+// ============================================================
 
-const SESSION_TTL = 7 * 24 * 60 * 60 * 1000;
+import { randomUUID } from 'crypto';
 
-const globalForSessions = globalThis as typeof globalThis & {
-  __dagoosSessionRegistry?: Map<string, SessionEntry>;
-};
+const sessionTokens = new Map<string, string>();
 
-const registry =
-  globalForSessions.__dagoosSessionRegistry ??
-  new Map<string, SessionEntry>();
-
-if (!globalForSessions.__dagoosSessionRegistry) {
-  globalForSessions.__dagoosSessionRegistry = registry;
-}
-
-function cleanupExpired() {
-  const now = Date.now();
-
-  for (const [sessionId, session] of registry.entries()) {
-    if (session.expiresAt <= now) {
-      registry.delete(sessionId);
-    }
-  }
-}
-
-export function createSession(token: string): string {
-  cleanupExpired();
-
-  const sessionId = crypto.randomUUID();
-  const now = Date.now();
-
-  registry.set(sessionId, {
-    token,
-    createdAt: now,
-    expiresAt: now + SESSION_TTL,
-  });
-
+export function createSession(
+  token: string
+): string {
+  const sessionId = randomUUID();
+  sessionTokens.set(sessionId, token);
   return sessionId;
 }
 
-export function getSessionToken(sessionId: string): string | null {
-  cleanupExpired();
-
-  const session = registry.get(sessionId);
-
-  return session?.token ?? null;
+export function registerSession(
+  sessionId: string,
+  token: string
+): void {
+  sessionTokens.set(sessionId, token);
 }
 
-export function deleteSession(sessionId: string): void {
-  registry.delete(sessionId);
+export function getSessionToken(
+  sessionId: string
+): string | null {
+  return sessionTokens.get(sessionId) || null;
+}
+
+export function deleteSession(
+  sessionId: string
+): void {
+  sessionTokens.delete(sessionId);
 }

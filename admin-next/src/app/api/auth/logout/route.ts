@@ -2,32 +2,49 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { deleteSession } from '@/lib/session/registry';
 
-export async function POST(request: NextRequest) {
+export async function POST(
+  request: NextRequest
+) {
   const cookieStore = cookies();
-  const sessionId = request.headers.get('x-session-id');
 
+  const sessionId =
+    request.headers.get(
+      'x-session-id'
+    );
+
+  /*
+   * Déconnexion de CET onglet uniquement.
+   */
   if (sessionId) {
     deleteSession(sessionId);
   }
 
-  const space = request.headers.get('x-auth-space') || 'admin';
+  const space =
+    request.headers.get(
+      'x-auth-space'
+    ) || 'admin';
 
-  const cookieNames =
-    space === 'fleet'
-      ? ['dagoos_fleet_token']
-      : space === 'coop'
-        ? ['dagoos_coop_token']
-        : ['dagoos_admin_token'];
-
-  for (const cookieName of cookieNames) {
-    cookieStore.set(cookieName, '', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 0,
-      path: '/',
-    });
+  /*
+   * Le cookie ADMIN reste indépendant.
+   * Les sessions Flotte/Coop sont gérées
+   * par le registre + sessionStorage.
+   */
+  if (
+    space === 'admin' ||
+    space === 'dashboard'
+  ) {
+    cookieStore.set(
+      'dagoos_admin_token',
+      '',
+      {
+        httpOnly: true,
+        maxAge: 0,
+        path: '/',
+      }
+    );
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({
+    ok: true,
+  });
 }

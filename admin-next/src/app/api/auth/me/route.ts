@@ -5,57 +5,76 @@ import { getSessionToken } from '@/lib/session/registry';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest
+) {
   try {
     const cookieStore = cookies();
-    const sessionId = request.headers.get('x-session-id');
-    const space = request.headers.get('x-auth-space') || 'admin';
+
+    const sessionId =
+      request.headers.get(
+        'x-session-id'
+      );
 
     let token: string | null = null;
 
     /*
-     * Priorité à la session serveur si elle existe.
+     * Chaque onglet récupère exclusivement
+     * son propre token via son sessionId.
      */
     if (sessionId) {
-      token = getSessionToken(sessionId);
+      token =
+        getSessionToken(sessionId);
     }
 
     /*
-     * Sinon, utiliser le cookie correspondant à l'espace.
+     * Fallback ADMIN uniquement.
      */
-    if (!token) {
-      if (space === 'fleet') {
-        token =
-          cookieStore.get('dagoos_fleet_token')?.value ?? null;
-      } else if (space === 'coop') {
-        token =
-          cookieStore.get('dagoos_coop_token')?.value ?? null;
-      } else {
-        token =
-          cookieStore.get('dagoos_admin_token')?.value ?? null;
-      }
+    const space =
+      request.headers.get(
+        'x-auth-space'
+      ) || 'admin';
+
+    if (
+      !token &&
+      (space === 'admin' ||
+        space === 'dashboard')
+    ) {
+      token =
+        cookieStore.get(
+          'dagoos_admin_token'
+        )?.value ?? null;
     }
 
     if (!token) {
       return NextResponse.json(
-        { error: 'Non authentifié' },
-        { status: 401 }
+        {
+          error:
+            'Non authentifié',
+        },
+        {
+          status: 401,
+        }
       );
     }
 
-    const response = await fetch(
-      `${API_BASE_URL}/api/auth/me`,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
-        },
-        cache: 'no-store',
-      }
-    );
+    const response =
+      await fetch(
+        `${API_BASE_URL}/api/auth/me`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+            Accept:
+              'application/json',
+          },
+          cache: 'no-store',
+        }
+      );
 
-    const text = await response.text();
+    const text =
+      await response.text();
 
     let data: unknown;
 
@@ -63,22 +82,32 @@ export async function GET(request: NextRequest) {
       data = JSON.parse(text);
     } catch {
       data = {
-        error: 'Réponse invalide du serveur API',
+        error:
+          'Réponse invalide',
       };
     }
 
-    return NextResponse.json(data, {
-      status: response.status,
-    });
+    return NextResponse.json(
+      data,
+      {
+        status:
+          response.status,
+      }
+    );
   } catch (error) {
-    console.error('[auth/me]', error);
+    console.error(
+      '[auth/me]',
+      error
+    );
 
     return NextResponse.json(
       {
         error:
           "Service d'authentification indisponible",
       },
-      { status: 502 }
+      {
+        status: 502,
+      }
     );
   }
 }
