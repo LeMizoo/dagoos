@@ -1,38 +1,9 @@
+import { getSessionId } from '@/lib/client/session';
+
 export interface ApiError {
   error?: string;
   message?: string;
   [key: string]: unknown;
-}
-
-const SESSION_STORAGE_KEY = 'dagoos_session_id';
-
-function getSessionId(): string | null {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
-  return window.sessionStorage.getItem(SESSION_STORAGE_KEY);
-}
-
-export function setSessionId(sessionId: string): void {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  window.sessionStorage.setItem(
-    SESSION_STORAGE_KEY,
-    sessionId
-  );
-}
-
-export function clearSessionId(): void {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  window.sessionStorage.removeItem(
-    SESSION_STORAGE_KEY
-  );
 }
 
 function getAuthSpace(pathname: string): string | null {
@@ -86,7 +57,6 @@ export async function apiFetch(
 
   if (typeof window !== 'undefined') {
     const pathname = window.location.pathname;
-
     const authSpace = getAuthSpace(pathname);
 
     if (authSpace) {
@@ -105,17 +75,11 @@ export async function apiFetch(
     !headers.has('Content-Type') &&
     !(options.body instanceof FormData)
   ) {
-    headers.set(
-      'Content-Type',
-      'application/json'
-    );
+    headers.set('Content-Type', 'application/json');
   }
 
   if (!headers.has('Accept')) {
-    headers.set(
-      'Accept',
-      'application/json'
-    );
+    headers.set('Accept', 'application/json');
   }
 
   const response = await fetch(url, {
@@ -135,8 +99,6 @@ export async function apiFetch(
     !window.location.pathname.endsWith('/register') &&
     window.location.pathname !== '/'
   ) {
-    clearSessionId();
-
     const pathname = window.location.pathname;
 
     let loginPath = '/login';

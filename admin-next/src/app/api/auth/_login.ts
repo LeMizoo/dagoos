@@ -4,8 +4,7 @@ import { createSession } from '@/lib/session/registry';
 
 type LoginEndpoint =
   | 'login'
-  | 'fleet-login'
-  | 'coop-login';
+  | 'flotte-login';
 
 export async function login(
   request: NextRequest,
@@ -64,8 +63,8 @@ export async function login(
     const cookieName =
       endpoint === 'login'
         ? 'dagoos_admin_token'
-        : endpoint === 'fleet-login'
-          ? 'dagoos_fleet_token'
+        : endpoint === 'flotte-login'
+          ? 'dagoos_flotte_token'
           : 'dagoos_coop_token';
 
     /*

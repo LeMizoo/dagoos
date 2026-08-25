@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { setSessionId } from '@/lib/api';
+import { setSessionId } from '@/lib/client/session';
 import {
   Eye,
   EyeOff,
@@ -95,10 +95,13 @@ export default function LoginForm({
       }
 
       if (typeof data.sessionId === 'string' && data.sessionId) {
-        setSessionId(data.sessionId);
+        sessionStorage.setItem('dagoos_session_id', data.sessionId);
+        console.log('SessionId stocké:', sessionStorage.getItem('dagoos_session_id'));
       }
 
-      window.location.replace(config.defaultRedirect);
+      setTimeout(() => {
+        window.location.href = config.defaultRedirect;
+      }, 200);
     } catch (error) {
       setError(
         error instanceof Error
