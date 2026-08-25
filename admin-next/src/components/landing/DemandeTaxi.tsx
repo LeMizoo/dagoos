@@ -114,7 +114,7 @@ export default function DemandeTaxi() {
   return (
     <section className="py-12 bg-white">
       <div className="max-w-md mx-auto px-4">
-        <h2 className="text-2xl font-bold text-center mb-4">🚕 Demander un taxi</h2>
+        <h2 className="font-display text-2xl font-bold text-center mb-4">Demander un taxi</h2>
         <p className="text-center text-gray-500 text-sm mb-6">Choisissez comment vous voulez être mis en relation</p>
 
         {/* Mode de mise en relation */}
@@ -122,23 +122,23 @@ export default function DemandeTaxi() {
           <button
             type="button"
             onClick={() => setMode('choisir')}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition ${mode === 'choisir' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition ${mode === 'choisir' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
           >
             Choisir une flotte
           </button>
           <button
             type="button"
             onClick={() => setMode('toutes')}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition ${mode === 'toutes' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition ${mode === 'toutes' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
           >
             Toutes les flottes
           </button>
           <button
             type="button"
             onClick={getLocation}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition ${mode === 'proche' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition ${mode === 'proche' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
           >
-            📍 La plus proche
+            La plus proche
           </button>
         </div>
 
@@ -148,8 +148,8 @@ export default function DemandeTaxi() {
           <input name="depart" placeholder="Adresse de départ" className="w-full px-4 py-3 border rounded-lg text-sm" required />
           <input name="arrivee" placeholder="Adresse d'arrivée" className="w-full px-4 py-3 border rounded-lg text-sm" required />
           <select name="type" className="w-full px-4 py-3 border rounded-lg text-sm">
-            <option value="moto">🏍️ Taxi Moto</option>
-            <option value="voiture">🚗 Taxi</option>
+            <option value="moto">Taxi moto</option>
+            <option value="voiture">Taxi voiture</option>
           </select>
 
           {mode === 'choisir' && (
@@ -162,9 +162,9 @@ export default function DemandeTaxi() {
           )}
 
           {mode === 'proche' && position && (
-            <div className="bg-green-50 rounded-lg p-3 text-center">
-              <p className="text-sm font-semibold text-green-700">📍 Position détectée</p>
-              <p className="text-xs text-green-600">
+            <div className="bg-emerald-50 rounded-lg p-3 text-center">
+              <p className="text-sm font-semibold text-emerald-700">Position détectée</p>
+              <p className="text-xs text-emerald-600">
                 {adresse || 'Antananarivo, Madagascar'}
               </p>
               <p className="text-[10px] text-gray-400 mt-1">
@@ -173,7 +173,7 @@ export default function DemandeTaxi() {
             </div>
           )}
 
-          <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50">
+          <button type="submit" disabled={loading} className="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-[#154360] transition disabled:opacity-50">
             {loading ? 'Envoi...' : mode === 'toutes' ? 'Envoyer à toutes les flottes' : mode === 'proche' ? 'Trouver la flotte la plus proche' : 'Demander un taxi'}
           </button>
         </form>

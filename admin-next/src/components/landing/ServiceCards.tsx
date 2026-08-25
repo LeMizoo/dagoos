@@ -38,14 +38,14 @@ export default function ServiceCards({ organizations, coopsAvecDeparts }: Servic
       {/* SECTION DES DEUX CARTES */}
       <section id="services-de-mobilite" className="py-16 bg-gray-50">
         <div className="max-w-5xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-4">Nos Services</h2>
+          <h2 className="font-display text-3xl font-bold text-center mb-4">Nos services</h2>
           <p className="text-center text-gray-500 mb-12">Choisissez un service pour commencer</p>
           
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* CARTE TAXI */}
             <button
               onClick={() => setActiveModal('taxi')}
-              className="group relative bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl p-8 text-left hover:scale-105 transition-transform duration-300 shadow-xl hover:shadow-2xl"
+              className="group relative bg-primary rounded-2xl p-8 text-left hover:scale-[1.02] transition-transform duration-300 shadow-xl hover:shadow-2xl"
             >
               <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition">
                 <ArrowRight size={24} className="text-white" />
@@ -53,34 +53,34 @@ export default function ServiceCards({ organizations, coopsAvecDeparts }: Servic
               <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4">
                 <Car size={32} className="text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-2">🚕 Taxi Urbain</h3>
+              <h3 className="font-display text-2xl font-bold text-white mb-2">Taxi urbain</h3>
               <p className="text-white/90 mb-4">
                 Demandez un taxi ou une moto à proximité et suivez votre course.
               </p>
               <div className="flex items-center gap-2 text-white/80 text-sm">
-                <span className="bg-white/20 px-3 py-1 rounded-full">📍 Géolocalisation</span>
-                <span className="bg-white/20 px-3 py-1 rounded-full">⏱️ Rapide</span>
+                <span className="bg-white/20 px-3 py-1 rounded-full">Géolocalisation</span>
+                <span className="bg-white/20 px-3 py-1 rounded-full">Rapide</span>
               </div>
             </button>
 
             {/* CARTE DÉPARTS */}
             <button
               onClick={() => setActiveModal('departs')}
-              className="group relative bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-8 text-left hover:scale-105 transition-transform duration-300 shadow-xl hover:shadow-2xl"
+              className="group relative bg-dark rounded-2xl p-8 text-left hover:scale-[1.02] transition-transform duration-300 shadow-xl hover:shadow-2xl"
             >
               <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition">
-                <ArrowRight size={24} className="text-white" />
+                <ArrowRight size={24} className="text-secondary" />
               </div>
-              <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4">
-                <Bus size={32} className="text-white" />
+              <div className="w-16 h-16 bg-secondary/20 rounded-2xl flex items-center justify-center mb-4">
+                <Bus size={32} className="text-secondary" />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-2">🚌 Départs Inter-urbains</h3>
-              <p className="text-white/90 mb-4">
+              <h3 className="font-display text-2xl font-bold text-white mb-2">Départs inter-urbains</h3>
+              <p className="text-white/80 mb-4">
                 Consultez les départs inter-urbains et réservez votre place.
               </p>
-              <div className="flex items-center gap-2 text-white/80 text-sm">
-                <span className="bg-white/20 px-3 py-1 rounded-full">🎫 Réservation</span>
-                <span className="bg-white/20 px-3 py-1 rounded-full">🚌 Confort</span>
+              <div className="flex items-center gap-2 text-white/70 text-sm">
+                <span className="bg-white/10 px-3 py-1 rounded-full">Réservation</span>
+                <span className="bg-white/10 px-3 py-1 rounded-full">Confort</span>
               </div>
             </button>
           </div>
@@ -93,7 +93,7 @@ export default function ServiceCards({ organizations, coopsAvecDeparts }: Servic
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setActiveModal(null)} />
           <div className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
-              <h3 className="text-xl font-bold text-gray-800">🚕 Taxi Urbain</h3>
+              <h3 className="font-display text-xl font-bold text-gray-800">Taxi urbain</h3>
               <button
                 onClick={() => setActiveModal(null)}
                 className="p-2 hover:bg-gray-100 rounded-lg transition"
@@ -114,7 +114,7 @@ export default function ServiceCards({ organizations, coopsAvecDeparts }: Servic
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setActiveModal(null)} />
           <div className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
-              <h3 className="text-xl font-bold text-gray-800">🚌 Départs Inter-urbains</h3>
+              <h3 className="font-display text-xl font-bold text-gray-800">Départs inter-urbains</h3>
               <button
                 onClick={() => setActiveModal(null)}
                 className="p-2 hover:bg-gray-100 rounded-lg transition"
@@ -128,10 +128,10 @@ export default function ServiceCards({ organizations, coopsAvecDeparts }: Servic
               ) : (
                 <div className="space-y-4">
                   {coopsAvecDeparts.map((org: any) => (
-                    <div key={org.id} className="border border-gray-200 rounded-xl p-4 hover:border-emerald-500 transition">
+                    <div key={org.id} className="border border-gray-200 rounded-xl p-4 hover:border-primary transition">
                       <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
-                          <Bus size={20} className="text-emerald-600" />
+                        <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                          <Bus size={20} className="text-primary" />
                         </div>
                         <div>
                           <h4 className="font-bold text-gray-800">{org.name}</h4>
@@ -148,11 +148,11 @@ export default function ServiceCards({ organizations, coopsAvecDeparts }: Servic
                             <p className="text-xs text-gray-500 mt-1 flex items-center gap-2">
                               <Calendar size={12} className="inline mr-1" />
                               {new Date(d.date).toLocaleDateString('fr-FR')} à {d.heure}
-                              <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 rounded-full px-2 py-0.5 ml-auto">
+                              <span className="text-[10px] font-semibold text-primary bg-primary/10 rounded-full px-2 py-0.5 ml-auto">
                                 {getCountdown(d.date, d.heure)}
                               </span>
                             </p>
-                            <p className="text-sm font-bold text-emerald-600 mt-1">{Number(d.prix).toLocaleString()} Ar</p>
+                            <p className="text-sm font-bold text-primary mt-1">{Number(d.prix).toLocaleString()} Ar</p>
                             <p className="text-xs text-gray-400 mt-1">
                               Places : {d.placesTotal || 26} · Disponible(s) : {(d.placesTotal || 26) - (d.reservations?.length || 0)}
                             </p>
@@ -161,7 +161,7 @@ export default function ServiceCards({ organizations, coopsAvecDeparts }: Servic
                       </div>
                       <Link
                         href={`/coop/${org.slug}`}
-                        className="w-full mt-3 bg-emerald-600 text-white py-2 rounded-lg font-semibold hover:bg-emerald-700 transition text-sm inline-block text-center"
+                        className="w-full mt-3 bg-primary text-white py-2 rounded-lg font-semibold hover:bg-[#154360] transition text-sm inline-block text-center"
                       >
                         Réserver maintenant →
                       </Link>

@@ -13,10 +13,14 @@ interface Org {
 }
 
 const gradients = [
-  'from-blue-600 to-blue-800', 'from-emerald-600 to-emerald-800',
-  'from-purple-600 to-purple-800', 'from-orange-600 to-orange-800',
-  'from-cyan-600 to-cyan-800', 'from-rose-600 to-rose-800',
-  'from-amber-600 to-amber-800', 'from-indigo-600 to-indigo-800',
+  'from-primary to-dark',
+  'from-dark to-primary',
+  'from-[#2874A6] to-primary',
+  'from-dark to-[#2C2C54]',
+  'from-secondary to-[#D4A017]',
+  'from-[#154360] to-dark',
+  'from-primary to-[#1A1A2E]',
+  'from-[#1A5276] to-[#0F3A56]',
 ];
 
 export default function TrustSection() {
@@ -72,11 +76,11 @@ export default function TrustSection() {
   };
 
   return (
-    <section className="py-6 bg-gray-900 overflow-hidden">
+    <section className="py-6 bg-dark overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 mb-4">
         <div className="text-center">
           <span className="text-sm font-semibold text-gray-400 uppercase tracking-[0.2em]">Nos</span>
-          <h2 className="text-2xl md:text-3xl font-bold text-white mt-1 mb-2">partenaires</h2>
+          <h2 className="font-display text-2xl md:text-3xl font-bold text-white mt-1 mb-2">partenaires</h2>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
             Des établissements d&apos;exception soigneusement choisis pour vous
           </p>
@@ -130,7 +134,7 @@ export default function TrustSection() {
                 marginLeft: '-96px',
               }}
             >
-              <div className={`relative bg-gray-800 rounded-2xl p-3 text-center border border-gray-700 hover:border-gray-500 transition-all duration-500 overflow-hidden group ${
+              <div className={`relative bg-[#22223a] rounded-2xl p-3 text-center border border-white/10 hover:border-white/30 transition-all duration-500 overflow-hidden group ${
                 position === 0 ? 'shadow-2xl shadow-primary/20 ring-1 ring-primary/30' : ''
               }`}>
                 {/* Motif unique par partenaire avec animation au survol */}
@@ -139,32 +143,32 @@ export default function TrustSection() {
                     const patterns = [
                       // Partenaire 1 : cercles concentriques
                       <div key="p1" className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-40 h-40 rounded-full border-4 border-emerald-400 animate-spin" style={{ animationDuration: '8s' }} />
-                        <div className="absolute w-28 h-28 rounded-full border-4 border-blue-400 animate-spin" style={{ animationDuration: '6s', animationDirection: 'reverse' }} />
-                        <div className="absolute w-16 h-16 rounded-full border-4 border-secondary animate-spin" style={{ animationDuration: '4s' }} />
+                        <div className="w-40 h-40 rounded-full border-4 border-secondary animate-spin" style={{ animationDuration: '8s' }} />
+                        <div className="absolute w-28 h-28 rounded-full border-4 border-primary animate-spin" style={{ animationDuration: '6s', animationDirection: 'reverse' }} />
+                        <div className="absolute w-16 h-16 rounded-full border-4 border-white/40 animate-spin" style={{ animationDuration: '4s' }} />
                       </div>,
                       // Partenaire 2 : vagues
                       <div key="p2" className="absolute inset-0 overflow-hidden">
-                        <div className="absolute top-1/4 left-0 w-full h-2 bg-gradient-to-r from-transparent via-emerald-400 to-transparent animate-pulse" />
-                        <div className="absolute top-1/2 left-0 w-full h-2 bg-gradient-to-r from-transparent via-blue-400 to-transparent animate-pulse" style={{ animationDelay: '0.5s' }} />
-                        <div className="absolute top-3/4 left-0 w-full h-2 bg-gradient-to-r from-transparent via-purple-400 to-transparent animate-pulse" style={{ animationDelay: '1s' }} />
+                        <div className="absolute top-1/4 left-0 w-full h-2 bg-gradient-to-r from-transparent via-secondary to-transparent animate-pulse" />
+                        <div className="absolute top-1/2 left-0 w-full h-2 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse" style={{ animationDelay: '0.5s' }} />
+                        <div className="absolute top-3/4 left-0 w-full h-2 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse" style={{ animationDelay: '1s' }} />
                       </div>,
                       // Partenaire 3 : diagonales
                       <div key="p3" className="absolute inset-0">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-transparent rotate-12 animate-pulse" />
-                        <div className="absolute top-1/3 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-transparent rotate-12 animate-pulse" style={{ animationDelay: '0.3s' }} />
-                        <div className="absolute top-2/3 left-0 w-full h-1 bg-gradient-to-r from-secondary to-transparent rotate-12 animate-pulse" style={{ animationDelay: '0.6s' }} />
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary to-transparent rotate-12 animate-pulse" />
+                        <div className="absolute top-1/3 left-0 w-full h-1 bg-gradient-to-r from-primary to-transparent rotate-12 animate-pulse" style={{ animationDelay: '0.3s' }} />
+                        <div className="absolute top-2/3 left-0 w-full h-1 bg-gradient-to-r from-white/40 to-transparent rotate-12 animate-pulse" style={{ animationDelay: '0.6s' }} />
                       </div>,
                       // Partenaire 4 : points
                       <div key="p4" className="absolute inset-0 flex flex-wrap items-center justify-center gap-3">
                         {[...Array(9)].map((_, i) => (
-                          <div key={i} className="w-3 h-3 rounded-full bg-emerald-400 animate-ping" style={{ animationDelay: `${i * 0.3}s` }} />
+                          <div key={i} className="w-3 h-3 rounded-full bg-secondary animate-ping" style={{ animationDelay: `${i * 0.3}s` }} />
                         ))}
                       </div>,
                       // Partenaire 5 : carrés rotatifs
                       <div key="p5" className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-20 h-20 border-4 border-blue-400 rotate-45 animate-spin" style={{ animationDuration: '5s' }} />
-                        <div className="absolute w-14 h-14 border-4 border-emerald-400 rotate-45 animate-spin" style={{ animationDuration: '4s', animationDirection: 'reverse' }} />
+                        <div className="w-20 h-20 border-4 border-primary rotate-45 animate-spin" style={{ animationDuration: '5s' }} />
+                        <div className="absolute w-14 h-14 border-4 border-secondary rotate-45 animate-spin" style={{ animationDuration: '4s', animationDirection: 'reverse' }} />
                       </div>,
                     ];
                     const idx = orgs.indexOf(org) % patterns.length;
@@ -186,7 +190,7 @@ export default function TrustSection() {
 
                 {/* Badge */}
                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
-                  org.plan === 'Premium' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-green-500/20 text-green-400'
+                  org.plan === 'Premium' ? 'bg-secondary/20 text-secondary' : 'bg-emerald-500/20 text-emerald-400'
                 }`}>
                   {org.plan === 'Premium' ? '★ Premium' : '✓ Standard'}
                 </span>
