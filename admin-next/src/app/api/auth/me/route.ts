@@ -24,7 +24,7 @@ export async function GET(
      */
     if (sessionId) {
       token =
-        getSessionToken(sessionId);
+        await getSessionToken(sessionId);
     }
 
     /*

@@ -86,7 +86,7 @@ async function proxyRequest(
    * Ainsi chaque onglet possède son propre token.
    */
   if (sessionId) {
-    token = getSessionToken(sessionId);
+    token = await getSessionToken(sessionId);
   }
 
   /*

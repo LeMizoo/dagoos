@@ -49,6 +49,7 @@ app.use('/api/departs', require('./modules/departs/departs.routes'));
 app.use('/api/reservations', require('./modules/reservations/reservations.routes'));
 app.use('/api/actions', require('./modules/actions/actions.routes'));
 app.use('/api/public', require('./modules/public/public.routes'));
+app.use('/api/sessions', require('./modules/sessions/sessions.routes'));
 
 // =========================================================
 // HEALTH

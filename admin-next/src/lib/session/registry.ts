@@ -1,35 +1,79 @@
 // ============================================================
-// DAGOOS SESSION REGISTRY
-// Permet de stocker les tokens par sessionId (onglet)
+// DAGOOS SESSION REGISTRY - POSTGRES (persistant)
 // ============================================================
 
 import { randomUUID } from 'crypto';
 
-const sessionTokens = new Map<string, string>();
+const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 jours
 
-export function createSession(
+/**
+ * On utilise fetch vers l'API backend pour persister les sessions.
+ * Cela évite d'importer Prisma côté Next.js.
+ */
+export async function createSession(
   token: string
-): string {
+): Promise<string> {
   const sessionId = randomUUID();
-  sessionTokens.set(sessionId, token);
+
+  await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/sessions`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId,
+        token,
+        expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString(),
+      }),
+    }
+  );
+
   return sessionId;
 }
 
-export function registerSession(
+export async function registerSession(
   sessionId: string,
   token: string
-): void {
-  sessionTokens.set(sessionId, token);
+): Promise<void> {
+  await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/sessions`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId,
+        token,
+        expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString(),
+      }),
+    }
+  );
 }
 
-export function getSessionToken(
+export async function getSessionToken(
   sessionId: string
-): string | null {
-  return sessionTokens.get(sessionId) || null;
+): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/sessions/${sessionId}`,
+      { cache: 'no-store' }
+    );
+
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    return data.token || null;
+  } catch {
+    return null;
+  }
 }
 
-export function deleteSession(
+export async function deleteSession(
   sessionId: string
-): void {
-  sessionTokens.delete(sessionId);
+): Promise<void> {
+  try {
+    await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/sessions/${sessionId}`,
+      { method: 'DELETE' }
+    );
+  } catch {}
 }
