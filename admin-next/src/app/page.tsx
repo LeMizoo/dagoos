@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import { Building2, Users, Shield, Zap, Smartphone, Car } from 'lucide-react';
+import { Route, Users, Wallet, Zap, Smartphone, Building2 } from 'lucide-react';
 import HeroWithDriverModal from '@/components/landing/HeroWithDriverModal';
 import PlansSection from '@/components/landing/PlansSection';
 import ServiceCards from '@/components/landing/ServiceCards';
+import RouteDivider from '@/components/landing/RouteDivider';
 import { API_BASE_URL } from '@/lib/config';
 import TrustSection from '@/components/landing/TrustSection';
 
@@ -56,6 +57,9 @@ export default async function LandingPage() {
       {/* HERO */}
       <HeroWithDriverModal />
 
+      {/* SÉPARATEUR — ligne de route, signature visuelle du réseau Dago */}
+      <RouteDivider />
+
       {/* NOS PARTENAIRES */}
       <TrustSection />
 
@@ -63,13 +67,22 @@ export default async function LandingPage() {
       <ServiceCards organizations={organizations} coopsAvecDeparts={coopsAvecDeparts} />
 
       {/* CHIFFRES CLÉS */}
-      <section className="py-16 bg-gradient-to-r from-blue-600 to-primary text-white">
+      <section className="py-16 bg-gradient-to-r from-primary to-dark text-white">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-8">Chiffres clés</h2>
+          <h2 className="font-display text-3xl font-bold mb-8">Le réseau en un coup d'œil</h2>
           <div className="grid grid-cols-3 gap-8">
-            <div><div className="text-4xl font-bold">{organizations.filter((o: { type?: string }) => o.type === 'FLEET_MANAGER').length}</div><div className="text-white/70 text-sm">Services urbains</div></div>
-            <div><div className="text-4xl font-bold">{organizations.filter((o: { type?: string }) => o.type === 'COOPERATIVE').length}</div><div className="text-white/70 text-sm">Services inter-urbains</div></div>
-            <div><div className="text-4xl font-bold">{coopsAvecDeparts.length}</div><div className="text-white/70 text-sm">Avec départs</div></div>
+            <div>
+              <div className="font-display text-4xl font-bold">{organizations.filter((o: { type?: string }) => o.type === 'FLEET_MANAGER').length}</div>
+              <div className="text-white/70 text-sm mt-1">Services urbains</div>
+            </div>
+            <div>
+              <div className="font-display text-4xl font-bold">{organizations.filter((o: { type?: string }) => o.type === 'COOPERATIVE').length}</div>
+              <div className="text-white/70 text-sm mt-1">Services inter-urbains</div>
+            </div>
+            <div>
+              <div className="font-display text-4xl font-bold text-secondary">{coopsAvecDeparts.length}</div>
+              <div className="text-white/70 text-sm mt-1">Départs à venir</div>
+            </div>
           </div>
         </div>
       </section>
@@ -80,23 +93,25 @@ export default async function LandingPage() {
       {/* POURQUOI DAGOOS */}
       <section id="pourquoi" className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Pourquoi Dagoos ?</h2>
-          <p className="text-gray-500 mb-12">Une plateforme unique pour votre mobilité</p>
+          <h2 className="font-display text-3xl font-bold mb-4">Pourquoi Dagoos ?</h2>
+          <p className="text-gray-500 mb-12">Tout ce qu'il faut pour piloter une activité de transport, dans un seul espace</p>
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { icon: Car, title: 'Réservation en ligne', desc: 'Réservez vos places en quelques clics' },
-              { icon: Users, title: 'Services inter-urbains fiables', desc: 'Des partenaires de confiance' },
-              { icon: Shield, title: 'Sécurité garantie', desc: 'Vos données protégées' },
-              { icon: Zap, title: 'Rapide', desc: 'Confirmation immédiate' },
-              { icon: Smartphone, title: 'Mobile', desc: 'Accessible sur tous les appareils' },
-              { icon: Building2, title: 'Partenariat', desc: 'Rejoignez le réseau Dago' },
+              { icon: Route, title: 'Suivi des courses en temps réel', desc: "Position et statut de chaque véhicule, du départ à l'arrivée." },
+              { icon: Users, title: 'Réseau inter-urbain vérifié', desc: 'Des coopératives partenaires sur les grands axes de Madagascar.' },
+              { icon: Wallet, title: 'Finances centralisées', desc: 'Courses, dépenses et versements suivis automatiquement.' },
+              { icon: Zap, title: 'Confirmation immédiate', desc: 'Une réservation validée en quelques secondes, sans attente.' },
+              { icon: Smartphone, title: 'Un espace pour chaque rôle', desc: 'Chauffeurs, gestionnaires et coopératives, chacun son accès.' },
+              { icon: Building2, title: 'Ouvrez votre espace', desc: 'Flotte ou coopérative : votre organisation en quelques minutes.' },
             ].map(s => {
               const Icon = s.icon;
               return (
-                <div key={s.title} className="bg-gray-50 rounded-2xl p-6 hover:shadow-lg transition">
-                  <Icon size={32} className="mx-auto text-emerald-600 mb-3" />
-                  <h3 className="font-bold text-gray-800 mb-2">{s.title}</h3>
-                  <p className="text-gray-500 text-sm">{s.desc}</p>
+                <div key={s.title} className="bg-gray-50 rounded-2xl p-6 text-left hover:shadow-lg transition">
+                  <div className="w-11 h-11 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
+                    <Icon size={22} className="text-primary" />
+                  </div>
+                  <h3 className="font-display font-bold text-gray-800 mb-2">{s.title}</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">{s.desc}</p>
                 </div>
               );
             })}
@@ -105,10 +120,10 @@ export default async function LandingPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 bg-gradient-to-r from-primary to-blue-800 text-white text-center">
-        <h2 className="text-3xl font-bold mb-4">Rejoignez l'aventure</h2>
+      <section className="py-16 bg-gradient-to-r from-primary to-dark text-white text-center">
+        <h2 className="font-display text-3xl font-bold mb-4">Rejoignez le réseau Dago</h2>
         <p className="text-white/80 mb-8">Gérez votre activité de transport depuis un espace unique</p>
-        <Link href="/urbain-login" className="inline-block bg-secondary text-dark px-8 py-4 rounded-xl font-bold text-lg hover:bg-yellow-400 transition">
+        <Link href="/flotte-login" className="inline-block bg-secondary text-dark px-8 py-4 rounded-xl font-bold text-lg hover:bg-yellow-400 transition">
           Accéder à mon espace
         </Link>
       </section>
@@ -118,7 +133,7 @@ export default async function LandingPage() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             {/* Logo + description */}
             <div>
-              <div className="text-white font-bold text-lg mb-3">DAGO MOBILITY</div>
+              <div className="font-display text-white font-bold text-lg mb-3">DAGO MOBILITY</div>
               <p className="text-gray-400 text-sm leading-relaxed">
                 La mobilité connectée... Chez les potes, ça roule.
               </p>
@@ -170,6 +185,4 @@ export default async function LandingPage() {
       </footer>
     </div>
   );
-
-
 }
