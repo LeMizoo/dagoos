@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1787657453200" clover="3.2.0">
+  <project timestamp="1787657453200" name="All files">
+    <metrics statements="17" coveredstatements="14" conditionals="12" coveredconditionals="9" methods="3" coveredmethods="1" elements="32" coveredelements="24" complexity="0" loc="17" ncloc="17" packages="1" files="3" classes="3"/>
+    <file name="permissions.js" path="D:\Dagoos\apps\api\security\permissions.js">
+      <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <line num="1" count="1" type="stmt"/>
+      <line num="76" count="1" type="stmt"/>
+    </file>
+    <file name="roles.js" path="D:\Dagoos\apps\api\security\roles.js">
+      <metrics statements="5" coveredstatements="3" conditionals="2" coveredconditionals="0" methods="2" coveredmethods="0"/>
+      <line num="1" count="1" type="stmt"/>
+      <line num="3" count="1" type="stmt"/>
+      <line num="237" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="241" count="0" type="stmt"/>
+      <line num="244" count="1" type="stmt"/>
+    </file>
+    <file name="scopes.js" path="D:\Dagoos\apps\api\security\scopes.js">
+      <metrics statements="10" coveredstatements="9" conditionals="10" coveredconditionals="9" methods="1" coveredmethods="1"/>
+      <line num="1" count="1" type="stmt"/>
+      <line num="8" count="6" type="cond" truecount="3" falsecount="1"/>
+      <line num="9" count="0" type="stmt"/>
+      <line num="12" count="6" type="cond" truecount="6" falsecount="0"/>
+      <line num="14" count="1" type="stmt"/>
+      <line num="17" count="1" type="stmt"/>
+      <line num="21" count="2" type="stmt"/>
+      <line num="24" count="1" type="stmt"/>
+      <line num="27" count="1" type="stmt"/>
+      <line num="31" count="1" type="stmt"/>
+    </file>
+  </project>
+</coverage>

@@ -40,3 +40,6 @@ admin-next/.vercel/
 *.db-wal
 .vercel
 admin-next/tsconfig.tsbuildinfo
+
+# Fichiers temporaires
+tmp/

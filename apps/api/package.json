@@ -4,7 +4,9 @@
   "main": "server.js",
   "scripts": {
     "start": "npx prisma generate && node server.js",
-    "seed": "node seed-full.js && node reset-tovo.js && node seed-coops-premium.js && node seed-proprietaires-societes.js && node seed-chauffeurs.js"
+    "seed": "node seed-full.js && node reset-tovo.js && node seed-coops-premium.js && node seed-proprietaires-societes.js && node seed-chauffeurs.js",
+    "lint": "eslint . --ext .js",
+    "test": "jest"
   },
   "dependencies": {
     "@prisma/client": "5.22.0",
@@ -15,7 +17,9 @@
     "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/jest": "^30.0.0",
+    "eslint": "^10.9.1",
     "jest": "^30.4.2",
     "nodemon": "^3.1.7",
     "prisma": "5.22.0",
