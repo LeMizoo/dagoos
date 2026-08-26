@@ -1,5 +1,5 @@
-import FlotteHome from '@/app/flotte/page';
+import FlotteDashboard from '@/components/flotte/FlotteDashboard';
 
 export default function FlotteUrbainEntry() {
-  return <FlotteHome />;
+  return <FlotteDashboard />;
 }
