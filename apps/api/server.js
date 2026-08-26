@@ -5,7 +5,7 @@ const { authMiddleware } = require('./middleware/auth');
 
 const app = express();
 
-const allowedOrigins = (process.env.CORS_ORIGINS || "http://localhost:5001")
+const allowedOrigins = (process.env.CORS_ORIGINS || "http://localhost:5001,https://dago-mobility.vercel.app,https://dago-driver.pages.dev,https://dago-coop-driver.pages.dev,http://localhost:3000")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
