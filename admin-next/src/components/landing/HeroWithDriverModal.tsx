@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import LoginModal from '@/components/landing/LoginModal';
 import { Route } from 'lucide-react';
 import HeroSlider from '@/components/landing/HeroSlider';
 import HeroParticles from '@/components/landing/HeroParticles';
 
 export default function HeroWithDriverModal() {
   const [showDriverModal, setShowDriverModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   return (
     <section className="relative flex items-center justify-center bg-dark overflow-hidden py-16 md:py-20">
@@ -26,9 +28,9 @@ export default function HeroWithDriverModal() {
           La gestion intelligente de votre activité de transport. Chauffeurs, véhicules, courses, départs, réservations et finances dans un seul espace.
         </p>
         <div className="flex gap-4 justify-center flex-wrap">
-          <Link href="/urbain-login" className="bg-secondary text-dark px-8 py-4 rounded-xl font-bold text-lg hover:bg-yellow-400 transition">
+          <button onClick={() => setShowLoginModal(true)} className="bg-secondary text-dark px-8 py-4 rounded-xl font-bold text-lg hover:bg-yellow-400 transition">
             Accéder à mon espace
-          </Link>
+          </button>
           <Link href="/register" className="border-2 border-white/30 text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/10 transition">
             Devenir partenaire
           </Link>
@@ -60,6 +62,7 @@ export default function HeroWithDriverModal() {
           </div>
         </div>
       )}
+      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
     </section>
   );
 }

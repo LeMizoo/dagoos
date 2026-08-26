@@ -4,6 +4,7 @@ import HeroWithDriverModal from '@/components/landing/HeroWithDriverModal';
 import PlansSection from '@/components/landing/PlansSection';
 import ServiceCards from '@/components/landing/ServiceCards';
 import RouteDivider from '@/components/landing/RouteDivider';
+import CTASection from '@/components/landing/CTASection';
 import { API_BASE_URL } from '@/lib/config';
 import TrustSection from '@/components/landing/TrustSection';
 
@@ -120,13 +121,7 @@ export default async function LandingPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 bg-gradient-to-r from-primary to-dark text-white text-center">
-        <h2 className="font-display text-3xl font-bold mb-4">Rejoignez le réseau Dago</h2>
-        <p className="text-white/80 mb-8">Gérez votre activité de transport depuis un espace unique</p>
-        <Link href="/urbain-login" className="inline-block bg-secondary text-dark px-8 py-4 rounded-xl font-bold text-lg hover:bg-yellow-400 transition">
-          Accéder à mon espace
-        </Link>
-      </section>
+      <CTASection />
 
       <footer className="bg-gray-900 text-gray-400 py-12 text-sm">
         <div className="max-w-6xl mx-auto px-4">
