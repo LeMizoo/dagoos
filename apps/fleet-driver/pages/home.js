@@ -167,7 +167,7 @@ function loadCourseTypesFromTarifs(tarifs, vehicleType) {
         // Bus / Mini Van / Tricycle : un tarif fixe, et une location
         // spéciale seulement si elle a été activée dans les paramètres.
         var options = [{ value: 'tarifFixe', label: 'Trajet (tarif fixe)' }];
-        if (config.locationSpeciale && config.locationSpeciale.active) {
+        if (config.locationSpeciale) {
             options.push({ value: 'locationSpeciale', label: 'Location spéciale' });
         }
         courseTypes = options;
@@ -266,6 +266,7 @@ function getLocationTarif(courseMode) {
         'prixJour',
         'location',
         'locationJour',
+        'locationJournalier',
         'prixLocation',
         'pricePerDay'
     ]);
@@ -783,9 +784,32 @@ async function loadCourseNotifications() {
 
         notifs = Array.isArray(notifs)
             ? notifs.filter(function (notification) {
+                // Vérifier si cette notification a déjà été traitée
+                var coursesAcceptees = [];
+                try {
+                    coursesAcceptees = JSON.parse(
+                        localStorage.getItem('dagoo_courses_acceptees') || '[]'
+                    );
+                } catch(e) {}
+
+                var dejaAcceptee = coursesAcceptees.some(function(c) {
+                    return c.notificationId === notification.id;
+                });
+
+                var dejaRefusee = false;
+                try {
+                    var coursesRefusees = JSON.parse(
+                        localStorage.getItem('dagoo_courses_refusees') || '[]'
+                    );
+                    dejaRefusee = coursesRefusees.indexOf(notification.id) !== -1;
+                } catch(e) {}
+
                 return (
-                    notification.type === 'course_request' ||
-                    notification.type === 'lead_action'
+                    (notification.type === 'course_request' ||
+                     notification.type === 'lead_action') &&
+                    !dejaAcceptee &&
+                    !dejaRefusee &&
+                    notification.read === false
                 );
             })
             : [];
@@ -1073,7 +1097,7 @@ function updateCourseForm() {
             'Part chauffeur : ' + commissionPct + ' % · À verser : ' + (100 - commissionPct) + ' %' +
         '</div>';
 
-    if (type === 'locationJournalier' || type === 'locationSpeciale') {
+    if (type === 'location' || type === 'locationSpeciale') {
 
         var locationTarif =
             getLocationTarif(type);
@@ -1098,7 +1122,7 @@ function updateCourseForm() {
         return;
     }
 
-    if (type === 'adyVarotra') {
+    if (type === 'ady_varotra') {
 
         form.innerHTML =
             '<input type="number" id="montantAdy" placeholder="Montant négocié (Ar)" min="1" style="width:100%;padding:8px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;margin-bottom:8px;">' +
@@ -1222,7 +1246,7 @@ async function enregistrerCourse() {
     // ADY VAROTRA (montant négocié)
     // ------------------------------------
 
-    else if (type === 'adyVarotra') {
+    else if (type === 'ady_varotra') {
 
         montant =
             parseFloat(
@@ -1263,7 +1287,7 @@ async function enregistrerCourse() {
     // LOCATION (journalière ou spéciale)
     // ------------------------------------
 
-    else if (type === 'locationJournalier' || type === 'locationSpeciale') {
+    else if (type === 'location' || type === 'locationSpeciale') {
 
         montant = getLocationTarif(type);
 
@@ -1615,6 +1639,17 @@ async function refuserCourse(notificationId) {
                 'Impossible de traiter la notification'
             );
         }
+
+        // Stocker le refus
+        var coursesRefusees = [];
+        try {
+            coursesRefusees = JSON.parse(
+                localStorage.getItem('dagoo_courses_refusees') || '[]'
+            );
+        } catch(e) {}
+
+        coursesRefusees.push(notificationId);
+        localStorage.setItem('dagoo_courses_refusees', JSON.stringify(coursesRefusees));
 
         alert('Course refusée.');
 
