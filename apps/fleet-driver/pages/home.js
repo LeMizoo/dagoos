@@ -1577,10 +1577,25 @@ async function accepterCourse(notificationId) {
                 );
         } catch (e) {}
 
+        // Récupérer la notification pour obtenir son titre
+        var notificationTitle = 'Course acceptée';
+        var notificationMessage = '';
+
+        // Chercher dans les notifications affichées
+        var notifsElements = document.querySelectorAll('[data-notification-id="' + notificationId + '"]');
+        if (notifsElements.length > 0) {
+            var titleEl = notifsElements[0].querySelector('[data-title]');
+            var messageEl = notifsElements[0].querySelector('[data-message]');
+            if (titleEl) notificationTitle = titleEl.textContent;
+            if (messageEl) notificationMessage = messageEl.textContent;
+        }
+
         coursesAcceptees.push({
             notificationId: notificationId,
             date: new Date().toISOString(),
-            statut: 'ACCEPTED'
+            statut: 'ACCEPTED',
+            title: notificationTitle,
+            message: notificationMessage
         });
 
         localStorage.setItem(
