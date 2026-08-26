@@ -50,6 +50,8 @@ router.put('/:organizationId', authMiddleware, requirePermission('tarifs.manage'
         adyVarotraActif: adyVarotraActif ?? undefined,
         courseNormalActif: courseNormalActif ?? undefined,
         locationActif: locationActif ?? undefined,
+        vehiculeTarifs: vehiculeTarifs ?? undefined,
+        mobileMoney: mobileMoney ?? undefined,
       },
       create: { 
         organizationId, 
@@ -60,6 +62,8 @@ router.put('/:organizationId', authMiddleware, requirePermission('tarifs.manage'
         adyVarotraActif: adyVarotraActif ?? DEFAULT_TARIFS.adyVarotraActif,
         courseNormalActif: courseNormalActif ?? DEFAULT_TARIFS.courseNormalActif,
         locationActif: locationActif ?? DEFAULT_TARIFS.locationActif,
+        vehiculeTarifs: vehiculeTarifs ?? null,
+        mobileMoney: mobileMoney ?? undefined,
       },
     });
     

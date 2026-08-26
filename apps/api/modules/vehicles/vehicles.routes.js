@@ -101,6 +101,7 @@ router.post('/', authMiddleware, requirePermission('vehicles.manage'), async (re
       currentKm,
       status,
       placesTotal,
+      type,
     } = req.body;
 
     let organizationId = requestedOrganizationId;
@@ -176,6 +177,7 @@ router.post('/', authMiddleware, requirePermission('vehicles.manage'), async (re
           ? Number(currentKm)
           : 0,
         status: status || 'active',
+        type: type || 'voiture',
       },
       include: {
         organization: true,
@@ -236,6 +238,7 @@ router.put('/:id', authMiddleware, requirePermission('vehicles.manage'), async (
       year,
       currentKm,
       status,
+      type,
       organizationId: requestedOrganizationId,
     } = req.body;
 
@@ -299,6 +302,10 @@ router.put('/:id', authMiddleware, requirePermission('vehicles.manage'), async (
 
     if (status !== undefined) {
       data.status = status;
+    }
+
+    if (type !== undefined) {
+      data.type = type;
     }
 
     if (

@@ -10,10 +10,24 @@ async function init_versements() {
     try {
         var courses = await window.apiGet('/finances/courses?driverId=' + user.driverId);
         var arr = Array.isArray(courses) ? courses : [];
-        
+
+        // Commission réelle de l'organisation (paramétrée dans /flotte/settings),
+        // au lieu d'un taux 20%/80% figé dans le code.
+        var commissionPct = 20;
+        try {
+            if (user.organizationId) {
+                var tarifsOrg = await window.apiGet('/tarifs/' + user.organizationId);
+                if (tarifsOrg && tarifsOrg.commissionChauffeur !== undefined && tarifsOrg.commissionChauffeur !== null) {
+                    commissionPct = Number(tarifsOrg.commissionChauffeur);
+                }
+            }
+        } catch (e) {
+            console.warn('Commission organisation indisponible, utilisation du taux par défaut (20%):', e);
+        }
+
         var totalCA = arr.reduce(function(s, c) { return s + (c.price || 0); }, 0);
-        var totalCommission = Math.round(totalCA * 0.20);
-        var totalVerse = Math.round(totalCA * 0.80);
+        var totalCommission = Math.round(totalCA * (commissionPct / 100));
+        var totalVerse = totalCA - totalCommission;
 
         var html = getHeaderHTML() + '<div style="padding:12px;max-width:500px;margin:0 auto;padding-bottom:80px;">' +
             // Résumé
@@ -21,8 +35,8 @@ async function init_versements() {
                 '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';margin-bottom:16px;">💰 Résumé des versements</h3>' +
                 '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;">' +
                     '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:10px;padding:10px;"><div style="font-size:16px;font-weight:800;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';">' + totalCA.toLocaleString() + ' Ar</div><div style="font-size:9px;color:#888;">CA Total</div></div>' +
-                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:10px;padding:10px;"><div style="font-size:16px;font-weight:800;color:#3B82F6;">' + totalCommission.toLocaleString() + ' Ar</div><div style="font-size:9px;color:#888;">Gardé (20%)</div></div>' +
-                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:10px;padding:10px;"><div style="font-size:16px;font-weight:800;color:#8B5CF6;">' + totalVerse.toLocaleString() + ' Ar</div><div style="font-size:9px;color:#888;">Versé (80%)</div></div>' +
+                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:10px;padding:10px;"><div style="font-size:16px;font-weight:800;color:#3B82F6;">' + totalCommission.toLocaleString() + ' Ar</div><div style="font-size:9px;color:#888;">Gardé (' + commissionPct + '%)</div></div>' +
+                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:10px;padding:10px;"><div style="font-size:16px;font-weight:800;color:#8B5CF6;">' + totalVerse.toLocaleString() + ' Ar</div><div style="font-size:9px;color:#888;">Versé (' + (100 - commissionPct) + '%)</div></div>' +
                 '</div>' +
             '</div>' +
             

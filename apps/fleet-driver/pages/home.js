@@ -121,17 +121,14 @@ function parseOrganizationTarifs(data) {
     return result;
 }
 
-function loadCourseTypesFromTarifs(tarifs) {
-    var fallback = [
-        { value: 'course', label: 'Course normale' },
-        { value: 'ady_varotra', label: 'Ady Varotra' },
-        { value: 'location', label: 'Location journalière' }
-    ];
+// Types de véhicules pour lesquels le tarif est au forfait (un seul prix
+// fixe par trajet), par opposition à moto/voiture qui sont tarifés au
+// (prixBase + prixKm). Doit rester aligné avec admin-next
+// (src/app/flotte/settings/page.tsx, FLEET_DEFAULT_TARIFS).
+var FLAT_FARE_VEHICLE_TYPES = ['bus', 'minivan', 'tricycle'];
 
-    if (!tarifs) {
-        courseTypes = fallback;
-        return;
-    }
+function getVehiculeTarifs(tarifs) {
+    if (!tarifs) return null;
 
     var vehicleTarifs = tarifs.vehiculeTarifs;
 
@@ -139,39 +136,51 @@ function loadCourseTypesFromTarifs(tarifs) {
         try {
             vehicleTarifs = JSON.parse(vehicleTarifs);
         } catch (e) {
-            vehicleTarifs = null;
+            return null;
         }
     }
 
-    if (!vehicleTarifs || typeof vehicleTarifs !== 'object') {
+    return (vehicleTarifs && typeof vehicleTarifs === 'object') ? vehicleTarifs : null;
+}
+
+// Construit les options de type de course (Course normale / Ady Varotra /
+// Location) à partir de la grille tarifaire réellement configurée pour LE
+// TYPE DU VÉHICULE du chauffeur connecté (moto, voiture, bus, minivan,
+// tricycle) — pas à partir des types de véhicules eux-mêmes.
+function loadCourseTypesFromTarifs(tarifs, vehicleType) {
+    var fallback = [
+        { value: 'course', label: 'Course normale' },
+        { value: 'ady_varotra', label: 'Ady Varotra' },
+        { value: 'location', label: 'Location journalière' }
+    ];
+
+    var vehiculeTarifs = getVehiculeTarifs(tarifs);
+    var type = vehicleType || (currentVehicle && currentVehicle.type) || 'voiture';
+    var config = vehiculeTarifs ? vehiculeTarifs[type] : null;
+
+    if (!config || typeof config !== 'object') {
         courseTypes = fallback;
         return;
     }
 
-    var keys = Object.keys(vehicleTarifs);
-
-    if (!keys.length) {
-        courseTypes = fallback;
+    if (FLAT_FARE_VEHICLE_TYPES.indexOf(type) !== -1) {
+        // Bus / Mini Van / Tricycle : un tarif fixe, et une location
+        // spéciale seulement si elle a été activée dans les paramètres.
+        var options = [{ value: 'tarifFixe', label: 'Trajet (tarif fixe)' }];
+        if (config.locationSpeciale && config.locationSpeciale.active) {
+            options.push({ value: 'locationSpeciale', label: 'Location spéciale' });
+        }
+        courseTypes = options;
         return;
     }
 
-    courseTypes = keys.map(function (key) {
-        var item = vehicleTarifs[key];
+    // Moto / Voiture : course normale, Ady Varotra, location journalière.
+    var options = [];
+    if (config.courseNormale) options.push({ value: 'courseNormale', label: 'Course normale' });
+    if (config.adyVarotra) options.push({ value: 'adyVarotra', label: 'Ady Varotra' });
+    if (config.locationJournalier) options.push({ value: 'locationJournalier', label: 'Location journalière' });
 
-        if (typeof item === 'string') {
-            return {
-                value: key,
-                label: item
-            };
-        }
-
-        item = item || {};
-
-        return {
-            value: key,
-            label: item.label || key
-        };
-    });
+    courseTypes = options.length ? options : fallback;
 }
 
 async function loadOrganizationTarifs() {
@@ -185,30 +194,31 @@ async function loadOrganizationTarifs() {
         );
 
         organizationTarifs = parseOrganizationTarifs(data);
-        loadCourseTypesFromTarifs(organizationTarifs);
     } catch (e) {
         console.warn('Tarifs organisation indisponibles:', e);
     }
 }
 
-function getVehicleTarifConfig(type) {
-    if (!organizationTarifs) return null;
+// À appeler une fois que currentVehicle est connu (après le chargement du
+// véhicule), pour construire les options de course adaptées à SA
+// catégorie de véhicule.
+function refreshCourseTypesForCurrentVehicle() {
+    loadCourseTypesFromTarifs(organizationTarifs, currentVehicle && currentVehicle.type);
+}
 
-    var vehicleTarifs = organizationTarifs.vehiculeTarifs;
+// Renvoie la configuration tarifaire (prixBase/prixKm/prixJour/prixTrajet)
+// pour un mode de course donné (ex: 'courseNormale', 'adyVarotra',
+// 'locationJournalier', 'tarifFixe', 'locationSpeciale'), pour le véhicule
+// actuellement assigné au chauffeur.
+function getVehicleTarifConfig(courseMode) {
+    var vehiculeTarifs = getVehiculeTarifs(organizationTarifs);
+    if (!vehiculeTarifs) return null;
 
-    if (typeof vehicleTarifs === 'string') {
-        try {
-            vehicleTarifs = JSON.parse(vehicleTarifs);
-        } catch (e) {
-            return null;
-        }
-    }
+    var type = (currentVehicle && currentVehicle.type) || 'voiture';
+    var vehicleConfig = vehiculeTarifs[type];
+    if (!vehicleConfig || typeof vehicleConfig !== 'object') return null;
 
-    if (!vehicleTarifs || typeof vehicleTarifs !== 'object') {
-        return null;
-    }
-
-    return vehicleTarifs[type] || null;
+    return vehicleConfig[courseMode] || null;
 }
 
 function getTarifValue(config, keys) {
@@ -231,39 +241,53 @@ function getTarifValue(config, keys) {
     return 0;
 }
 
-function getBaseTarif(type) {
-    var config = getVehicleTarifConfig(type);
+function getBaseTarif(courseMode) {
+    var config = getVehicleTarifConfig(courseMode);
 
     return getTarifValue(config, [
+        'prixBase',
+        'prixTrajet',
         'base',
         'basePrice',
-        'prixBase',
         'prix'
     ]);
 }
 
-function getKmTarif(type) {
-    var config = getVehicleTarifConfig(type);
+function getKmTarif(courseMode) {
+    var config = getVehicleTarifConfig(courseMode);
 
     return getTarifValue(config, [
-        'km',
         'prixKm',
+        'km',
         'pricePerKm',
         'prixParKm'
     ]);
 }
 
-function getLocationTarif(type) {
-    var config = getVehicleTarifConfig(type);
+function getLocationTarif(courseMode) {
+    var config = getVehicleTarifConfig(courseMode);
 
     return getTarifValue(config, [
+        'prixJour',
         'location',
         'locationJour',
-        'locationJournalier',
-        'prixJour',
         'prixLocation',
         'pricePerDay'
     ]);
+}
+
+// Commission réelle de l'organisation (configurée dans /flotte/settings),
+// avec repli à 20 % si elle n'a pas pu être chargée.
+function getCommissionPct() {
+    if (
+        organizationTarifs &&
+        organizationTarifs.commissionChauffeur !== undefined &&
+        organizationTarifs.commissionChauffeur !== null &&
+        !isNaN(Number(organizationTarifs.commissionChauffeur))
+    ) {
+        return Number(organizationTarifs.commissionChauffeur);
+    }
+    return 20;
 }
 
 
@@ -357,6 +381,11 @@ async function init_home() {
         console.error('Chargement véhicule:', e);
         currentVehicle = null;
     }
+
+    // Les types de course dépendent de la catégorie du véhicule
+    // (moto/voiture/bus/minivan/tricycle) : on ne peut les construire
+    // qu'une fois currentVehicle connu.
+    refreshCourseTypesForCurrentVehicle();
 
     // ------------------------------------
     // CONTEXTE
@@ -908,14 +937,14 @@ async function loadStats(driverId) {
             0
         );
 
-        // Règle métier actuellement affichée dans l'application :
-        // chauffeur = 20 %
-        // organisation = 80 %
-        var chauffeurJour = Math.round(caJour * 0.20);
-        var versementJour = Math.round(caJour * 0.80);
+        // Commission réelle de l'organisation (voir /flotte/settings),
+        // au lieu d'un taux 20 %/80 % figé.
+        var commissionPctStats = getCommissionPct();
+        var chauffeurJour = Math.round(caJour * (commissionPctStats / 100));
+        var versementJour = caJour - chauffeurJour;
 
-        var chauffeurSem = Math.round(caSem * 0.20);
-        var versementSem = Math.round(caSem * 0.80);
+        var chauffeurSem = Math.round(caSem * (commissionPctStats / 100));
+        var versementSem = caSem - chauffeurSem;
 
         setText(
             'statCoursesJour',
@@ -970,7 +999,14 @@ async function loadStats(driverId) {
 function calcCourse() {
     var type =
         document.getElementById('typeCourse')?.value ||
-        'course';
+        'courseNormale';
+
+    if (type === 'tarifFixe') {
+        var fixe = getBaseTarif(type);
+        setText('distanceCalc', '-');
+        setText('prixCalc', fixe > 0 ? formatAmount(fixe) : 'Tarif indisponible');
+        return;
+    }
 
     var depart =
         parseFloat(
@@ -1027,7 +1063,7 @@ function calcCourse() {
 function updateCourseForm() {
     var type =
         document.getElementById('typeCourse')?.value ||
-        'course';
+        'courseNormale';
 
     var form =
         document.getElementById('courseForm');
@@ -1036,7 +1072,13 @@ function updateCourseForm() {
         return;
     }
 
-    if (type === 'location') {
+    var commissionPct = getCommissionPct();
+    var commissionLine =
+        '<div style="font-size:10px;color:#888;text-align:center;margin-bottom:8px;">' +
+            'Part chauffeur : ' + commissionPct + ' % · À verser : ' + (100 - commissionPct) + ' %' +
+        '</div>';
+
+    if (type === 'locationJournalier' || type === 'locationSpeciale') {
 
         var locationTarif =
             getLocationTarif(type);
@@ -1061,14 +1103,24 @@ function updateCourseForm() {
         return;
     }
 
-    if (type === 'ady_varotra') {
+    if (type === 'adyVarotra') {
 
         form.innerHTML =
             '<input type="number" id="montantAdy" placeholder="Montant négocié (Ar)" min="1" style="width:100%;padding:8px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;margin-bottom:8px;">' +
+            commissionLine;
 
-            '<div style="font-size:10px;color:#888;text-align:center;">' +
-                'Part chauffeur : 20 % · À verser : 80 %' +
-            '</div>';
+        return;
+    }
+
+    if (type === 'tarifFixe') {
+
+        var fixe = getBaseTarif(type);
+
+        form.innerHTML =
+            '<div style="text-align:center;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';padding:10px;font-size:16px;font-weight:700;" id="prixCalc">' +
+                (fixe > 0 ? formatAmount(fixe) : 'Tarif indisponible') +
+            '</div>' +
+            commissionLine;
 
         return;
     }
@@ -1090,9 +1142,7 @@ function updateCourseForm() {
 
         '</div>' +
 
-        '<div style="font-size:10px;color:#888;text-align:center;margin-bottom:8px;">' +
-            'Part chauffeur : 20 % · À verser : 80 %' +
-        '</div>';
+        commissionLine;
 
     calcCourse();
 }
@@ -1106,7 +1156,7 @@ async function enregistrerCourse() {
 
     var type =
         document.getElementById('typeCourse')?.value ||
-        'course';
+        'courseNormale';
 
     var user = getDriverUser();
 
@@ -1126,10 +1176,10 @@ async function enregistrerCourse() {
     }
 
     // ------------------------------------
-    // COURSE NORMALE
+    // COURSE NORMALE (moto/voiture, au km)
     // ------------------------------------
 
-    if (type === 'course') {
+    if (type === 'courseNormale') {
 
         var d =
             parseFloat(
@@ -1174,10 +1224,10 @@ async function enregistrerCourse() {
     }
 
     // ------------------------------------
-    // ADY VAROTRA
+    // ADY VAROTRA (montant négocié)
     // ------------------------------------
 
-    else if (type === 'ady_varotra') {
+    else if (type === 'adyVarotra') {
 
         montant =
             parseFloat(
@@ -1196,10 +1246,29 @@ async function enregistrerCourse() {
     }
 
     // ------------------------------------
-    // LOCATION
+    // TARIF FIXE (bus / mini van / tricycle)
     // ------------------------------------
 
-    else if (type === 'location') {
+    else if (type === 'tarifFixe') {
+
+        montant = getBaseTarif(type);
+
+        if (montant <= 0) {
+
+            if (msg) {
+                msg.innerHTML =
+                    '<span style="color:#F87171;">Tarif indisponible</span>';
+            }
+
+            return;
+        }
+    }
+
+    // ------------------------------------
+    // LOCATION (journalière ou spéciale)
+    // ------------------------------------
+
+    else if (type === 'locationJournalier' || type === 'locationSpeciale') {
 
         montant = getLocationTarif(type);
 
@@ -1218,17 +1287,19 @@ async function enregistrerCourse() {
         return;
     }
 
+    var commissionPct = getCommissionPct();
+
     var chauffeurPart =
-        Math.round(montant * 0.20);
+        Math.round(montant * (commissionPct / 100));
 
     var versement =
-        Math.round(montant * 0.80);
+        montant - chauffeurPart;
 
     var confirmation =
         'Confirmer la course ?\n\n' +
 
         (
-            type === 'location'
+            (type === 'locationJournalier' || type === 'locationSpeciale')
                 ? 'Location : ' + formatAmount(montant)
                 : distance > 0
                     ? 'Distance : ' +
@@ -1614,7 +1685,7 @@ async function proposerVersement() {
             );
 
         var netJour =
-            Math.round(caJour * 0.80);
+            Math.round(caJour * ((100 - getCommissionPct()) / 100));
 
         if (netJour <= 0) {
             return;

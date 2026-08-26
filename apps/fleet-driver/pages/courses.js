@@ -548,7 +548,8 @@ function getCourseCommission(course) {
 
     // Compatibilité avec les anciennes données.
     // Le calcul n'est utilisé que si l'API ne fournit aucune valeur.
-    return Math.round(getCourseAmount(course) * 0.80);
+    var pct = (typeof getCommissionPct === 'function') ? getCommissionPct() : 20;
+    return Math.round(getCourseAmount(course) * ((100 - pct) / 100));
 }
 
 function getCourseNet(course) {
@@ -587,11 +588,16 @@ function getCourseTypeLabel(course) {
 
     var labels = {
         course: 'Course normale',
+        courseNormale: 'Course normale',
         normale: 'Course normale',
         normal: 'Course normale',
         ady_varotra: 'Ady Varotra',
+        adyVarotra: 'Ady Varotra',
         ady: 'Ady Varotra',
-        location: 'Location journalière'
+        location: 'Location journalière',
+        locationJournalier: 'Location journalière',
+        locationSpeciale: 'Location spéciale',
+        tarifFixe: 'Trajet (tarif fixe)'
     };
 
     return labels[type] || course.type || 'Course';
