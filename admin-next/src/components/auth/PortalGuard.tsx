@@ -11,6 +11,46 @@ interface PortalGuardProps {
   allowedRoles: string[];
 }
 
+function getRequiredRole(pathname: string): string[] | null {
+  if (
+    pathname === '/flotte/urbain' ||
+    pathname.startsWith('/flotte/urbain/')
+  ) {
+    return ['FLEET_MANAGER'];
+  }
+
+  if (
+    pathname === '/flotte/interurbain' ||
+    pathname.startsWith('/flotte/interurbain/')
+  ) {
+    return ['COOP_MANAGER'];
+  }
+
+  return null;
+}
+
+function getLoginPath(pathname: string): string {
+  if (
+    pathname === '/flotte/interurbain' ||
+    pathname.startsWith('/flotte/interurbain/')
+  ) {
+    return '/interurbain-login';
+  }
+
+  if (
+    pathname === '/flotte/urbain' ||
+    pathname.startsWith('/flotte/urbain/')
+  ) {
+    return '/urbain-login';
+  }
+
+  if (pathname.startsWith('/flotte')) {
+    return '/urbain-login';
+  }
+
+  return '/login';
+}
+
 export default function PortalGuard({
   children,
   allowedRoles,
@@ -25,12 +65,7 @@ export default function PortalGuard({
     }
 
     if (!user) {
-      const loginPath =
-        pathname.startsWith('/flotte/interurbain')
-          ? '/interurbain-login'
-          : pathname.startsWith('/flotte')
-            ? '/urbain-login'
-            : '/login';
+      const loginPath = getLoginPath(pathname);
 
       const redirect = encodeURIComponent(
         `${pathname}${window.location.search}`
@@ -40,10 +75,19 @@ export default function PortalGuard({
       return;
     }
 
-    if (
-      user.role &&
-      allowedRoles.includes(user.role)
-    ) {
+    const requiredRoles = getRequiredRole(pathname);
+
+    // Les espaces Urbain et Interurbain sont isolés par rôle.
+    if (requiredRoles) {
+      if (!user.role || !requiredRoles.includes(user.role)) {
+        router.replace(getDefaultArea(user));
+      }
+
+      return;
+    }
+
+    // Pour /flotte (point d'entrée), les deux rôles sont autorisés.
+    if (user.role && allowedRoles.includes(user.role)) {
       return;
     }
 
@@ -64,6 +108,16 @@ export default function PortalGuard({
         </div>
       </div>
     );
+  }
+
+  const requiredRoles = getRequiredRole(pathname);
+
+  if (requiredRoles) {
+    if (!user.role || !requiredRoles.includes(user.role)) {
+      return null;
+    }
+
+    return <>{children}</>;
   }
 
   if (
