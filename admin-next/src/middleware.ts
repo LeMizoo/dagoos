@@ -29,7 +29,16 @@ export function middleware(request: NextRequest) {
   // Le middleware ne gère plus l'authentification.
   // L'authentification est gérée par le proxy et le AuthContext côté client.
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+  
+  // Empêcher le cache des pages protégées
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/flotte')) {
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+  }
+
+  return response;
 }
 
 export const config = {

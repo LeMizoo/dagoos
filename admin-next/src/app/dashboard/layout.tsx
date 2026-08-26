@@ -6,6 +6,9 @@ export const metadata = {
   title: 'Dagoo Admin - Tableau de bord',
 };
 
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+
 export default function DashboardLayout({
   children,
 }: {
