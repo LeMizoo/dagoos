@@ -26,13 +26,29 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Le middleware ne gère plus l'authentification.
-  // L'authentification est gérée par le proxy et le AuthContext côté client.
+  // Vérifier le cookie pour les pages protégées
+  const isAdminPath = pathname === '/dashboard' || pathname.startsWith('/dashboard/');
+  const isUrbainPath = pathname === '/flotte/urbain' || pathname.startsWith('/flotte/urbain/');
+  const isInterurbainPath = pathname === '/flotte/interurbain' || pathname.startsWith('/flotte/interurbain/');
+  const isFlottePath = pathname === '/flotte' || pathname.startsWith('/flotte/');
+
+  if (isAdminPath || isUrbainPath || isInterurbainPath || isFlottePath) {
+    const adminToken = request.cookies.get('dagoos_admin_token')?.value;
+    const urbainToken = request.cookies.get('dagoos_urbain_token')?.value;
+    const interurbainToken = request.cookies.get('dagoos_interurbain_token')?.value;
+
+    const hasToken = adminToken || urbainToken || interurbainToken;
+
+    if (!hasToken) {
+      const loginPath = isAdminPath ? '/login' : isInterurbainPath ? '/interurbain-login' : '/urbain-login';
+      return NextResponse.redirect(new URL(loginPath, request.url));
+    }
+  }
 
   const response = NextResponse.next();
   
   // Empêcher le cache des pages protégées
-  if (pathname.startsWith('/dashboard') || pathname.startsWith('/flotte')) {
+  if (isAdminPath || isFlottePath || isUrbainPath || isInterurbainPath) {
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     response.headers.set('Pragma', 'no-cache');
     response.headers.set('Expires', '0');

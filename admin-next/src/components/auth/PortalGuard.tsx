@@ -26,10 +26,10 @@ export default function PortalGuard({
 
     if (!user) {
       const loginPath =
-        pathname.startsWith('/fleet')
-          ? '/fleet-login'
-          : pathname.startsWith('/coop')
-            ? '/coop-login'
+        pathname.startsWith('/flotte/interurbain')
+          ? '/interurbain-login'
+          : pathname.startsWith('/flotte')
+            ? '/urbain-login'
             : '/login';
 
       const redirect = encodeURIComponent(

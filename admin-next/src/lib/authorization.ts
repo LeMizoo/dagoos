@@ -106,17 +106,17 @@ export function canAccessSelf(
 
 export function getDefaultArea(
   user: AuthorizationUser | null | undefined
-): '/dashboard' | '/fleet' | '/coop' | '/' {
+): '/dashboard' | '/flotte/urbain' | '/flotte/interurbain' | '/' {
   switch (user?.role) {
     case 'SUPER_ADMIN':
     case 'ADMIN':
       return '/dashboard';
 
     case 'FLEET_MANAGER':
-      return '/fleet';
+      return '/flotte/urbain';
 
     case 'COOP_MANAGER':
-      return '/coop';
+      return '/flotte/interurbain';
 
     case 'DRIVER':
       return '/';
