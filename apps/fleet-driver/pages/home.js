@@ -211,14 +211,9 @@ function refreshCourseTypesForCurrentVehicle() {
 // 'locationJournalier', 'tarifFixe', 'locationSpeciale'), pour le véhicule
 // actuellement assigné au chauffeur.
 function getVehicleTarifConfig(courseMode) {
-    var vehiculeTarifs = getVehiculeTarifs(organizationTarifs);
-    if (!vehiculeTarifs) return null;
-
-    var type = (currentVehicle && currentVehicle.type) || 'voiture';
-    var vehicleConfig = vehiculeTarifs[type];
-    if (!vehicleConfig || typeof vehicleConfig !== 'object') return null;
-
-    return vehicleConfig[courseMode] || null;
+    // Le backend renvoie des champs plats : prixBase, prixKm, locationJournalier
+    if (!organizationTarifs) return null;
+    return organizationTarifs;
 }
 
 function getTarifValue(config, keys) {
