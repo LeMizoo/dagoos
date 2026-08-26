@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -50,6 +51,18 @@ async function fetchCurrentUser(): Promise<AuthUser | null> {
     return null;
   }
 }
+
+// Durée d'inactivité avant déconnexion automatique (30 minutes).
+const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000;
+
+// Événements considérés comme une activité utilisateur.
+const ACTIVITY_EVENTS = [
+  'mousedown',
+  'keydown',
+  'touchstart',
+  'scroll',
+  'wheel',
+] as const;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -106,6 +119,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
     }
   }, []);
+
+  // Déconnexion automatique après une période d'inactivité.
+  // N'a d'effet que si un utilisateur est actuellement connecté.
+  const inactivityTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    function resetTimer() {
+      if (inactivityTimer.current) {
+        clearTimeout(inactivityTimer.current);
+      }
+      inactivityTimer.current = setTimeout(() => {
+        logout();
+      }, INACTIVITY_TIMEOUT_MS);
+    }
+
+    resetTimer();
+
+    ACTIVITY_EVENTS.forEach((eventName) => {
+      window.addEventListener(eventName, resetTimer, { passive: true });
+    });
+
+    // Redémarre aussi le minuteur quand l'onglet redevient visible,
+    // pour éviter une déconnexion immédiate après un long moment
+    // en arrière-plan sans réel geste utilisateur détecté entre-temps.
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'visible') {
+        resetTimer();
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      if (inactivityTimer.current) {
+        clearTimeout(inactivityTimer.current);
+      }
+      ACTIVITY_EVENTS.forEach((eventName) => {
+        window.removeEventListener(eventName, resetTimer);
+      });
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user, logout]);
 
   return (
     <AuthContext.Provider

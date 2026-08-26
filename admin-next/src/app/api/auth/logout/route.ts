@@ -11,18 +11,10 @@ export async function POST(
       'x-auth-space'
     ) || 'admin';
 
-  const cookieName =
-    space === 'admin' || space === 'dashboard'
-      ? 'dagoos_admin_token'
-      : space === 'urbain'
-        ? 'dagoos_urbain_token'
-        : 'dagoos_interurbain_token';
-
-  cookieStore.set(cookieName, '', {
-    httpOnly: true,
-    maxAge: 0,
-    path: '/',
-  });
+  // Supprimer TOUS les cookies de session
+  cookieStore.set('dagoos_admin_token', '', { httpOnly: true, maxAge: 0, path: '/' });
+  cookieStore.set('dagoos_urbain_token', '', { httpOnly: true, maxAge: 0, path: '/' });
+  cookieStore.set('dagoos_interurbain_token', '', { httpOnly: true, maxAge: 0, path: '/' });
 
   const response = NextResponse.json({
     ok: true,
