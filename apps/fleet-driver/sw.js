@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dagoos-driver-v9';
+const CACHE_NAME = 'dagoos-driver-v10';
 const STATIC_CACHE = 'dagoos-static-v9';
 
 const STATIC_ASSETS = [
