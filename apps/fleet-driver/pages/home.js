@@ -19,6 +19,15 @@ var courseTypes = [
     { value: 'location', label: 'Location journalière' }
 ];
 
+var vehicleTypeLabels = {
+    'taxi_moto': 'Taxi Moto',
+    'taxi': 'Taxi',
+    'minivan': 'Mini Van (Taxi-be)',
+    'bus': 'Bus',
+    'tricycle': 'Tricycle (Bajaj)',
+    'voiture': 'Voiture'
+};
+
 
 // ========================================
 // UTILITAIRES
