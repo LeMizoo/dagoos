@@ -43,3 +43,4 @@ admin-next/tsconfig.tsbuildinfo
 
 # Fichiers temporaires
 tmp/
+*.tar.gz
