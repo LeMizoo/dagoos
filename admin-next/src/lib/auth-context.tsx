@@ -82,6 +82,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Revalidation lors du retour arrière (bouton précédent)
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        refreshUser();
+      }
+    };
+
+    window.addEventListener('pageshow', handlePageShow);
+    return () => {
+      window.removeEventListener('pageshow', handlePageShow);
+    };
+  }, [refreshUser]);
+
   const logout = useCallback(async () => {
     try {
       await apiFetch('/api/auth/logout', { method: 'POST' });
