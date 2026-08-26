@@ -24,7 +24,13 @@ export async function POST(
     path: '/',
   });
 
-  return NextResponse.json({
+  const response = NextResponse.json({
     ok: true,
   });
+
+  // Forcer le navigateur à vider le cache
+  response.headers.set('Clear-Site-Data', '"cache", "cookies"');
+  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+
+  return response;
 }

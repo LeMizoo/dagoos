@@ -80,8 +80,9 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
   ];
 
   const handleLogout = () => {
-    // Redirection immédiate, logout en arrière-plan
-    window.location.href = '/urbain-login';
+    // Redirection selon l'espace courant
+    const loginPath = isInterurbain ? '/interurbain-login' : '/urbain-login';
+    window.location.href = loginPath;
     logout();
   };
 
