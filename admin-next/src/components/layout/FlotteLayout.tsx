@@ -79,9 +79,10 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
     ...(isInterurbain ? interurbainMenu : [])
   ];
 
-  const handleLogout = async () => {
-    await logout();
+  const handleLogout = () => {
+    // Redirection immédiate, logout en arrière-plan
     window.location.href = '/urbain-login';
+    logout();
   };
 
   const isActive = (href: string) => {

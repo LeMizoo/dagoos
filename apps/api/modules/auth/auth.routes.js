@@ -211,4 +211,16 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 });
 
+// Logout - supprimer le cookie de session
+router.post('/logout', authMiddleware, async (req, res) => {
+  try {
+    res.clearCookie('dagoos_admin_token', { path: '/' });
+    res.clearCookie('dagoos_urbain_token', { path: '/' });
+    res.clearCookie('dagoos_interurbain_token', { path: '/' });
+    res.json({ ok: true });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 module.exports = router;
