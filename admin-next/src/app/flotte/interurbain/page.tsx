@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import FlotteHome from '@/app/flotte/page';
 
 export default function FlotteInterurbainEntry() {
-  redirect('/flotte');
+  return <FlotteHome />;
 }

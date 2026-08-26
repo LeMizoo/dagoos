@@ -47,7 +47,8 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       const redirectPath = data.redirectPath || (mode === 'urbain' ? '/flotte/urbain' : '/flotte/interurbain');
       
       setTimeout(() => {
-        window.location.href = redirectPath;
+        window.open(redirectPath, '_blank', 'noopener,noreferrer');
+        onClose();
       }, 200);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur de connexion');
