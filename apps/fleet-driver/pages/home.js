@@ -259,6 +259,7 @@ function getLocationTarif(type) {
     return getTarifValue(config, [
         'location',
         'locationJour',
+        'locationJournalier',
         'prixJour',
         'prixLocation',
         'pricePerDay'
