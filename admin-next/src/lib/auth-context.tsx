@@ -86,6 +86,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const handlePageShow = (event: PageTransitionEvent) => {
       if (event.persisted) {
+        // Force une revalidation complète et synchrone
+        setLoading(true);
+        setUser(null);
         refreshUser();
       }
     };
