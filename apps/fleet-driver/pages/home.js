@@ -1560,11 +1560,10 @@ async function demarrerCourse(courseId) {
 }
 
 async function clientPrisEnCharge(courseId) {
-    // Transition EN_ROUTE → EN_COURS
+    // Transition EN_ROUTE → EN_COURS via la route métier pickup
     try {
-        // Pas de route spécifique pour l'instant — utiliser PATCH statut
         var response = await fetch(
-            getApiUrl() + '/finances/courses/' + encodeURIComponent(courseId) + '/start',
+            getApiUrl() + '/finances/courses/' + encodeURIComponent(courseId) + '/pickup',
             {
                 method: 'POST',
                 headers: {
@@ -1574,8 +1573,14 @@ async function clientPrisEnCharge(courseId) {
             }
         );
 
-        // Pour l'instant : on passe directement à EN_COURS via une mise à jour locale
-        // Idéalement : ajouter une route backend /complete avec statut intermédiaire
+        var data = {};
+        try { data = await response.json(); } catch(e) {}
+
+        if (!response.ok) {
+            alert(data.error || 'Impossible de prendre le client en charge');
+            return;
+        }
+
         courseActive.statut = 'EN_COURS';
         afficherCourseActive();
 
@@ -1782,11 +1787,10 @@ async function demarrerCourse(courseId) {
 }
 
 async function clientPrisEnCharge(courseId) {
-    // Transition EN_ROUTE → EN_COURS
+    // Transition EN_ROUTE → EN_COURS via la route métier pickup
     try {
-        // Pas de route spécifique pour l'instant — utiliser PATCH statut
         var response = await fetch(
-            getApiUrl() + '/finances/courses/' + encodeURIComponent(courseId) + '/start',
+            getApiUrl() + '/finances/courses/' + encodeURIComponent(courseId) + '/pickup',
             {
                 method: 'POST',
                 headers: {
@@ -1796,8 +1800,14 @@ async function clientPrisEnCharge(courseId) {
             }
         );
 
-        // Pour l'instant : on passe directement à EN_COURS via une mise à jour locale
-        // Idéalement : ajouter une route backend /complete avec statut intermédiaire
+        var data = {};
+        try { data = await response.json(); } catch(e) {}
+
+        if (!response.ok) {
+            alert(data.error || 'Impossible de prendre le client en charge');
+            return;
+        }
+
         courseActive.statut = 'EN_COURS';
         afficherCourseActive();
 

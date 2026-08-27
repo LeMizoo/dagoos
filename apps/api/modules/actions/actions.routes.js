@@ -327,6 +327,22 @@ router.post('/:id/reject', authMiddleware, async (req, res) => {
       data: { statut: 'REJECTED' }
     });
 
+    // Marquer les notifications liées comme lues
+    const notifications = await prisma.notification.findMany({
+      where: {
+        leadActionId: actionId,
+        read: false
+      },
+      select: { id: true }
+    }).catch(() => []);
+
+    for (const notif of notifications) {
+      await prisma.notification.update({
+        where: { id: notif.id },
+        data: { read: true }
+      }).catch(() => {});
+    }
+
     res.json(updated);
   } catch (error) {
     console.error('POST /actions/:id/reject:', error);

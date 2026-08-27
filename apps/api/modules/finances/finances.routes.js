@@ -294,6 +294,43 @@ router.post('/courses/:id/start', authMiddleware, async (req, res) => {
   }
 });
 
+// POST /api/finances/courses/:id/pickup - Client pris en charge (EN_ROUTE → EN_COURS)
+router.post('/courses/:id/pickup', authMiddleware, async (req, res) => {
+  try {
+    if (!req.user.driverId) {
+      return res.status(403).json({ error: 'Chauffeur non associé' });
+    }
+
+    const course = await prisma.course.findUnique({
+      where: { id: req.params.id }
+    });
+
+    if (!course) {
+      return res.status(404).json({ error: 'Course introuvable' });
+    }
+
+    if (course.driverId !== req.user.driverId) {
+      return res.status(403).json({ error: 'Accès refusé' });
+    }
+
+    if (course.statut !== 'EN_ROUTE') {
+      return res.status(409).json({ error: 'Course non démarrée' });
+    }
+
+    const updated = await prisma.course.update({
+      where: { id: req.params.id },
+      data: {
+        statut: 'EN_COURS'
+      }
+    });
+
+    res.json(updated);
+  } catch (error) {
+    console.error('POST /courses/:id/pickup:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // POST /api/finances/courses/:id/complete - Terminer la course (EN_COURS → TERMINEE)
 router.post('/courses/:id/complete', authMiddleware, async (req, res) => {
   try {
