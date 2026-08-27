@@ -247,6 +247,75 @@ function arrondirPrix(prix) {
   }
 }
 
+// POST /api/public/estimate - Estimer distance et prix
+router.post('/estimate', async (req, res) => {
+  try {
+    const { organizationSlug, depart, arrivee, typeVehicule } = req.body;
+
+    if (!organizationSlug || !depart || !arrivee) {
+      return res.status(400).json({ error: 'Départ et arrivée requis' });
+    }
+
+    const org = await prisma.organization.findUnique({
+      where: { slug: organizationSlug },
+      select: { id: true }
+    });
+
+    if (!org) return res.status(404).json({ error: 'Organisation introuvable' });
+
+    // Calculer la distance
+    const distanceKm = await calculerDistance(depart, arrivee);
+
+    // Récupérer le tarif
+    const VEHICLE_TYPE_MAP = {
+      'moto': 'moto',
+      'voiture': 'voiture',
+      'taxi': 'taxi',
+      'bus': 'bus',
+      'minivan': 'minivan',
+      'tricycle': 'tricycle'
+    };
+    const cleTarif = VEHICLE_TYPE_MAP[typeVehicule] || 'moto';
+
+    const tarif = await prisma.tarif.findUnique({
+      where: { organizationId: org.id }
+    }).catch(() => null);
+
+    let prixEstime = 2000;
+    let modePrestation = 'courseNormale';
+
+    if (tarif?.vehiculeTarifs) {
+      try {
+        const vehiculeTarifs = JSON.parse(tarif.vehiculeTarifs);
+        const tarifVehicule = vehiculeTarifs[cleTarif];
+
+        if (tarifVehicule) {
+          if (['bus', 'minivan', 'tricycle'].includes(cleTarif)) {
+            prixEstime = tarifVehicule?.tarifFixe?.prixTrajet || tarif.prixBase;
+            modePrestation = 'tarifFixe';
+          } else if (tarifVehicule?.courseNormale) {
+            const prixBase = tarifVehicule.courseNormale.prixBase || tarif.prixBase;
+            const prixKm = tarifVehicule.courseNormale.prixKm || tarif.prixKm;
+            prixEstime = arrondirPrix(prixBase + (distanceKm * prixKm));
+            modePrestation = 'courseNormale';
+          }
+        }
+      } catch(e) {}
+    } else if (tarif) {
+      prixEstime = arrondirPrix(tarif.prixBase + (distanceKm * tarif.prixKm));
+    }
+
+    res.json({
+      distanceKm,
+      prixEstime,
+      modePrestation
+    });
+  } catch (error) {
+    console.error('POST /public/estimate:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // POST /api/public/actions - Créer une action depuis la landing
 router.post('/actions', async (req, res) => {
   try {

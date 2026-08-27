@@ -9,6 +9,8 @@ export default function DemandeTaxi() {
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [adresse, setAdresse] = useState('');
   const [loading, setLoading] = useState(false);
+  const [estimation, setEstimation] = useState<{ distanceKm: number; prixEstime: number } | null>(null);
+  const [estimating, setEstimating] = useState(false);
 
   useEffect(() => {
     apiFetch('/public/organizations')
@@ -46,6 +48,47 @@ export default function DemandeTaxi() {
       );
     } else {
       alert('❌ Géolocalisation non supportée');
+    }
+  }
+
+  async function estimerPrix() {
+    const form = document.querySelector('form') as HTMLFormElement;
+    if (!form) return;
+
+    const formData = new FormData(form);
+    const depart = formData.get('depart') as string;
+    const arrivee = formData.get('arrivee') as string;
+    const typeVehicule = formData.get('type') as string;
+    const flotte = formData.get('flotte') as string;
+
+    if (!depart || !arrivee || !flotte) {
+      setEstimation(null);
+      return;
+    }
+
+    setEstimating(true);
+
+    try {
+      const res = await apiFetch('/public/estimate', {
+        method: 'POST',
+        body: JSON.stringify({
+          organizationSlug: flotte,
+          depart,
+          arrivee,
+          typeVehicule: typeVehicule || 'moto'
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setEstimation(data);
+      } else {
+        setEstimation(null);
+      }
+    } catch(e) {
+      setEstimation(null);
+    } finally {
+      setEstimating(false);
     }
   }
 
@@ -145,12 +188,28 @@ export default function DemandeTaxi() {
         <form onSubmit={handleSubmit} className="space-y-3 bg-gray-50 p-6 rounded-xl border">
           <input name="nom" placeholder="Votre nom" className="w-full px-4 py-3 border rounded-lg text-sm" required />
           <input name="tel" type="tel" placeholder="Votre téléphone" className="w-full px-4 py-3 border rounded-lg text-sm" required />
-          <input name="depart" placeholder="Adresse de départ" className="w-full px-4 py-3 border rounded-lg text-sm" required />
-          <input name="arrivee" placeholder="Adresse d'arrivée" className="w-full px-4 py-3 border rounded-lg text-sm" required />
-          <select name="type" className="w-full px-4 py-3 border rounded-lg text-sm">
+          <input name="depart" placeholder="Adresse de départ" className="w-full px-4 py-3 border rounded-lg text-sm" required onBlur={estimerPrix} />
+          <input name="arrivee" placeholder="Adresse d'arrivée" className="w-full px-4 py-3 border rounded-lg text-sm" required onBlur={estimerPrix} />
+          <select name="type" className="w-full px-4 py-3 border rounded-lg text-sm" onChange={estimerPrix}>
             <option value="moto">Taxi moto</option>
             <option value="voiture">Taxi voiture</option>
           </select>
+
+          {estimating && (
+            <p className="text-sm text-gray-500 text-center">Calcul en cours...</p>
+          )}
+
+          {estimation && !estimating && (
+            <div className="bg-emerald-50 rounded-lg p-3 text-center border border-emerald-200">
+              <p className="text-sm font-semibold text-emerald-700">Estimation</p>
+              <p className="text-xs text-emerald-600">
+                Distance approximative : <strong>{estimation.distanceKm} km</strong>
+              </p>
+              <p className="text-xs text-emerald-600">
+                Prix de la course : <strong>{estimation.prixEstime.toLocaleString('fr-FR')} Ar</strong>
+              </p>
+            </div>
+          )}
 
           {mode === 'choisir' && (
             <select name="flotte" className="w-full px-4 py-3 border rounded-lg text-sm" required>
