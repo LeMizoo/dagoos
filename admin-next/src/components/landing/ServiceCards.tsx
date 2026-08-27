@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Car, Bus, X, MapPin, Calendar, Phone, ArrowRight } from 'lucide-react';
 import DemandeTaxi from './DemandeTaxi';
+import DemandeLocation from './DemandeLocation';
 import Link from 'next/link';
 
 interface ServiceCardsProps {
@@ -11,7 +12,7 @@ interface ServiceCardsProps {
 }
 
 export default function ServiceCards({ organizations, coopsAvecDeparts }: ServiceCardsProps) {
-  const [activeModal, setActiveModal] = useState<'taxi' | 'departs' | null>(null);
+  const [activeModal, setActiveModal] = useState<'taxi' | 'location' | 'departs' | null>(null);
 
   const fleets = organizations.filter((o: any) => o.type === 'FLEET_MANAGER');
 
@@ -63,7 +64,21 @@ export default function ServiceCards({ organizations, coopsAvecDeparts }: Servic
               </div>
             </button>
 
-            {/* CARTE DÉPARTS */}
+            {/* CARTE LOCATION */}
+      <button
+        onClick={() => setActiveModal('location')}
+        className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all"
+      >
+        <div className="bg-gradient-to-br from-purple-600 to-purple-800 p-6 text-left">
+          <span className="text-3xl mb-2 block">🚐</span>
+          <h3 className="font-display text-2xl font-bold text-white mb-2">Location</h3>
+          <p className="text-white/80 text-sm">
+            Bus, minivan ou tricycle pour vos événements
+          </p>
+        </div>
+      </button>
+
+      {/* CARTE DÉPARTS */}
             <button
               onClick={() => setActiveModal('departs')}
               className="group relative bg-dark rounded-2xl p-8 text-left hover:scale-[1.02] transition-transform duration-300 shadow-xl hover:shadow-2xl"
@@ -103,6 +118,27 @@ export default function ServiceCards({ organizations, coopsAvecDeparts }: Servic
             </div>
             <div className="p-6">
               <DemandeTaxi />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODALE LOCATION */}
+      {activeModal === 'location' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setActiveModal(null)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
+              <h3 className="font-display text-xl font-bold text-gray-800">Location</h3>
+              <button
+                onClick={() => setActiveModal(null)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition"
+              >
+                <X size={20} className="text-gray-500" />
+              </button>
+            </div>
+            <div className="p-6">
+              <DemandeLocation />
             </div>
           </div>
         </div>

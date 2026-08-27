@@ -381,6 +381,101 @@ router.get('/suivi/:code', async (req, res) => {
   }
 });
 
+// POST /api/public/estimate-location - Estimer une location
+router.post('/estimate-location', async (req, res) => {
+  try {
+    const { organizationSlug, typeVehicule, typeTrajet, depart, arrivee, dateAller, dateRetour, carburant } = req.body;
+
+    if (!organizationSlug || !depart || !arrivee || !typeTrajet) {
+      return res.status(400).json({ error: 'Informations manquantes' });
+    }
+
+    const org = await prisma.organization.findUnique({
+      where: { slug: organizationSlug },
+      select: { id: true }
+    });
+
+    if (!org) return res.status(404).json({ error: 'Organisation introuvable' });
+
+    // Calculer la distance
+    const distanceKm = await calculerDistance(depart, arrivee);
+
+    // Récupérer le tarif
+    const tarif = await prisma.tarif.findUnique({
+      where: { organizationId: org.id }
+    }).catch(() => null);
+
+    if (!tarif) {
+      return res.status(404).json({ error: 'Tarif non configuré' });
+    }
+
+    // Parser vehiculeTarifs
+    let vehiculeTarifs = {};
+    if (tarif.vehiculeTarifs) {
+      try {
+        vehiculeTarifs = JSON.parse(tarif.vehiculeTarifs);
+      } catch(e) {}
+    }
+
+    // Récupérer le tarif location du type de véhicule
+    const typeMap = { 'bus': 'bus', 'minivan': 'minivan', 'tricycle': 'tricycle' };
+    const cle = typeMap[typeVehicule] || 'bus';
+    const tarifLocation = vehiculeTarifs[cle]?.location || {};
+
+    const prixBase = tarifLocation.prixBase || 100000;
+    const prixKm = tarifLocation.prixKm || 1500;
+    const forfaitJournalier = tarifLocation.forfaitJournalier || 50000;
+
+    // Calculer le nombre de jours
+    let nbJours = 1;
+    if (typeTrajet === 'A_B_A_MULTI' && dateAller && dateRetour) {
+      const debut = new Date(dateAller);
+      const fin = new Date(dateRetour);
+      nbJours = Math.max(1, Math.ceil((fin.getTime() - debut.getTime()) / (1000 * 3600 * 24)) + 1);
+    }
+
+    let prixEstime = 0;
+
+    switch (typeTrajet) {
+      case 'A_B':
+        if (carburant === 'AVEC') {
+          // Tarif fixe sans km
+          prixEstime = prixBase;
+        } else {
+          // Base + (x × prixKm) + ½ Base
+          prixEstime = prixBase + (distanceKm * prixKm) + (prixBase * 0.5);
+        }
+        break;
+
+      case 'A_B_A':
+        // 2 × Base + (2x × prixKm)
+        prixEstime = (2 * prixBase) + (2 * distanceKm * prixKm);
+        break;
+
+      case 'A_B_A_MULTI':
+        // Base + (xJ1 × prixKm) + (forfait × nbJours) + (xJn × prixKm) + Base
+        prixEstime = prixBase + (distanceKm * prixKm) + (forfaitJournalier * nbJours) + (distanceKm * prixKm) + prixBase;
+        break;
+
+      default:
+        prixEstime = prixBase;
+    }
+
+    prixEstime = arrondirPrix(prixEstime);
+
+    res.json({
+      distanceKm,
+      prixEstime,
+      nbJours,
+      typeTrajet,
+      carburant
+    });
+  } catch (error) {
+    console.error('POST /public/estimate-location:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // POST /api/public/actions - Créer une action depuis la landing
 router.post('/actions', async (req, res) => {
   try {
