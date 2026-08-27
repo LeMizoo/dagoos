@@ -66,6 +66,12 @@ export default async function LandingPage() {
 
       {/* SECTION SERVICES AVEC CARTES */}
       <ServiceCards organizations={organizations} coopsAvecDeparts={coopsAvecDeparts} />
+      
+      <div className="text-center py-4">
+        <Link href="/suivi" className="text-sm text-primary hover:text-[#154360] font-semibold underline">
+          📋 Suivre ma demande taxi
+        </Link>
+      </div>
 
       {/* CHIFFRES CLÉS */}
       <section className="py-16 bg-gradient-to-r from-primary to-dark text-white">
