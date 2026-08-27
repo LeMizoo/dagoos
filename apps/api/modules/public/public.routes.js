@@ -229,16 +229,29 @@ router.post('/actions', async (req, res) => {
 
     // Notifier les chauffeurs disponibles pour les demandes de course
     if (type === 'COURSE_REQUEST' || type === 'TAXI_RESERVATION') {
-      const vehicleType = details?.typeVehicule === 'moto' ? 'taxi_moto' : 'voiture';
+      // Mapping typeVehicule (formulaire public) → Vehicle.type (base)
+      const VEHICLE_TYPE_MAP = {
+        'moto': 'taxi_moto',
+        'taxi_moto': 'taxi_moto',
+        'voiture': 'voiture',
+        'taxi': 'taxi',
+        'minivan': 'minivan',
+        'bus': 'bus',
+        'tricycle': 'tricycle'
+      };
+      const vehicleType = VEHICLE_TYPE_MAP[details?.typeVehicule] || null;
+
+      // Si le type est inconnu, ne pas filtrer par véhicule (tous les chauffeurs dispo)
+      const driverWhere = {
+        organizationId: org.id,
+        status: { in: ['AVAILABLE', 'active'] }
+      };
+      if (vehicleType) {
+        driverWhere.vehicle = { type: vehicleType };
+      }
 
       const drivers = await prisma.driver.findMany({
-        where: {
-          organizationId: org.id,
-          status: { in: ['AVAILABLE', 'active'] },
-          vehicle: {
-            type: vehicleType
-          }
-        },
+        where: driverWhere,
         select: { userId: true, driverCode: true }
       });
 
