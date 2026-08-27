@@ -319,6 +319,8 @@ model Tarif {
   adyVarotraActif     Boolean  @default(true)
   courseNormalActif   Boolean  @default(true)
   locationActif       Boolean  @default(true)
+  vehiculeTarifs      String?  @db.Text
+  mobileMoney         Json?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 }
