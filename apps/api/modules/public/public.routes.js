@@ -281,7 +281,7 @@ router.post('/estimate', async (req, res) => {
     // Récupérer le tarif
     const VEHICLE_TYPE_MAP = {
       'moto': 'moto',
-      'voiture': 'voiture',
+      'voiture': 'taxi',
       'taxi': 'taxi',
       'bus': 'bus',
       'minivan': 'minivan',
@@ -423,7 +423,7 @@ router.post('/actions', async (req, res) => {
     if (type === 'COURSE_REQUEST' || type === 'TAXI_RESERVATION') {
       const VEHICLE_TYPE_MAP = {
         'moto': 'moto',
-        'voiture': 'voiture',
+        'voiture': 'taxi',
         'taxi': 'taxi',
         'bus': 'bus',
         'minivan': 'minivan',
@@ -525,7 +525,7 @@ router.post('/actions', async (req, res) => {
       // Trouver les chauffeurs disponibles avec le bon type de véhicule
       const vehicleTypeMap = {
         'moto': 'taxi_moto',
-        'voiture': 'voiture',
+        'voiture': 'taxi',
         'taxi': 'taxi',
         'bus': 'bus',
         'minivan': 'minivan',
