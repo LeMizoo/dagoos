@@ -158,6 +158,95 @@ router.get('/departs/:slug', async (req, res) => {
 // ACTION PUBLIQUE
 // =========================================================
 
+// =========================================================
+// GÉOCODAGE ET CALCUL DE DISTANCE
+// =========================================================
+
+/**
+ * Calcule la distance haversine entre deux points GPS (en km)
+ */
+function haversineDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371; // Rayon de la Terre en km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+/**
+ * Géocode une adresse via Nominatim (OpenStreetMap)
+ * Retourne { lat, lng } ou null
+ */
+async function geocodeAdresse(adresse) {
+  if (!adresse) return null;
+
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(adresse + ', Antananarivo, Madagascar')}&limit=1`;
+    const response = await fetch(url, {
+      headers: { 'User-Agent': 'DAGOOS/1.0' }
+    });
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+
+    if (data && data.length > 0) {
+      return {
+        lat: parseFloat(data[0].lat),
+        lng: parseFloat(data[0].lon)
+      };
+    }
+
+    return null;
+  } catch(e) {
+    console.warn('Géocodage échoué:', e.message);
+    return null;
+  }
+}
+
+/**
+ * Calcule la distance entre deux adresses
+ * Retourne la distance en km, ou 0 si géocodage impossible
+ */
+async function calculerDistance(depart, arrivee) {
+  if (!depart || !arrivee) return 0;
+
+  const coordDepart = await geocodeAdresse(depart);
+  const coordArrivee = await geocodeAdresse(arrivee);
+
+  if (!coordDepart || !coordArrivee) return 0;
+
+  const distance = haversineDistance(
+    coordDepart.lat, coordDepart.lng,
+    coordArrivee.lat, coordArrivee.lng
+  );
+
+  // Facteur de correction pour routes réelles (vs vol d'oiseau)
+  const FACTEUR_ROUTE = 1.35;
+  return Math.round(distance * FACTEUR_ROUTE * 10) / 10;
+}
+
+/**
+ * Arrondit un prix à un montant commercial
+ * - Multiple de 500 Ar si prix < 10000
+ * - Multiple de 1000 Ar si prix >= 10000
+ */
+function arrondirPrix(prix) {
+  if (prix <= 0) return 0;
+
+  if (prix < 10000) {
+    // Arrondir au multiple de 500 supérieur
+    return Math.ceil(prix / 500) * 500;
+  } else {
+    // Arrondir au multiple de 1000 supérieur
+    return Math.ceil(prix / 1000) * 1000;
+  }
+}
+
 // POST /api/public/actions - Créer une action depuis la landing
 router.post('/actions', async (req, res) => {
   try {
@@ -193,7 +282,7 @@ router.post('/actions', async (req, res) => {
     // ========================================
     let prixEstime = 2000;
     let modePrestation = 'courseNormale';
-    // Distance strictement backend — à calculer plus tard (géocodage)
+    // Distance calculée par le backend via géocodage
     let distanceKm = 0;
     let commissionPct = 20;
 
@@ -207,6 +296,9 @@ router.post('/actions', async (req, res) => {
         'tricycle': 'tricycle'
       };
       const cleTarif = VEHICLE_TYPE_MAP[details?.typeVehicule] || 'moto';
+
+      // Calculer la distance entre départ et arrivée (géocodage backend)
+      distanceKm = await calculerDistance(details?.depart, details?.arrivee);
 
       const tarif = await prisma.tarif.findUnique({
         where: { organizationId: org.id }
@@ -226,19 +318,19 @@ router.post('/actions', async (req, res) => {
             } else if (tarifVehicule?.courseNormale) {
               const prixBase = tarifVehicule.courseNormale.prixBase || tarif.prixBase;
               const prixKm = tarifVehicule.courseNormale.prixKm || tarif.prixKm;
-              prixEstime = Math.round(prixBase + (distanceKm * prixKm));
+              prixEstime = arrondirPrix(prixBase + (distanceKm * prixKm));
               modePrestation = 'courseNormale';
             } else {
-              prixEstime = Math.round(tarif.prixBase + (distanceKm * tarif.prixKm));
+              prixEstime = arrondirPrix(tarif.prixBase + (distanceKm * tarif.prixKm));
             }
           } else {
-            prixEstime = Math.round(tarif.prixBase + (distanceKm * tarif.prixKm));
+            prixEstime = arrondirPrix(tarif.prixBase + (distanceKm * tarif.prixKm));
           }
         } catch(e) {
-          prixEstime = Math.round(tarif.prixBase + (distanceKm * tarif.prixKm));
+          prixEstime = arrondirPrix(tarif.prixBase + (distanceKm * tarif.prixKm));
         }
       } else if (tarif) {
-        prixEstime = Math.round(tarif.prixBase + (distanceKm * tarif.prixKm));
+        prixEstime = arrondirPrix(tarif.prixBase + (distanceKm * tarif.prixKm));
       }
     }
 
