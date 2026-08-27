@@ -74,7 +74,7 @@ export default async function LandingPage() {
         >
           <span className="text-2xl group-hover:scale-110 transition-transform">📋</span>
           <span className="text-left">
-            <span className="block font-bold text-primary group-hover:text-white transition-colors">Suivre ma demande taxi</span>
+            <span className="block font-bold text-primary group-hover:text-white transition-colors">Suivre ma demande</span>
             <span className="block text-xs text-gray-500 group-hover:text-white/80 transition-colors">
               Vérifiez le statut avec votre code de suivi
             </span>

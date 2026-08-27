@@ -12,7 +12,7 @@ interface ServiceCardsProps {
 }
 
 export default function ServiceCards({ organizations, coopsAvecDeparts }: ServiceCardsProps) {
-  const [activeModal, setActiveModal] = useState<'taxi' | 'location' | 'departs' | null>(null);
+  const [activeModal, setActiveModal] = useState<'taxi' | 'location' | 'location-inter' | 'departs' | null>(null);
 
   const fleets = organizations.filter((o: any) => o.type === 'FLEET_MANAGER');
 
@@ -64,40 +64,70 @@ export default function ServiceCards({ organizations, coopsAvecDeparts }: Servic
               </div>
             </button>
 
-            {/* CARTE LOCATION */}
-      <button
-        onClick={() => setActiveModal('location')}
-        className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all"
-      >
-        <div className="bg-gradient-to-br from-purple-600 to-purple-800 p-6 text-left">
-          <span className="text-3xl mb-2 block">🚐</span>
-          <h3 className="font-display text-2xl font-bold text-white mb-2">Location</h3>
-          <p className="text-white/80 text-sm">
-            Bus, minivan ou tricycle pour vos événements
-          </p>
-        </div>
-      </button>
 
       {/* CARTE DÉPARTS */}
             <button
               onClick={() => setActiveModal('departs')}
-              className="group relative bg-dark rounded-2xl p-8 text-left hover:scale-[1.02] transition-transform duration-300 shadow-xl hover:shadow-2xl"
+              className="group relative bg-emerald-700 rounded-2xl p-8 text-left hover:scale-[1.02] transition-transform duration-300 shadow-xl hover:shadow-2xl"
             >
               <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition">
-                <ArrowRight size={24} className="text-secondary" />
+                <ArrowRight size={24} className="text-white" />
               </div>
-              <div className="w-16 h-16 bg-secondary/20 rounded-2xl flex items-center justify-center mb-4">
-                <Bus size={32} className="text-secondary" />
+              <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4">
+                <Bus size={32} className="text-white" />
               </div>
               <h3 className="font-display text-2xl font-bold text-white mb-2">Départs inter-urbains</h3>
-              <p className="text-white/80 mb-4">
+              <p className="text-white/90 mb-4">
                 Consultez les départs inter-urbains et réservez votre place.
               </p>
-              <div className="flex items-center gap-2 text-white/70 text-sm">
-                <span className="bg-white/10 px-3 py-1 rounded-full">Réservation</span>
-                <span className="bg-white/10 px-3 py-1 rounded-full">Confort</span>
+              <div className="flex items-center gap-2 text-white/80 text-sm">
+                <span className="bg-white/20 px-3 py-1 rounded-full">Réservation</span>
+                <span className="bg-white/20 px-3 py-1 rounded-full">Confort</span>
               </div>
             </button>
+
+            {/* CARTE LOCATION */}
+            <button
+              onClick={() => setActiveModal('location')}
+              className="group relative bg-purple-600 rounded-2xl p-8 text-left hover:scale-[1.02] transition-transform duration-300 shadow-xl hover:shadow-2xl"
+            >
+              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition">
+                <ArrowRight size={24} className="text-white" />
+              </div>
+              <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4">
+                <Bus size={32} className="text-white" />
+              </div>
+              <h3 className="font-display text-2xl font-bold text-white mb-2">Location urbaine</h3>
+              <p className="text-white/90 mb-4">
+                Bus, minivan ou tricycle pour vos événements et déplacements.
+              </p>
+              <div className="flex items-center gap-2 text-white/80 text-sm">
+                <span className="bg-white/20 px-3 py-1 rounded-full">Avec chauffeur</span>
+                <span className="bg-white/20 px-3 py-1 rounded-full">Flexible</span>
+              </div>
+            </button>
+
+            {/* CARTE LOCATION INTERURBAIN */}
+            <button
+              onClick={() => setActiveModal('location-inter')}
+              className="group relative bg-blue-700 rounded-2xl p-8 text-left hover:scale-[1.02] transition-transform duration-300 shadow-xl hover:shadow-2xl"
+            >
+              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition">
+                <ArrowRight size={24} className="text-white" />
+              </div>
+              <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4">
+                <Bus size={32} className="text-white" />
+              </div>
+              <h3 className="font-display text-2xl font-bold text-white mb-2">Location inter-urbaine</h3>
+              <p className="text-white/90 mb-4">
+                Déplacements vers tout le territoire de Madagascar.
+              </p>
+              <div className="flex items-center gap-2 text-white/80 text-sm">
+                <span className="bg-white/20 px-3 py-1 rounded-full">Longue distance</span>
+                <span className="bg-white/20 px-3 py-1 rounded-full">Multi-jours</span>
+              </div>
+            </button>
+
           </div>
         </div>
       </section>
@@ -139,6 +169,29 @@ export default function ServiceCards({ organizations, coopsAvecDeparts }: Servic
             </div>
             <div className="p-6">
               <DemandeLocation />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODALE LOCATION INTERURBAIN */}
+      {activeModal === 'location-inter' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setActiveModal(null)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
+              <h3 className="font-display text-xl font-bold text-gray-800">Location interurbain</h3>
+              <button
+                onClick={() => setActiveModal(null)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition"
+              >
+                <X size={20} className="text-gray-500" />
+              </button>
+            </div>
+            <div className="p-6 text-center text-gray-500">
+              <p className="text-3xl mb-3">🚌</p>
+              <p className="font-bold text-gray-700">Location interurbain — bientôt disponible</p>
+              <p className="text-sm mt-2">Déplacements vers tout le territoire de Madagascar</p>
             </div>
           </div>
         </div>
