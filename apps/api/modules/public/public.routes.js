@@ -328,6 +328,59 @@ router.post('/estimate', async (req, res) => {
   }
 });
 
+// GET /api/public/suivi/:code - Suivre une demande par code
+router.get('/suivi/:code', async (req, res) => {
+  try {
+    const { code } = req.params;
+
+    if (!code) {
+      return res.status(400).json({ error: 'Code requis' });
+    }
+
+    // Rechercher la LeadAction avec ce code dans details
+    const action = await prisma.leadAction.findFirst({
+      where: {
+        details: {
+          path: ['codeSuivi'],
+          equals: code
+        }
+      },
+      select: {
+        id: true,
+        clientNom: true,
+        clientTel: true,
+        type: true,
+        statut: true,
+        details: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+
+    if (!action) {
+      return res.status(404).json({ error: 'Demande introuvable' });
+    }
+
+    res.json({
+      codeSuivi: code,
+      statut: action.statut,
+      clientNom: action.clientNom,
+      type: action.type,
+      depart: action.details?.depart || '',
+      arrivee: action.details?.arrivee || '',
+      prixEstime: action.details?.prixEstime || 0,
+      offreClient: action.details?.offreClient || null,
+      contreOffreChauffeur: action.details?.contreOffreChauffeur || null,
+      statutNegociation: action.details?.statutNegociation || null,
+      createdAt: action.createdAt,
+      updatedAt: action.updatedAt
+    });
+  } catch (error) {
+    console.error('GET /public/suivi/:code:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // POST /api/public/actions - Créer une action depuis la landing
 router.post('/actions', async (req, res) => {
   try {
