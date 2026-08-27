@@ -203,14 +203,18 @@ export default function FlotteSettings() {
             <Card>
               <h2 className="text-lg font-semibold mb-4">🏍️ Taxi Moto</h2>
               <ModeRow label="Course normale" base={tarifs.moto?.courseNormale?.prixBase || 0} km={tarifs.moto?.courseNormale?.prixKm || 0} onChange={(f, v) => updateFleetMode('moto', 'courseNormale', f, v)} />
-              <ModeRow label="Ady varotra" base={tarifs.moto?.adyVarotra?.prixBase || 0} km={tarifs.moto?.adyVarotra?.prixKm || 0} onChange={(f, v) => updateFleetMode('moto', 'adyVarotra', f, v)} />
+              <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600">
+                💰 <strong>Ady varotra</strong> : champ libre — le chauffeur saisit le montant négocié dans son application
+              </div>
               <JourRow label="Location journalière (Ar)" value={tarifs.moto?.locationJournalier?.prixJour || 0} onChange={(v) => updateFleetMode('moto', 'locationJournalier', 'prixJour', v)} />
             </Card>
 
             <Card>
               <h2 className="text-lg font-semibold mb-4">🚗 Taxi</h2>
               <ModeRow label="Course normale" base={tarifs.voiture?.courseNormale?.prixBase || 0} km={tarifs.voiture?.courseNormale?.prixKm || 0} onChange={(f, v) => updateFleetMode('voiture', 'courseNormale', f, v)} />
-              <ModeRow label="Ady varotra" base={tarifs.voiture?.adyVarotra?.prixBase || 0} km={tarifs.voiture?.adyVarotra?.prixKm || 0} onChange={(f, v) => updateFleetMode('voiture', 'adyVarotra', f, v)} />
+              <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600">
+                💰 <strong>Ady varotra</strong> : champ libre — le chauffeur saisit le montant négocié dans son application
+              </div>
               <JourRow label="Location journalière (Ar)" value={tarifs.voiture?.locationJournalier?.prixJour || 0} onChange={(v) => updateFleetMode('voiture', 'locationJournalier', 'prixJour', v)} />
             </Card>
 

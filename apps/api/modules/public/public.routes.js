@@ -209,6 +209,18 @@ async function geocodeAdresse(adresse) {
 }
 
 /**
+ * Génère un code de suivi unique (ex: DG-8F3K)
+ */
+function genererCodeSuivi() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 4; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return 'DG-' + code;
+}
+
+/**
  * Calcule la distance entre deux adresses
  * Retourne la distance en km, ou 0 si géocodage impossible
  */
@@ -417,7 +429,10 @@ router.post('/actions', async (req, res) => {
           distanceKm,
           prixEstime,
           modePrestation,
-          commissionPct
+          commissionPct,
+          offreClient: details?.offreClient ? Number(details.offreClient) : null,
+          codeSuivi: genererCodeSuivi(),
+          statutNegociation: details?.offreClient ? 'OFFRE_CLIENT' : 'PRIX_SUGGERE'
         },
         statut: 'NEW',
       },
@@ -479,15 +494,18 @@ router.post('/actions', async (req, res) => {
       });
 
       // Message enrichi avec les données structurées
+      const offreClient = details?.offreClient ? Number(details.offreClient) : null;
+
       const messageCourse = [
         `Client: ${clientNom}`,
         `Départ: ${details?.depart || ''}`,
         `Arrivée: ${details?.arrivee || ''}`,
-        `Prix: ${prixEstime} Ar`,
+        `Prix suggéré: ${prixEstime} Ar`,
+        offreClient ? `Offre client: ${offreClient} Ar` : null,
         `Distance: ${distanceKm} km`,
         `Mode: ${modePrestation}`,
         `Commission: ${commissionPct}%`
-      ].join(' | ');
+      ].filter(Boolean).join(' | ');
 
       for (const driver of drivers) {
         await prisma.notification.create({
@@ -504,7 +522,11 @@ router.post('/actions', async (req, res) => {
       }
     }
 
-    res.status(201).json({ ok: true, actionId: action.id });
+    res.status(201).json({
+      ok: true,
+      actionId: action.id,
+      codeSuivi: action.details?.codeSuivi || null
+    });
   } catch (error) {
     console.error('POST /public/actions:', error);
     res.status(500).json({ error: 'Erreur serveur' });

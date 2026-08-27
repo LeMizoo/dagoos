@@ -208,16 +208,32 @@ export default function DemandeTaxi() {
               <p className="text-xs text-emerald-600">
                 Prix de la course : <strong>{estimation.prixEstime.toLocaleString('fr-FR')} Ar</strong>
               </p>
+              <input
+                name="offreClient"
+                type="number"
+                placeholder="Votre offre (Ar)"
+                min="0"
+                className="mt-2 w-full px-3 py-2 border rounded-lg text-sm text-center"
+              />
+              <p className="text-[10px] text-gray-400 mt-1">
+                💡 Proposez votre prix — le chauffeur accepte ou refuse
+              </p>
             </div>
           )}
 
           {mode === 'choisir' && (
-            <select name="flotte" className="w-full px-4 py-3 border rounded-lg text-sm" required>
+            <select name="flotte" className="w-full px-4 py-3 border rounded-lg text-sm" required onChange={estimerPrix}>
               <option value="">-- Choisir une flotte --</option>
               {flottes.map((f: any) => (
                 <option key={f.id} value={f.slug}>{f.name}</option>
               ))}
             </select>
+          )}
+
+          {mode === 'choisir' && !estimation && !estimating && (
+            <p className="text-xs text-gray-400 text-center">
+              💡 Choisissez une flotte puis saisissez départ et arrivée pour voir l'estimation
+            </p>
           )}
 
           {mode === 'proche' && position && (
