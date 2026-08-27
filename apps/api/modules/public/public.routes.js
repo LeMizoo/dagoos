@@ -226,7 +226,36 @@ router.post('/actions', async (req, res) => {
         },
       }).catch(() => {});
     }
-    
+
+    // Notifier les chauffeurs disponibles pour les demandes de course
+    if (type === 'COURSE_REQUEST' || type === 'TAXI_RESERVATION') {
+      const vehicleType = details?.typeVehicule === 'moto' ? 'taxi_moto' : 'voiture';
+
+      const drivers = await prisma.driver.findMany({
+        where: {
+          organizationId: org.id,
+          status: { in: ['AVAILABLE', 'active'] },
+          vehicle: {
+            type: vehicleType
+          }
+        },
+        select: { userId: true, driverCode: true }
+      });
+
+      for (const driver of drivers) {
+        await prisma.notification.create({
+          data: {
+            userId: driver.userId,
+            organizationId: org.id,
+            type: 'course_request',
+            title: 'Nouvelle course disponible',
+            message: `${clientNom} - ${details?.depart || ''} → ${details?.arrivee || ''}`,
+            read: false,
+          },
+        }).catch(() => {});
+      }
+    }
+
     res.status(201).json({ ok: true, actionId: action.id });
   } catch (error) {
     console.error('POST /public/actions:', error);
