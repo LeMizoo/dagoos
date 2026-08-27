@@ -71,7 +71,7 @@ async function demanderVersement() {
     if (!montant || parseInt(montant) <= 0) { msg.innerHTML = '<span style="color:#F87171;">Veuillez entrer un montant valide</span>'; return; }
 
     try {
-        var r = await fetch(DAGOOS_CONFIG.apiUrl + '/versements', {
+        var r = await fetch(DAGOOS_CONFIG.apiUrl + '/finances/versements', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('dagoo_driver_token') },
             body: JSON.stringify({ driverId: user.driverId, amount: parseInt(montant), method: mode, periode: new Date().toISOString().slice(0,7) })
