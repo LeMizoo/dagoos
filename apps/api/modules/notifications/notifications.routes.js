@@ -11,6 +11,27 @@ router.get('/', authMiddleware, requirePermission('notifications.read'), async (
 router.get('/unread-count', authMiddleware, requirePermission('notifications.read'), async (req, res) => {
   try { const count = await prisma.notification.count({ where: { read: false } }); res.json({ count }); } catch (e) { res.status(500).json({ error: e.message }); }
 });
+router.get('/:id', authMiddleware, async (req, res) => {
+  try {
+    const notification = await prisma.notification.findUnique({
+      where: { id: req.params.id }
+    });
+
+    if (!notification) {
+      return res.status(404).json({ error: 'Notification introuvable' });
+    }
+
+    // Pour DRIVER : vérifier que la notification lui appartient
+    if (req.user.role === 'DRIVER' && notification.userId !== req.user.id) {
+      return res.status(403).json({ error: 'Accès refusé' });
+    }
+
+    res.json(notification);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 router.put('/:id/read', authMiddleware, async (req, res) => {
   try { await prisma.notification.update({ where: { id: req.params.id }, data: { read: true } }); res.json({ ok: true }); } catch (e) { res.status(500).json({ error: e.message }); }
 });

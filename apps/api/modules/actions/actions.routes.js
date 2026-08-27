@@ -134,6 +134,191 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// POST /api/actions/:id/accept - Accepter une demande de course (driver)
+router.post('/:id/accept', authMiddleware, async (req, res) => {
+  try {
+    const actionId = req.params.id;
+
+    // 1. Vérifier que le chauffeur est authentifié et a un driverId
+    if (!req.user.driverId) {
+      return res.status(403).json({ error: 'Chauffeur non associé' });
+    }
+
+    const driver = await prisma.driver.findUnique({
+      where: { id: req.user.driverId },
+      select: { id: true, organizationId: true, vehicleId: true, status: true }
+    });
+
+    if (!driver) {
+      return res.status(404).json({ error: 'Chauffeur introuvable' });
+    }
+
+    // 2. Récupérer l'action
+    const action = await prisma.leadAction.findUnique({
+      where: { id: actionId }
+    });
+
+    if (!action) {
+      return res.status(404).json({ error: 'Demande introuvable' });
+    }
+
+    // 3. Vérifier que l'action appartient à l'organisation du chauffeur
+    if (action.organizationId !== driver.organizationId) {
+      return res.status(403).json({ error: 'Accès refusé' });
+    }
+
+    // 4. Vérifier que l'action est encore NEW
+    if (action.statut !== 'NEW') {
+      return res.status(409).json({ error: 'Cette course a déjà été traitée' });
+    }
+
+    // 5. Vérifier que le chauffeur a un véhicule
+    const finalVehicleId = driver.vehicleId;
+    if (!finalVehicleId) {
+      return res.status(400).json({ error: 'Aucun véhicule associé au chauffeur' });
+    }
+
+    const vehicle = await prisma.vehicle.findUnique({
+      where: { id: finalVehicleId },
+      select: { id: true, organizationId: true }
+    });
+
+    if (!vehicle) {
+      return res.status(404).json({ error: 'Véhicule introuvable' });
+    }
+
+    if (vehicle.organizationId && vehicle.organizationId !== driver.organizationId) {
+      return res.status(403).json({ error: 'Véhicule non autorisé' });
+    }
+
+    // 6. Récupérer les détails calculés depuis LeadAction.details
+    const details = action.details || {};
+    const prixEstime = Number(details.prixEstime || 0);
+    const distanceKm = Number(details.distanceKm || 0);
+    const modePrestation = details.modePrestation || 'NORMALE';
+    // commissionPct = PART CHAUFFEUR (ex: 20% = le chauffeur reçoit 20%)
+    const commissionPct = Number(details.commissionPct || 20);
+
+    // Sémantique verrouillée :
+    // - commissionPct = part chauffeur
+    // - partChauffeur = prix × commissionPct / 100
+    // - partOrganisation = prix - partChauffeur
+    const partChauffeur = Math.round(prixEstime * commissionPct / 100);
+    const partOrganisation = prixEstime - partChauffeur;
+
+    // 7. Transaction atomique : réserver LeadAction + créer Course
+    let courseCree = null;
+
+    try {
+      courseCree = await prisma.$transaction(async (tx) => {
+        // Réserver atomiquement la LeadAction (NEW → ACCEPTED)
+        // Si count === 0, un autre chauffeur a déjà accepté
+        const reservation = await tx.leadAction.updateMany({
+          where: { id: actionId, statut: 'NEW' },
+          data: { statut: 'ACCEPTED' }
+        });
+
+        if (reservation.count === 0) {
+          throw new Error('Cette course a déjà été acceptée');
+        }
+
+        // Créer la Course seulement si la réservation a réussi
+        const course = await tx.course.create({
+          data: {
+            driverId: driver.id,
+            vehicleId: finalVehicleId,
+            type: modePrestation,
+            distanceKm,
+            price: prixEstime,
+            // Convention : commission = part organisation
+            commission: partOrganisation
+          }
+        });
+
+        return course;
+      });
+    } catch (txError) {
+      if (txError.message === 'Cette course a déjà été acceptée') {
+        return res.status(409).json({ error: txError.message });
+      }
+      throw txError;
+    }
+
+    // 8. Marquer UNIQUEMENT les notifications liées à cette action comme lues
+    // Utiliser leadActionId pour cibler précisément
+    const notifications = await prisma.notification.findMany({
+      where: {
+        leadActionId: actionId,
+        read: false
+      },
+      select: { id: true }
+    }).catch(() => []);
+
+    for (const notif of notifications) {
+      await prisma.notification.update({
+        where: { id: notif.id },
+        data: { read: true }
+      }).catch(() => {});
+    }
+
+    res.status(201).json(courseCree);
+  } catch (error) {
+    console.error('POST /actions/:id/accept:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/actions/:id/reject - Refuser une demande de course (driver)
+router.post('/:id/reject', authMiddleware, async (req, res) => {
+  try {
+    const actionId = req.params.id;
+
+    // Vérifier que le chauffeur est authentifié
+    if (!req.user.driverId) {
+      return res.status(403).json({ error: 'Chauffeur non associé' });
+    }
+
+    const driver = await prisma.driver.findUnique({
+      where: { id: req.user.driverId },
+      select: { id: true, organizationId: true }
+    });
+
+    if (!driver) {
+      return res.status(404).json({ error: 'Chauffeur introuvable' });
+    }
+
+    // Récupérer l'action
+    const action = await prisma.leadAction.findUnique({
+      where: { id: actionId }
+    });
+
+    if (!action) {
+      return res.status(404).json({ error: 'Demande introuvable' });
+    }
+
+    // Vérifier l'organisation
+    if (action.organizationId !== driver.organizationId) {
+      return res.status(403).json({ error: 'Accès refusé' });
+    }
+
+    // Vérifier que l'action est encore NEW
+    if (action.statut !== 'NEW') {
+      return res.status(409).json({ error: 'Cette course a déjà été traitée' });
+    }
+
+    // Mettre à jour le statut
+    const updated = await prisma.leadAction.update({
+      where: { id: actionId },
+      data: { statut: 'REJECTED' }
+    });
+
+    res.json(updated);
+  } catch (error) {
+    console.error('POST /actions/:id/reject:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // PATCH /api/actions/:id - Mettre à jour le statut
 router.patch('/:id', authMiddleware, async (req, res) => {
   try {

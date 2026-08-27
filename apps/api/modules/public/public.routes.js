@@ -188,13 +188,76 @@ router.post('/actions', async (req, res) => {
       return res.status(400).json({ error: 'Type invalide' });
     }
     
+    // ========================================
+    // CALCUL DU PRIX (backend uniquement)
+    // ========================================
+    let prixEstime = 2000;
+    let modePrestation = 'courseNormale';
+    // Distance strictement backend — à calculer plus tard (géocodage)
+    let distanceKm = 0;
+    let commissionPct = 20;
+
+    if (type === 'COURSE_REQUEST' || type === 'TAXI_RESERVATION') {
+      const VEHICLE_TYPE_MAP = {
+        'moto': 'moto',
+        'voiture': 'voiture',
+        'taxi': 'taxi',
+        'bus': 'bus',
+        'minivan': 'minivan',
+        'tricycle': 'tricycle'
+      };
+      const cleTarif = VEHICLE_TYPE_MAP[details?.typeVehicule] || 'moto';
+
+      const tarif = await prisma.tarif.findUnique({
+        where: { organizationId: org.id }
+      }).catch(() => null);
+
+      commissionPct = tarif?.commissionChauffeur ?? 20;
+
+      if (tarif?.vehiculeTarifs) {
+        try {
+          const vehiculeTarifs = JSON.parse(tarif.vehiculeTarifs);
+          const tarifVehicule = vehiculeTarifs[cleTarif];
+
+          if (tarifVehicule) {
+            if (['bus', 'minivan', 'tricycle'].includes(cleTarif)) {
+              prixEstime = tarifVehicule?.tarifFixe?.prixTrajet || tarif.prixBase;
+              modePrestation = 'tarifFixe';
+            } else if (tarifVehicule?.courseNormale) {
+              const prixBase = tarifVehicule.courseNormale.prixBase || tarif.prixBase;
+              const prixKm = tarifVehicule.courseNormale.prixKm || tarif.prixKm;
+              prixEstime = Math.round(prixBase + (distanceKm * prixKm));
+              modePrestation = 'courseNormale';
+            } else {
+              prixEstime = Math.round(tarif.prixBase + (distanceKm * tarif.prixKm));
+            }
+          } else {
+            prixEstime = Math.round(tarif.prixBase + (distanceKm * tarif.prixKm));
+          }
+        } catch(e) {
+          prixEstime = Math.round(tarif.prixBase + (distanceKm * tarif.prixKm));
+        }
+      } else if (tarif) {
+        prixEstime = Math.round(tarif.prixBase + (distanceKm * tarif.prixKm));
+      }
+    }
+
+    // ========================================
+    // CRÉATION LEAD ACTION (avec données enrichies)
+    // ========================================
     const action = await prisma.leadAction.create({
       data: {
         organizationId: org.id,
         type,
         clientNom: String(clientNom).trim(),
         clientTel: String(clientTel).trim(),
-        details: details || {},
+        details: {
+          ...(details || {}),
+          distanceKm,
+          prixEstime,
+          modePrestation,
+          commissionPct
+        },
         statut: 'NEW',
       },
     });
@@ -219,6 +282,7 @@ router.post('/actions', async (req, res) => {
         data: {
           userId: manager.id,
           organizationId: org.id,
+          leadActionId: action.id,
           type: 'lead_action',
           title: `Nouvelle demande : ${type}`,
           message: `${clientNom} - ${clientTel}`,
@@ -229,19 +293,17 @@ router.post('/actions', async (req, res) => {
 
     // Notifier les chauffeurs disponibles pour les demandes de course
     if (type === 'COURSE_REQUEST' || type === 'TAXI_RESERVATION') {
-      // Mapping typeVehicule (formulaire public) → Vehicle.type (base)
-      const VEHICLE_TYPE_MAP = {
+      // Trouver les chauffeurs disponibles avec le bon type de véhicule
+      const vehicleTypeMap = {
         'moto': 'taxi_moto',
-        'taxi_moto': 'taxi_moto',
         'voiture': 'voiture',
         'taxi': 'taxi',
-        'minivan': 'minivan',
         'bus': 'bus',
+        'minivan': 'minivan',
         'tricycle': 'tricycle'
       };
-      const vehicleType = VEHICLE_TYPE_MAP[details?.typeVehicule] || null;
+      const vehicleType = vehicleTypeMap[details?.typeVehicule] || null;
 
-      // Si le type est inconnu, ne pas filtrer par véhicule (tous les chauffeurs dispo)
       const driverWhere = {
         organizationId: org.id,
         status: { in: ['AVAILABLE', 'active'] }
@@ -255,14 +317,26 @@ router.post('/actions', async (req, res) => {
         select: { userId: true, driverCode: true }
       });
 
+      // Message enrichi avec les données structurées
+      const messageCourse = [
+        `Client: ${clientNom}`,
+        `Départ: ${details?.depart || ''}`,
+        `Arrivée: ${details?.arrivee || ''}`,
+        `Prix: ${prixEstime} Ar`,
+        `Distance: ${distanceKm} km`,
+        `Mode: ${modePrestation}`,
+        `Commission: ${commissionPct}%`
+      ].join(' | ');
+
       for (const driver of drivers) {
         await prisma.notification.create({
           data: {
             userId: driver.userId,
             organizationId: org.id,
+            leadActionId: action.id,
             type: 'course_request',
             title: 'Nouvelle course disponible',
-            message: `${clientNom} - ${details?.depart || ''} → ${details?.arrivee || ''}`,
+            message: messageCourse,
             read: false,
           },
         }).catch(() => {});

@@ -377,6 +377,8 @@ model Notification {
   user           User?         @relation(fields: [userId], references: [id])
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id])
+  leadActionId   String?
+  leadAction     LeadAction?   @relation(fields: [leadActionId], references: [id])
   title          String
   message        String
   type           String        @default("info")
@@ -456,14 +458,15 @@ model Reservation {
 // V7 PRO — ACTIONS CLIENTS (LEADS)
 // ========================================
 model LeadAction {
-  id             String       @id @default(cuid())
+  id             String         @id @default(cuid())
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
+  organization   Organization   @relation(fields: [organizationId], references: [id])
   type           String
   clientNom      String
   clientTel      String
   details        Json?
-  statut         String       @default("NEW")
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  statut         String         @default("NEW")
+  notifications  Notification[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 }

@@ -855,12 +855,16 @@ async function loadCourseNotifications() {
                     '<div style="display:flex;gap:8px;margin-top:8px;">' +
 
                         '<button onclick="accepterCourse(\'' +
+                            escapeHtml(notification.leadActionId || notification.id) +
+                            '\', \'' +
                             escapeHtml(notification.id) +
                             '\')" style="flex:1;background:#10B981;color:white;border:none;padding:8px 12px;border-radius:6px;font-weight:bold;">' +
                             'Accepter' +
                         '</button>' +
 
                         '<button onclick="refuserCourse(\'' +
+                            escapeHtml(notification.leadActionId || notification.id) +
+                            '\', \'' +
                             escapeHtml(notification.id) +
                             '\')" style="flex:1;background:#EF4444;color:white;border:none;padding:8px 12px;border-radius:6px;font-weight:bold;">' +
                             'Refuser' +
@@ -1538,7 +1542,7 @@ async function changeStatus(status) {
 // ACCEPTATION COURSE
 // ========================================
 
-async function accepterCourse(notificationId) {
+async function accepterCourse(actionId, notificationId) {
 
     var user = getDriverUser();
 
@@ -1549,83 +1553,41 @@ async function accepterCourse(notificationId) {
 
     try {
 
-        var response =
-            await fetch(
-                getApiUrl() +
-                '/notifications/' +
-                encodeURIComponent(notificationId) +
-                '/read',
-                {
-                    method: 'PUT',
-
-                    headers: {
-                        'Authorization':
-                            'Bearer ' +
-                            getDriverToken(),
-
-                        'Content-Type':
-                            'application/json'
-                    }
+        // Appeler la vraie route métier d'acceptation
+        var response = await fetch(
+            getApiUrl() + '/actions/' + encodeURIComponent(actionId) + '/accept',
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + getDriverToken(),
+                    'Content-Type': 'application/json'
                 }
-            );
-
-        if (!response.ok) {
-            throw new Error(
-                'Impossible de traiter la notification'
-            );
-        }
-
-        var coursesAcceptees = [];
-
-        try {
-            coursesAcceptees =
-                JSON.parse(
-                    localStorage.getItem(
-                        'dagoo_courses_acceptees'
-                    ) || '[]'
-                );
-        } catch (e) {}
-
-        // Récupérer la notification pour obtenir son titre
-        var notificationTitle = 'Course acceptée';
-        var notificationMessage = '';
-
-        // Chercher dans les notifications affichées
-        var notifsElements = document.querySelectorAll('[data-notification-id="' + notificationId + '"]');
-        if (notifsElements.length > 0) {
-            var titleEl = notifsElements[0].querySelector('[data-title]');
-            var messageEl = notifsElements[0].querySelector('[data-message]');
-            if (titleEl) notificationTitle = titleEl.textContent;
-            if (messageEl) notificationMessage = messageEl.textContent;
-        }
-
-        coursesAcceptees.push({
-            notificationId: notificationId,
-            date: new Date().toISOString(),
-            statut: 'ACCEPTED',
-            title: notificationTitle,
-            message: notificationMessage
-        });
-
-        localStorage.setItem(
-            'dagoo_courses_acceptees',
-            JSON.stringify(coursesAcceptees)
+            }
         );
 
-        alert('Course acceptée.');
+        var data = {};
+        try {
+            data = await response.json();
+        } catch(e) {}
 
+        if (!response.ok) {
+            if (response.status === 409) {
+                alert(data.error || 'Cette course a déjà été acceptée');
+            } else {
+                alert(data.error || 'Impossible d\'accepter la course');
+            }
+            await init_home();
+            return;
+        }
+
+        // Succès : la Course a été créée par le backend
+        alert('Course acceptée et enregistrée !');
         loadPage('courses');
 
     } catch (e) {
 
-        console.error(
-            'Acceptation course:',
-            e
-        );
-
-        alert(
-            'Erreur lors de l\'acceptation'
-        );
+        console.error('Acceptation course:', e);
+        alert('Erreur réseau lors de l\'acceptation');
     }
 }
 
@@ -1634,46 +1596,32 @@ async function accepterCourse(notificationId) {
 // REFUS COURSE
 // ========================================
 
-async function refuserCourse(notificationId) {
+async function refuserCourse(actionId, notificationId) {
 
     try {
 
-        var response =
-            await fetch(
-                getApiUrl() +
-                '/notifications/' +
-                encodeURIComponent(notificationId) +
-                '/read',
-                {
-                    method: 'PUT',
-
-                    headers: {
-                        'Authorization':
-                            'Bearer ' +
-                            getDriverToken(),
-
-                        'Content-Type':
-                            'application/json'
-                    }
+        // Appeler la vraie route métier de refus
+        var response = await fetch(
+            getApiUrl() + '/actions/' + encodeURIComponent(actionId) + '/reject',
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + getDriverToken(),
+                    'Content-Type': 'application/json'
                 }
-            );
+            }
+        );
 
-        if (!response.ok) {
-            throw new Error(
-                'Impossible de traiter la notification'
-            );
-        }
-
-        // Stocker le refus
-        var coursesRefusees = [];
+        var data = {};
         try {
-            coursesRefusees = JSON.parse(
-                localStorage.getItem('dagoo_courses_refusees') || '[]'
-            );
+            data = await response.json();
         } catch(e) {}
 
-        coursesRefusees.push(notificationId);
-        localStorage.setItem('dagoo_courses_refusees', JSON.stringify(coursesRefusees));
+        if (!response.ok) {
+            alert(data.error || 'Impossible de refuser la course');
+            await init_home();
+            return;
+        }
 
         alert('Course refusée.');
 
@@ -1681,14 +1629,8 @@ async function refuserCourse(notificationId) {
 
     } catch (e) {
 
-        console.error(
-            'Refus course:',
-            e
-        );
-
-        alert(
-            'Erreur lors du refus'
-        );
+        console.error('Refus course:', e);
+        alert('Erreur réseau lors du refus');
     }
 }
 
