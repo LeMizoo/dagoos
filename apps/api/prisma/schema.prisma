@@ -233,15 +233,51 @@ model Livraison {
 // ========================================
 model Course {
   id         String   @id @default(cuid())
+
+  // Relations
   driverId   String
   driver     Driver   @relation(fields: [driverId], references: [id])
   vehicleId  String
   vehicle    Vehicle  @relation(fields: [vehicleId], references: [id])
+  leadActionId String?    @unique
+  leadAction   LeadAction? @relation(fields: [leadActionId], references: [id])
+
+  // Nature de la prestation
   type       String   @default("NORMALE")
-  distanceKm Float    @default(0)
-  price      Float    @default(0)
-  commission Float    @default(0)
+
+  // Cycle de vie
+  statut     String   @default("EN_ATTENTE")
+
+  // Distances
+  distanceEstimeeKm Float @default(0)
+  distanceKm        Float @default(0)
+
+  // Contexte client figé à l'acceptation
+  clientNom       String?
+  clientTel       String?
+  adresseDepart   String?
+  adresseArrivee  String?
+
+  // Montants figés
+  price                 Float @default(0)
+  commissionPct         Float @default(20)
+  montantChauffeur     Float @default(0)
+  montantOrganisation  Float @default(0)
+
+  // Legacy (compatibilité)
+  commission Float @default(0)
   date       DateTime @default(now())
+
+  // Timestamps métier
+  createdAt   DateTime @default(now())
+  acceptedAt  DateTime?
+  startedAt   DateTime?
+  completedAt DateTime?
+  cancelledAt DateTime?
+
+  // Annulation
+  motifAnnulation String?
+  annulePar       String?
 }
 
 // ========================================
@@ -467,6 +503,7 @@ model LeadAction {
   details        Json?
   statut         String         @default("NEW")
   notifications  Notification[]
+  course         Course?
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 }

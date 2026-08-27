@@ -222,16 +222,31 @@ router.post('/:id/accept', authMiddleware, async (req, res) => {
           throw new Error('Cette course a déjà été acceptée');
         }
 
-        // Créer la Course seulement si la réservation a réussi
+        // Créer la Course complète avec tous les champs métier
         const course = await tx.course.create({
           data: {
             driverId: driver.id,
             vehicleId: finalVehicleId,
+            leadActionId: actionId,
             type: modePrestation,
-            distanceKm,
+            statut: 'EN_ATTENTE',
+            // Contexte client figé
+            clientNom: action.clientNom,
+            clientTel: action.clientTel,
+            adresseDepart: details.depart || null,
+            adresseArrivee: details.arrivee || null,
+            // Distances
+            distanceEstimeeKm: distanceKm,
+            distanceKm: distanceKm,
+            // Finances figées
             price: prixEstime,
-            // Convention : commission = part organisation
-            commission: partOrganisation
+            commissionPct,
+            montantChauffeur: partChauffeur,
+            montantOrganisation: partOrganisation,
+            // Legacy
+            commission: partOrganisation,
+            // Timestamps
+            acceptedAt: new Date()
           }
         });
 

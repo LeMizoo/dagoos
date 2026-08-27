@@ -253,6 +253,145 @@ router.post('/courses', authMiddleware, requirePermission('courses.create'), asy
 });
 
 // =========================================================
+// ROUTES MÉTIER COURSE
+// =========================================================
+
+// POST /api/finances/courses/:id/start - Démarrer la course (EN_ATTENTE → EN_ROUTE)
+router.post('/courses/:id/start', authMiddleware, async (req, res) => {
+  try {
+    if (!req.user.driverId) {
+      return res.status(403).json({ error: 'Chauffeur non associé' });
+    }
+
+    const course = await prisma.course.findUnique({
+      where: { id: req.params.id }
+    });
+
+    if (!course) {
+      return res.status(404).json({ error: 'Course introuvable' });
+    }
+
+    if (course.driverId !== req.user.driverId) {
+      return res.status(403).json({ error: 'Accès refusé' });
+    }
+
+    if (course.statut !== 'EN_ATTENTE') {
+      return res.status(409).json({ error: 'Course déjà démarrée ou terminée' });
+    }
+
+    const updated = await prisma.course.update({
+      where: { id: req.params.id },
+      data: {
+        statut: 'EN_ROUTE',
+        startedAt: new Date()
+      }
+    });
+
+    res.json(updated);
+  } catch (error) {
+    console.error('POST /courses/:id/start:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/finances/courses/:id/complete - Terminer la course (EN_COURS → TERMINEE)
+router.post('/courses/:id/complete', authMiddleware, async (req, res) => {
+  try {
+    if (!req.user.driverId) {
+      return res.status(403).json({ error: 'Chauffeur non associé' });
+    }
+
+    const course = await prisma.course.findUnique({
+      where: { id: req.params.id }
+    });
+
+    if (!course) {
+      return res.status(404).json({ error: 'Course introuvable' });
+    }
+
+    if (course.driverId !== req.user.driverId) {
+      return res.status(403).json({ error: 'Accès refusé' });
+    }
+
+    // Accepter EN_ROUTE ou EN_COURS → TERMINEE
+    if (course.statut !== 'EN_ROUTE' && course.statut !== 'EN_COURS') {
+      return res.status(409).json({ error: 'Course non démarrée' });
+    }
+
+    // Si distanceKm envoyée, la prendre ; sinon conserver l'actuelle
+    const distanceFinale = req.body.distanceKm !== undefined
+      ? Number(req.body.distanceKm)
+      : course.distanceKm;
+
+    // Recalculer le prix final si la distance a changé
+    // Pour l'instant : conserver le prix figé (géocodage à venir)
+    const prixFinal = course.price;
+    const montantChauffeurFinal = course.montantChauffeur;
+    const montantOrganisationFinal = course.montantOrganisation;
+
+    const updated = await prisma.course.update({
+      where: { id: req.params.id },
+      data: {
+        statut: 'TERMINEE',
+        distanceKm: distanceFinale,
+        price: prixFinal,
+        montantChauffeur: montantChauffeurFinal,
+        montantOrganisation: montantOrganisationFinal,
+        commission: montantOrganisationFinal, // legacy
+        completedAt: new Date()
+      }
+    });
+
+    res.json(updated);
+  } catch (error) {
+    console.error('POST /courses/:id/complete:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/finances/courses/:id/cancel - Annuler la course
+router.post('/courses/:id/cancel', authMiddleware, async (req, res) => {
+  try {
+    if (!req.user.driverId) {
+      return res.status(403).json({ error: 'Chauffeur non associé' });
+    }
+
+    const course = await prisma.course.findUnique({
+      where: { id: req.params.id }
+    });
+
+    if (!course) {
+      return res.status(404).json({ error: 'Course introuvable' });
+    }
+
+    if (course.driverId !== req.user.driverId) {
+      return res.status(403).json({ error: 'Accès refusé' });
+    }
+
+    if (course.statut === 'TERMINEE' || course.statut === 'ANNULEE') {
+      return res.status(409).json({ error: 'Course déjà terminée ou annulée' });
+    }
+
+    const { motifAnnulation } = req.body;
+
+    const updated = await prisma.course.update({
+      where: { id: req.params.id },
+      data: {
+        statut: 'ANNULEE',
+        motifAnnulation: motifAnnulation || 'ANNULATION_CHAUFFEUR',
+        annulePar: 'DRIVER',
+        cancelledAt: new Date()
+      }
+    });
+
+    res.json(updated);
+  } catch (error) {
+    console.error('POST /courses/:id/cancel:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// =========================================================
 // TRANSACTIONS / PAYMENTS
 // =========================================================
 
