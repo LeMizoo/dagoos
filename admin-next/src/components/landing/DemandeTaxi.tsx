@@ -11,6 +11,7 @@ export default function DemandeTaxi() {
   const [loading, setLoading] = useState(false);
   const [estimation, setEstimation] = useState<{ distanceKm: number; prixEstime: number } | null>(null);
   const [estimating, setEstimating] = useState(false);
+  const [codeSuivi, setCodeSuivi] = useState<string | null>(null);
 
   useEffect(() => {
     apiFetch('/public/organizations')
@@ -143,8 +144,16 @@ export default function DemandeTaxi() {
           }),
         });
         if (res.ok) {
+          const data = await res.json();
+          setCodeSuivi(data.codeSuivi || null);
           form.reset();
-          alert('✅ Demande envoyée !');
+          setEstimation(null);
+          // Alerte pour retenir le code
+          if (data.codeSuivi) {
+            alert('✅ Demande envoyée !\n\n📋 VOTRE CODE DE SUIVI : ' + data.codeSuivi + '\n\n⚠️ Retenez bien ce code avant de fermer cette fenêtre !');
+          } else {
+            alert('✅ Demande envoyée !');
+          }
         }
       }
     } catch (error) {
@@ -251,6 +260,25 @@ export default function DemandeTaxi() {
           <button type="submit" disabled={loading} className="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-[#154360] transition disabled:opacity-50">
             {loading ? 'Envoi...' : mode === 'toutes' ? 'Envoyer à toutes les flottes' : mode === 'proche' ? 'Trouver la flotte la plus proche' : 'Demander un taxi'}
           </button>
+
+          {codeSuivi && (
+            <div className="bg-amber-50 border-2 border-amber-400 rounded-xl p-5 text-center mt-4">
+              <p className="text-2xl mb-2">✅</p>
+              <p className="text-sm font-bold text-amber-800 mb-2">Demande envoyée avec succès !</p>
+              <p className="text-sm font-bold text-red-600 mb-2">⚠️ RETENEZ BIEN VOTRE CODE AVANT DE FERMER</p>
+              <p className="text-xs text-amber-700 mb-2">Votre code de suivi :</p>
+              <p className="text-4xl font-mono font-black tracking-widest text-amber-900 bg-white rounded-lg py-3 border-2 border-amber-300">{codeSuivi}</p>
+              <p className="text-xs text-gray-600 mt-3">
+                📋 Notez ce code ou faites une capture d'écran
+              </p>
+              <a
+                href="/suivi"
+                className="inline-block mt-3 bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#154360] transition"
+              >
+                Suivre ma demande →
+              </a>
+            </div>
+          )}
         </form>
       </div>
     </section>

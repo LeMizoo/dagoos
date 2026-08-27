@@ -67,9 +67,19 @@ export default async function LandingPage() {
       {/* SECTION SERVICES AVEC CARTES */}
       <ServiceCards organizations={organizations} coopsAvecDeparts={coopsAvecDeparts} />
       
-      <div className="text-center py-4">
-        <Link href="/suivi" className="text-sm text-primary hover:text-[#154360] font-semibold underline">
-          📋 Suivre ma demande taxi
+      <div className="flex justify-center py-6">
+        <Link
+          href="/suivi"
+          className="group flex items-center gap-3 bg-white border-2 border-primary rounded-2xl px-6 py-4 shadow-lg hover:shadow-xl hover:bg-primary hover:text-white transition-all duration-300"
+        >
+          <span className="text-2xl group-hover:scale-110 transition-transform">📋</span>
+          <span className="text-left">
+            <span className="block font-bold text-primary group-hover:text-white transition-colors">Suivre ma demande taxi</span>
+            <span className="block text-xs text-gray-500 group-hover:text-white/80 transition-colors">
+              Vérifiez le statut avec votre code de suivi
+            </span>
+          </span>
+          <span className="ml-2 text-primary group-hover:text-white transition-colors">→</span>
         </Link>
       </div>
 
