@@ -546,6 +546,9 @@ async function init_home() {
         // CONTENU
         '<div style="padding:12px;max-width:500px;margin:0 auto;padding-bottom:80px;">' +
 
+            // COURSE ACTIVE
+            '<div id="courseActiveCard"></div>' +
+
             // COMPTE BLOQUE
             (
                 estBloque
@@ -741,6 +744,8 @@ async function init_home() {
     // ------------------------------------
 
     await loadStats(driverId);
+
+    await chargerCourseActive();
 
     loadExpenses();
 
@@ -1450,6 +1455,450 @@ async function enregistrerCourse() {
 
 
 // ========================================
+// CYCLE DE VIE COURSE
+// ========================================
+
+var courseActive = null;
+
+async function chargerCourseActive() {
+    var user = getDriverUser();
+
+    if (!user.driverId) return;
+
+    try {
+        var courses = await apiGet(
+            '/finances/courses?driverId=' + encodeURIComponent(user.driverId)
+        );
+
+        var arr = Array.isArray(courses) ? courses : [];
+
+        // Trouver la course active (non terminée, non annulée)
+        courseActive = arr.find(function(c) {
+            return c.statut === 'EN_ATTENTE' ||
+                   c.statut === 'EN_ROUTE' ||
+                   c.statut === 'EN_COURS';
+        }) || null;
+
+        window.courseActive = courseActive;
+
+        if (courseActive) {
+            afficherCourseActive();
+        }
+    } catch(e) {
+        console.warn('Course active:', e);
+    }
+}
+
+function afficherCourseActive() {
+    var card = document.getElementById('courseActiveCard');
+    if (!card || !courseActive) return;
+
+    var statutLabel =
+        courseActive.statut === 'EN_ATTENTE' ? 'En attente' :
+        courseActive.statut === 'EN_ROUTE' ? 'En route vers le client' :
+        courseActive.statut === 'EN_COURS' ? 'Course en cours' :
+        courseActive.statut;
+
+    var boutons = '';
+
+    if (courseActive.statut === 'EN_ATTENTE') {
+        boutons =
+            '<button onclick="demarrerCourse(\'' + courseActive.id + '\')" style="flex:1;background:#10B981;color:white;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">Démarrer</button>' +
+            '<button onclick="annulerCourse(\'' + courseActive.id + '\')" style="flex:1;background:#EF4444;color:white;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">Annuler</button>';
+    } else if (courseActive.statut === 'EN_ROUTE') {
+        boutons =
+            '<button onclick="clientPrisEnCharge(\'' + courseActive.id + '\')" style="flex:1;background:#3B82F6;color:white;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">Client pris en charge</button>' +
+            '<button onclick="annulerCourse(\'' + courseActive.id + '\')" style="flex:1;background:#EF4444;color:white;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">Annuler</button>';
+    } else if (courseActive.statut === 'EN_COURS') {
+        boutons =
+            '<button onclick="terminerCourse(\'' + courseActive.id + '\')" style="flex:1;background:#F1C40F;color:#1A1A2E;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">Terminer</button>' +
+            '<button onclick="annulerCourse(\'' + courseActive.id + '\')" style="flex:1;background:#EF4444;color:white;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">Annuler</button>';
+    }
+
+    card.innerHTML =
+        '<div style="background:#FEF3C7;border-radius:12px;padding:12px;margin-bottom:10px;border:2px solid #F59E0B;">' +
+            '<h3 style="font-weight:bold;color:#92400E;margin-bottom:8px;font-size:13px;">🚕 Course en cours</h3>' +
+            '<p style="font-size:12px;color:#1F2937;font-weight:bold;">' + escapeHtml(statutLabel) + '</p>' +
+            '<p style="font-size:12px;color:#6B7280;">Client : ' + escapeHtml(courseActive.clientNom || '—') + '</p>' +
+            '<p style="font-size:12px;color:#6B7280;">' + escapeHtml(courseActive.adresseDepart || '') + ' → ' + escapeHtml(courseActive.adresseArrivee || '') + '</p>' +
+            '<p style="font-size:12px;color:#1F2937;font-weight:bold;">Prix : ' + formatAmount(courseActive.price) + '</p>' +
+            '<p style="font-size:11px;color:#6B7280;">Part chauffeur : ' + formatAmount(courseActive.montantChauffeur) + '</p>' +
+            '<div style="display:flex;gap:8px;margin-top:8px;">' + boutons + '</div>' +
+        '</div>';
+}
+
+async function demarrerCourse(courseId) {
+    try {
+        var response = await fetch(
+            getApiUrl() + '/finances/courses/' + encodeURIComponent(courseId) + '/start',
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + getDriverToken(),
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        var data = {};
+        try { data = await response.json(); } catch(e) {}
+
+        if (!response.ok) {
+            alert(data.error || 'Impossible de démarrer la course');
+            return;
+        }
+
+        courseActive.statut = 'EN_ROUTE';
+        courseActive.startedAt = data.startedAt;
+        afficherCourseActive();
+        await loadStats(getDriverUser().driverId);
+
+    } catch(e) {
+        console.error('Démarrer course:', e);
+        alert('Erreur réseau');
+    }
+}
+
+async function clientPrisEnCharge(courseId) {
+    // Transition EN_ROUTE → EN_COURS
+    try {
+        // Pas de route spécifique pour l'instant — utiliser PATCH statut
+        var response = await fetch(
+            getApiUrl() + '/finances/courses/' + encodeURIComponent(courseId) + '/start',
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + getDriverToken(),
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        // Pour l'instant : on passe directement à EN_COURS via une mise à jour locale
+        // Idéalement : ajouter une route backend /complete avec statut intermédiaire
+        courseActive.statut = 'EN_COURS';
+        afficherCourseActive();
+
+    } catch(e) {
+        console.error('Client pris en charge:', e);
+        alert('Erreur réseau');
+    }
+}
+
+async function terminerCourse(courseId) {
+    var distanceFinale = prompt('Distance réelle (km) :', String(courseActive.distanceKm || 0));
+
+    if (distanceFinale === null) return;
+
+    var distance = parseFloat(distanceFinale);
+
+    if (isNaN(distance) || distance < 0) {
+        alert('Distance invalide');
+        return;
+    }
+
+    try {
+        var response = await fetch(
+            getApiUrl() + '/finances/courses/' + encodeURIComponent(courseId) + '/complete',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + getDriverToken()
+                },
+                body: JSON.stringify({ distanceKm: distance })
+            }
+        );
+
+        var data = {};
+        try { data = await response.json(); } catch(e) {}
+
+        if (!response.ok) {
+            alert(data.error || 'Impossible de terminer la course');
+            return;
+        }
+
+        courseActive.statut = 'TERMINEE';
+        courseActive.completedAt = data.completedAt;
+        courseActive.distanceKm = data.distanceKm;
+
+        // Masquer la carte active
+        var card = document.getElementById('courseActiveCard');
+        if (card) card.innerHTML = '';
+
+        alert('Course terminée !');
+        await init_home();
+
+    } catch(e) {
+        console.error('Terminer course:', e);
+        alert('Erreur réseau');
+    }
+}
+
+async function annulerCourse(courseId) {
+    var motif = prompt('Motif d\'annulation :', 'ANNULATION_CHAUFFEUR');
+
+    if (motif === null) return;
+
+    try {
+        var response = await fetch(
+            getApiUrl() + '/finances/courses/' + encodeURIComponent(courseId) + '/cancel',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + getDriverToken()
+                },
+                body: JSON.stringify({ motifAnnulation: motif })
+            }
+        );
+
+        var data = {};
+        try { data = await response.json(); } catch(e) {}
+
+        if (!response.ok) {
+            alert(data.error || 'Impossible d\'annuler la course');
+            return;
+        }
+
+        courseActive.statut = 'ANNULEE';
+        courseActive.cancelledAt = data.cancelledAt;
+
+        var card = document.getElementById('courseActiveCard');
+        if (card) card.innerHTML = '';
+
+        alert('Course annulée.');
+        await init_home();
+
+    } catch(e) {
+        console.error('Annuler course:', e);
+        alert('Erreur réseau');
+    }
+}
+
+// ========================================
+// CYCLE DE VIE COURSE
+// ========================================
+
+var courseActive = null;
+
+async function chargerCourseActive() {
+    var user = getDriverUser();
+
+    if (!user.driverId) return;
+
+    try {
+        var courses = await apiGet(
+            '/finances/courses?driverId=' + encodeURIComponent(user.driverId)
+        );
+
+        var arr = Array.isArray(courses) ? courses : [];
+
+        // Trouver la course active (non terminée, non annulée)
+        courseActive = arr.find(function(c) {
+            return c.statut === 'EN_ATTENTE' ||
+                   c.statut === 'EN_ROUTE' ||
+                   c.statut === 'EN_COURS';
+        }) || null;
+
+        window.courseActive = courseActive;
+
+        if (courseActive) {
+            afficherCourseActive();
+        }
+    } catch(e) {
+        console.warn('Course active:', e);
+    }
+}
+
+function afficherCourseActive() {
+    var card = document.getElementById('courseActiveCard');
+    if (!card || !courseActive) return;
+
+    var statutLabel =
+        courseActive.statut === 'EN_ATTENTE' ? 'En attente' :
+        courseActive.statut === 'EN_ROUTE' ? 'En route vers le client' :
+        courseActive.statut === 'EN_COURS' ? 'Course en cours' :
+        courseActive.statut;
+
+    var boutons = '';
+
+    if (courseActive.statut === 'EN_ATTENTE') {
+        boutons =
+            '<button onclick="demarrerCourse(\'' + courseActive.id + '\')" style="flex:1;background:#10B981;color:white;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">Démarrer</button>' +
+            '<button onclick="annulerCourse(\'' + courseActive.id + '\')" style="flex:1;background:#EF4444;color:white;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">Annuler</button>';
+    } else if (courseActive.statut === 'EN_ROUTE') {
+        boutons =
+            '<button onclick="clientPrisEnCharge(\'' + courseActive.id + '\')" style="flex:1;background:#3B82F6;color:white;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">Client pris en charge</button>' +
+            '<button onclick="annulerCourse(\'' + courseActive.id + '\')" style="flex:1;background:#EF4444;color:white;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">Annuler</button>';
+    } else if (courseActive.statut === 'EN_COURS') {
+        boutons =
+            '<button onclick="terminerCourse(\'' + courseActive.id + '\')" style="flex:1;background:#F1C40F;color:#1A1A2E;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">Terminer</button>' +
+            '<button onclick="annulerCourse(\'' + courseActive.id + '\')" style="flex:1;background:#EF4444;color:white;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">Annuler</button>';
+    }
+
+    card.innerHTML =
+        '<div style="background:#FEF3C7;border-radius:12px;padding:12px;margin-bottom:10px;border:2px solid #F59E0B;">' +
+            '<h3 style="font-weight:bold;color:#92400E;margin-bottom:8px;font-size:13px;">🚕 Course en cours</h3>' +
+            '<p style="font-size:12px;color:#1F2937;font-weight:bold;">' + escapeHtml(statutLabel) + '</p>' +
+            '<p style="font-size:12px;color:#6B7280;">Client : ' + escapeHtml(courseActive.clientNom || '—') + '</p>' +
+            '<p style="font-size:12px;color:#6B7280;">' + escapeHtml(courseActive.adresseDepart || '') + ' → ' + escapeHtml(courseActive.adresseArrivee || '') + '</p>' +
+            '<p style="font-size:12px;color:#1F2937;font-weight:bold;">Prix : ' + formatAmount(courseActive.price) + '</p>' +
+            '<p style="font-size:11px;color:#6B7280;">Part chauffeur : ' + formatAmount(courseActive.montantChauffeur) + '</p>' +
+            '<div style="display:flex;gap:8px;margin-top:8px;">' + boutons + '</div>' +
+        '</div>';
+}
+
+async function demarrerCourse(courseId) {
+    try {
+        var response = await fetch(
+            getApiUrl() + '/finances/courses/' + encodeURIComponent(courseId) + '/start',
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + getDriverToken(),
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        var data = {};
+        try { data = await response.json(); } catch(e) {}
+
+        if (!response.ok) {
+            alert(data.error || 'Impossible de démarrer la course');
+            return;
+        }
+
+        courseActive.statut = 'EN_ROUTE';
+        courseActive.startedAt = data.startedAt;
+        afficherCourseActive();
+        await loadStats(getDriverUser().driverId);
+
+    } catch(e) {
+        console.error('Démarrer course:', e);
+        alert('Erreur réseau');
+    }
+}
+
+async function clientPrisEnCharge(courseId) {
+    // Transition EN_ROUTE → EN_COURS
+    try {
+        // Pas de route spécifique pour l'instant — utiliser PATCH statut
+        var response = await fetch(
+            getApiUrl() + '/finances/courses/' + encodeURIComponent(courseId) + '/start',
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + getDriverToken(),
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        // Pour l'instant : on passe directement à EN_COURS via une mise à jour locale
+        // Idéalement : ajouter une route backend /complete avec statut intermédiaire
+        courseActive.statut = 'EN_COURS';
+        afficherCourseActive();
+
+    } catch(e) {
+        console.error('Client pris en charge:', e);
+        alert('Erreur réseau');
+    }
+}
+
+async function terminerCourse(courseId) {
+    var distanceFinale = prompt('Distance réelle (km) :', String(courseActive.distanceKm || 0));
+
+    if (distanceFinale === null) return;
+
+    var distance = parseFloat(distanceFinale);
+
+    if (isNaN(distance) || distance < 0) {
+        alert('Distance invalide');
+        return;
+    }
+
+    try {
+        var response = await fetch(
+            getApiUrl() + '/finances/courses/' + encodeURIComponent(courseId) + '/complete',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + getDriverToken()
+                },
+                body: JSON.stringify({ distanceKm: distance })
+            }
+        );
+
+        var data = {};
+        try { data = await response.json(); } catch(e) {}
+
+        if (!response.ok) {
+            alert(data.error || 'Impossible de terminer la course');
+            return;
+        }
+
+        courseActive.statut = 'TERMINEE';
+        courseActive.completedAt = data.completedAt;
+        courseActive.distanceKm = data.distanceKm;
+
+        // Masquer la carte active
+        var card = document.getElementById('courseActiveCard');
+        if (card) card.innerHTML = '';
+
+        alert('Course terminée !');
+        await init_home();
+
+    } catch(e) {
+        console.error('Terminer course:', e);
+        alert('Erreur réseau');
+    }
+}
+
+async function annulerCourse(courseId) {
+    var motif = prompt('Motif d\'annulation :', 'ANNULATION_CHAUFFEUR');
+
+    if (motif === null) return;
+
+    try {
+        var response = await fetch(
+            getApiUrl() + '/finances/courses/' + encodeURIComponent(courseId) + '/cancel',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + getDriverToken()
+                },
+                body: JSON.stringify({ motifAnnulation: motif })
+            }
+        );
+
+        var data = {};
+        try { data = await response.json(); } catch(e) {}
+
+        if (!response.ok) {
+            alert(data.error || 'Impossible d\'annuler la course');
+            return;
+        }
+
+        courseActive.statut = 'ANNULEE';
+        courseActive.cancelledAt = data.cancelledAt;
+
+        var card = document.getElementById('courseActiveCard');
+        if (card) card.innerHTML = '';
+
+        alert('Course annulée.');
+        await init_home();
+
+    } catch(e) {
+        console.error('Annuler course:', e);
+        alert('Erreur réseau');
+    }
+}
+
+// ========================================
 // STATUT CHAUFFEUR
 // ========================================
 
@@ -2091,6 +2540,21 @@ window.accepterCourse =
 
 window.refuserCourse =
     refuserCourse;
+
+window.chargerCourseActive =
+    chargerCourseActive;
+
+window.demarrerCourse =
+    demarrerCourse;
+
+window.clientPrisEnCharge =
+    clientPrisEnCharge;
+
+window.terminerCourse =
+    terminerCourse;
+
+window.annulerCourse =
+    annulerCourse;
 
 window.proposerVersement =
     proposerVersement;
