@@ -15,8 +15,8 @@ var notificationInterval = null;
 var organizationTarifs = null;
 var courseTypes = [
     { value: 'course', label: 'Course normale' },
-    { value: 'ady_varotra', label: 'Ady Varotra' },
-    { value: 'location', label: 'Location journalière' }
+    { value: 'adyVarotra', label: 'Ady Varotra' },
+    { value: 'locationJournalier', label: 'Location journalière' }
 ];
 
 var vehicleTypeLabels = {
@@ -158,8 +158,8 @@ function getVehiculeTarifs(tarifs) {
 function loadCourseTypesFromTarifs(tarifs, vehicleType) {
     var fallback = [
         { value: 'course', label: 'Course normale' },
-        { value: 'ady_varotra', label: 'Ady Varotra' },
-        { value: 'location', label: 'Location journalière' }
+        { value: 'adyVarotra', label: 'Ady Varotra' },
+        { value: 'locationJournalier', label: 'Location journalière' }
     ];
 
     var vehiculeTarifs = getVehiculeTarifs(tarifs);
@@ -219,9 +219,47 @@ function refreshCourseTypesForCurrentVehicle() {
 // 'locationJournalier', 'tarifFixe', 'locationSpeciale'), pour le véhicule
 // actuellement assigné au chauffeur.
 function getVehicleTarifConfig(courseMode) {
-    // Le backend renvoie des champs plats : prixBase, prixKm, locationJournalier
     if (!organizationTarifs) return null;
-    return organizationTarifs;
+
+    var vehicleType =
+        currentVehicle?.type ||
+        'VOITURE';
+
+    var vehiculeTarifs =
+        getVehiculeTarifs(organizationTarifs);
+
+    if (!vehiculeTarifs) {
+        return organizationTarifs;
+    }
+
+    var vehicleConfig =
+        vehiculeTarifs[vehicleType];
+
+    if (!vehicleConfig) {
+        return organizationTarifs;
+    }
+
+    if (courseMode === 'tarifFixe') {
+        return vehicleConfig.tarifFixe || null;
+    }
+
+    if (courseMode === 'locationSpeciale') {
+        return vehicleConfig.locationSpeciale || null;
+    }
+
+    if (courseMode === 'locationJournalier') {
+        return vehicleConfig.locationJournalier || null;
+    }
+
+    if (courseMode === 'adyVarotra') {
+        return vehicleConfig.adyVarotra || null;
+    }
+
+    if (courseMode === 'courseNormale') {
+        return vehicleConfig.courseNormale || null;
+    }
+
+    return vehicleConfig;
 }
 
 function getTarifValue(config, keys) {
@@ -1213,7 +1251,7 @@ function updateCourseForm() {
         return;
     }
 
-    if (type === 'ady_varotra') {
+    if (type === 'adyVarotra') {
 
         form.innerHTML =
             '<input type="number" id="montantAdy" placeholder="Montant négocié (Ar)" min="1" style="width:100%;padding:8px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;margin-bottom:8px;">' +
@@ -1337,7 +1375,7 @@ async function enregistrerCourse() {
     // ADY VAROTRA (montant négocié)
     // ------------------------------------
 
-    else if (type === 'ady_varotra') {
+    else if (type === 'adyVarotra') {
 
         montant =
             parseFloat(
@@ -1378,7 +1416,7 @@ async function enregistrerCourse() {
     // LOCATION (journalière ou spéciale)
     // ------------------------------------
 
-    else if (type === 'location' || type === 'locationSpeciale') {
+    else if (type === 'locationJournalier' || type === 'locationSpeciale') {
 
         montant = getLocationTarif(type);
 
@@ -1452,10 +1490,6 @@ async function enregistrerCourse() {
                         type: type,
                         distanceKm: distance,
                         price: montant,
-                        statut: 'EN_ATTENTE',
-                        commissionPct: commissionPct,
-                        montantChauffeur: chauffeurPart,
-                        montantOrganisation: versement,
                         commission: versement
                     })
                 }

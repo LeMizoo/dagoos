@@ -225,7 +225,13 @@ router.post('/courses', authMiddleware, requirePermission('courses.create'), asy
         commission:
           commission !== undefined
             ? Number(commission)
-            : Math.round(amount * 0.20)
+            : Math.round(amount * 0.20),
+        // Les courses créées via le formulaire PWA sont directement TERMINEE
+        statut: 'TERMINEE',
+        completedAt: new Date(),
+        commissionPct: req.body.commissionPct || 20,
+        montantChauffeur: req.body.montantChauffeur || Math.round(amount * 0.20),
+        montantOrganisation: req.body.montantOrganisation || Math.round(amount * 0.80)
       },
       include: {
         driver: {
