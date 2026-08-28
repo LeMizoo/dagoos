@@ -84,6 +84,17 @@ model Driver {
 }
 
 // ========================================
+// TYPES DE VÉHICULES
+// ========================================
+enum VehicleType {
+  MOTO
+  VOITURE
+  BUS
+  MINIVAN
+  TRICYCLE
+}
+
+// ========================================
 // VÉHICULES
 // ========================================
 model Vehicle {
@@ -99,7 +110,7 @@ model Vehicle {
   year           Int?
   currentKm      Int           @default(0)
   status         String        @default("active")
-  type           String?       @default("voiture")
+  type           VehicleType?  @default(VOITURE)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   drivers        Driver[]

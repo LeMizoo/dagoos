@@ -280,12 +280,12 @@ router.post('/estimate', async (req, res) => {
 
     // Récupérer le tarif
     const VEHICLE_TYPE_MAP = {
-      'moto': 'moto',
-      'voiture': 'taxi',
-      'taxi': 'taxi',
-      'bus': 'bus',
-      'minivan': 'minivan',
-      'tricycle': 'tricycle'
+      'moto': 'MOTO',
+      'voiture': 'VOITURE',
+      'taxi': 'VOITURE',
+      'bus': 'BUS',
+      'minivan': 'MINIVAN',
+      'tricycle': 'TRICYCLE'
     };
     const cleTarif = VEHICLE_TYPE_MAP[typeVehicule] || 'moto';
 
@@ -302,7 +302,7 @@ router.post('/estimate', async (req, res) => {
         const tarifVehicule = vehiculeTarifs[cleTarif];
 
         if (tarifVehicule) {
-          if (['bus', 'minivan', 'tricycle'].includes(cleTarif)) {
+          if (['BUS', 'MINIVAN', 'TRICYCLE'].includes(cleTarif)) {
             prixEstime = tarifVehicule?.tarifFixe?.prixTrajet || tarif.prixBase;
             modePrestation = 'tarifFixe';
           } else if (tarifVehicule?.courseNormale) {
@@ -517,12 +517,12 @@ router.post('/actions', async (req, res) => {
 
     if (type === 'COURSE_REQUEST' || type === 'TAXI_RESERVATION') {
       const VEHICLE_TYPE_MAP = {
-        'moto': 'moto',
-        'voiture': 'taxi',
-        'taxi': 'taxi',
-        'bus': 'bus',
-        'minivan': 'minivan',
-        'tricycle': 'tricycle'
+        'moto': 'MOTO',
+        'voiture': 'VOITURE',
+        'taxi': 'VOITURE',
+        'bus': 'BUS',
+        'minivan': 'MINIVAN',
+        'tricycle': 'TRICYCLE'
       };
       const cleTarif = VEHICLE_TYPE_MAP[details?.typeVehicule] || 'moto';
 
@@ -541,7 +541,7 @@ router.post('/actions', async (req, res) => {
           const tarifVehicule = vehiculeTarifs[cleTarif];
 
           if (tarifVehicule) {
-            if (['bus', 'minivan', 'tricycle'].includes(cleTarif)) {
+            if (['BUS', 'MINIVAN', 'TRICYCLE'].includes(cleTarif)) {
               prixEstime = tarifVehicule?.tarifFixe?.prixTrajet || tarif.prixBase;
               modePrestation = 'tarifFixe';
             } else if (tarifVehicule?.courseNormale) {
@@ -619,12 +619,12 @@ router.post('/actions', async (req, res) => {
     if (type === 'COURSE_REQUEST' || type === 'TAXI_RESERVATION') {
       // Trouver les chauffeurs disponibles avec le bon type de véhicule
       const vehicleTypeMap = {
-        'moto': 'taxi_moto',
-        'voiture': 'taxi',
-        'taxi': 'taxi',
-        'bus': 'bus',
-        'minivan': 'minivan',
-        'tricycle': 'tricycle'
+        'moto': 'MOTO',
+        'voiture': 'VOITURE',
+        'taxi': 'VOITURE',
+        'bus': 'BUS',
+        'minivan': 'MINIVAN',
+        'tricycle': 'TRICYCLE'
       };
       const vehicleType = vehicleTypeMap[details?.typeVehicule] || null;
 

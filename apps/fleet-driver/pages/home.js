@@ -20,12 +20,11 @@ var courseTypes = [
 ];
 
 var vehicleTypeLabels = {
-    'taxi_moto': 'Taxi Moto',
-    'taxi': 'Taxi',
-    'minivan': 'Mini Van (Taxi-be)',
-    'bus': 'Bus',
-    'tricycle': 'Tricycle (Bajaj)',
-    'voiture': 'Voiture'
+    'MOTO': 'Taxi Moto',
+    'VOITURE': 'Taxi Voiture',
+    'BUS': 'Bus',
+    'MINIVAN': 'Mini Van',
+    'TRICYCLE': 'Tricycle (Bajaj)'
 };
 
 
@@ -134,7 +133,7 @@ function parseOrganizationTarifs(data) {
 // fixe par trajet), par opposition à moto/voiture qui sont tarifés au
 // (prixBase + prixKm). Doit rester aligné avec admin-next
 // (src/app/flotte/settings/page.tsx, FLEET_DEFAULT_TARIFS).
-var FLAT_FARE_VEHICLE_TYPES = ['bus', 'minivan', 'tricycle'];
+var FLAT_FARE_VEHICLE_TYPES = ['BUS', 'MINIVAN', 'TRICYCLE'];
 
 function getVehiculeTarifs(tarifs) {
     if (!tarifs) return null;
