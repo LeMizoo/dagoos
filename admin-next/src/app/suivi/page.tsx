@@ -35,11 +35,20 @@ export default function SuiviPage() {
 
   const statutLabels: Record<string, string> = {
     'NEW': 'En attente',
-    'ACCEPTED': 'Acceptée',
-    'REJECTED': 'Refusée',
+    'ACCEPTED': '✅ Acceptée',
+    'REJECTED': '❌ Refusée',
     'IN_PROGRESS': 'En cours',
     'COMPLETED': 'Terminée',
     'CANCELLED': 'Annulée',
+  };
+
+  const statutMessages: Record<string, string> = {
+    'NEW': '⏳ Votre demande est en attente. Les chauffeurs sont notifiés. Patientez quelques instants.',
+    'ACCEPTED': '✅ Un chauffeur a accepté votre demande ! 📞 Restez joignable sur votre téléphone — il va vous appeler pour confirmer le rendez-vous.',
+    'REJECTED': '❌ Votre demande a été refusée. Vous pouvez réessayer avec une autre flotte.',
+    'IN_PROGRESS': '🕐 Votre course est en cours de traitement.',
+    'COMPLETED': '✅ Votre course est terminée. Merci de votre confiance !',
+    'CANCELLED': '❌ Votre course a été annulée.',
   };
 
   const statutNegociationLabels: Record<string, string> = {
@@ -89,6 +98,12 @@ export default function SuiviPage() {
                 <span className="text-gray-500">Statut</span>
                 <span className="font-semibold">{statutLabels[result.statut] || result.statut}</span>
               </div>
+
+              {statutMessages[result.statut] && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800 text-center">
+                  {statutMessages[result.statut]}
+                </div>
+              )}
 
               <div className="flex justify-between">
                 <span className="text-gray-500">Client</span>
