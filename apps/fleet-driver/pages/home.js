@@ -2284,6 +2284,30 @@ async function loadDriverVehicleInfo() {
 // ONLINE / OFFLINE
 // ========================================
 
+// ========================================
+// DÉTECTION FERMETURE APPLICATION
+// ========================================
+
+// À la fermeture du navigateur ou de l'app
+window.addEventListener('beforeunload', function() {
+    if (getDriverToken()) {
+        navigator.sendBeacon(
+            getApiUrl() + '/drivers/me/status',
+            JSON.stringify({ status: 'OFFLINE' })
+        );
+    }
+});
+
+// Passage en arrière-plan (mobile)
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden && getDriverToken()) {
+        navigator.sendBeacon(
+            getApiUrl() + '/drivers/me/status',
+            JSON.stringify({ status: 'OFFLINE' })
+        );
+    }
+});
+
 window.addEventListener(
     'online',
     function () {
