@@ -208,9 +208,9 @@ function loadCourseTypesFromTarifs(tarifs, vehicleType) {
         return;
     }
 
-    // Moto / Voiture : course normale, Ady Varotra, location journalière.
+    // Moto / Voiture : Ady Varotra et location journalière uniquement
+    // (Course normale passe par le flux de demande client → LeadAction)
     var options = [];
-    if (config.courseNormale) options.push({ value: 'courseNormale', label: 'Course normale' });
     if (config.adyVarotra) options.push({ value: 'adyVarotra', label: 'Ady Varotra' });
     if (config.locationJournalier) options.push({ value: 'locationJournalier', label: 'Location journalière' });
 
