@@ -747,6 +747,11 @@ async function init_home() {
 
     await chargerCourseActive();
 
+    // Forcer l'affichage de la carte si une course est active
+    if (courseActive) {
+      afficherCourseActive();
+    }
+
     loadExpenses();
 
     // ------------------------------------
