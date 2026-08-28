@@ -140,6 +140,18 @@ export default function SuiviPage() {
                   <span className="font-semibold">{statutNegociationLabels[result.statutNegociation] || result.statutNegociation}</span>
                 </div>
               )}
+
+              {result.offreClient ? (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Votre offre</span>
+                  <span className="font-semibold text-emerald-600">{Number(result.offreClient).toLocaleString('fr-FR')} Ar</span>
+                </div>
+              ) : (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Prix suggéré</span>
+                  <span className="font-semibold text-blue-600">{Number(result.prixEstime).toLocaleString('fr-FR')} Ar</span>
+                </div>
+              )}
             </div>
           </div>
         )}
