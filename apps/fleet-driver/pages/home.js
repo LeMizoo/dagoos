@@ -175,8 +175,14 @@ function loadCourseTypesFromTarifs(tarifs, vehicleType) {
         // Bus / Mini Van / Tricycle : un tarif fixe, et une location
         // spéciale seulement si elle a été activée dans les paramètres.
         var options = [{ value: 'tarifFixe', label: 'Trajet (tarif fixe)' }];
-        if (config.locationSpeciale) {
-            options.push({ value: 'locationSpeciale', label: 'Location spéciale' });
+        if (
+            config.locationSpeciale &&
+            config.locationSpeciale.active === true
+        ) {
+            options.push({
+                value: 'locationSpeciale',
+                label: 'Location spéciale'
+            });
         }
         courseTypes = options;
         return;
@@ -225,6 +231,18 @@ function getVehicleTarifConfig(courseMode) {
         currentVehicle?.type ||
         'VOITURE';
 
+    var vehicleTypeMap = {
+        MOTO: 'moto',
+        VOITURE: 'voiture',
+        BUS: 'bus',
+        MINIVAN: 'minivan',
+        TRICYCLE: 'tricycle'
+    };
+
+    var vehicleKey =
+        vehicleTypeMap[vehicleType] ||
+        String(vehicleType).toLowerCase();
+
     var vehiculeTarifs =
         getVehiculeTarifs(organizationTarifs);
 
@@ -233,7 +251,7 @@ function getVehicleTarifConfig(courseMode) {
     }
 
     var vehicleConfig =
-        vehiculeTarifs[vehicleType];
+        vehiculeTarifs[vehicleKey];
 
     if (!vehicleConfig) {
         return organizationTarifs;
