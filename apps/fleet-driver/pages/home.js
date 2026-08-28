@@ -558,8 +558,8 @@ async function init_home() {
                     : ''
             ) +
 
-            // STATUT
-            '<div style="display:flex;gap:8px;margin-bottom:10px;">' +
+            // STATUT (masqué si course active)
+            (!courseActive ? '<div style="display:flex;gap:8px;margin-bottom:10px;">' +
 
                 '<button onclick="changeStatus(\'present\')" style="flex:1;padding:12px 6px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
                     (estBloque ? 'disabled' : '') +
@@ -585,7 +585,7 @@ async function init_home() {
                     'Fin' +
                 '</button>' +
 
-            '</div>' +
+            '</div>' : '') +
 
             // STATISTIQUES JOUR
             '<div class="card" style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:14px;margin-bottom:10px;">' +
@@ -1519,10 +1519,11 @@ function afficherCourseActive() {
         '<div style="background:#FEF3C7;border-radius:12px;padding:12px;margin-bottom:10px;border:2px solid #F59E0B;">' +
             '<h3 style="font-weight:bold;color:#92400E;margin-bottom:8px;font-size:13px;">🚕 Course en cours</h3>' +
             '<p style="font-size:12px;color:#1F2937;font-weight:bold;">' + escapeHtml(statutLabel) + '</p>' +
-            '<p style="font-size:12px;color:#6B7280;">Client : ' + escapeHtml(courseActive.clientNom || '—') + '</p>' +
-            '<p style="font-size:12px;color:#6B7280;">' + escapeHtml(courseActive.adresseDepart || '') + ' → ' + escapeHtml(courseActive.adresseArrivee || '') + '</p>' +
+            '<p style="font-size:12px;color:#6B7280;">Client : ' + escapeHtml(courseActive.clientNom || courseActive.clientTel || '—') + '</p>' +
+            '<p style="font-size:12px;color:#6B7280;">' + escapeHtml(courseActive.adresseDepart || 'Départ inconnu') + ' → ' + escapeHtml(courseActive.adresseArrivee || 'Arrivée inconnue') + '</p>' +
             '<p style="font-size:12px;color:#1F2937;font-weight:bold;">Prix : ' + formatAmount(courseActive.price) + '</p>' +
-            '<p style="font-size:11px;color:#6B7280;">Part chauffeur : ' + formatAmount(courseActive.montantChauffeur) + '</p>' +
+            '<p style="font-size:11px;color:#6B7280;">Part chauffeur : ' + formatAmount(courseActive.montantChauffeur || courseActive.price * (courseActive.commissionPct || 20) / 100) + '</p>'
+            '<p style="font-size:11px;color:#6B7280;">À verser : ' + formatAmount(courseActive.montantOrganisation || courseActive.commission || 0) + '</p>' +
             '<div style="display:flex;gap:8px;margin-top:8px;">' + boutons + '</div>' +
         '</div>';
 }
@@ -1746,10 +1747,11 @@ function afficherCourseActive() {
         '<div style="background:#FEF3C7;border-radius:12px;padding:12px;margin-bottom:10px;border:2px solid #F59E0B;">' +
             '<h3 style="font-weight:bold;color:#92400E;margin-bottom:8px;font-size:13px;">🚕 Course en cours</h3>' +
             '<p style="font-size:12px;color:#1F2937;font-weight:bold;">' + escapeHtml(statutLabel) + '</p>' +
-            '<p style="font-size:12px;color:#6B7280;">Client : ' + escapeHtml(courseActive.clientNom || '—') + '</p>' +
-            '<p style="font-size:12px;color:#6B7280;">' + escapeHtml(courseActive.adresseDepart || '') + ' → ' + escapeHtml(courseActive.adresseArrivee || '') + '</p>' +
+            '<p style="font-size:12px;color:#6B7280;">Client : ' + escapeHtml(courseActive.clientNom || courseActive.clientTel || '—') + '</p>' +
+            '<p style="font-size:12px;color:#6B7280;">' + escapeHtml(courseActive.adresseDepart || 'Départ inconnu') + ' → ' + escapeHtml(courseActive.adresseArrivee || 'Arrivée inconnue') + '</p>' +
             '<p style="font-size:12px;color:#1F2937;font-weight:bold;">Prix : ' + formatAmount(courseActive.price) + '</p>' +
-            '<p style="font-size:11px;color:#6B7280;">Part chauffeur : ' + formatAmount(courseActive.montantChauffeur) + '</p>' +
+            '<p style="font-size:11px;color:#6B7280;">Part chauffeur : ' + formatAmount(courseActive.montantChauffeur || courseActive.price * (courseActive.commissionPct || 20) / 100) + '</p>'
+            '<p style="font-size:11px;color:#6B7280;">À verser : ' + formatAmount(courseActive.montantOrganisation || courseActive.commission || 0) + '</p>' +
             '<div style="display:flex;gap:8px;margin-top:8px;">' + boutons + '</div>' +
         '</div>';
 }
