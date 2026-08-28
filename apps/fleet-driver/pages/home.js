@@ -1449,9 +1449,10 @@ async function enregistrerCourse() {
                         type: type,
                         distanceKm: distance,
                         price: montant,
-
-                        // Convention conservée avec le code
-                        // existant : commission = part versée
+                        statut: 'EN_ATTENTE',
+                        commissionPct: commissionPct,
+                        montantChauffeur: chauffeurPart,
+                        montantOrganisation: versement,
                         commission: versement
                     })
                 }
