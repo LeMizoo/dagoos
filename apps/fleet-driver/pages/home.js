@@ -407,19 +407,22 @@ async function init_home() {
             currentOrg = {
                 id: currentDriver.organizationId || '',
                 name: currentDriver.organization.name || 'Organisation',
-                code: currentDriver.organizationCode || ''
+                code: currentDriver.organizationCode || '',
+                slug: currentDriver.organization.slug || ''
             };
         } else if (currentDriver && currentDriver.organizationId) {
             currentOrg = {
                 id: currentDriver.organizationId,
                 name: user.organization || 'Organisation',
-                code: currentDriver.organizationCode || ''
+                code: currentDriver.organizationCode || '',
+                slug: ''
             };
         } else {
             currentOrg = {
                 id: '',
                 name: user.organization || 'Flotte',
-                code: ''
+                code: '',
+                slug: ''
             };
         }
 
@@ -2432,20 +2435,30 @@ async function loadDriverVehicleInfo() {
 // À la fermeture du navigateur ou de l'app
 window.addEventListener('beforeunload', function() {
     if (getDriverToken()) {
-        navigator.sendBeacon(
-            getApiUrl() + '/drivers/me/status',
-            JSON.stringify({ status: 'OFFLINE' })
-        );
+        fetch(getApiUrl() + '/drivers/me/status', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + getDriverToken()
+            },
+            body: JSON.stringify({ status: 'OFFLINE' }),
+            keepalive: true
+        }).catch(function() {});
     }
 });
 
 // Passage en arrière-plan (mobile)
 document.addEventListener('visibilitychange', function() {
     if (document.hidden && getDriverToken()) {
-        navigator.sendBeacon(
-            getApiUrl() + '/drivers/me/status',
-            JSON.stringify({ status: 'OFFLINE' })
-        );
+        fetch(getApiUrl() + '/drivers/me/status', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + getDriverToken()
+            },
+            body: JSON.stringify({ status: 'OFFLINE' }),
+            keepalive: true
+        }).catch(function() {});
     }
 });
 
