@@ -126,6 +126,33 @@ export default function DemandeTaxi() {
         }
         form.reset();
         alert(`✅ Demande envoyée à ${sent} flotte(s) !`);
+      } else if (mode === 'proche') {
+        // Mode proche : envoyer à la première flotte disponible
+        if (flottes.length === 0) {
+          alert('Aucune flotte disponible');
+          return;
+        }
+        const res = await apiFetch('/public/actions', {
+          method: 'POST',
+          body: JSON.stringify({
+            organizationSlug: flottes[0].slug,
+            type: 'COURSE_REQUEST',
+            clientNom: formData.get('nom') as string,
+            clientTel: formData.get('tel') as string,
+            details,
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setCodeSuivi(data.codeSuivi || null);
+          form.reset();
+          setEstimation(null);
+          if (data.codeSuivi) {
+            alert('✅ Demande envoyée !\n\n📋 VOTRE CODE DE SUIVI : ' + data.codeSuivi + '\n\n⚠️ Retenez bien ce code avant de fermer cette fenêtre !');
+          } else {
+            alert('✅ Demande envoyée !');
+          }
+        }
       } else {
         // Envoyer à une flotte spécifique
         const slug = formData.get('flotte') as string;
