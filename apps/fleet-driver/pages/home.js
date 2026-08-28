@@ -1264,7 +1264,7 @@ function updateCourseForm() {
             'Part chauffeur : ' + commissionPct + ' % · À verser : ' + (100 - commissionPct) + ' %' +
         '</div>';
 
-    if (type === 'location' || type === 'locationSpeciale') {
+    if (type === 'locationJournalier' || type === 'locationSpeciale') {
 
         var locationTarif =
             getLocationTarif(type);
