@@ -280,12 +280,12 @@ router.post('/estimate', async (req, res) => {
 
     // Récupérer le tarif
     const VEHICLE_TYPE_MAP = {
-      'moto': 'MOTO',
-      'voiture': 'VOITURE',
-      'taxi': 'VOITURE',
-      'bus': 'BUS',
-      'minivan': 'MINIVAN',
-      'tricycle': 'TRICYCLE'
+      'moto': 'moto',
+      'voiture': 'voiture',
+      'taxi': 'voiture',
+      'bus': 'bus',
+      'minivan': 'minivan',
+      'tricycle': 'tricycle'
     };
     const cleTarif = VEHICLE_TYPE_MAP[typeVehicule] || 'moto';
 
@@ -302,7 +302,7 @@ router.post('/estimate', async (req, res) => {
         const tarifVehicule = vehiculeTarifs[cleTarif];
 
         if (tarifVehicule) {
-          if (['BUS', 'MINIVAN', 'TRICYCLE'].includes(cleTarif)) {
+          if (['bus', 'minivan', 'tricycle'].includes(cleTarif)) {
             prixEstime = tarifVehicule?.tarifFixe?.prixTrajet || tarif.prixBase;
             modePrestation = 'tarifFixe';
           } else if (tarifVehicule?.courseNormale) {
@@ -517,12 +517,12 @@ router.post('/actions', async (req, res) => {
 
     if (type === 'COURSE_REQUEST' || type === 'TAXI_RESERVATION') {
       const VEHICLE_TYPE_MAP = {
-        'moto': 'MOTO',
-        'voiture': 'VOITURE',
-        'taxi': 'VOITURE',
-        'bus': 'BUS',
-        'minivan': 'MINIVAN',
-        'tricycle': 'TRICYCLE'
+        'moto': 'moto',
+        'voiture': 'voiture',
+        'taxi': 'voiture',
+        'bus': 'bus',
+        'minivan': 'minivan',
+        'tricycle': 'tricycle'
       };
       const cleTarif = VEHICLE_TYPE_MAP[details?.typeVehicule] || 'moto';
 
@@ -541,7 +541,7 @@ router.post('/actions', async (req, res) => {
           const tarifVehicule = vehiculeTarifs[cleTarif];
 
           if (tarifVehicule) {
-            if (['BUS', 'MINIVAN', 'TRICYCLE'].includes(cleTarif)) {
+            if (['bus', 'minivan', 'tricycle'].includes(cleTarif)) {
               prixEstime = tarifVehicule?.tarifFixe?.prixTrajet || tarif.prixBase;
               modePrestation = 'tarifFixe';
             } else if (tarifVehicule?.courseNormale) {
