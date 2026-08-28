@@ -558,8 +558,8 @@ async function init_home() {
                     : ''
             ) +
 
-            // STATUT (masqué si course active)
-            (!courseActive ? '<div style="display:flex;gap:8px;margin-bottom:10px;">' +
+            // STATUT (toujours visible)
+            '<div style="display:flex;gap:8px;margin-bottom:10px;">' +
 
                 '<button onclick="changeStatus(\'present\')" style="flex:1;padding:12px 6px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
                     (estBloque ? 'disabled' : '') +
@@ -585,7 +585,7 @@ async function init_home() {
                     'Fin' +
                 '</button>' +
 
-            '</div>' : '') +
+            '</div>' +
 
             // STATISTIQUES JOUR
             '<div class="card" style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:14px;margin-bottom:10px;">' +
