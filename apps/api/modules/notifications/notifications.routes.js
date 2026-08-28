@@ -4,9 +4,36 @@ const { authMiddleware } = require('../../middleware/auth');
 const { requirePermission } = require('../../security/require-permission');
 const router = express.Router();
 router.get('/', authMiddleware, requirePermission('notifications.read'), async (req, res) => {
-  // Pour DRIVER : filtrer par userId
-  const where = req.user.role === 'DRIVER' ? { userId: req.user.id } : {};
-  try { const data = await prisma.notification.findMany({ where, orderBy: { createdAt: 'desc' }, take: 50 }); res.json(data); } catch (e) { res.status(500).json({ error: e.message }); }
+  try {
+    // Pour DRIVER : filtrer par userId
+    const where = {};
+
+    if (req.user.role === 'DRIVER') {
+      where.userId = req.user.id;
+    }
+
+    // Filtrer par read si query param présent
+    if (req.query.read === 'true') {
+      where.read = true;
+    } else if (req.query.read === 'false') {
+      where.read = false;
+    }
+
+    // Filtrer par type si présent
+    if (req.query.type) {
+      where.type = req.query.type;
+    }
+
+    const data = await prisma.notification.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      take: 50
+    });
+
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 router.get('/unread-count', authMiddleware, requirePermission('notifications.read'), async (req, res) => {
   try { const count = await prisma.notification.count({ where: { read: false } }); res.json({ count }); } catch (e) { res.status(500).json({ error: e.message }); }
