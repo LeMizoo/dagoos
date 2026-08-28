@@ -959,14 +959,17 @@ async function loadStats(driverId) {
         });
 
         var todayCourses = arrTerminees.filter(function (course) {
-            return (
-                course.date &&
-                String(course.date).startsWith(today)
-            );
+            if (!course.date) return false;
+            var courseDate = new Date(course.date);
+            var courseDay = courseDate.toISOString().split('T')[0];
+            return courseDay === today;
         });
 
         var weekCourses = arrTerminees.filter(function (course) {
-            return isDateInCurrentWeek(course.date);
+            if (!course.date) return false;
+            var courseDate = new Date(course.date);
+            var courseDay = courseDate.toISOString().split('T')[0];
+            return courseDay >= getWeekStartString() && courseDay <= today;
         });
 
         var caJour = todayCourses.reduce(
