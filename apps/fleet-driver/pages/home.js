@@ -1179,74 +1179,18 @@ async function calcCourse() {
         distance.toFixed(1)
     );
 
-    // Appeler le backend pour l'estimation
-    try {
-        var typeVehicule = currentVehicle?.type || 'VOITURE';
-        
-        // Mapper le type enum vers le format du formulaire
-        var typeMap = {
-            'MOTO': 'moto',
-            'VOITURE': 'voiture',
-            'BUS': 'bus',
-            'MINIVAN': 'minivan',
-            'TRICYCLE': 'tricycle'
-        };
-        var typeForm = typeMap[typeVehicule] || 'moto';
+    // Calcul local basé sur les tarifs de l'organisation
+    // (le formulaire PWA utilise des compteurs km, pas des adresses)
+    var base = getBaseTarif(type);
+    var prixKm = getKmTarif(type);
 
-        var response = await fetch(
-            getApiUrl() + '/public/estimate',
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    organizationSlug: currentOrg?.slug || '',
-                    depart: 'Point A',
-                    arrivee: 'Point B',
-                    typeVehicule: typeForm,
-                    distanceKm: distance
-                })
-            }
-        );
-
-        if (response.ok) {
-            var data = await response.json();
-            var distanceAffichee = data.distanceKm || distance;
-            var prixAffiche = data.prixEstime || 0;
-
-            setText('distanceCalc', Number(distanceAffichee).toFixed(1));
-
-            if (prixAffiche > 0) {
-                setText('prixCalc', formatAmount(prixAffiche));
-            } else {
-                // Fallback local si prix = 0
-                var baseLocal = getBaseTarif(type);
-                var prixKmLocal = getKmTarif(type);
-                var prixLocal = Math.round(baseLocal + (distance * prixKmLocal));
-                setText('prixCalc', formatAmount(prixLocal));
-            }
-        } else {
-            // Fallback : calcul local si le backend échoue
-            var base = getBaseTarif(type);
-            var prixKm = getKmTarif(type);
-
-            if (!base && !prixKm) {
-                setText('prixCalc', 'Tarif indisponible');
-                return;
-            }
-
-            var prix = Math.round(base + (distance * prixKm));
-            setText('prixCalc', formatAmount(prix));
-        }
-    } catch(e) {
-        console.warn('Estimation backend:', e);
-        // Fallback local
-        var base = getBaseTarif(type);
-        var prixKm = getKmTarif(type);
-        var prix = Math.round(base + (distance * prixKm));
-        setText('prixCalc', formatAmount(prix));
+    if (!base && !prixKm) {
+        setText('prixCalc', 'Tarif indisponible');
+        return;
     }
+
+    var prix = Math.round(base + (distance * prixKm));
+    setText('prixCalc', formatAmount(prix));
 }
 
 function updateCourseForm() {
