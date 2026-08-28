@@ -825,11 +825,6 @@ async function init_home() {
 
     await chargerCourseActive();
 
-    // Forcer l'affichage de la carte si une course est active
-    if (courseActive) {
-      afficherCourseActive();
-    }
-
     loadExpenses();
 
     // ------------------------------------
@@ -1556,68 +1551,159 @@ var courseActive = null;
 async function chargerCourseActive() {
     var user = getDriverUser();
 
-    if (!user.driverId) return;
+    if (!user || !user.driverId) {
+        courseActive = null;
+        window.courseActive = null;
+
+        var card = document.getElementById('courseActiveCard');
+        if (card) card.innerHTML = '';
+
+        return;
+    }
 
     try {
         var courses = await apiGet(
-            '/finances/courses?driverId=' + encodeURIComponent(user.driverId)
+            '/finances/courses?driverId=' +
+            encodeURIComponent(user.driverId)
         );
 
-        var arr = Array.isArray(courses) ? courses : [];
+        var arr = Array.isArray(courses)
+            ? courses
+            : [];
 
-        // Trouver la course active (non terminée, non annulée)
-        courseActive = arr.find(function(c) {
-            return c.statut === 'EN_ATTENTE' ||
-                   c.statut === 'EN_ROUTE' ||
-                   c.statut === 'EN_COURS';
+        courseActive = arr.find(function (c) {
+            return (
+                c.statut === 'EN_ATTENTE' ||
+                c.statut === 'EN_ROUTE' ||
+                c.statut === 'EN_COURS'
+            );
         }) || null;
 
         window.courseActive = courseActive;
 
-        if (courseActive) {
-            afficherCourseActive();
-        }
-    } catch(e) {
+        afficherCourseActive();
+
+    } catch (e) {
         console.warn('Course active:', e);
+
+        courseActive = null;
+        window.courseActive = null;
+
+        var card = document.getElementById('courseActiveCard');
+        if (card) card.innerHTML = '';
     }
 }
 
 function afficherCourseActive() {
     var card = document.getElementById('courseActiveCard');
-    if (!card || !courseActive) return;
+
+    if (!card) return;
+
+    if (!courseActive) {
+        card.innerHTML = '';
+        return;
+    }
+
+    // Une course terminée ou annulée ne doit jamais rester affichée.
+    if (
+        courseActive.statut === 'TERMINEE' ||
+        courseActive.statut === 'ANNULEE'
+    ) {
+        card.innerHTML = '';
+        return;
+    }
 
     var statutLabel =
-        courseActive.statut === 'EN_ATTENTE' ? 'En attente' :
-        courseActive.statut === 'EN_ROUTE' ? 'En route vers le client' :
-        courseActive.statut === 'EN_COURS' ? 'Course en cours' :
-        courseActive.statut;
+        courseActive.statut === 'EN_ATTENTE'
+            ? 'En attente'
+            : courseActive.statut === 'EN_ROUTE'
+                ? 'En route'
+                : courseActive.statut === 'EN_COURS'
+                    ? 'Course en cours'
+                    : courseActive.statut;
 
-    var boutons = '';
+    var bouton = '';
 
     if (courseActive.statut === 'EN_ATTENTE') {
-        boutons =
-            '<button onclick="demarrerCourse(\'' + courseActive.id + '\')" style="flex:1;background:#10B981;color:white;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">Démarrer</button>' +
-            '<button onclick="annulerCourse(\'' + courseActive.id + '\')" style="flex:1;background:#EF4444;color:white;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">Annuler</button>';
-    } else if (courseActive.statut === 'EN_ROUTE') {
-        boutons =
-            '<button onclick="clientPrisEnCharge(\'' + courseActive.id + '\')" style="flex:1;background:#3B82F6;color:white;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">Client pris en charge</button>' +
-            '<button onclick="annulerCourse(\'' + courseActive.id + '\')" style="flex:1;background:#EF4444;color:white;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">Annuler</button>';
-    } else if (courseActive.statut === 'EN_COURS') {
-        boutons =
-            '<button onclick="terminerCourse(\'' + courseActive.id + '\')" style="flex:1;background:#F1C40F;color:#1A1A2E;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">Terminer</button>' +
-            '<button onclick="annulerCourse(\'' + courseActive.id + '\')" style="flex:1;background:#EF4444;color:white;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">Annuler</button>';
+        bouton =
+            '<button onclick="demarrerCourse(\'' +
+            courseActive.id +
+            '\')" ' +
+            'style="width:100%;background:#10B981;color:white;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">' +
+            'Démarrer' +
+            '</button>';
+    }
+
+    if (
+        courseActive.statut === 'EN_ROUTE' ||
+        courseActive.statut === 'EN_COURS'
+    ) {
+        bouton =
+            '<button onclick="terminerCourse(\'' +
+            courseActive.id +
+            '\')" ' +
+            'style="width:100%;background:#F1C40F;color:#1A1A2E;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">' +
+            'Terminer' +
+            '</button>';
     }
 
     card.innerHTML =
         '<div style="background:#FEF3C7;border-radius:12px;padding:12px;margin-bottom:10px;border:2px solid #F59E0B;">' +
-            '<h3 style="font-weight:bold;color:#92400E;margin-bottom:8px;font-size:13px;">🚕 Course en cours</h3>' +
-            '<p style="font-size:12px;color:#1F2937;font-weight:bold;">' + escapeHtml(statutLabel) + '</p>' +
-            '<p style="font-size:12px;color:#6B7280;">Client : ' + escapeHtml(courseActive.clientNom || courseActive.clientTel || '—') + '</p>' +
-            '<p style="font-size:12px;color:#6B7280;">' + escapeHtml(courseActive.adresseDepart || 'Départ inconnu') + ' → ' + escapeHtml(courseActive.adresseArrivee || 'Arrivée inconnue') + '</p>' +
-            '<p style="font-size:12px;color:#1F2937;font-weight:bold;">Prix : ' + formatAmount(courseActive.price) + '</p>' +
-            '<p style="font-size:11px;color:#6B7280;">Part chauffeur : ' + formatAmount(courseActive.montantChauffeur || courseActive.price * (courseActive.commissionPct || 20) / 100) + '</p>'
-            '<p style="font-size:11px;color:#6B7280;">À verser : ' + formatAmount(courseActive.montantOrganisation || courseActive.commission || 0) + '</p>' +
-            '<div style="display:flex;gap:8px;margin-top:8px;">' + boutons + '</div>' +
+
+            '<h3 style="font-weight:bold;color:#92400E;margin-bottom:8px;font-size:13px;">' +
+                'Course en cours' +
+            '</h3>' +
+
+            '<p style="font-size:12px;color:#1F2937;font-weight:bold;">' +
+                escapeHtml(statutLabel) +
+            '</p>' +
+
+            '<p style="font-size:12px;color:#6B7280;">' +
+                'Client : ' +
+                escapeHtml(
+                    courseActive.clientNom ||
+                    courseActive.clientTel ||
+                    '—'
+                ) +
+            '</p>' +
+
+            '<p style="font-size:12px;color:#6B7280;">' +
+                escapeHtml(
+                    courseActive.adresseDepart ||
+                    'Départ inconnu'
+                ) +
+                ' → ' +
+                escapeHtml(
+                    courseActive.adresseArrivee ||
+                    'Arrivée inconnue'
+                ) +
+            '</p>' +
+
+            '<p style="font-size:12px;color:#1F2937;font-weight:bold;">' +
+                'Prix : ' +
+                formatAmount(courseActive.price) +
+            '</p>' +
+
+            '<p style="font-size:11px;color:#6B7280;">' +
+                'Part chauffeur : ' +
+                formatAmount(
+                    courseActive.montantChauffeur ||
+                    0
+                ) +
+            '</p>' +
+
+            '<p style="font-size:11px;color:#6B7280;">' +
+                'À verser : ' +
+                formatAmount(
+                    courseActive.montantOrganisation ||
+                    0
+                ) +
+            '</p>' +
+
+            '<div style="margin-top:8px;">' +
+                bouton +
+            '</div>' +
+
         '</div>';
 }
 
@@ -1717,11 +1803,9 @@ async function terminerCourse(courseId) {
             return;
         }
 
-        courseActive.statut = 'TERMINEE';
-        courseActive.completedAt = data.completedAt;
-        courseActive.distanceKm = data.distanceKm;
+        courseActive = null;
+        window.courseActive = null;
 
-        // Masquer la carte active
         var card = document.getElementById('courseActiveCard');
         if (card) card.innerHTML = '';
 
@@ -1760,8 +1844,8 @@ async function annulerCourse(courseId) {
             return;
         }
 
-        courseActive.statut = 'ANNULEE';
-        courseActive.cancelledAt = data.cancelledAt;
+        courseActive = null;
+        window.courseActive = null;
 
         var card = document.getElementById('courseActiveCard');
         if (card) card.innerHTML = '';
