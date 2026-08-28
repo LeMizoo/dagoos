@@ -162,6 +162,14 @@ router.post('/courses', authMiddleware, requirePermission('courses.create'), asy
       commission
     } = req.body;
 
+    // SECURITE : Course normale doit passer par LeadAction → Accept
+    if (type === 'courseNormale' || type === 'NORMALE') {
+      return res.status(403).json({
+        success: false,
+        error: 'Course normale non autorisée via cette route. Utilisez le flux de demande client.'
+      });
+    }
+
     if (!price || Number(price) <= 0) {
       return res.status(400).json({
         success: false,
