@@ -1133,7 +1133,6 @@ async function calcCourse() {
 
         if (response.ok) {
             var data = await response.json();
-            // Si le backend a une distance, l'afficher ; sinon utiliser la distance saisie
             var distanceAffichee = data.distanceKm || distance;
             var prixAffiche = data.prixEstime || 0;
 
@@ -1142,7 +1141,11 @@ async function calcCourse() {
             if (prixAffiche > 0) {
                 setText('prixCalc', formatAmount(prixAffiche));
             } else {
-                setText('prixCalc', 'Tarif indisponible');
+                // Fallback local si prix = 0
+                var baseLocal = getBaseTarif(type);
+                var prixKmLocal = getKmTarif(type);
+                var prixLocal = Math.round(baseLocal + (distance * prixKmLocal));
+                setText('prixCalc', formatAmount(prixLocal));
             }
         } else {
             // Fallback : calcul local si le backend échoue
