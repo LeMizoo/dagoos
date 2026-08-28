@@ -135,6 +135,15 @@ function parseOrganizationTarifs(data) {
 // (src/app/flotte/settings/page.tsx, FLEET_DEFAULT_TARIFS).
 var FLAT_FARE_VEHICLE_TYPES = ['BUS', 'MINIVAN', 'TRICYCLE'];
 
+// Mapping enum → clés tarifaires (pour cohérence avec admin settings)
+var VEHICLE_TARIF_KEY_MAP = {
+    MOTO: 'moto',
+    VOITURE: 'voiture',
+    BUS: 'bus',
+    MINIVAN: 'minivan',
+    TRICYCLE: 'tricycle'
+};
+
 function getVehiculeTarifs(tarifs) {
     if (!tarifs) return null;
 
@@ -164,7 +173,18 @@ function loadCourseTypesFromTarifs(tarifs, vehicleType) {
 
     var vehiculeTarifs = getVehiculeTarifs(tarifs);
     var type = vehicleType || (currentVehicle && currentVehicle.type) || 'VOITURE';
-    var config = vehiculeTarifs ? vehiculeTarifs[type] : null;
+
+    // Mapper l'enum VehicleType vers les clés tarifaires minuscules
+    var typeTarifMap = {
+        MOTO: 'moto',
+        VOITURE: 'voiture',
+        BUS: 'bus',
+        MINIVAN: 'minivan',
+        TRICYCLE: 'tricycle'
+    };
+    var cleConfig = typeTarifMap[type] || String(type).toLowerCase();
+
+    var config = vehiculeTarifs ? vehiculeTarifs[cleConfig] : null;
 
     if (!config || typeof config !== 'object') {
         courseTypes = fallback;
