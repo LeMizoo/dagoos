@@ -163,7 +163,7 @@ function loadCourseTypesFromTarifs(tarifs, vehicleType) {
     ];
 
     var vehiculeTarifs = getVehiculeTarifs(tarifs);
-    var type = vehicleType || (currentVehicle && currentVehicle.type) || 'voiture';
+    var type = vehicleType || (currentVehicle && currentVehicle.type) || 'VOITURE';
     var config = vehiculeTarifs ? vehiculeTarifs[type] : null;
 
     if (!config || typeof config !== 'object') {
@@ -953,14 +953,19 @@ async function loadStats(driverId) {
 
         var today = getTodayString();
 
-        var todayCourses = arr.filter(function (course) {
+        // Filtrer uniquement les courses TERMINEE
+        var arrTerminees = arr.filter(function (course) {
+            return course.statut === 'TERMINEE';
+        });
+
+        var todayCourses = arrTerminees.filter(function (course) {
             return (
                 course.date &&
                 String(course.date).startsWith(today)
             );
         });
 
-        var weekCourses = arr.filter(function (course) {
+        var weekCourses = arrTerminees.filter(function (course) {
             return isDateInCurrentWeek(course.date);
         });
 
@@ -978,14 +983,34 @@ async function loadStats(driverId) {
             0
         );
 
-        // Commission réelle de l'organisation (voir /flotte/settings),
-        // au lieu d'un taux 20 %/80 % figé.
-        var commissionPctStats = getCommissionPct();
-        var chauffeurJour = Math.round(caJour * (commissionPctStats / 100));
-        var versementJour = caJour - chauffeurJour;
+        // Utiliser les montants figés (montantChauffeur / montantOrganisation)
+        var chauffeurJour = todayCourses.reduce(
+            function (sum, course) {
+                return sum + (Number(course.montantChauffeur) || 0);
+            },
+            0
+        );
 
-        var chauffeurSem = Math.round(caSem * (commissionPctStats / 100));
-        var versementSem = caSem - chauffeurSem;
+        var versementJour = todayCourses.reduce(
+            function (sum, course) {
+                return sum + (Number(course.montantOrganisation) || Number(course.commission) || 0);
+            },
+            0
+        );
+
+        var chauffeurSem = weekCourses.reduce(
+            function (sum, course) {
+                return sum + (Number(course.montantChauffeur) || 0);
+            },
+            0
+        );
+
+        var versementSem = weekCourses.reduce(
+            function (sum, course) {
+                return sum + (Number(course.montantOrganisation) || Number(course.commission) || 0);
+            },
+            0
+        );
 
         setText(
             'statCoursesJour',
