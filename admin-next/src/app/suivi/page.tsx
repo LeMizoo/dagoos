@@ -44,7 +44,7 @@ export default function SuiviPage() {
 
   const statutMessages: Record<string, string> = {
     'NEW': '⏳ Votre demande est en attente. Les chauffeurs sont notifiés. Patientez quelques instants.',
-    'ACCEPTED': '✅ Un chauffeur a accepté votre demande ! 📞 Restez joignable sur votre téléphone — il va vous appeler pour confirmer le rendez-vous.',
+    'ACCEPTED': '✅ Un chauffeur a accepté votre demande ! 📞 Restez joignable sur votre téléphone.',
     'REJECTED': '❌ Votre demande a été refusée. Vous pouvez réessayer avec une autre flotte.',
     'IN_PROGRESS': '🕐 Votre course est en cours de traitement.',
     'COMPLETED': '✅ Votre course est terminée. Merci de votre confiance !',

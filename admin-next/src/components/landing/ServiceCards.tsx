@@ -54,7 +54,7 @@ export default function ServiceCards({ organizations, coopsAvecDeparts }: Servic
               <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4">
                 <Car size={32} className="text-white" />
               </div>
-              <h3 className="font-display text-2xl font-bold text-white mb-2">Taxi urbain</h3>
+              <h3 className="font-display text-2xl font-bold text-white mb-2">Demandez un taxi</h3>
               <p className="text-white/90 mb-4">
                 Demandez un taxi ou une moto à proximité et suivez votre course.
               </p>

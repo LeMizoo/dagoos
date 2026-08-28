@@ -127,6 +127,8 @@ export default function DemandeLocation() {
           </select>
 
           <select name="typeVehicule" className="w-full px-4 py-3 border rounded-lg text-sm" required>
+            <option value="moto">🏍️ Moto</option>
+            <option value="taxi">🚗 Taxi</option>
             <option value="bus">🚌 Bus</option>
             <option value="minivan">🚐 Mini Van</option>
             <option value="tricycle">🛺 Tricycle</option>
