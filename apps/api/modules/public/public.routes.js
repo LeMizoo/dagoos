@@ -480,6 +480,14 @@ router.post('/estimate-location', async (req, res) => {
 router.post('/actions', async (req, res) => {
   try {
     const { organizationSlug, type, clientNom, clientTel, details } = req.body;
+
+    // Normaliser les chaînes Unicode pour éviter les caractères mal encodés
+    const normalize = (str) => {
+      if (!str) return str;
+      return String(str).normalize('NFC').trim();
+    };
+    const clientNomNormalized = normalize(clientNom);
+    const clientTelNormalized = normalize(clientTel);
     
     if (!organizationSlug || !type || !clientNom || !clientTel) {
       return res.status(400).json({ error: 'Tous les champs sont requis' });
@@ -570,8 +578,8 @@ router.post('/actions', async (req, res) => {
       data: {
         organizationId: org.id,
         type,
-        clientNom: String(clientNom).trim(),
-        clientTel: String(clientTel).trim(),
+        clientNom: clientNomNormalized,
+        clientTel: clientTelNormalized,
         details: {
           ...(details || {}),
           distanceKm,

@@ -22,7 +22,11 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization", "X-Auth-Space"],
   maxAge: 86400,
 }));
-app.use(express.json({ limit: "100kb" }));
+app.use(express.json({ 
+  limit: "100kb",
+  type: ['application/json', 'application/json; charset=utf-8']
+}));
+app.use(express.urlencoded({ extended: true, limit: "100kb" }));
 
 // =========================================================
 // ROUTES API
