@@ -54,6 +54,14 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
       { href: '/flotte/profil', icon: User, label: 'Profil' },
       { href: '/flotte/settings', icon: Settings, label: 'Paramètres' }
     ]}
+
+
+
+
+
+
+
+
   ];
 
   // Menu spécifique Urbain
