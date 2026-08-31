@@ -22,6 +22,7 @@ export default function FlotteChauffeurs() {
   const [saving, setSaving] = useState(false);
   const [showPin, setShowPin] = useState<Record<string, boolean>>({});
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [pointages, setPointages] = useState<Record<string, string>>({});
 
   const load = useCallback(async () => {
     try {
@@ -38,6 +39,22 @@ export default function FlotteChauffeurs() {
       
       setDrivers(resolvedOrgId ? allDrivers.filter((d: any) => d.organizationId === resolvedOrgId) : allDrivers);
       setVehicles(resolvedOrgId ? allVehicles.filter((v: any) => v.organizationId === resolvedOrgId) : allVehicles);
+
+      // Charger les pointages du jour
+      const today = new Date().toISOString().split('T')[0];
+      try {
+        const pRes = await apiFetch(`/drivers/pointages?organizationId=${resolvedOrgId || ''}&date=${today}`);
+        const allPointages = pRes.ok ? await pRes.json() : [];
+        const pMap: Record<string, string> = {};
+        (Array.isArray(allPointages) ? allPointages : []).forEach((p: any) => {
+          if (p.driverId) {
+            pMap[p.driverId] = p.statut || 'PRESENT';
+          }
+        });
+        setPointages(pMap);
+      } catch {
+        // Silencieux
+      }
     } catch {
       // Silencieux
     } finally {
@@ -167,7 +184,8 @@ export default function FlotteChauffeurs() {
 
   const filtered = drivers.filter(d => {
     const matchesSearch = ((d.firstName || '') + ' ' + (d.lastName || '') + ' ' + (d.driverCode || '')).toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || d.status === statusFilter;
+    const effectiveStatus = pointages[d.id] || d.status;
+    const matchesStatus = statusFilter === 'all' || effectiveStatus === statusFilter;
     const matchesVehicle = vehicleFilter === 'all' || 
       (vehicleFilter === 'assigned' && d.vehicleId) || 
       (vehicleFilter === 'unassigned' && !d.vehicleId) ||
@@ -177,7 +195,7 @@ export default function FlotteChauffeurs() {
 
   const stats = {
     total: drivers.length,
-    active: drivers.filter(d => d.status === 'active').length,
+    active: drivers.filter(d => (pointages[d.id] || d.status) === 'PRESENT').length,
     assigned: drivers.filter(d => d.vehicleId).length,
     unassigned: drivers.filter(d => !d.vehicleId).length,
   };
@@ -237,8 +255,9 @@ export default function FlotteChauffeurs() {
           className="px-3 py-2 border rounded-lg text-sm"
         >
           <option value="all">Tous statuts</option>
-          <option value="active">Actifs</option>
-          <option value="inactive">Inactifs</option>
+          <option value="PRESENT">En service</option>
+          <option value="PAUSE">En pause</option>
+          <option value="NON_DEBUTE">Absent</option>
         </select>
         <select
           value={vehicleFilter}
@@ -331,11 +350,12 @@ export default function FlotteChauffeurs() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${
-                          d.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                        }`}>
-                          {d.status || 'inactif'}
-                        </span>
+                        {(() => {
+                          const pt = pointages[d.id] || d.status;
+                          const label = pt === 'PRESENT' ? 'En service' : pt === 'PAUSE' ? 'En pause' : pt === 'NON_DEBUTE' ? 'Absent' : d.status;
+                          const color = pt === 'PRESENT' ? 'bg-green-100 text-green-700' : pt === 'PAUSE' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700';
+                          return <span className={`text-xs px-2 py-0.5 rounded-full ${color}`}>{label}</span>;
+                        })()}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <button onClick={() => openEdit(d)} className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg"><Pencil size={16} /></button>
