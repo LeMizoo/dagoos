@@ -208,7 +208,7 @@ function loadCourseTypesFromTarifs(tarifs, vehicleType) {
         return;
     }
 
-    // Moto / Voiture : Ady Varotra et location journalière uniquement
+    // Moto / Voiture : Ady Varotra et location journalière
     // (Course normale passe par le flux de demande client → LeadAction)
     var options = [];
     if (config.adyVarotra) options.push({ value: 'adyVarotra', label: 'Ady Varotra' });
