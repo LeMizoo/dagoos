@@ -36,9 +36,6 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
       { href: '/flotte/messages', icon: MessageSquare, label: 'Messages' },
       { href: '/flotte/notifications', icon: Bell, label: 'Notifications' }
     ]},
-    { section: 'Opérations', items: [
-      { href: '/flotte/pointages', icon: Clock, label: 'Pointage' }
-    ]},
     { section: 'Gestion', items: [
       { href: '/flotte/proprietaires', icon: Users, label: 'Propriétaires' },
       { href: '/flotte/chauffeurs', icon: Users, label: 'Chauffeurs' },
@@ -66,22 +63,24 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
 
   // Menu spécifique Urbain
   const urbainMenu = [
-    { section: 'Opérations Urbain', items: [
+    { section: 'Opérations', items: [
       { href: '/flotte/urbain/courses', icon: Truck, label: 'Courses' },
       { href: '/flotte/urbain/maintenance', icon: Wrench, label: 'Maintenance' },
-      { href: '/flotte/rapports', icon: FileText, label: 'Rapports' }
+      { href: '/flotte/rapports', icon: FileText, label: 'Rapports' },
+      { href: '/flotte/pointages', icon: Clock, label: 'Pointage' }
     ]}
   ];
 
   // Menu spécifique Inter-urbain
   const interurbainMenu = [
-    { section: 'Opérations Inter-urbain', items: [
+    { section: 'Opérations', items: [
       { href: '/flotte/interurbain/departs', icon: Calendar, label: 'Départs' },
       { href: '/flotte/interurbain/reservations', icon: Ticket, label: 'Réservations' },
       { href: '/flotte/interurbain/societes', icon: Building2, label: 'Sociétés' },
       { href: '/flotte/interurbain/contrats', icon: FileCheck, label: 'Contrats' },
       { href: '/flotte/interurbain/livraisons', icon: Truck, label: 'Livraisons' },
-      { href: '/flotte/rapports', icon: FileText, label: 'Rapports' }
+      { href: '/flotte/rapports', icon: FileText, label: 'Rapports' },
+      { href: '/flotte/pointages', icon: Clock, label: 'Pointage' }
     ]}
   ];
 
