@@ -226,7 +226,8 @@ router.post('/courses', authMiddleware, requirePermission('courses.create'), asy
           commission !== undefined
             ? Number(commission)
             : Math.round(amount * 0.20),
-        statut: 'EN_ATTENTE',
+        statut: 'TERMINEE',
+        completedAt: new Date(),
         commissionPct: req.body.commissionPct || 20,
         montantChauffeur: req.body.montantChauffeur || Math.round(amount * 0.20),
         montantOrganisation: req.body.montantOrganisation || Math.round(amount * 0.80)
