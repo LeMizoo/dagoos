@@ -9,7 +9,7 @@ import {
   Menu, X, LogOut, LayoutDashboard, Car, Users, DollarSign, 
   CreditCard, MessageSquare, Bell, Settings, Truck, Building2,
   Calendar, Ticket, FileCheck, FileText, User, ClipboardList,
-  ArrowRightLeft, QrCode, Wrench, Receipt, Clock
+  ArrowRightLeft, QrCode, Wrench, Receipt, Clock, Sun
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -50,6 +50,7 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
       { href: '/flotte/depenses', icon: CreditCard, label: 'Dépenses' }
     ]},
     { section: 'Systèmes', items: [
+      { href: '/flotte/theme', icon: Sun, label: 'Thème' },
       { href: '/flotte/profil', icon: User, label: 'Profil' },
       { href: '/flotte/settings', icon: Settings, label: 'Paramètres' }
     ]}
