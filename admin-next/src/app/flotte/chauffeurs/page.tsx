@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { apiFetch } from '@/lib/api';
 import { useOrganization } from '@/lib/organization-context';
-import { Users, Plus, Search, Car, CheckCircle, XCircle, Link2, Phone, Key, Eye, EyeOff, Copy, Check } from 'lucide-react';
+import { Users, Plus, Search, Car, CheckCircle, XCircle, Link2, Phone, Key, Eye, EyeOff, Copy, Check, Pencil, Trash2 } from 'lucide-react';
 
 export default function FlotteChauffeurs() {
   const { organization } = useOrganization();
@@ -17,6 +17,8 @@ export default function FlotteChauffeurs() {
   const [orgId, setOrgId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({ firstName: '', lastName: '', phone: '', license: '', pin: '' });
+  const [editingDriver, setEditingDriver] = useState<any | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<any | null>(null);
   const [saving, setSaving] = useState(false);
   const [showPin, setShowPin] = useState<Record<string, boolean>>({});
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
@@ -98,6 +100,69 @@ export default function FlotteChauffeurs() {
     await navigator.clipboard.writeText(code);
     setCopiedCode(code);
     setTimeout(() => setCopiedCode(null), 2000);
+  }
+
+  function openEdit(driver: any) {
+    const nameParts = (driver.user?.name || '').split(' ');
+    setEditingDriver(driver);
+    setForm({
+      firstName: driver.user?.name ? nameParts[0] || '' : (driver.firstName || ''),
+      lastName: driver.user?.name ? nameParts.slice(1).join(' ') : (driver.lastName || ''),
+      phone: driver.user?.phone || driver.phone || '',
+      license: driver.license || '',
+      pin: ''
+    });
+    setModalOpen(true);
+  }
+
+  async function handleEdit() {
+    if (!editingDriver || !form.firstName || !form.lastName) return;
+    setSaving(true);
+    try {
+      const res = await apiFetch(`/drivers/${editingDriver.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          firstName: form.firstName,
+          lastName: form.lastName,
+          phone: form.phone,
+          license: form.license,
+          ...(form.pin ? { pin: form.pin } : {})
+        })
+      });
+      if (res.ok) {
+        alert('✅ Chauffeur modifié avec succès !');
+        setModalOpen(false);
+        setEditingDriver(null);
+        setForm({ firstName: '', lastName: '', phone: '', license: '', pin: '' });
+        load();
+      } else {
+        const err = await res.json();
+        alert('❌ ' + (err.error || 'Erreur lors de la modification'));
+      }
+    } catch (e) {
+      console.error(e);
+      alert('❌ Erreur réseau');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!deleteConfirm) return;
+    try {
+      const res = await apiFetch(`/drivers/${deleteConfirm.id}`, { method: 'DELETE' });
+      if (res.ok) {
+        alert('✅ Chauffeur supprimé !');
+        setDeleteConfirm(null);
+        load();
+      } else {
+        const err = await res.json();
+        alert('❌ ' + (err.error || 'Erreur lors de la suppression'));
+      }
+    } catch (e) {
+      console.error(e);
+      alert('❌ Erreur réseau');
+    }
   }
 
   const filtered = drivers.filter(d => {
@@ -201,13 +266,14 @@ export default function FlotteChauffeurs() {
                 <th className="px-4 py-3">Véhicule</th>
                 <th className="px-4 py-3">PIN</th>
                 <th className="px-4 py-3">Statut</th>
+                <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={6} className="text-center py-8">Chargement...</td></tr>
+                <tr><td colSpan={7} className="text-center py-8">Chargement...</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={6} className="text-center py-8 text-gray-400">Aucun chauffeur</td></tr>
+                <tr><td colSpan={7} className="text-center py-8 text-gray-400">Aucun chauffeur</td></tr>
               ) : (
                 filtered.map(d => {
                   const cv = vehicles.find(v => v.id === d.vehicleId);
@@ -228,7 +294,7 @@ export default function FlotteChauffeurs() {
                       </td>
                       <td className="px-4 py-3 text-gray-500 flex items-center gap-2">
                         <Phone size={14} className="text-gray-400" />
-                        {d.phone || '-'}
+                        {d.user?.phone || d.phone || '-'}
                       </td>
                       <td className="px-4 py-3">
                         {assigning === d.id ? (
@@ -271,6 +337,10 @@ export default function FlotteChauffeurs() {
                           {d.status || 'inactif'}
                         </span>
                       </td>
+                      <td className="px-4 py-3 text-right">
+                        <button onClick={() => openEdit(d)} className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg"><Pencil size={16} /></button>
+                        <button onClick={() => setDeleteConfirm(d)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>
+                      </td>
                     </tr>
                   );
                 })
@@ -284,7 +354,7 @@ export default function FlotteChauffeurs() {
       {modalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
-            <h2 className="text-lg font-bold mb-4">👨‍✈️ Ajouter un chauffeur</h2>
+            <h2 className="text-lg font-bold mb-4">{editingDriver ? '✏️ Modifier le chauffeur' : '👨‍✈️ Ajouter un chauffeur'}</h2>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <input
@@ -330,17 +400,43 @@ export default function FlotteChauffeurs() {
             </div>
             <div className="flex gap-2 mt-4">
               <button
-                onClick={() => setModalOpen(false)}
+                onClick={() => { setModalOpen(false); setEditingDriver(null); setForm({ firstName: '', lastName: '', phone: '', license: '', pin: '' }); }}
                 className="flex-1 px-4 py-2 border rounded-lg text-sm"
               >
                 Annuler
               </button>
               <button
-                onClick={handleAdd}
+                onClick={editingDriver ? handleEdit : handleAdd}
                 disabled={saving}
                 className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700 disabled:opacity-50"
               >
-                {saving ? 'Création...' : 'Créer le chauffeur'}
+                {saving ? 'Enregistrement...' : editingDriver ? 'Enregistrer' : 'Créer le chauffeur'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modale suppression */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-sm shadow-xl">
+            <h2 className="text-lg font-bold mb-3">⚠️ Confirmer la suppression</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Supprimer le chauffeur <strong>{deleteConfirm.user?.name || deleteConfirm.driverCode}</strong> ?
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="flex-1 px-4 py-2 border rounded-lg text-sm"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"
+              >
+                Supprimer
               </button>
             </div>
           </div>
