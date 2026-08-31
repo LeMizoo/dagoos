@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { apiFetch } from '@/lib/api';
 import { useOrganization } from '@/lib/organization-context';
-import { Save, AlertCircle, CheckCircle } from 'lucide-react';
+import { Save, AlertCircle, CheckCircle, Palette } from 'lucide-react';
+import { useTheme } from '@/lib/theme-context';
 
 // ============================================================
 // TYPES DE TARIFS PAR TYPE D'ORGANISATION
@@ -68,6 +69,7 @@ export default function FlotteSettings() {
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
+  const { theme, setTheme } = useTheme();
 
   const loadSettings = useCallback(async () => {
     if (!organization?.id) return;
@@ -369,6 +371,32 @@ export default function FlotteSettings() {
           </div>
         </Card>
       </div>
+
+      <Card>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Palette size={18} /> Apparence
+        </h2>
+        <div className="flex gap-2 max-w-lg">
+          {[
+            { id: 'light' as const, icon: '☀️', label: 'Clair' },
+            { id: 'dark' as const, icon: '🌙', label: 'Sombre' },
+            { id: 'system' as const, icon: '💻', label: 'Système' },
+          ].map(item => (
+            <button
+              key={item.id}
+              onClick={() => setTheme(item.id)}
+              className={`flex-1 p-3 rounded-xl border text-center transition-all ${
+                theme === item.id
+                  ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-400 shadow-sm'
+                  : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+              }`}
+            >
+              <div className="text-lg">{item.icon}</div>
+              <div className="text-xs mt-1">{item.label}</div>
+            </button>
+          ))}
+        </div>
+      </Card>
 
       <button
         onClick={handleSave}
