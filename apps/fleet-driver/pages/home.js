@@ -1571,12 +1571,19 @@ async function chargerCourseActive() {
             ? courses
             : [];
 
+        var today = getTodayString();
+
         courseActive = arr.find(function (c) {
-            return (
-                c.statut === 'EN_ATTENTE' ||
-                c.statut === 'EN_ROUTE' ||
-                c.statut === 'EN_COURS'
-            );
+            if (c.statut !== 'EN_ATTENTE' &&
+                c.statut !== 'EN_ROUTE' &&
+                c.statut !== 'EN_COURS') {
+                return false;
+            }
+
+            // Ne garder que les courses créées aujourd'hui
+            if (!c.date) return false;
+            var courseDate = new Date(c.date).toISOString().split('T')[0];
+            return courseDate === today;
         }) || null;
 
         window.courseActive = courseActive;
