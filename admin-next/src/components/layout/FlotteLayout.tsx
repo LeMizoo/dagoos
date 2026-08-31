@@ -63,34 +63,34 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
   // Menu Coop (Inter-urbain)
   const coopMenu = [
     { section: 'Principal', items: [
-      { href: '/coop', icon: LayoutDashboard, label: 'Tableau de bord' }
+      { href: '/flotte/interurbain', icon: LayoutDashboard, label: 'Tableau de bord' }
     ]},
     { section: 'Opérations', items: [
-      { href: '/coop/departs', icon: Calendar, label: 'Départs' },
-      { href: '/coop/reservations', icon: Ticket, label: 'Réservations' },
-      { href: '/coop/livraisons', icon: Truck, label: 'Livraisons' },
-      { href: '/coop/societes', icon: Building2, label: 'Sociétés' },
-      { href: '/coop/contrats', icon: FileCheck, label: 'Contrats' },
-      { href: '/coop/pointages', icon: Clock, label: 'Pointage' },
-      { href: '/coop/rapports', icon: FileText, label: 'Rapports' }
+      { href: '/flotte/interurbain/departs', icon: Calendar, label: 'Départs' },
+      { href: '/flotte/interurbain/reservations', icon: Ticket, label: 'Réservations' },
+      { href: '/flotte/interurbain/livraisons', icon: Truck, label: 'Livraisons' },
+      { href: '/flotte/interurbain/societes', icon: Building2, label: 'Sociétés' },
+      { href: '/flotte/interurbain/contrats', icon: FileCheck, label: 'Contrats' },
+      { href: '/flotte/interurbain/pointages', icon: Clock, label: 'Pointage' },
+      { href: '/flotte/interurbain/rapports', icon: FileText, label: 'Rapports' }
     ]},
     { section: 'Gestion', items: [
-      { href: '/coop/vehicles', icon: Car, label: 'Véhicules' },
-      { href: '/coop/drivers', icon: Users, label: 'Chauffeurs' },
-      { href: '/coop/proprietaires', icon: Users, label: 'Propriétaires' }
+      { href: '/flotte/interurbain/vehicles', icon: Car, label: 'Véhicules' },
+      { href: '/flotte/interurbain/drivers', icon: Users, label: 'Chauffeurs' },
+      { href: '/flotte/interurbain/proprietaires', icon: Users, label: 'Propriétaires' }
     ]},
     { section: 'Finances', items: [
-      { href: '/coop/finances', icon: DollarSign, label: 'Finances' },
-      { href: '/coop/versements', icon: Receipt, label: 'Versements' },
-      { href: '/coop/depenses', icon: CreditCard, label: 'Dépenses' }
+      { href: '/flotte/interurbain/finances', icon: DollarSign, label: 'Finances' },
+      { href: '/flotte/interurbain/versements', icon: Receipt, label: 'Versements' },
+      { href: '/flotte/interurbain/depenses', icon: CreditCard, label: 'Dépenses' }
     ]},
     { section: 'Communication', items: [
-      { href: '/coop/messages', icon: MessageSquare, label: 'Messages' },
-      { href: '/coop/notifications', icon: Bell, label: 'Notifications' }
+      { href: '/flotte/interurbain/messages', icon: MessageSquare, label: 'Messages' },
+      { href: '/flotte/interurbain/notifications', icon: Bell, label: 'Notifications' }
     ]},
     { section: 'Systèmes', items: [
-      { href: '/coop/profil', icon: User, label: 'Profil' },
-      { href: '/coop/settings', icon: Settings, label: 'Paramètres' }
+      { href: '/flotte/interurbain/profil', icon: User, label: 'Profil' },
+      { href: '/flotte/interurbain/settings', icon: Settings, label: 'Paramètres' }
     ]}
   ];
 
