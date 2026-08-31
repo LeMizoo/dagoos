@@ -669,4 +669,40 @@ router.post('/pointage', authMiddleware, async (req, res) => {
   }
 });
 
+// GET /api/drivers/pointages - Liste des pointages (admin/fleet)
+router.get('/pointages', authMiddleware, requirePermission('drivers.read'), async (req, res) => {
+  try {
+    const { organizationId, date } = req.query;
+    
+    const where = {};
+    if (organizationId) {
+      where.driver = { organizationId };
+    }
+    if (date) {
+      where.date = date;
+    }
+
+    const pointages = await prisma.pointage.findMany({
+      where,
+      include: {
+        driver: {
+          select: {
+            id: true,
+            driverCode: true,
+            user: { select: { name: true } },
+            vehicle: { select: { plate: true } }
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 200
+    });
+
+    res.json(pointages);
+  } catch (error) {
+    console.error('GET /drivers/pointages:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
