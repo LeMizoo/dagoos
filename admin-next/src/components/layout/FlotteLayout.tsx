@@ -27,8 +27,8 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
   const isUrbain = organization?.type === 'FLEET_MANAGER';
   const isInterurbain = organization?.type === 'COOPERATIVE';
 
-  // Menu commun à toutes les organisations
-  const commonMenu = [
+  // Menu Fleet (Urbain)
+  const fleetMenu = [
     { section: 'Principal', items: [
       { href: '/flotte', icon: LayoutDashboard, label: 'Tableau de bord' }
     ]},
@@ -42,7 +42,6 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
       { href: '/flotte/rapports', icon: FileText, label: 'Rapports' },
       { href: '/flotte/pointages', icon: Clock, label: 'Pointage' }
     ]},
-
     { section: 'Gestion', items: [
       { href: '/flotte/proprietaires', icon: Users, label: 'Propriétaires' },
       { href: '/flotte/chauffeurs', icon: Users, label: 'Chauffeurs' },
@@ -58,44 +57,46 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
       { href: '/flotte/profil', icon: User, label: 'Profil' },
       { href: '/flotte/settings', icon: Settings, label: 'Paramètres' }
     ]}
-
-
-
-
-
-
-
-
   ];
 
-  // Menu spécifique Urbain
-  const urbainMenu = [
+  // Menu Coop (Inter-urbain)
+  const coopMenu = [
+    { section: 'Principal', items: [
+      { href: '/coop', icon: LayoutDashboard, label: 'Tableau de bord' }
+    ]},
+    { section: 'Communication', items: [
+      { href: '/coop/messages', icon: MessageSquare, label: 'Messages' },
+      { href: '/coop/notifications', icon: Bell, label: 'Notifications' }
+    ]},
     { section: 'Opérations', items: [
-      { href: '/flotte/urbain/courses', icon: Truck, label: 'Courses' },
-      { href: '/flotte/urbain/maintenance', icon: Wrench, label: 'Maintenance' },
-      { href: '/flotte/rapports', icon: FileText, label: 'Rapports' },
-      { href: '/flotte/pointages', icon: Clock, label: 'Pointage' }
+      { href: '/coop/departs', icon: Calendar, label: 'Départs' },
+      { href: '/coop/reservations', icon: Ticket, label: 'Réservations' },
+      { href: '/coop/societes', icon: Building2, label: 'Sociétés' },
+      { href: '/coop/contrats', icon: FileCheck, label: 'Contrats' },
+      { href: '/coop/livraisons', icon: Truck, label: 'Livraisons' },
+      { href: '/coop/rapports', icon: FileText, label: 'Rapports' },
+      { href: '/coop/pointages', icon: Clock, label: 'Pointage' }
+    ]},
+    { section: 'Gestion', items: [
+      { href: '/coop/proprietaires', icon: Users, label: 'Propriétaires' },
+      { href: '/coop/drivers', icon: Users, label: 'Chauffeurs' },
+      { href: '/coop/vehicles', icon: Car, label: 'Véhicules' }
+    ]},
+    { section: 'Finances', items: [
+      { href: '/coop/finances', icon: DollarSign, label: 'Finances' },
+      { href: '/coop/versements', icon: Receipt, label: 'Versements' },
+      { href: '/coop/depenses', icon: CreditCard, label: 'Dépenses' }
+    ]},
+    { section: 'Systèmes', items: [
+      { href: '/coop/theme', icon: Sun, label: 'Thème' },
+      { href: '/coop/profil', icon: User, label: 'Profil' },
+      { href: '/coop/settings', icon: Settings, label: 'Paramètres' }
     ]}
   ];
 
-  // Menu spécifique Inter-urbain
-  const interurbainMenu = [
-    { section: 'Opérations', items: [
-      { href: '/flotte/interurbain/departs', icon: Calendar, label: 'Départs' },
-      { href: '/flotte/interurbain/reservations', icon: Ticket, label: 'Réservations' },
-      { href: '/flotte/interurbain/societes', icon: Building2, label: 'Sociétés' },
-      { href: '/flotte/interurbain/contrats', icon: FileCheck, label: 'Contrats' },
-      { href: '/flotte/interurbain/livraisons', icon: Truck, label: 'Livraisons' },
-      { href: '/flotte/rapports', icon: FileText, label: 'Rapports' },
-      { href: '/flotte/pointages', icon: Clock, label: 'Pointage' }
-    ]}
-  ];
+  const menu = isUrbain ? fleetMenu : coopMenu;
 
-  const menu = [
-    ...commonMenu,
-    ...(isUrbain ? urbainMenu : []),
-    ...(isInterurbain ? interurbainMenu : [])
-  ];
+
 
   const handleLogout = async () => {
     // Attendre le logout pour que Clear-Site-Data soit traité
