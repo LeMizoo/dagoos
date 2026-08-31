@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { Menu, X, LogOut, LayoutDashboard, Car, Wrench, Users, ClipboardList, DollarSign, CreditCard, MessageSquare, Bell, ScrollText, Settings, Truck, Building2, ArrowRightLeft, Receipt, User, QrCode, FileText, FileCheck, Calendar, Ticket, Clock } from 'lucide-react';
 import { useState } from 'react';
+import ThemeSwitcher from './ThemeSwitcher';
 
 const menus: Record<string, any> = {
   admin: [
@@ -128,8 +129,10 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
             </h1>
             <p className="text-xs text-gray-500 dark:text-gray-400">Gestion complète de {app === 'admin' ? 'la plateforme' : app === 'fleet' ? 'la flotte' : 'la coopérative'}</p>
           </div>
-          <div className="relative">
-            <button onClick={() => setShowUserMenu(!showUserMenu)} className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg px-3 py-2 transition">
+          <div className="flex items-center gap-2">
+            <ThemeSwitcher />
+            <div className="relative">
+              <button onClick={() => setShowUserMenu(!showUserMenu)} className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg px-3 py-2 transition">
               <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
                 {user?.name?.charAt(0) || 'U'}
               </div>
@@ -158,8 +161,9 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
                     </button>
                   </div>
                 </div>
-              </>
-            )}
+                </>
+              )}
+            </div>
           </div>
         </header>
         <div className="p-4 lg:p-6 pt-4">{children}</div>

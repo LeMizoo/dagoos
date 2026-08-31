@@ -26,16 +26,29 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!ready) return;
     const root = document.documentElement;
-    root.classList.remove('dark');
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else if (theme === 'system') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (prefersDark) root.classList.add('dark');
-    }
+    const applyTheme = () => {
+      root.classList.remove('dark');
 
+      if (theme === 'dark') {
+        root.classList.add('dark');
+      } else if (theme === 'system') {
+        if (mediaQuery.matches) {
+          root.classList.add('dark');
+        }
+      }
+    };
+
+    applyTheme();
     localStorage.setItem('dagoos_theme', theme);
+
+    // Écouter les changements du système quand mode = system
+    if (theme === 'system') {
+      const handler = () => applyTheme();
+      mediaQuery.addEventListener('change', handler);
+      return () => mediaQuery.removeEventListener('change', handler);
+    }
   }, [theme, ready]);
 
   const setTheme = (newTheme: Theme) => {
