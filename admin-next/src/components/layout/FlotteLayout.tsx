@@ -9,7 +9,7 @@ import {
   Menu, X, LogOut, LayoutDashboard, Car, Users, DollarSign, 
   CreditCard, MessageSquare, Bell, Settings, Truck, Building2,
   Calendar, Ticket, FileCheck, FileText, User, ClipboardList,
-  ArrowRightLeft, QrCode, Wrench, Receipt
+  ArrowRightLeft, QrCode, Wrench, Receipt, Clock
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -32,7 +32,15 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
     { section: 'Principal', items: [
       { href: '/flotte', icon: LayoutDashboard, label: 'Tableau de bord' }
     ]},
+    { section: 'Communication', items: [
+      { href: '/flotte/messages', icon: MessageSquare, label: 'Messages' },
+      { href: '/flotte/notifications', icon: Bell, label: 'Notifications' }
+    ]},
+    { section: 'Opérations', items: [
+      { href: '/flotte/pointages', icon: Clock, label: 'Pointage' }
+    ]},
     { section: 'Gestion', items: [
+      { href: '/flotte/proprietaires', icon: Users, label: 'Propriétaires' },
       { href: '/flotte/chauffeurs', icon: Users, label: 'Chauffeurs' },
       { href: '/flotte/vehicules', icon: Car, label: 'Véhicules' }
     ]},
@@ -41,12 +49,7 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
       { href: '/flotte/versements', icon: Receipt, label: 'Versements' },
       { href: '/flotte/depenses', icon: CreditCard, label: 'Dépenses' }
     ]},
-    { section: 'Communication', items: [
-      { href: '/flotte/messages', icon: MessageSquare, label: 'Messages' },
-      { href: '/flotte/notifications', icon: Bell, label: 'Notifications' }
-    ]},
-    { section: 'Autres', items: [
-      { href: '/flotte/rapports', icon: FileText, label: 'Rapports' },
+    { section: 'Systèmes', items: [
       { href: '/flotte/profil', icon: User, label: 'Profil' },
       { href: '/flotte/settings', icon: Settings, label: 'Paramètres' }
     ]}
@@ -56,8 +59,8 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
   const urbainMenu = [
     { section: 'Opérations Urbain', items: [
       { href: '/flotte/urbain/courses', icon: Truck, label: 'Courses' },
-      { href: '/flotte/urbain/proprietaires', icon: Building2, label: 'Propriétaires' },
-      { href: '/flotte/urbain/maintenance', icon: Wrench, label: 'Maintenance' }
+      { href: '/flotte/urbain/maintenance', icon: Wrench, label: 'Maintenance' },
+      { href: '/flotte/rapports', icon: FileText, label: 'Rapports' }
     ]}
   ];
 
@@ -68,11 +71,11 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
       { href: '/flotte/interurbain/reservations', icon: Ticket, label: 'Réservations' },
       { href: '/flotte/interurbain/societes', icon: Building2, label: 'Sociétés' },
       { href: '/flotte/interurbain/contrats', icon: FileCheck, label: 'Contrats' },
-      { href: '/flotte/interurbain/livraisons', icon: Truck, label: 'Livraisons' }
+      { href: '/flotte/interurbain/livraisons', icon: Truck, label: 'Livraisons' },
+      { href: '/flotte/rapports', icon: FileText, label: 'Rapports' }
     ]}
   ];
 
-  // Menu complet selon le type d'organisation
   const menu = [
     ...commonMenu,
     ...(isUrbain ? urbainMenu : []),
