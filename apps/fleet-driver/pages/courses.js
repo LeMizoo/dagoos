@@ -30,8 +30,7 @@ async function init_courses() {
                 '</button>' +
             '</div>' +
 
-            // COURSES ACCEPTÉES
-            '<div id="coursesAccepteesContainer"></div>' +
+            // COURSES — source de vérité API
 
             // FILTRES
             '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:10px;margin-bottom:10px;">' +
@@ -52,7 +51,6 @@ async function init_courses() {
 
         '</div>';
 
-    renderAcceptedCourses();
     await loadCourses();
 }
 
@@ -245,6 +243,54 @@ function getCourseDate(course) {
     return '-';
 }
 
+function renderCourseActions(course) {
+    var status = String(
+        course.status ||
+        course.statut ||
+        course.state ||
+        'TERMINEE'
+    ).toUpperCase();
+
+    var courseId = course.id;
+
+    if (!courseId) return '';
+
+    var html =
+        '<div style="display:grid;gap:6px;margin-top:10px;">';
+
+    if (status === 'EN_ATTENTE') {
+        html +=
+            '<button onclick="demarrerCourse(\'' +
+            escapeHtml(courseId) +
+            '\')" style="width:100%;background:#3B82F6;color:#fff;border:none;padding:9px;border-radius:7px;font-weight:700;font-size:11px;cursor:pointer;">' +
+                'Démarrer' +
+            '</button>';
+    }
+
+    if (status === 'EN_ROUTE') {
+        html +=
+            '<button onclick="prendreEnCharge(\'' +
+            escapeHtml(courseId) +
+            '\')" style="width:100%;background:#8B5CF6;color:#fff;border:none;padding:9px;border-radius:7px;font-weight:700;font-size:11px;cursor:pointer;">' +
+                'Client pris en charge' +
+            '</button>';
+    }
+
+    if (status === 'EN_ROUTE' || status === 'EN_COURS') {
+        html +=
+            '<button onclick="terminerCourse(\'' +
+            escapeHtml(courseId) +
+            '\')" style="width:100%;background:#10B981;color:#fff;border:none;padding:9px;border-radius:7px;font-weight:700;font-size:11px;cursor:pointer;">' +
+                'Terminer' +
+            '</button>';
+    }
+
+    html += '</div>';
+
+    return html;
+}
+
+
 function renderCourseCard(course) {
     var amount = getCourseAmount(course);
     var commission = getCourseCommission(course);
@@ -319,153 +365,133 @@ function renderCourseCard(course) {
                     : ''
             ) +
 
+            renderCourseActions(course) +
+
         '</div>'
     );
 }
 
 
 // ========================================
-// COURSES ACCEPTÉES
+// ACTIONS COURSE — API
 // ========================================
 
-function renderAcceptedCourses() {
-    var container = document.getElementById('coursesAccepteesContainer');
+async function demarrerCourse(courseId) {
+    if (!courseId) return;
 
-    if (!container) return;
+    try {
+        var response = await fetch(
+            getApiUrl() + '/finances/courses/' +
+            encodeURIComponent(courseId) + '/start',
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + getDriverToken(),
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
 
-    var acceptees = getAcceptedCourses();
+        var data = await response.json().catch(function() {
+            return {};
+        });
 
-    if (acceptees.length === 0) {
-        container.innerHTML = '';
-        return;
-    }
-
-    var html =
-        '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:13px;margin-bottom:10px;">' +
-            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
-                '<div style="font-size:13px;font-weight:700;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';">Courses acceptées</div>' +
-                '<span style="font-size:9px;color:#94A3B8;">' + acceptees.length + '</span>' +
-            '</div>';
-
-    acceptees.forEach(function(course, index) {
-        var status = String(course.statut || 'ACCEPTED').toUpperCase();
-
-        var statusLabel =
-            status === 'ACCEPTED'
-                ? 'Acceptée'
-                : status === 'IN_PROGRESS'
-                    ? 'En cours'
-                    : status === 'COMPLETED'
-                        ? 'Terminée'
-                        : status;
-
-        var statusColor =
-            status === 'ACCEPTED'
-                ? ''+ (window.FLEET_THEME ? window.FLEET_THEME.warning : '#F59E0B') +''
-                : status === 'IN_PROGRESS'
-                    ? '#3B82F6'
-                    : ''+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +'';
-
-        html +=
-            '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:9px;padding:10px;margin-bottom:6px;">' +
-
-                '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-                    '<div>' +
-                        '<div style="font-size:12px;font-weight:700;color:#fff;">Course disponible</div>' +
-                        '<div style="font-size:9px;color:#94A3B8;margin-top:2px;">' +
-                            formatDate(course.date) +
-                        '</div>' +
-                    '</div>' +
-
-                    '<span style="background:' + statusColor + ';color:#fff;padding:3px 7px;border-radius:10px;font-size:9px;font-weight:700;">' +
-                        statusLabel +
-                    '</span>' +
-                '</div>';
-
-        if (status === 'ACCEPTED') {
-            html +=
-                '<button onclick="demarrerCourse(' + index + ')" style="width:100%;margin-top:8px;background:#3B82F6;color:#fff;border:none;padding:9px;border-radius:7px;font-weight:700;font-size:11px;cursor:pointer;">' +
-                    'Démarrer' +
-                '</button>';
-        } else if (status === 'IN_PROGRESS') {
-            html +=
-                '<button onclick="terminerCourse(' + index + ')" style="width:100%;margin-top:8px;background:#10B981;color:#fff;border:none;padding:9px;border-radius:7px;font-weight:700;font-size:11px;cursor:pointer;">' +
-                    'Terminer' +
-                '</button>';
+        if (!response.ok) {
+            alert(data.error || 'Impossible de démarrer la course');
+            return;
         }
 
-        html += '</div>';
-    });
+        alert('Course démarrée !');
+        await loadCourses();
 
-    html += '</div>';
-
-    container.innerHTML = html;
-}
-
-
-// ========================================
-// DÉMARRER COURSE ACCEPTÉE
-// ========================================
-
-function demarrerCourse(index) {
-    var acceptees = getAcceptedCourses();
-
-    if (!acceptees[index]) return;
-
-    acceptees[index].statut = 'IN_PROGRESS';
-    acceptees[index].heureDebut = new Date().toISOString();
-
-    saveAcceptedCourses(acceptees);
-
-    renderAcceptedCourses();
-}
-
-
-// ========================================
-// TERMINER COURSE ACCEPTÉE
-// ========================================
-
-function terminerCourse(index) {
-    var acceptees = getAcceptedCourses();
-
-    if (!acceptees[index]) return;
-
-    acceptees[index].statut = 'COMPLETED';
-    acceptees[index].heureFin = new Date().toISOString();
-
-    saveAcceptedCourses(acceptees);
-
-    renderAcceptedCourses();
-}
-
-
-// ========================================
-// UTILITAIRES COURSES ACCEPTÉES
-// ========================================
-
-function getAcceptedCourses() {
-    try {
-        var data = localStorage.getItem('dagoo_courses_acceptees');
-        var parsed = data ? JSON.parse(data) : [];
-
-        return Array.isArray(parsed) ? parsed : [];
     } catch (error) {
-        console.error('Erreur courses acceptées:', error);
-        return [];
+        console.error('Démarrage course:', error);
+        alert('Erreur réseau lors du démarrage');
     }
 }
 
-function saveAcceptedCourses(courses) {
+
+// ========================================
+// PRISE EN CHARGE CLIENT
+// ========================================
+
+async function prendreEnCharge(courseId) {
+    if (!courseId) return;
+
     try {
-        localStorage.setItem(
-            'dagoo_courses_acceptees',
-            JSON.stringify(courses)
+        var response = await fetch(
+            getApiUrl() + '/finances/courses/' +
+            encodeURIComponent(courseId) + '/pickup',
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + getDriverToken(),
+                    'Content-Type': 'application/json'
+                }
+            }
         );
+
+        var data = await response.json().catch(function() {
+            return {};
+        });
+
+        if (!response.ok) {
+            alert(data.error || 'Impossible de prendre en charge le client');
+            return;
+        }
+
+        alert('Client pris en charge !');
+        await loadCourses();
+
     } catch (error) {
-        console.error('Erreur sauvegarde courses acceptées:', error);
+        console.error('Prise en charge:', error);
+        alert('Erreur réseau lors de la prise en charge');
     }
 }
 
+
+// ========================================
+// TERMINER COURSE
+// ========================================
+
+async function terminerCourse(courseId) {
+    if (!courseId) return;
+
+    try {
+        var response = await fetch(
+            getApiUrl() + '/finances/courses/' +
+            encodeURIComponent(courseId) + '/complete',
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + getDriverToken(),
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        var data = await response.json().catch(function() {
+            return {};
+        });
+
+        if (!response.ok) {
+            alert(data.error || 'Impossible de terminer la course');
+            return;
+        }
+
+        alert('Course terminée !');
+        await loadCourses();
+
+    } catch (error) {
+        console.error('Fin course:', error);
+        alert('Erreur réseau lors de la fin de course');
+    }
+}
+
+
+// ========================================
+// ACTIONS COURSE — FIN
+// ========================================
 
 // ========================================
 // FILTRES DE DATE
@@ -702,4 +728,5 @@ window.init_courses = init_courses;
 window.loadCourses = loadCourses;
 window.filterCourses = filterCourses;
 window.demarrerCourse = demarrerCourse;
+window.prendreEnCharge = prendreEnCharge;
 window.terminerCourse = terminerCourse;

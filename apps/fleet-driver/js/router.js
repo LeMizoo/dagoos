@@ -5,6 +5,25 @@ function getAuthHeaders() {
   return headers;
 }
 
+// Fonctions utilitaires communes
+function getDriverToken() {
+  return localStorage.getItem('dagoo_driver_token') || '';
+}
+
+function getDriverUser() {
+  try {
+    return JSON.parse(localStorage.getItem('dagoo_driver_user') || '{}');
+  } catch (e) {
+    return {};
+  }
+}
+
+function getApiUrl() {
+  return (typeof DAGOOS_CONFIG !== 'undefined' && DAGOOS_CONFIG.apiUrl)
+    ? DAGOOS_CONFIG.apiUrl
+    : '';
+}
+
 async function apiFetch(endpoint, options) {
   options = options || {};
   var url = DAGOOS_CONFIG.apiUrl + endpoint;
@@ -28,6 +47,10 @@ async function apiFetch(endpoint, options) {
     throw err;
   }
 }
+
+window.getDriverToken = getDriverToken;
+window.getDriverUser = getDriverUser;
+window.getApiUrl = getApiUrl;
 
 window.apiFetch = apiFetch;
 window.apiGet = function(endpoint) { return apiFetch(endpoint); };
