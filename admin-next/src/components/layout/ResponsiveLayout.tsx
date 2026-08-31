@@ -13,18 +13,20 @@ const menus: Record<string, any> = {
     { section: 'Système', items: [{ href: '/dashboard/system-logs', icon: ScrollText, label: 'Logs' }, { href: '/dashboard/settings', icon: Settings, label: 'Paramètres' }] },
   ],
   fleet: [
-    { section: 'Principal', items: [{ href: '/fleet', icon: LayoutDashboard, label: 'Tableau de bord' }] },
-    { section: 'Gestion', items: [{ href: '/flotte/chauffeurs', icon: Users, label: 'Chauffeurs' }, { href: '/flotte/vehicules', icon: Car, label: 'Véhicules' }, { href: '/flotte/pointages', icon: Clock, label: 'Pointages' }] },
-    { section: 'Opérations', items: [{ href: '/fleet/permutation', icon: ArrowRightLeft, label: 'Permutation' }, { href: '/fleet/codes', icon: QrCode, label: 'Codes' }] },
+    { section: 'Principal', items: [{ href: '/flotte/urbain', icon: LayoutDashboard, label: 'Tableau de bord' }] },
+    { section: 'Communication', items: [{ href: '/flotte/messages', icon: MessageSquare, label: 'Messages' }, { href: '/flotte/notifications', icon: Bell, label: 'Notifications' }] },
+    { section: 'Opérations', items: [{ href: '/flotte/pointages', icon: Clock, label: 'Pointage' }, { href: '/flotte/urbain/courses', icon: ClipboardList, label: 'Courses' }, { href: '/flotte/maintenance', icon: Wrench, label: 'Maintenance' }, { href: '/flotte/rapports', icon: FileText, label: 'Rapports' }] },
+    { section: 'Gestion', items: [{ href: '/flotte/proprietaires', icon: Users, label: 'Propriétaires' }, { href: '/flotte/chauffeurs', icon: Users, label: 'Chauffeurs' }, { href: '/flotte/vehicules', icon: Car, label: 'Véhicules' }] },
     { section: 'Finances', items: [{ href: '/flotte/finances', icon: DollarSign, label: 'Finances' }, { href: '/flotte/versements', icon: Receipt, label: 'Versements' }, { href: '/flotte/depenses', icon: DollarSign, label: 'Dépenses' }] },
-    { section: 'Autres', items: [{ href: '/fleet/demandes', icon: ClipboardList, label: 'Demandes clients' }, { href: '/fleet/messages', icon: MessageSquare, label: 'Messages' }, { href: '/fleet/notifications', icon: Bell, label: 'Notifications' }, { href: '/fleet/rapports', icon: FileText, label: 'Rapports' }, { href: '/fleet/profil', icon: User, label: 'Profil' }, { href: '/fleet/settings', icon: Settings, label: 'Paramètres' }] },
+    { section: 'Systèmes', items: [{ href: '/flotte/profil', icon: User, label: 'Profil' }, { href: '/flotte/settings', icon: Settings, label: 'Paramètres' }] },
   ],
   coop: [
     { section: 'Principal', items: [{ href: '/coop', icon: LayoutDashboard, label: 'Tableau de bord' }] },
-    { section: 'Gestion', items: [{ href: '/coop/drivers', icon: Users, label: 'Chauffeurs' }, { href: '/coop/vehicles', icon: Car, label: 'Véhicules' }] },
-    { section: 'Opérations', items: [{ href: '/coop/departs', icon: Calendar, label: 'Départs' }, { href: '/coop/reservations', icon: Ticket, label: 'Réservations' }, { href: '/coop/demandes', icon: ClipboardList, label: 'Demandes clients' }, { href: '/coop/contrats', icon: FileCheck, label: 'Contrats' }, { href: '/coop/livraisons', icon: Truck, label: 'Livraisons' }, { href: '/coop/permutation', icon: ArrowRightLeft, label: 'Permutation' }, { href: '/coop/codes', icon: QrCode, label: 'Codes' }] },
+    { section: 'Communication', items: [{ href: '/coop/messages', icon: MessageSquare, label: 'Messages' }, { href: '/coop/notifications', icon: Bell, label: 'Notifications' }] },
+    { section: 'Opérations', items: [{ href: '/coop/pointages', icon: Clock, label: 'Pointage' }, { href: '/coop/departs', icon: Calendar, label: 'Départs' }, { href: '/coop/reservations', icon: Ticket, label: 'Réservations' }, { href: '/coop/demandes', icon: ClipboardList, label: 'Demandes clients' }, { href: '/coop/contrats', icon: FileCheck, label: 'Contrats' }, { href: '/coop/livraisons', icon: Truck, label: 'Livraisons' }] },
+    { section: 'Gestion', items: [{ href: '/coop/proprietaires', icon: Users, label: 'Propriétaires' }, { href: '/coop/drivers', icon: Users, label: 'Chauffeurs' }, { href: '/coop/vehicles', icon: Car, label: 'Véhicules' }] },
     { section: 'Finances', items: [{ href: '/coop/finances', icon: DollarSign, label: 'Finances' }, { href: '/coop/versements', icon: Receipt, label: 'Versements' }, { href: '/coop/depenses', icon: DollarSign, label: 'Dépenses' }] },
-    { section: 'Autres', items: [{ href: '/coop/messages', icon: MessageSquare, label: 'Messages' }, { href: '/coop/notifications', icon: Bell, label: 'Notifications' }, { href: '/coop/rapports', icon: FileText, label: 'Rapports' }, { href: '/coop/profil', icon: User, label: 'Profil' }, { href: '/coop/settings', icon: Settings, label: 'Paramètres' }] },
+    { section: 'Systèmes', items: [{ href: '/coop/profil', icon: User, label: 'Profil' }, { href: '/coop/settings', icon: Settings, label: 'Paramètres' }] },
   ],
 };
 
