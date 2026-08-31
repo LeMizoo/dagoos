@@ -297,6 +297,9 @@ router.put('/:id', authMiddleware, requirePermission('drivers.manage'), async (r
       status,
       vehicleId,
       license,
+      firstName,
+      lastName,
+      phone,
     } = req.body;
 
     const data = {};
@@ -344,7 +347,34 @@ router.put('/:id', authMiddleware, requirePermission('drivers.manage'), async (r
       },
     });
 
-    res.json(sanitizeDriver(driver));
+    // Mettre à jour le User associé si firstName/lastName/phone sont fournis
+    if (
+      firstName !== undefined ||
+      lastName !== undefined ||
+      phone !== undefined
+    ) {
+      const name = `${firstName || ''} ${lastName || ''}`.trim();
+
+      await prisma.user.update({
+        where: { id: driver.userId },
+        data: {
+          ...(name ? { name } : {}),
+          ...(phone !== undefined ? { phone } : {}),
+        },
+      });
+    }
+
+    // Recharger avec les données User à jour
+    const driverUpdated = await prisma.driver.findUnique({
+      where: { id: req.params.id },
+      include: {
+        user: true,
+        organization: true,
+        vehicle: true,
+      },
+    });
+
+    res.json(sanitizeDriver(driverUpdated || driver));
   } catch (error) {
     console.error('PUT /drivers/:id:', error);
 
