@@ -36,6 +36,13 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
       { href: '/flotte/messages', icon: MessageSquare, label: 'Messages' },
       { href: '/flotte/notifications', icon: Bell, label: 'Notifications' }
     ]},
+    { section: 'Opérations', items: [
+      { href: '/flotte/urbain/courses', icon: Truck, label: 'Courses' },
+      { href: '/flotte/urbain/maintenance', icon: Wrench, label: 'Maintenance' },
+      { href: '/flotte/rapports', icon: FileText, label: 'Rapports' },
+      { href: '/flotte/pointages', icon: Clock, label: 'Pointage' }
+    ]},
+
     { section: 'Gestion', items: [
       { href: '/flotte/proprietaires', icon: Users, label: 'Propriétaires' },
       { href: '/flotte/chauffeurs', icon: Users, label: 'Chauffeurs' },
