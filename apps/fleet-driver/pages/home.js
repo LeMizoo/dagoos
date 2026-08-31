@@ -386,7 +386,7 @@ async function init_home() {
     }
 
     main.innerHTML =
-        getHeaderLoadingHTML() +
+        getHeaderHTML() +
         '<div style="padding:40px;text-align:center;color:#94A3B8;">' +
             'Chargement du tableau de bord...' +
         '</div>';

@@ -110,7 +110,7 @@ function getHeaderHTML() {
     '<div style="display:flex;gap:4px;">' +
       '<button onclick="loadPage(\'notifications\')" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:#DAA520;cursor:pointer;font-size:14px;">🔔</button>' +
       '<button onclick="loadPage(\'profil\')" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:#DAA520;cursor:pointer;font-size:14px;">📶</button>' +
-      '<button onclick="window.location.reload()" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:#F87171;cursor:pointer;font-size:16px;">↻</button>' +
+      '<button onclick="logout()" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:#F87171;cursor:pointer;font-size:16px;" aria-label="Déconnexion" title="Déconnexion">⏻</button>' +
     '</div>' +
   '</div>';
 }
