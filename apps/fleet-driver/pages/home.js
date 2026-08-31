@@ -400,6 +400,16 @@ async function init_home() {
 
         window.currentDriver = currentDriver;
 
+        // Charger le pointage du jour
+        var pointageData = null;
+        try {
+            pointageData = await apiGet('/drivers/me/pointage');
+        } catch (e) {
+            console.warn('Pointage indisponible:', e);
+        }
+
+        window.currentPointage = pointageData;
+
         if (
             currentDriver &&
             currentDriver.organization
@@ -494,42 +504,34 @@ async function init_home() {
     };
 
     // ------------------------------------
-    // STATUT
+    // STATUT DE PRÉSENCE — dérivé du POINTAGE
     // ------------------------------------
 
-    var driverStatus =
-        currentDriver && currentDriver.status
-            ? currentDriver.status
-            : 'OFFLINE';
-
-    var isAvailable =
-        driverStatus === 'AVAILABLE' ||
-        driverStatus === 'active';
-
-    var isOnBreak =
-        driverStatus === 'ON_BREAK' ||
-        driverStatus === 'pause';
+    var pointageStatut =
+        pointageData && pointageData.statut
+            ? pointageData.statut
+            : 'NON_DEBUTE';
 
     var statutPresence =
-        isAvailable
+        pointageStatut === 'PRESENT'
             ? 'present'
-            : isOnBreak
+            : pointageStatut === 'PAUSE'
                 ? 'pause'
                 : 'absent';
 
     window.statutPresence = statutPresence;
 
     var statusLabel =
-        isAvailable
+        statutPresence === 'present'
             ? 'En service'
-            : isOnBreak
+            : statutPresence === 'pause'
                 ? 'En pause'
                 : 'Absent';
 
     var statusColor =
-        isAvailable
+        statutPresence === 'present'
             ? ''+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +''
-            : isOnBreak
+            : statutPresence === 'pause'
                 ? ''+ (window.FLEET_THEME ? window.FLEET_THEME.warning : '#F59E0B') +''
                 : ''+ (window.FLEET_THEME ? window.FLEET_THEME.danger : '#E74C3C') +'';
 
@@ -636,32 +638,52 @@ async function init_home() {
                     : ''
             ) +
 
-            // STATUT (toujours visible)
+            // STATUT (pointage)
             '<div style="display:flex;gap:8px;margin-bottom:10px;">' +
 
-                '<button onclick="changeStatus(\'present\')" style="flex:1;padding:12px 6px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
-                    (estBloque ? 'disabled' : '') +
-                '>' +
-                    'Début' +
-                '</button>' +
+                // Bouton DÉBUT — visible si NON_DEBUTE
+                (
+                    statutPresence === 'absent'
+                        ? '<button onclick="changeStatus(\'present\')" style="flex:1;padding:12px 6px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
+                            (estBloque ? 'disabled' : '') +
+                        '>' +
+                            'Début' +
+                        '</button>'
+                        : ''
+                ) +
 
-                '<button onclick="changeStatus(\'pause\')" style="flex:1;padding:12px 6px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.warning : '#F59E0B') +';color:#000;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
-                    (estBloque || statutPresence !== 'present' ? 'disabled' : '') +
-                '>' +
-                    'Pause' +
-                '</button>' +
+                // Bouton PAUSE — visible si PRESENT
+                (
+                    statutPresence === 'present'
+                        ? '<button onclick="changeStatus(\'pause\')" style="flex:1;padding:12px 6px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.warning : '#F59E0B') +';color:#000;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
+                            (estBloque ? 'disabled' : '') +
+                        '>' +
+                            'Pause' +
+                        '</button>'
+                        : ''
+                ) +
 
-                '<button onclick="changeStatus(\'termine\')" style="flex:1;padding:12px 6px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.danger : '#E74C3C') +';color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
-                    (
-                        estBloque ||
-                        statutPresence === 'absent' ||
-                        statutPresence === 'termine'
-                            ? 'disabled'
-                            : ''
-                    ) +
-                '>' +
-                    'Fin' +
-                '</button>' +
+                // Bouton REPRISE — visible si PAUSE
+                (
+                    statutPresence === 'pause'
+                        ? '<button onclick="changeStatus(\'reprise\')" style="flex:1;padding:12px 6px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
+                            (estBloque ? 'disabled' : '') +
+                        '>' +
+                            'Reprise' +
+                        '</button>'
+                        : ''
+                ) +
+
+                // Bouton FIN — visible si PRESENT ou PAUSE
+                (
+                    statutPresence === 'present' || statutPresence === 'pause'
+                        ? '<button onclick="changeStatus(\'termine\')" style="flex:1;padding:12px 6px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.danger : '#E74C3C') +';color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
+                            (estBloque ? 'disabled' : '') +
+                        '>' +
+                            'Fin' +
+                        '</button>'
+                        : ''
+                ) +
 
             '</div>' +
 
@@ -1887,7 +1909,9 @@ async function changeStatus(status) {
             ? 'Passage en service'
             : status === 'pause'
                 ? 'Mise en pause'
-                : 'Fin de service';
+                : status === 'reprise'
+                    ? 'Reprise de service'
+                    : 'Fin de service';
 
     try {
 

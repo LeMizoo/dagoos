@@ -89,9 +89,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function getHeaderHTML() {
   var user = JSON.parse(localStorage.getItem('dagoo_driver_user') || '{}');
-  var driverStatus = window.currentDriver && window.currentDriver.status ? window.currentDriver.status : 'active';
-  var statusLabel = driverStatus === 'active' ? 'En service' : driverStatus === 'pause' ? 'En pause' : 'Absent';
-  var statusColor = driverStatus === 'active' ? '#22C55E' : driverStatus === 'pause' ? '#F59E0B' : '#E74C3C';
+  // Statut dérivé du pointage (pas de Driver.status)
+  var pointageStatut = window.currentPointage && window.currentPointage.statut
+    ? window.currentPointage.statut
+    : (window.statutPresence === 'present' ? 'PRESENT'
+      : window.statutPresence === 'pause' ? 'PAUSE'
+      : 'NON_DEBUTE');
+  var statusLabel = pointageStatut === 'PRESENT' ? 'En service' : pointageStatut === 'PAUSE' ? 'En pause' : 'Absent';
+  var statusColor = pointageStatut === 'PRESENT' ? '#22C55E' : pointageStatut === 'PAUSE' ? '#F59E0B' : '#E74C3C';
   var plate = window.currentVehicle ? window.currentVehicle.plate : '';
   
   return '<div style="background:#1E293B;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid #DAA520;">' +
