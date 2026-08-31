@@ -9,7 +9,7 @@ import {
   Menu, X, LogOut, LayoutDashboard, Car, Users, DollarSign, 
   CreditCard, MessageSquare, Bell, Settings, Truck, Building2,
   Calendar, Ticket, FileCheck, FileText, User, ClipboardList,
-  ArrowRightLeft, QrCode, Wrench, Receipt, Clock, Sun
+  ArrowRightLeft, QrCode, Wrench, Receipt, Clock
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -32,28 +32,27 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
     { section: 'Principal', items: [
       { href: '/flotte', icon: LayoutDashboard, label: 'Tableau de bord' }
     ]},
-    { section: 'Communication', items: [
-      { href: '/flotte/messages', icon: MessageSquare, label: 'Messages' },
-      { href: '/flotte/notifications', icon: Bell, label: 'Notifications' }
-    ]},
     { section: 'Opérations', items: [
       { href: '/flotte/urbain/courses', icon: Truck, label: 'Courses' },
       { href: '/flotte/urbain/maintenance', icon: Wrench, label: 'Maintenance' },
-      { href: '/flotte/rapports', icon: FileText, label: 'Rapports' },
-      { href: '/flotte/pointages', icon: Clock, label: 'Pointage' }
+      { href: '/flotte/pointages', icon: Clock, label: 'Pointage' },
+      { href: '/flotte/rapports', icon: FileText, label: 'Rapports' }
     ]},
     { section: 'Gestion', items: [
-      { href: '/flotte/proprietaires', icon: Users, label: 'Propriétaires' },
+      { href: '/flotte/vehicules', icon: Car, label: 'Véhicules' },
       { href: '/flotte/chauffeurs', icon: Users, label: 'Chauffeurs' },
-      { href: '/flotte/vehicules', icon: Car, label: 'Véhicules' }
+      { href: '/flotte/proprietaires', icon: Users, label: 'Propriétaires' }
     ]},
     { section: 'Finances', items: [
       { href: '/flotte/finances', icon: DollarSign, label: 'Finances' },
       { href: '/flotte/versements', icon: Receipt, label: 'Versements' },
       { href: '/flotte/depenses', icon: CreditCard, label: 'Dépenses' }
     ]},
+    { section: 'Communication', items: [
+      { href: '/flotte/messages', icon: MessageSquare, label: 'Messages' },
+      { href: '/flotte/notifications', icon: Bell, label: 'Notifications' }
+    ]},
     { section: 'Systèmes', items: [
-      { href: '/flotte/theme', icon: Sun, label: 'Thème' },
       { href: '/flotte/profil', icon: User, label: 'Profil' },
       { href: '/flotte/settings', icon: Settings, label: 'Paramètres' }
     ]}
@@ -64,31 +63,30 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
     { section: 'Principal', items: [
       { href: '/coop', icon: LayoutDashboard, label: 'Tableau de bord' }
     ]},
-    { section: 'Communication', items: [
-      { href: '/coop/messages', icon: MessageSquare, label: 'Messages' },
-      { href: '/coop/notifications', icon: Bell, label: 'Notifications' }
-    ]},
     { section: 'Opérations', items: [
       { href: '/coop/departs', icon: Calendar, label: 'Départs' },
       { href: '/coop/reservations', icon: Ticket, label: 'Réservations' },
+      { href: '/coop/livraisons', icon: Truck, label: 'Livraisons' },
       { href: '/coop/societes', icon: Building2, label: 'Sociétés' },
       { href: '/coop/contrats', icon: FileCheck, label: 'Contrats' },
-      { href: '/coop/livraisons', icon: Truck, label: 'Livraisons' },
-      { href: '/coop/rapports', icon: FileText, label: 'Rapports' },
-      { href: '/coop/pointages', icon: Clock, label: 'Pointage' }
+      { href: '/coop/pointages', icon: Clock, label: 'Pointage' },
+      { href: '/coop/rapports', icon: FileText, label: 'Rapports' }
     ]},
     { section: 'Gestion', items: [
-      { href: '/coop/proprietaires', icon: Users, label: 'Propriétaires' },
+      { href: '/coop/vehicles', icon: Car, label: 'Véhicules' },
       { href: '/coop/drivers', icon: Users, label: 'Chauffeurs' },
-      { href: '/coop/vehicles', icon: Car, label: 'Véhicules' }
+      { href: '/coop/proprietaires', icon: Users, label: 'Propriétaires' }
     ]},
     { section: 'Finances', items: [
       { href: '/coop/finances', icon: DollarSign, label: 'Finances' },
       { href: '/coop/versements', icon: Receipt, label: 'Versements' },
       { href: '/coop/depenses', icon: CreditCard, label: 'Dépenses' }
     ]},
+    { section: 'Communication', items: [
+      { href: '/coop/messages', icon: MessageSquare, label: 'Messages' },
+      { href: '/coop/notifications', icon: Bell, label: 'Notifications' }
+    ]},
     { section: 'Systèmes', items: [
-      { href: '/coop/theme', icon: Sun, label: 'Thème' },
       { href: '/coop/profil', icon: User, label: 'Profil' },
       { href: '/coop/settings', icon: Settings, label: 'Paramètres' }
     ]}

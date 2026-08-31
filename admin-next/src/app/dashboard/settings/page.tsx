@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Settings, User, Shield, Palette, Bell, Globe, Smartphone, Save, Crown, Coffee, Star, Zap, FileText } from 'lucide-react';
 import PasswordInput from '@/components/ui/PasswordInput';
 import { apiFetch } from '@/lib/api';
+import { useTheme } from '@/lib/theme-context';
 
 type PlanKey = 'freemium' | 'basic' | 'standard' | 'premium' | 'surdevis';
 type EntityType = 'fleet' | 'coop';
@@ -33,20 +34,6 @@ const defaultCoopPlans: Record<PlanKey, Plan> = {
   surdevis: { name: 'Sur devis', price: -1, vehiclesMax: 999, driversMax: 999, landingPage: true },
 };
 
-// Fonction globale pour appliquer le thème
-function applyGlobalTheme(newTheme: 'light' | 'dark' | 'system') {
-  localStorage.setItem('dagoos_theme', newTheme);
-  const root = document.documentElement;
-  root.classList.remove('dark');
-  if (newTheme === 'dark') {
-    root.classList.add('dark');
-  } else if (newTheme === 'system') {
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      root.classList.add('dark');
-    }
-  }
-}
-
 export default function SettingsPage() {
   const [tab, setTab] = useState('general');
   const [saved, setSaved] = useState(false);
@@ -56,9 +43,8 @@ export default function SettingsPage() {
   const [editPlan, setEditPlan] = useState<string | null>(null);
   const [editPrice, setEditPrice] = useState(0);
 
-  // Thème
-  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('light');
-  const [themeReady, setThemeReady] = useState(false);
+  // Thème global
+  const { theme, setTheme } = useTheme();
   
   const [mobileMoney, setMobileMoney] = useState({ mvola: '', orange: '', airtel: '' });
 
@@ -91,12 +77,6 @@ export default function SettingsPage() {
   }, []);
 
 
-  useEffect(() => {
-    const saved = localStorage.getItem('dagoos_theme') as 'light' | 'dark' | 'system' | null;
-    if (saved) setTheme(saved);
-    setThemeReady(true);
-  }, []);
-
   const currentPlans = entityTab === 'fleet' ? fleetPlans : coopPlans;
   const setCurrentPlans = entityTab === 'fleet' ? setFleetPlans : setCoopPlans;
 
@@ -107,7 +87,7 @@ export default function SettingsPage() {
     { id: 'security', icon: Shield, label: 'Sécurité' },
     { id: 'appearance', icon: Palette, label: 'Apparence' },
     { id: 'notifications', icon: Bell, label: 'Notifications' },
-    { id: 'api', icon: Globe, Smartphone, label: 'API' },
+    { id: 'api', icon: Globe, label: 'API' },
     { id: 'mobile-money', icon: Smartphone, label: 'Mobile Money' },
   ];
 
@@ -256,10 +236,7 @@ export default function SettingsPage() {
                     ].map(item => (
                       <button
                         key={item.id}
-                        onClick={() => {
-                          setTheme(item.id);
-                          applyGlobalTheme(item.id);
-                        }}
+                        onClick={() => setTheme(item.id)}
                         className={`flex-1 p-3 rounded-xl border text-center transition-all ${
                           theme === item.id
                             ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-400 shadow-sm'
