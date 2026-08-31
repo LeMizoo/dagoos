@@ -3,7 +3,7 @@ import { useAuth } from '@/lib/auth-context';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, X, LogOut, LayoutDashboard, Car, Wrench, Users, ClipboardList, DollarSign, CreditCard, MessageSquare, Bell, ScrollText, Settings, Truck, Building2, ArrowRightLeft, Receipt, User, QrCode, FileText, FileCheck, Calendar, Ticket } from 'lucide-react';
+import { Menu, X, LogOut, LayoutDashboard, Car, Wrench, Users, ClipboardList, DollarSign, CreditCard, MessageSquare, Bell, ScrollText, Settings, Truck, Building2, ArrowRightLeft, Receipt, User, QrCode, FileText, FileCheck, Calendar, Ticket, Clock } from 'lucide-react';
 import { useState } from 'react';
 
 const menus: Record<string, any> = {
@@ -14,9 +14,9 @@ const menus: Record<string, any> = {
   ],
   fleet: [
     { section: 'Principal', items: [{ href: '/fleet', icon: LayoutDashboard, label: 'Tableau de bord' }] },
-    { section: 'Gestion', items: [{ href: '/fleet/drivers', icon: Users, label: 'Chauffeurs' }, { href: '/fleet/vehicles', icon: Car, label: 'Véhicules' }] },
+    { section: 'Gestion', items: [{ href: '/flotte/chauffeurs', icon: Users, label: 'Chauffeurs' }, { href: '/flotte/vehicules', icon: Car, label: 'Véhicules' }, { href: '/flotte/pointages', icon: Clock, label: 'Pointages' }] },
     { section: 'Opérations', items: [{ href: '/fleet/permutation', icon: ArrowRightLeft, label: 'Permutation' }, { href: '/fleet/codes', icon: QrCode, label: 'Codes' }] },
-    { section: 'Finances', items: [{ href: '/fleet/finances', icon: DollarSign, label: 'Finances' }, { href: '/fleet/versements', icon: Receipt, label: 'Versements' }, { href: '/fleet/depenses', icon: DollarSign, label: 'Dépenses' }] },
+    { section: 'Finances', items: [{ href: '/flotte/finances', icon: DollarSign, label: 'Finances' }, { href: '/flotte/versements', icon: Receipt, label: 'Versements' }, { href: '/flotte/depenses', icon: DollarSign, label: 'Dépenses' }] },
     { section: 'Autres', items: [{ href: '/fleet/demandes', icon: ClipboardList, label: 'Demandes clients' }, { href: '/fleet/messages', icon: MessageSquare, label: 'Messages' }, { href: '/fleet/notifications', icon: Bell, label: 'Notifications' }, { href: '/fleet/rapports', icon: FileText, label: 'Rapports' }, { href: '/fleet/profil', icon: User, label: 'Profil' }, { href: '/fleet/settings', icon: Settings, label: 'Paramètres' }] },
   ],
   coop: [
