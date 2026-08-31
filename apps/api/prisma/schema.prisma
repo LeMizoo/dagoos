@@ -81,6 +81,7 @@ model Driver {
   courses        Course[]
   trips          Trip[]
   expenses       Expense[]
+  pointages      Pointage[]
 }
 
 // ========================================
@@ -237,6 +238,22 @@ model Livraison {
   statut         String   @default("en_attente")
   preuve         String?
   createdAt      DateTime @default(now())
+}
+
+// ========================================
+// POINTAGE CHAUFFEUR
+// ========================================
+model Pointage {
+  id        String   @id @default(cuid())
+  driverId  String
+  driver    Driver   @relation(fields: [driverId], references: [id])
+  date      String   // format YYYY-MM-DD
+  type      String   // arrivee, pause, reprise, depart
+  statut    String   // PRESENT, PAUSE, PARTI
+  heure     DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@index([driverId, date])
 }
 
 // ========================================

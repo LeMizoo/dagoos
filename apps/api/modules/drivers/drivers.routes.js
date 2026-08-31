@@ -573,4 +573,100 @@ router.put('/me/status', authMiddleware, async (req, res) => {
   }
 });
 
+// ========================================
+// POINTAGE CHAUFFEUR
+// ========================================
+
+// GET /api/drivers/me/pointage - Statut du pointage aujourd'hui
+router.get('/me/pointage', authMiddleware, async (req, res) => {
+  try {
+    if (!req.user.driverId) {
+      return res.status(400).json({ error: 'Chauffeur non associé' });
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+
+    const pointage = await prisma.pointage.findFirst({
+      where: {
+        driverId: req.user.driverId,
+        date: today
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    res.json({
+      success: true,
+      pointage: pointage || null,
+      statut: pointage ? pointage.statut : 'NON_DEBUTE'
+    });
+  } catch (error) {
+    console.error('GET /drivers/me/pointage:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/drivers/pointage - Pointer (debut/standby/reprise/fin)
+router.post('/pointage', authMiddleware, async (req, res) => {
+  try {
+    if (req.user.role !== 'DRIVER') {
+      return res.status(403).json({ error: 'Réservé aux chauffeurs' });
+    }
+
+    if (!req.user.driverId) {
+      return res.status(400).json({ error: 'Chauffeur non associé' });
+    }
+
+    const { type } = req.body;
+    const today = new Date().toISOString().split('T')[0];
+
+    if (!['arrivee', 'pause', 'reprise', 'depart'].includes(type)) {
+      return res.status(400).json({ error: 'Type de pointage invalide' });
+    }
+
+    // Vérifier le pointage actuel
+    const pointageActuel = await prisma.pointage.findFirst({
+      where: {
+        driverId: req.user.driverId,
+        date: today
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    let statut = '';
+    if (type === 'arrivee') statut = 'PRESENT';
+    if (type === 'pause') statut = 'PAUSE';
+    if (type === 'reprise') statut = 'PRESENT';
+    if (type === 'depart') statut = 'PARTI';
+
+    // Créer le pointage
+    const pointage = await prisma.pointage.create({
+      data: {
+        driverId: req.user.driverId,
+        date: today,
+        type,
+        statut,
+        heure: new Date()
+      }
+    });
+
+    // Mettre à jour le statut du driver
+    const driverStatus = statut === 'PRESENT' ? 'AVAILABLE' : 
+                         statut === 'PAUSE' ? 'ON_BREAK' : 'OFFLINE';
+
+    await prisma.driver.update({
+      where: { id: req.user.driverId },
+      data: { status: driverStatus }
+    });
+
+    res.json({
+      success: true,
+      pointage,
+      statut
+    });
+  } catch (error) {
+    console.error('POST /drivers/pointage:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
