@@ -12,6 +12,7 @@ import {
   ArrowRightLeft, QrCode, Wrench, Receipt, Clock
 } from 'lucide-react';
 import { useState } from 'react';
+import { useTheme } from '@/lib/theme-context';
 
 interface FlotteLayoutProps {
   children: React.ReactNode;
@@ -23,6 +24,7 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
   const { organization } = useOrganization();
   const [isOpen, setIsOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   const isUrbain = organization?.type === 'FLEET_MANAGER';
   const isInterurbain = organization?.type === 'COOPERATIVE';
@@ -195,8 +197,32 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
               {isUrbain ? 'Gestion Urbaine' : isInterurbain ? 'Gestion Inter-urbaine' : 'Chargement...'}
             </p>
           </div>
-          <div className="relative">
-            <button onClick={() => setShowUserMenu(!showUserMenu)} className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg px-3 py-2 transition">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+              <button
+                onClick={() => setTheme('light')}
+                className={`px-2 py-1 rounded-md text-sm transition ${theme === 'light' ? 'bg-white dark:bg-gray-600 shadow' : 'hover:bg-gray-200 dark:hover:bg-gray-600'}`}
+                title="Clair"
+              >
+                ☀️
+              </button>
+              <button
+                onClick={() => setTheme('dark')}
+                className={`px-2 py-1 rounded-md text-sm transition ${theme === 'dark' ? 'bg-white dark:bg-gray-600 shadow' : 'hover:bg-gray-200 dark:hover:bg-gray-600'}`}
+                title="Sombre"
+              >
+                🌙
+              </button>
+              <button
+                onClick={() => setTheme('system')}
+                className={`px-2 py-1 rounded-md text-sm transition ${theme === 'system' ? 'bg-white dark:bg-gray-600 shadow' : 'hover:bg-gray-200 dark:hover:bg-gray-600'}`}
+                title="Système"
+              >
+                🖥️
+              </button>
+            </div>
+            <div className="relative">
+              <button onClick={() => setShowUserMenu(!showUserMenu)} className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg px-3 py-2 transition">
               <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
                 {user?.name?.charAt(0) || 'U'}
               </div>
@@ -227,8 +253,9 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
                     </button>
                   </div>
                 </div>
-              </>
-            )}
+                </>
+              )}
+            </div>
           </div>
         </header>
         <div className="p-4 lg:p-6 pt-4">{children}</div>
