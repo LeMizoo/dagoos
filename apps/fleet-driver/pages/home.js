@@ -1872,12 +1872,15 @@ async function annulerCourse(courseId) {
 
 async function changeStatus(status) {
 
-    var statusApi =
+    // Nouveau système de pointage
+    var typePointage =
         status === 'present'
-            ? 'AVAILABLE'
+            ? 'arrivee'
             : status === 'pause'
-                ? 'ON_BREAK'
-                : 'OFFLINE';
+                ? 'pause'
+                : status === 'reprise'
+                    ? 'reprise'
+                    : 'depart';
 
     var msg =
         status === 'present'
@@ -1891,9 +1894,9 @@ async function changeStatus(status) {
         var response =
             await fetch(
                 getApiUrl() +
-                '/drivers/me/status',
+                '/drivers/pointage',
                 {
-                    method: 'PUT',
+                    method: 'POST',
 
                     headers: {
                         'Content-Type': 'application/json',
@@ -1903,7 +1906,7 @@ async function changeStatus(status) {
                     },
 
                     body: JSON.stringify({
-                        status: statusApi
+                        type: typePointage
                     })
                 }
             );
