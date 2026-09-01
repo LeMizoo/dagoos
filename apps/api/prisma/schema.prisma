@@ -82,6 +82,7 @@ model Driver {
   trips          Trip[]
   expenses       Expense[]
   pointages      Pointage[]
+  dossier        DriverDossier?
 }
 
 // ========================================
@@ -243,6 +244,32 @@ model Livraison {
 // ========================================
 // POINTAGE CHAUFFEUR
 // ========================================
+model DriverDossier {
+  id             String   @id @default(cuid())
+  driverId       String   @unique
+  driver         Driver   @relation(fields: [driverId], references: [id])
+  cin            String?
+  cinDateDelivrance String?
+  cinLieuDelivrance String?
+  permisNumero   String?
+  permisCategorie String?
+  permisDateDelivrance String?
+  permisDateExpiration String?
+  permisLieuDelivrance String?
+  permisStatut   String?  @default("en_attente")
+  adresse        String?
+  certificatResidenceNum String?
+  certificatResidenceDate String?
+  dateEmbauche   String?
+  photo          String?
+  heurePrisePoste String? @default("07:00")
+  heureFinService String? @default("19:00")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([driverId])
+}
+
 model Pointage {
   id        String   @id @default(cuid())
   driverId  String
