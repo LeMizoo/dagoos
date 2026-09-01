@@ -51,6 +51,41 @@ user: safeUser,
 return safeDriver;
 }
 
+async function generateDriverCode(organizationId) {
+  const org = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    select: { code: true, type: true },
+  });
+
+  if (!org) {
+    return `DRV-${Date.now()}`;
+  }
+
+  const prefix = org.type === 'COOPERATIVE' ? 'CO' : 'FL';
+  const basePattern = `${prefix}-${org.code}-`;
+
+  // Chercher tous les codes existants qui commencent par le pattern
+  const existingDrivers = await prisma.driver.findMany({
+    where: {
+      organizationId,
+      driverCode: { startsWith: basePattern },
+    },
+    select: { driverCode: true },
+  });
+
+  let maxNum = 0;
+
+  for (const d of existingDrivers) {
+    const suffix = d.driverCode.slice(basePattern.length);
+    const num = parseInt(suffix, 10);
+    if (!isNaN(num) && num > maxNum) {
+      maxNum = num;
+    }
+  }
+
+  return `${basePattern}${String(maxNum + 1).padStart(3, '0')}`;
+}
+
 async function canAccessOrganization(req, organizationId) {
   if (PRIVILEGED_ROLES.includes(req.user.role)) {
     return true;
@@ -228,11 +263,12 @@ router.post('/', authMiddleware, requirePermission('drivers.manage'), async (req
         status: status || 'active',
         license: license || null,
         pin: hashedPin,
+        driverCode: driverCode || await generateDriverCode(organizationId),
       },
       create: {
         userId: user.id,
         organizationId,
-        driverCode: driverCode || `DRV-${user.id}`,
+        driverCode: driverCode || await generateDriverCode(organizationId),
         pin: hashedPin,
         vehicleId: vehicleId || null,
         status: status || 'active',
