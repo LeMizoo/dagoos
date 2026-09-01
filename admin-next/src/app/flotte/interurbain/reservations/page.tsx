@@ -32,7 +32,7 @@ export default function InterurbainReservations() {
 
   async function updateStatut(id: string, statut: string) {
     await apiFetch(`/reservations/${id}`, {
-      method: 'PATCH',
+      method: 'PUT',
       body: JSON.stringify({ statut }),
     });
     load();
