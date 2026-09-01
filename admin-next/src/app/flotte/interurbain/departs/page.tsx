@@ -125,7 +125,14 @@ export default function InterurbainDeparts() {
   }
 
   const filtered = departs
-    .filter(d => statutFilter === 'all' || d.statut === statutFilter)
+    .filter(d => {
+      // Si filtre "Archivés" → uniquement les ARCHIVED
+      if (statutFilter === 'ARCHIVED') return d.statut === 'ARCHIVED';
+      // Sinon → exclure les ARCHIVED de la liste normale
+      if (d.statut === 'ARCHIVED') return false;
+      // Appliquer le filtre normal
+      return statutFilter === 'all' || d.statut === statutFilter;
+    })
     .filter(d => {
       if (!search) return true;
       const searchLower = search.toLowerCase();
