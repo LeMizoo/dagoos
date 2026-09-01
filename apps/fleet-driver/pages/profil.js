@@ -20,10 +20,10 @@ function init_profil() {
             '</div>' +
 
             // Auto-déconnexion
-            '<div class="card" style="background:' + (window.FLEET_THEME ? window.FLEET_THEME.card : (pwa === 'fleet-driver' ? '#1E293B' : '#064E3B')) + ';border-radius:12px;padding:20px;margin-bottom:12px;">' +
-                '<h3 style="color:' + (window.FLEET_THEME ? window.FLEET_THEME.primary : (pwa === 'fleet-driver' ? '#DAA520' : '#10B981')) + ';margin-bottom:16px;">⏱️ Déconnexion automatique</h3>' +
+            '<div class="card" style="background:' + (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') + ';border-radius:12px;padding:20px;margin-bottom:12px;">' +
+                '<h3 style="color:' + (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') + ';margin-bottom:16px;">⏱️ Déconnexion automatique</h3>' +
                 '<label style="display:block;font-size:12px;color:#94A3B8;margin-bottom:6px;">Délai d'inactivité</label>' +
-                '<select id="inactivityTimeout" onchange="changeInactivityTimeout(this.value)" style="width:100%;padding:10px;border:1px solid ' + (window.FLEET_THEME ? window.FLEET_THEME.primary : (pwa === 'fleet-driver' ? '#DAA520' : '#10B981')) + ';background:' + (pwa === 'fleet-driver' ? '#1A1A2E' : '#0A1F18') + ';color:#fff;border-radius:8px;font-size:14px;">' +
+                '<select id="inactivityTimeout" onchange="changeInactivityTimeout(this.value)" style="width:100%;padding:10px;border:1px solid ' + (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') + ';background:' + '#1A1A2E' + ';color:#fff;border-radius:8px;font-size:14px;">' +
                     '<option value="60000">1 minute</option>' +
                     '<option value="180000">3 minutes</option>' +
                     '<option value="300000">5 minutes (défaut)</option>' +
