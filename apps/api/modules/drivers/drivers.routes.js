@@ -191,12 +191,6 @@ router.post('/', authMiddleware, requirePermission('drivers.manage'), async (req
       });
     }
 
-    if (!email && !driverCode) {
-      return res.status(400).json({
-        error: 'Email ou driverCode requis',
-      });
-    }
-
     /*
      * Vérifier que le véhicule appartient à la même organisation.
      */
@@ -224,9 +218,19 @@ router.post('/', authMiddleware, requirePermission('drivers.manage'), async (req
 
     const name = `${firstName || ''} ${lastName || ''}`.trim();
 
+    /*
+     * Le driverCode est une donnée métier générée par le backend.
+     * Le frontend n'a pas à le fournir.
+     */
+    const generatedDriverCode = await generateDriverCode(organizationId);
+
+    /*
+     * Si aucun email n'est fourni, créer automatiquement un email
+     * technique unique à partir du driverCode.
+     */
     const generatedEmail = email
       ? email.trim().toLowerCase()
-      : `${driverCode.toLowerCase()}@driver.dagoos.mg`;
+      : `${generatedDriverCode.toLowerCase()}@driver.dagoos.mg`;
 
     /*
      * Le compte User du chauffeur possède lui aussi un mot de passe.
@@ -255,7 +259,7 @@ router.post('/', authMiddleware, requirePermission('drivers.manage'), async (req
 
     const driver = await prisma.driver.upsert({
       where: {
-        driverCode: driverCode || `DRV-${user.id}`,
+        driverCode: generatedDriverCode,
       },
       update: {
         organizationId,
@@ -263,12 +267,12 @@ router.post('/', authMiddleware, requirePermission('drivers.manage'), async (req
         status: status || 'active',
         license: license || null,
         pin: hashedPin,
-        driverCode: driverCode || await generateDriverCode(organizationId),
+        driverCode: generatedDriverCode,
       },
       create: {
         userId: user.id,
         organizationId,
-        driverCode: driverCode || await generateDriverCode(organizationId),
+        driverCode: generatedDriverCode,
         pin: hashedPin,
         vehicleId: vehicleId || null,
         status: status || 'active',
