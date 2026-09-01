@@ -44,11 +44,24 @@ export default function FlotteDemandes() {
   }, [load]);
 
   async function updateStatut(id: string, statut: string) {
-    await apiFetch(`/actions/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ statut }),
-    });
-    load();
+    try {
+      const res = await apiFetch(`/actions/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ statut }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        alert(data.error || 'Erreur lors de la mise à jour de la demande');
+        return;
+      }
+
+      load();
+    } catch (e: any) {
+      console.error('updateStatut:', e);
+      alert(e.message || 'Erreur réseau lors de la mise à jour de la demande');
+    }
   }
 
   const filtered = actions
