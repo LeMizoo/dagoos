@@ -150,7 +150,7 @@ export default function FlotteCodes() {
                     </td>
                     <td className="px-4 py-3">
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        d.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                        (d.status === 'active' || d.status === 'AVAILABLE') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                       }`}>
                         {d.status || 'inactif'}
                       </span>

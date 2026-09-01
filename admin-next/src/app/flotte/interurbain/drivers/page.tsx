@@ -221,7 +221,7 @@ export default function InterurbainDriversPage() {
 
   const stats = {
     total: drivers.length,
-    active: drivers.filter(d => (pointages[d.id] || d.status) === 'PRESENT').length,
+    active: drivers.filter(d => pointages[d.id] === 'PRESENT' || (!pointages[d.id] && d.status === 'active')).length,
     assigned: drivers.filter(d => d.vehicleId).length,
     unassigned: drivers.filter(d => !d.vehicleId).length,
   };
@@ -371,7 +371,7 @@ export default function InterurbainDriversPage() {
                       <td className="px-4 py-3">
                         {(() => {
                           const pt = pointages[d.id] || d.status;
-                          const label = pt === 'PRESENT' ? 'En service' : pt === 'PAUSE' ? 'En pause' : pt === 'NON_DEBUTE' ? 'Absent' : d.status;
+                          const label = pt === 'PRESENT' ? 'En service' : pt === 'PAUSE' ? 'En pause' : pt === 'PARTI' ? 'Absent' : pt === 'NON_DEBUTE' ? 'Non débuté' : d.status;
                           const color = pt === 'PRESENT' ? 'bg-green-100 text-green-700' : pt === 'PAUSE' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700';
                           return <span className={`text-xs px-2 py-0.5 rounded-full ${color}`}>{label}</span>;
                         })()}

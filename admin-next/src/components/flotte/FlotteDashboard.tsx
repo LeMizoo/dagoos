@@ -41,7 +41,7 @@ export default function FlotteDashboard() {
 
       setStats({
         drivers: orgDrivers.length,
-        driversActifs: orgDrivers.filter((d: any) => d.status === 'active').length,
+        driversActifs: orgDrivers.filter((d: any) => d.status === 'active' || d.status === 'AVAILABLE').length,
         vehicles: orgVehicles.length,
         vehiclesActifs: orgVehicles.filter((v: any) => v.status === 'active').length,
         caJour: statsRes?.today?.ca || 0,
