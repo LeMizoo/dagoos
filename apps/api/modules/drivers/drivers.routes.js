@@ -814,35 +814,61 @@ router.post('/pointage', authMiddleware, async (req, res) => {
 });
 
 // GET /api/drivers/pointages - Liste des pointages (admin/fleet)
+// Filtres supportés : organizationId, dateDebut, dateFin, driverId
+// Pagination : page, pageSize
 router.get('/pointages', authMiddleware, requirePermission('drivers.read'), async (req, res) => {
   try {
-    const { organizationId, date } = req.query;
-    
+    const { organizationId, date, dateDebut, dateFin, driverId, page, pageSize } = req.query;
+
     const where = {};
+
     if (organizationId) {
       where.driver = { organizationId };
     }
-    if (date) {
+
+    if (driverId) {
+      where.driverId = driverId;
+    }
+
+    if (dateDebut && dateFin) {
+      where.date = {
+        gte: dateDebut,
+        lte: dateFin,
+      };
+    } else if (date) {
       where.date = date;
     }
 
-    const pointages = await prisma.pointage.findMany({
-      where,
-      include: {
-        driver: {
-          select: {
-            id: true,
-            driverCode: true,
-            user: { select: { name: true } },
-            vehicle: { select: { plate: true } }
-          }
-        }
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 200
-    });
+    const take = Math.min(Number(pageSize) || 50, 200);
+    const skip = (Math.max(Number(page) || 1, 1) - 1) * take;
 
-    res.json(pointages);
+    const [pointages, total] = await Promise.all([
+      prisma.pointage.findMany({
+        where,
+        include: {
+          driver: {
+            select: {
+              id: true,
+              driverCode: true,
+              user: { select: { name: true } },
+              vehicle: { select: { plate: true } }
+            }
+          }
+        },
+        orderBy: { date: 'desc', heure: 'desc' },
+        skip,
+        take,
+      }),
+      prisma.pointage.count({ where }),
+    ]);
+
+    res.json({
+      pointages,
+      total,
+      page: Math.max(Number(page) || 1, 1),
+      pageSize: take,
+      totalPages: Math.ceil(total / take),
+    });
   } catch (error) {
     console.error('GET /drivers/pointages:', error);
     res.status(500).json({ error: error.message });
