@@ -8,6 +8,7 @@ const STATIC_ASSETS = [
   '/js/router.js',
   '/js/autosave.js',
   '/js/login.js',
+  '/js/inactivity.js',
   '/pages/home.js',
   '/pages/courses.js',
   '/pages/stats.js',

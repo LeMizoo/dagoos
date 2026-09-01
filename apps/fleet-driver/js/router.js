@@ -27,12 +27,14 @@ function getApiUrl() {
 async function apiFetch(endpoint, options) {
   options = options || {};
   var url = DAGOOS_CONFIG.apiUrl + endpoint;
+  window.dagooApiPending = (window.dagooApiPending || 0) + 1;
   var config = { method: options.method || 'GET', headers: getAuthHeaders() };
   if (options.body !== undefined) {
     config.body = typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
   }
   try {
     var response = await fetch(url, config);
+    window.dagooApiPending = Math.max(0, (window.dagooApiPending || 1) - 1);
     if (response.status === 401) {
       localStorage.removeItem('dagoo_driver_token');
       localStorage.removeItem('dagoo_driver_user');
@@ -40,9 +42,11 @@ async function apiFetch(endpoint, options) {
       return null;
     }
     var contentType = response.headers.get('content-type') || '';
+    window.dagooApiPending = Math.max(0, (window.dagooApiPending || 1) - 1);
     if (contentType.includes('application/json')) return await response.json();
     return await response.text();
   } catch (err) {
+    window.dagooApiPending = Math.max(0, (window.dagooApiPending || 1) - 1);
     console.error('Erreur API (' + endpoint + '):', err);
     throw err;
   }
@@ -58,6 +62,10 @@ window.apiGet = function(endpoint) { return apiFetch(endpoint); };
 window.logout = function() {
   localStorage.removeItem('dagoo_driver_token');
   localStorage.removeItem('dagoo_driver_user');
+  localStorage.removeItem('dagoo_driver_code');
+  localStorage.removeItem('dagoo_driver_org');
+  localStorage.removeItem('dagoo_driver_type');
+  localStorage.removeItem('driver_current_page');
   window.location.href = '/';
 };
 
