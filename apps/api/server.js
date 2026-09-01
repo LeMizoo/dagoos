@@ -37,6 +37,7 @@ app.use('/api/users', require('./modules/users/users.routes'));
 app.use('/api/organizations', require('./modules/organizations/organizations.routes'));
 app.use('/api/drivers', require('./modules/drivers/drivers.routes'));
 app.use('/api/drivers', require('./modules/drivers/dossier.routes'));
+app.use('/api/drivers', require('./modules/drivers/stats.routes'));
 app.use('/api/vehicles', require('./modules/vehicles/vehicles.routes'));
 app.use('/api/maintenance', require('./modules/maintenance/maintenance.routes'));
 app.use('/api/proprietaires', require('./modules/proprietaires/proprietaires.routes'));
