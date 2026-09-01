@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { apiFetch } from '@/lib/api';
 import { useOrganization } from '@/lib/organization-context';
-import { Users, Plus, Search, Car, CheckCircle, XCircle, Link2, Phone, Key, Eye, EyeOff, Copy, Check, Pencil, Trash2 } from 'lucide-react';
+import { Users, Plus, Search, Car, CheckCircle, XCircle, Link2, Phone, Key, Copy, Check, Pencil, Trash2 } from 'lucide-react';
 
 export default function FlotteChauffeurs() {
   const { organization } = useOrganization();
@@ -20,7 +20,6 @@ export default function FlotteChauffeurs() {
   const [editingDriver, setEditingDriver] = useState<any | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<any | null>(null);
   const [saving, setSaving] = useState(false);
-  const [showPin, setShowPin] = useState<Record<string, boolean>>({});
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [pointages, setPointages] = useState<Record<string, string>>({});
 
@@ -161,6 +160,34 @@ export default function FlotteChauffeurs() {
       alert('❌ Erreur réseau');
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function resetPin(driverId: string) {
+    const confirmed = window.confirm(
+      'Réinitialiser le PIN de ce chauffeur ?\n\nUn nouveau PIN sera généré.'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const res = await apiFetch(`/drivers/${driverId}/reset-pin`, {
+        method: 'POST',
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert('❌ ' + (data.error || 'Erreur lors de la réinitialisation'));
+        return;
+      }
+
+      alert(
+        `✅ PIN réinitialisé !\n\nCode chauffeur : ${data.driverCode}\nNouveau PIN : ${data.pin}\n\n⚠️ Conservez ce PIN : il ne sera plus affiché.`
+      );
+    } catch (e) {
+      console.error(e);
+      alert('❌ Erreur réseau');
     }
   }
 
@@ -340,14 +367,7 @@ export default function FlotteChauffeurs() {
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-xs">
-                            {showPin[d.id] ? (d.pin || '****') : '****'}
-                          </span>
-                          <button onClick={() => setShowPin(prev => ({ ...prev, [d.id]: !prev[d.id] }))} className="text-gray-400 hover:text-emerald-600">
-                            {showPin[d.id] ? <EyeOff size={14} /> : <Eye size={14} />}
-                          </button>
-                        </div>
+                        <span className="font-mono text-xs text-gray-400">••••</span>
                       </td>
                       <td className="px-4 py-3">
                         {(() => {
@@ -359,6 +379,7 @@ export default function FlotteChauffeurs() {
                       </td>
                       <td className="px-4 py-3 text-right">
                         <button onClick={() => openEdit(d)} className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg"><Pencil size={16} /></button>
+                        <button onClick={() => resetPin(d.id)} className="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg" title="Réinitialiser le PIN" aria-label="Réinitialiser le PIN"><Key size={16} /></button>
                         <button onClick={() => setDeleteConfirm(d)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>
                       </td>
                     </tr>

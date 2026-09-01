@@ -1,4 +1,5 @@
 const express = require('express');
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const prisma = require('../../lib/prisma');
 const { authMiddleware } = require('../../middleware/auth');
@@ -425,6 +426,68 @@ router.put('/:id', authMiddleware, requirePermission('drivers.manage'), async (r
 });
 
 /*
+ * POST /api/drivers/:id/reset-pin
+ * Génère un nouveau PIN chauffeur.
+ * Le PIN n'est jamais retourné par GET /drivers.
+ */
+router.post(
+  '/:id/reset-pin',
+  authMiddleware,
+  requirePermission('drivers.manage'),
+  async (req, res) => {
+    try {
+      if (req.user.role === 'DRIVER') {
+        return res.status(403).json({
+          error: 'Accès refusé',
+        });
+      }
+
+      const driver = await prisma.driver.findUnique({
+        where: { id: req.params.id },
+        select: {
+          id: true,
+          driverCode: true,
+          organizationId: true,
+        },
+      });
+
+      if (!driver) {
+        return res.status(404).json({
+          error: 'Chauffeur introuvable',
+        });
+      }
+
+      if (!(await canAccessOrganization(req, driver.organizationId))) {
+        return res.status(403).json({
+          error: 'Accès à cette organisation refusé',
+        });
+      }
+
+      const newPin = String(crypto.randomInt(1000, 10000));
+
+      const hashedPin = await bcrypt.hash(newPin, 12);
+
+      await prisma.driver.update({
+        where: { id: driver.id },
+        data: { pin: hashedPin },
+      });
+
+      return res.json({
+        ok: true,
+        driverCode: driver.driverCode,
+        pin: newPin,
+      });
+    } catch (error) {
+      console.error('POST /drivers/:id/reset-pin:', error);
+
+      return res.status(500).json({
+        error: 'Erreur réinitialisation PIN',
+      });
+    }
+  }
+);
+
+/*
  * DELETE /api/drivers/:id
  */
 router.delete(
@@ -443,6 +506,7 @@ router.delete(
       where: { id: req.params.id },
       select: {
         id: true,
+        userId: true,
         organizationId: true,
       },
     });
@@ -459,11 +523,21 @@ router.delete(
       });
     }
 
-    await prisma.driver.delete({
-      where: { id: req.params.id },
+    await prisma.$transaction(async (tx) => {
+      await tx.driver.delete({
+        where: { id: driver.id },
+      });
+
+      await tx.user.delete({
+        where: { id: driver.userId },
+      });
     });
 
-    res.json({ ok: true });
+    res.json({
+      ok: true,
+      driverDeleted: true,
+      userDeleted: true,
+    });
   } catch (error) {
     console.error('DELETE /drivers/:id:', error);
 
