@@ -14,8 +14,8 @@ export default function InterurbainLivraisons() {
   const load = useCallback(async () => {
     if (!organization?.id) return;
     try {
-      const res = await apiFetch('/livraisons').then(r => r.ok ? r.json() : []);
-      setLivraisons(Array.isArray(res) ? res : []);
+      const res = await apiFetch('/livraisons?page=1&limit=100').then(r => r.ok ? r.json() : []);
+      setLivraisons(Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []));
     } catch (e) { console.error(e); } finally { setLoading(false); }
   }, [organization]);
 

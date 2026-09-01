@@ -48,26 +48,44 @@ router.get('/', authMiddleware, async (req, res) => {
       where.departId = { in: departs.map(d => d.id) };
     }
     
-    const reservations = await prisma.reservation.findMany({
-      where,
-      include: {
-        depart: {
-          select: {
-            pointDepart: true,
-            destination: true,
-            date: true,
-            heure: true,
-            prix: true,
-            vehicle: {
-              select: { id: true, plate: true, model: true },
+    // Pagination
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 15));
+    const skip = (page - 1) * limit;
+
+    const [reservations, total] = await Promise.all([
+      prisma.reservation.findMany({
+        where,
+        include: {
+          depart: {
+            select: {
+              pointDepart: true,
+              destination: true,
+              date: true,
+              heure: true,
+              prix: true,
+              vehicle: {
+                select: { id: true, plate: true, model: true },
+              },
             },
           },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.reservation.count({ where }),
+    ]);
     
-    res.json(reservations);
+    res.json({
+      data: reservations,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error('GET /reservations:', error);
     res.status(500).json({ error: 'Erreur récupération réservations' });

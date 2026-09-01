@@ -24,13 +24,13 @@ export default function FlotteDashboard() {
         apiFetch('/vehicles?page=1&limit=100').then(r => r.ok ? r.json() : []),
         apiFetch('/finances/stats/summary').then(r => r.ok ? r.json() : null),
         isInterurbain ? apiFetch('/departs?page=1&limit=100').then(r => r.ok ? r.json() : []) : Promise.resolve([]),
-        isInterurbain ? apiFetch('/reservations').then(r => r.ok ? r.json() : []) : Promise.resolve([]),
+        isInterurbain ? apiFetch('/reservations?page=1&limit=100').then(r => r.ok ? r.json() : []) : Promise.resolve([]),
       ]);
 
       const drivers = Array.isArray(driversRes?.data) ? driversRes.data : (Array.isArray(driversRes) ? driversRes : []);
       const vehicles = Array.isArray(vehiclesRes?.data) ? vehiclesRes.data : (Array.isArray(vehiclesRes) ? vehiclesRes : []);
       const departs = Array.isArray(departsRes?.data) ? departsRes.data : (Array.isArray(departsRes) ? departsRes : []);
-      const reservations = Array.isArray(reservationsRes) ? reservationsRes : [];
+      const reservations = Array.isArray(reservationsRes?.data) ? reservationsRes.data : (Array.isArray(reservationsRes) ? reservationsRes : []);
 
       const orgDrivers = drivers.filter((d: any) => d.organizationId === organization.id);
       const orgVehicles = vehicles.filter((v: any) => v.organizationId === organization.id);

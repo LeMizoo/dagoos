@@ -18,8 +18,8 @@ export default function InterurbainReservations() {
   const load = useCallback(async () => {
     if (!organization?.id) return;
     try {
-      const res = await apiFetch('/reservations').then(r => r.ok ? r.json() : []);
-      const allReservations = Array.isArray(res) ? res : [];
+      const res = await apiFetch('/reservations?page=1&limit=100').then(r => r.ok ? r.json() : []);
+      const allReservations = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
       setReservations(allReservations);
     } catch (e: any) {
       setError(e.message);

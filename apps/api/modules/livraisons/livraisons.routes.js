@@ -56,17 +56,35 @@ router.get('/', authMiddleware, requirePermission('livraisons.read'), async (req
       };
     }
 
-    const data = await prisma.livraison.findMany({
-      where,
-      include: {
-        societe: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
+    // Pagination
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 15));
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await Promise.all([
+      prisma.livraison.findMany({
+        where,
+        include: {
+          societe: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip,
+        take: limit,
+      }),
+      prisma.livraison.count({ where }),
+    ]);
+
+    res.json({
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
     });
-
-    res.json(data);
   } catch (error) {
     console.error('GET /livraisons:', error);
 
