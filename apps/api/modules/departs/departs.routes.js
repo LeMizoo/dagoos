@@ -360,16 +360,27 @@ router.delete('/:id', authMiddleware, async (req, res) => {
       }
     }
     
-    // Supprimer d'abord les réservations liées au départ
-    // PostgreSQL interdit la suppression du parent tant que les enfants existent.
-    await prisma.$transaction([
-      prisma.reservation.deleteMany({
-        where: { departId: req.params.id },
-      }),
-      prisma.depart.delete({
-        where: { id: req.params.id },
-      }),
-    ]);
+    // Vérifier s'il y a des réservations non annulées
+    const reservationsActives = await prisma.reservation.count({
+      where: {
+        departId: req.params.id,
+        statut: { in: ['PENDING', 'CONFIRMED'] },
+      },
+    });
+
+    if (reservationsActives > 0) {
+      return res.status(409).json({
+        error: `Impossible de supprimer : ${reservationsActives} réservation(s) encore actives. Annulez-les d'abord.`,
+      });
+    }
+
+    // Supprimer les réservations annulées éventuelles
+    await prisma.reservation.deleteMany({
+      where: { departId: req.params.id },
+    });
+
+    // Puis supprimer le départ
+    await prisma.depart.delete({ where: { id: req.params.id } });
 
     res.json({ ok: true });
   } catch (error) {
