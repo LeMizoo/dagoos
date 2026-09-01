@@ -265,7 +265,8 @@ router.post('/', authMiddleware, requirePermission('drivers.manage'), async (req
       update: {
         organizationId,
         vehicleId: vehicleId || null,
-        status: status || 'active',
+        accountStatus: status || 'active',
+        status: 'OFFLINE',
         license: license || null,
         pin: hashedPin,
         driverCode: generatedDriverCode,
@@ -276,7 +277,8 @@ router.post('/', authMiddleware, requirePermission('drivers.manage'), async (req
         driverCode: generatedDriverCode,
         pin: hashedPin,
         vehicleId: vehicleId || null,
-        status: status || 'active',
+        accountStatus: status || 'active',
+        status: 'OFFLINE',
         license: license || null,
       },
       include: {
@@ -347,7 +349,7 @@ router.put('/:id', authMiddleware, requirePermission('drivers.manage'), async (r
 
     if (driverCode !== undefined) data.driverCode = driverCode;
     if (pin !== undefined) data.pin = await bcrypt.hash(String(pin), 12);
-    if (status !== undefined) data.status = status;
+    if (status !== undefined) data.accountStatus = status;
     if (license !== undefined) data.license = license;
 
     if (vehicleId !== undefined) {

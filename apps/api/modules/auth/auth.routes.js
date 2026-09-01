@@ -134,6 +134,9 @@ router.post('/driver-login', async (req, res) => {
       ? await bcrypt.compare(pin, driver.pin)
       : driver.pin === pin;
     if (!validPin) return res.status(401).json({ error: "PIN incorrect" });
+    if (driver.accountStatus === 'inactive') {
+      return res.status(403).json({ error: 'Compte chauffeur désactivé' });
+    }
     if (!driver.pin.startsWith("$2")) {
       await prisma.driver.update({ where: { id: driver.id }, data: { pin: await bcrypt.hash(pin, 12) } });
     }

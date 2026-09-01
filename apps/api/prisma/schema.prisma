@@ -76,7 +76,11 @@ model Driver {
   license        String?
   vehicleId      String?
   vehicle        Vehicle?     @relation(fields: [vehicleId], references: [id])
-  status         String       @default("active")
+  // Disponibilité technique
+  status         String       @default("OFFLINE")
+
+  // Statut administratif du compte
+  accountStatus  String       @default("active")
   createdAt      DateTime     @default(now())
   courses        Course[]
   trips          Trip[]
