@@ -360,7 +360,17 @@ router.delete('/:id', authMiddleware, async (req, res) => {
       }
     }
     
-    await prisma.depart.delete({ where: { id: req.params.id } });
+    // Supprimer d'abord les réservations liées au départ
+    // PostgreSQL interdit la suppression du parent tant que les enfants existent.
+    await prisma.$transaction([
+      prisma.reservation.deleteMany({
+        where: { departId: req.params.id },
+      }),
+      prisma.depart.delete({
+        where: { id: req.params.id },
+      }),
+    ]);
+
     res.json({ ok: true });
   } catch (error) {
     console.error('DELETE /departs/:id:', error);
