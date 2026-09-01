@@ -33,10 +33,10 @@ export default function CoopDriversPage() {
   const fetchDrivers = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/drivers');
+      const res = await fetch('/api/drivers?page=1&limit=100');
       if (!res.ok) throw new Error('Erreur ' + res.status);
       const data = await res.json();
-      setDrivers(Array.isArray(data) ? data.filter((d: any) => d.organizationId === id) : []);
+      setDrivers(Array.isArray(data?.data) ? data.data.filter((d: any) => d.organizationId === id) : []);
       setError('');
     } catch (err: any) { setError(err.message); } finally { setLoading(false); }
   };
