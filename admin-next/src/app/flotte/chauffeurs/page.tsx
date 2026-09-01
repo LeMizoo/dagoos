@@ -127,12 +127,22 @@ export default function FlotteChauffeurs() {
   }
 
   async function assignVehicle(driverId: string, vehicleId: string) {
-    await apiFetch(`/drivers/${driverId}`, {
-      method: 'PUT',
-      body: JSON.stringify({ vehicleId: vehicleId || null }),
-    });
-    setAssigning(null);
-    load();
+    try {
+      const res = await apiFetch(`/drivers/${driverId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ vehicleId: vehicleId || null }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert('❌ ' + (err.error || 'Erreur lors de l\'affectation'));
+        return;
+      }
+      setAssigning(null);
+      load();
+    } catch (e) {
+      console.error(e);
+      alert('❌ Erreur réseau');
+    }
   }
 
   async function copyCode(code: string) {
@@ -234,8 +244,8 @@ export default function FlotteChauffeurs() {
 
   const filtered = drivers.filter(d => {
     const matchesSearch = ((d.firstName || '') + ' ' + (d.lastName || '') + ' ' + (d.driverCode || '')).toLowerCase().includes(search.toLowerCase());
-    const effectiveStatus = pointages[d.id] || d.status;
-    const matchesStatus = statusFilter === 'all' || effectiveStatus === statusFilter;
+    const effectiveStatus = pointages[d.id] || (d.status === 'active' ? 'PRESENT' : d.status);
+    const matchesStatus = statusFilter === 'all' || effectiveStatus === statusFilter || (statusFilter === 'PRESENT' && effectiveStatus === 'active');
     const matchesVehicle = vehicleFilter === 'all' || 
       (vehicleFilter === 'assigned' && d.vehicleId) || 
       (vehicleFilter === 'unassigned' && !d.vehicleId) ||
@@ -245,7 +255,7 @@ export default function FlotteChauffeurs() {
 
   const stats = {
     total: drivers.length,
-    active: drivers.filter(d => (pointages[d.id] || d.status) === 'PRESENT').length,
+    active: drivers.filter(d => pointages[d.id] === 'PRESENT' || (!pointages[d.id] && d.status === 'active')).length,
     assigned: drivers.filter(d => d.vehicleId).length,
     unassigned: drivers.filter(d => !d.vehicleId).length,
   };
@@ -307,7 +317,8 @@ export default function FlotteChauffeurs() {
           <option value="all">Tous statuts</option>
           <option value="PRESENT">En service</option>
           <option value="PAUSE">En pause</option>
-          <option value="NON_DEBUTE">Absent</option>
+          <option value="PARTI">Absent</option>
+          <option value="NON_DEBUTE">Non débuté</option>
         </select>
         <select
           value={vehicleFilter}
@@ -434,7 +445,7 @@ export default function FlotteChauffeurs() {
                       <td className="px-4 py-3">
                         {(() => {
                           const pt = pointages[d.id] || d.status;
-                          const label = pt === 'PRESENT' ? 'En service' : pt === 'PAUSE' ? 'En pause' : pt === 'NON_DEBUTE' ? 'Absent' : d.status;
+                          const label = pt === 'PRESENT' ? 'En service' : pt === 'PAUSE' ? 'En pause' : pt === 'PARTI' ? 'Absent' : pt === 'NON_DEBUTE' ? 'Non débuté' : d.status;
                           const color = pt === 'PRESENT' ? 'bg-green-100 text-green-700' : pt === 'PAUSE' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700';
                           return <span className={`text-xs px-2 py-0.5 rounded-full ${color}`}>{label}</span>;
                         })()}
