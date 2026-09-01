@@ -22,6 +22,7 @@ export default function FlotteChauffeurs() {
   const [saving, setSaving] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [pointages, setPointages] = useState<Record<string, string>>({});
+  const [driverStats, setDriverStats] = useState<Record<string, any>>({});
 
   const load = useCallback(async () => {
     try {
@@ -51,6 +52,28 @@ export default function FlotteChauffeurs() {
           }
         });
         setPointages(pMap);
+      } catch {
+        // Silencieux
+      }
+
+      // Charger les stats de chaque chauffeur
+      try {
+        const statsMap: Record<string, any> = {};
+        const allDriversResolved = resolvedOrgId ? allDrivers.filter((d: any) => d.organizationId === resolvedOrgId) : allDrivers;
+        await Promise.all(
+          allDriversResolved.map(async (d: any) => {
+            try {
+              const sRes = await apiFetch(`/drivers/${d.id}/stats`);
+              if (sRes.ok) {
+                const sData = await sRes.json();
+                statsMap[d.id] = sData;
+              }
+            } catch {
+              // Silencieux
+            }
+          })
+        );
+        setDriverStats(statsMap);
       } catch {
         // Silencieux
       }
@@ -311,15 +334,18 @@ export default function FlotteChauffeurs() {
                 <th className="px-4 py-3">Téléphone</th>
                 <th className="px-4 py-3">Véhicule</th>
                 <th className="px-4 py-3">PIN</th>
+                <th className="px-4 py-3">Aujourd'hui</th>
+                <th className="px-4 py-3">Semaine</th>
+                <th className="px-4 py-3">Mois</th>
                 <th className="px-4 py-3">Statut</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={7} className="text-center py-8">Chargement...</td></tr>
+                <tr><td colSpan={10} className="text-center py-8">Chargement...</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={7} className="text-center py-8 text-gray-400">Aucun chauffeur</td></tr>
+                <tr><td colSpan={10} className="text-center py-8 text-gray-400">Aucun chauffeur</td></tr>
               ) : (
                 filtered.map(d => {
                   const cv = vehicles.find(v => v.id === d.vehicleId);
@@ -368,6 +394,42 @@ export default function FlotteChauffeurs() {
                       </td>
                       <td className="px-4 py-3">
                         <span className="font-mono text-xs text-gray-400">••••</span>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {(() => {
+                          const s = driverStats[d.id];
+                          if (!s) return <span className="text-gray-400">-</span>;
+                          return (
+                            <div>
+                              <div className="font-bold text-emerald-600">{s.today?.net || 0} Ar</div>
+                              <div className="text-xs text-gray-400">{s.today?.courses || 0} courses</div>
+                            </div>
+                          );
+                        })()}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {(() => {
+                          const s = driverStats[d.id];
+                          if (!s) return <span className="text-gray-400">-</span>;
+                          return (
+                            <div>
+                              <div className="font-bold text-blue-600">{s.week?.net || 0} Ar</div>
+                              <div className="text-xs text-gray-400">{s.week?.courses || 0} courses</div>
+                            </div>
+                          );
+                        })()}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {(() => {
+                          const s = driverStats[d.id];
+                          if (!s) return <span className="text-gray-400">-</span>;
+                          return (
+                            <div>
+                              <div className="font-bold text-purple-600">{s.month?.net || 0} Ar</div>
+                              <div className="text-xs text-gray-400">{s.month?.courses || 0} courses</div>
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="px-4 py-3">
                         {(() => {
