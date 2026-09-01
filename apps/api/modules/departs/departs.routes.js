@@ -347,20 +347,42 @@ router.put('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// DELETE /api/departs/:id - Supprimer un départ
+// DELETE /api/departs/:id - Supprimer ou archiver un départ
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
-    const depart = await prisma.depart.findUnique({ where: { id: req.params.id } });
-    if (!depart) return res.status(404).json({ error: 'Départ introuvable' });
-    
+    const depart = await prisma.depart.findUnique({
+      where: { id: req.params.id },
+    });
+
+    if (!depart) {
+      return res.status(404).json({ error: 'Départ introuvable' });
+    }
+
     if (!GLOBAL_ROLES.includes(req.user.role)) {
       const orgId = await getUserOrganizationId(req);
+
       if (depart.organizationId !== orgId) {
         return res.status(403).json({ error: 'Accès refusé' });
       }
     }
-    
-    // Vérifier s'il y a des réservations non annulées
+
+    // Un départ déjà parti/terminé est archivé.
+    // Les réservations sont conservées pour l'historique.
+    if (['LEFT', 'TERMINÉ'].includes(depart.statut)) {
+      const archived = await prisma.depart.update({
+        where: { id: req.params.id },
+        data: { statut: 'ARCHIVED' },
+      });
+
+      return res.json({
+        ok: true,
+        archived: true,
+        depart: archived,
+      });
+    }
+
+    // Pour un départ non parti, empêcher la suppression
+    // s'il existe encore des réservations actives.
     const reservationsActives = await prisma.reservation.count({
       where: {
         departId: req.params.id,
@@ -374,18 +396,25 @@ router.delete('/:id', authMiddleware, async (req, res) => {
       });
     }
 
-    // Supprimer les réservations annulées éventuelles
+    // Les réservations annulées peuvent être supprimées avec le départ.
     await prisma.reservation.deleteMany({
       where: { departId: req.params.id },
     });
 
-    // Puis supprimer le départ
-    await prisma.depart.delete({ where: { id: req.params.id } });
+    // Suppression définitive du départ non parti.
+    await prisma.depart.delete({
+      where: { id: req.params.id },
+    });
 
-    res.json({ ok: true });
+    return res.json({
+      ok: true,
+      archived: false,
+    });
   } catch (error) {
     console.error('DELETE /departs/:id:', error);
-    res.status(500).json({ error: 'Erreur suppression départ' });
+    return res.status(500).json({
+      error: 'Erreur suppression départ',
+    });
   }
 });
 

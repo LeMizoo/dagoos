@@ -35,7 +35,7 @@ export default function InterurbainDeparts() {
       const allDeparts = Array.isArray(dRes?.data) ? dRes.data : [];
       const allVehicles = Array.isArray(vRes?.data) ? vRes.data : [];
       
-      setDeparts(allDeparts.filter((d: any) => d.organizationId === organization.id));
+      setDeparts(allDeparts.filter((d: any) => d.organizationId === organization.id && d.statut !== 'ARCHIVED'));
       setVehicles(allVehicles.filter((v: any) => v.organizationId === organization.id));
     } catch (e: any) {
       setError(e.message);
@@ -85,7 +85,14 @@ export default function InterurbainDeparts() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Supprimer ce départ ?')) return;
+    const depart = departs.find(d => d.id === id);
+    const isTermine = depart && ['LEFT', 'TERMINÉ'].includes(depart.statut);
+
+    const action = isTermine
+      ? 'Archiver ce départ ? (Les réservations seront conservées)'
+      : 'Supprimer ce départ ?';
+
+    if (!confirm(action)) return;
     try {
       const res = await apiFetch(`/departs/${id}`, { method: 'DELETE' });
       const data = await res.json().catch(() => ({}));
@@ -100,7 +107,11 @@ export default function InterurbainDeparts() {
         return;
       }
 
-      alert('✅ Départ supprimé avec succès !');
+      if (data.archived) {
+        alert('📦 Départ archivé avec succès !');
+      } else {
+        alert('✅ Départ supprimé avec succès !');
+      }
       load();
     } catch (e: any) {
       setError(e.message);
@@ -127,6 +138,7 @@ export default function InterurbainDeparts() {
     published: departs.filter(d => d.statut === 'PUBLISHED').length,
     draft: departs.filter(d => d.statut === 'DRAFT').length,
     left: departs.filter(d => d.statut === 'LEFT').length,
+    archived: departs.filter(d => d.statut === 'ARCHIVED').length,
   };
 
   const reservations = selectedDepart?.reservations || [];

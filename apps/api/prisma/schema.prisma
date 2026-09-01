@@ -524,7 +524,7 @@ model Depart {
   placesTotal    Int           @default(1)
   distanceKm     Float?
   dureeEstimee   String?
-  statut         String        @default("DRAFT") // DRAFT, PUBLISHED, EMBARQUEMENT, TERMINÉ, LEFT
+  statut         String        @default("DRAFT") // DRAFT, PUBLISHED, EMBARQUEMENT, TERMINÉ, LEFT, ARCHIVED
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   reservations   Reservation[]
