@@ -613,12 +613,12 @@ router.post('/shift/start', authMiddleware, async (req, res) => {
 
     await prisma.driver.update({
       where: { id: req.user.driverId },
-      data: { status: 'active' },
+      data: { status: 'AVAILABLE' },
     });
 
     return res.json({
       success: true,
-      status: 'active',
+      status: 'AVAILABLE',
     });
   } catch (error) {
     return res.status(500).json({
@@ -641,12 +641,12 @@ router.post('/shift/pause', authMiddleware, async (req, res) => {
 
     await prisma.driver.update({
       where: { id: req.user.driverId },
-      data: { status: 'pause' },
+      data: { status: 'ON_BREAK' },
     });
 
     return res.json({
       success: true,
-      status: 'pause',
+      status: 'ON_BREAK',
     });
   } catch (error) {
     return res.status(500).json({
@@ -669,12 +669,12 @@ router.post('/shift/end', authMiddleware, async (req, res) => {
 
     await prisma.driver.update({
       where: { id: req.user.driverId },
-      data: { status: 'inactive' },
+      data: { status: 'OFFLINE' },
     });
 
     return res.json({
       success: true,
-      status: 'inactive',
+      status: 'OFFLINE',
     });
   } catch (error) {
     return res.status(500).json({
