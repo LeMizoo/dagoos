@@ -56,7 +56,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Fichiers statiques : cache-first
+  // Fichiers statiques : cache-first avec fallback silencieux
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
@@ -66,6 +66,10 @@ self.addEventListener('fetch', (event) => {
         const clone = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         return response;
+      }).catch(() => {
+        // En cas d'échec réseau, renvoyer une réponse vide
+        // pour éviter les erreurs non gérées
+        return new Response('', { status: 503, statusText: 'Offline' });
       });
     })
   );
