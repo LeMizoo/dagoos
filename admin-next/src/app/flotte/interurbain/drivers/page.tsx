@@ -34,7 +34,7 @@ export default function InterurbainDriversPage() {
       setOrgId(resolvedOrgId);
 
       const allDrivers = Array.isArray(dRes?.data) ? dRes.data : [];
-      const allVehicles = Array.isArray(vRes) ? vRes : [];
+      const allVehicles = Array.isArray(vRes?.data) ? vRes.data : (Array.isArray(vRes) ? vRes : []);
 
       setDrivers(resolvedOrgId ? allDrivers.filter((d: any) => d.organizationId === resolvedOrgId) : allDrivers);
       setVehicles(resolvedOrgId ? allVehicles.filter((v: any) => v.organizationId === resolvedOrgId) : allVehicles);

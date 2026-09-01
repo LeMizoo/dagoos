@@ -38,8 +38,8 @@ export default function FlottePermutation() {
         apiFetch('/vehicles?page=1&limit=100').then(r => r.json()).catch(() => []),
       ]);
       
-      const allDrivers = Array.isArray(dRes) ? dRes : [];
-      const allVehicles = Array.isArray(vRes) ? vRes : [];
+      const allDrivers = Array.isArray(dRes?.data) ? dRes.data : (Array.isArray(dRes) ? dRes : []);
+      const allVehicles = Array.isArray(vRes?.data) ? vRes.data : (Array.isArray(vRes) ? vRes : []);
       
       setDrivers(allDrivers.filter((d: any) => d.organizationId === organization.id));
       setVehicles(allVehicles.filter((v: any) => v.organizationId === organization.id));

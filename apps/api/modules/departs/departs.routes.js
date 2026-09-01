@@ -55,16 +55,34 @@ router.get('/', authMiddleware, async (req, res) => {
       where.organizationId = req.query.organizationId;
     }
     
-    const departs = await prisma.depart.findMany({
-      where,
-      include: {
-        vehicle: { select: { id: true, plate: true, model: true } },
-        reservations: { select: { id: true, place: true, passagerNom: true, statut: true } },
-      },
-      orderBy: { date: 'asc' },
-    });
+    // Pagination
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 15));
+    const skip = (page - 1) * limit;
+
+    const [departs, total] = await Promise.all([
+      prisma.depart.findMany({
+        where,
+        include: {
+          vehicle: { select: { id: true, plate: true, model: true } },
+          reservations: { select: { id: true, place: true, passagerNom: true, statut: true } },
+        },
+        orderBy: { date: 'asc' },
+        skip,
+        take: limit,
+      }),
+      prisma.depart.count({ where }),
+    ]);
     
-    res.json(departs);
+    res.json({
+      data: departs,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error('GET /departs:', error);
     res.status(500).json({ error: 'Erreur récupération départs' });

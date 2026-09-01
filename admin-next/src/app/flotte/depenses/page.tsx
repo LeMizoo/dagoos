@@ -28,7 +28,7 @@ export default function FlotteDepenses() {
       ]);
       
       const allExpenses = Array.isArray(expRes) ? expRes : [];
-      const allVehicles = Array.isArray(vehRes) ? vehRes : [];
+      const allVehicles = Array.isArray(vehRes?.data) ? vehRes.data : (Array.isArray(vehRes) ? vehRes : []);
       
       setExpenses(allExpenses.filter((e: any) => e.organizationId === organization.id));
       setVehicles(allVehicles.filter((v: any) => v.organizationId === organization.id));

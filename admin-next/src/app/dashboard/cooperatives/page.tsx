@@ -40,7 +40,7 @@ export default function CooperativesPage() {
       const res = await apiFetch('/organizations?page=1&limit=100');
       if (!res.ok) throw new Error('Erreur ' + res.status);
       const data = await res.json();
-      const arr = Array.isArray(data) ? data : [];
+      const arr = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
       setOrgs(arr.filter((o: any) => o.type === 'COOPERATIVE' || o.type === 'coop'));
       setError('');
     } catch (err: any) {

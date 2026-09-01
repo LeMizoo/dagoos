@@ -30,7 +30,7 @@ export default function CoopVehiclesPage() {
   const fetchVehicles = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/vehicles');
+      const res = await fetch('/api/vehicles?page=1&limit=100');
       if (!res.ok) throw new Error('Erreur ' + res.status);
       const data = await res.json();
       setVehicles(Array.isArray(data) ? data.filter((v: any) => v.organizationId === id) : []);

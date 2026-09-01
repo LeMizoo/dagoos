@@ -44,8 +44,8 @@ export default function UrbainMaintenance() {
         apiFetch('/vehicles?page=1&limit=100').then(r => r.ok ? r.json() : []),
       ]);
       
-      const allRecords = Array.isArray(mRes) ? mRes : [];
-      const allVehicles = Array.isArray(vRes) ? vRes : [];
+      const allRecords = Array.isArray(mRes?.data) ? mRes.data : (Array.isArray(mRes) ? mRes : []);
+      const allVehicles = Array.isArray(vRes?.data) ? vRes.data : (Array.isArray(vRes) ? vRes : []);
       const orgVehicles = allVehicles.filter((v: any) => v.organizationId === organization.id);
       
       setVehicles(orgVehicles);

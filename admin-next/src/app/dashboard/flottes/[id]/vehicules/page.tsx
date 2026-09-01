@@ -36,10 +36,10 @@ export default function FleetVehiclesPage() {
   const fetchVehicles = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/vehicles');
+      const res = await fetch('/api/vehicles?page=1&limit=100');
       if (!res.ok) throw new Error('Erreur ' + res.status);
       const data = await res.json();
-      const arr = Array.isArray(data) ? data : [];
+      const arr = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
       setVehicles(arr.filter((v: any) => v.organizationId === id));
       setError('');
     } catch (err: any) {

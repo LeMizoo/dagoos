@@ -37,10 +37,10 @@ export default function AbonnementsPage() {
   const fetchOrgs = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/organizations');
+      const res = await fetch('/api/organizations?page=1&limit=100');
       if (!res.ok) throw new Error('Erreur ' + res.status);
       const data = await res.json();
-      setOrgs(Array.isArray(data) ? data : []);
+      setOrgs(Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []));
       setError('');
     } catch (err: any) { setError(err.message); } finally { setLoading(false); }
   };

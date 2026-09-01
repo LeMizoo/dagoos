@@ -28,12 +28,12 @@ export default function InterurbainDeparts() {
     
     try {
       const [dRes, vRes] = await Promise.all([
-        apiFetch('/departs').then(r => r.ok ? r.json() : []),
+        apiFetch('/departs?page=1&limit=100').then(r => r.ok ? r.json() : []),
         apiFetch('/vehicles?page=1&limit=100').then(r => r.ok ? r.json() : []),
       ]);
       
-      const allDeparts = Array.isArray(dRes) ? dRes : [];
-      const allVehicles = Array.isArray(vRes) ? vRes : [];
+      const allDeparts = Array.isArray(dRes?.data) ? dRes.data : [];
+      const allVehicles = Array.isArray(vRes?.data) ? vRes.data : [];
       
       setDeparts(allDeparts.filter((d: any) => d.organizationId === organization.id));
       setVehicles(allVehicles.filter((v: any) => v.organizationId === organization.id));
