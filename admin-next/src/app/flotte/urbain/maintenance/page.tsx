@@ -64,7 +64,18 @@ export default function UrbainMaintenance() {
   }, [load]);
 
   async function handleAdd() {
-    if (!form.vehicleId || !form.km) return;
+    if (!form.vehicleId) {
+      setError('⚠️ Veuillez sélectionner un véhicule');
+      return;
+    }
+    if (!form.km || form.km <= 0) {
+      setError('⚠️ Veuillez saisir le kilométrage actuel');
+      return;
+    }
+    if (!form.cost || form.cost <= 0) {
+      setError('⚠️ Veuillez saisir le coût');
+      return;
+    }
     
     try {
       const res = await apiFetch('/maintenance', {
@@ -245,17 +256,22 @@ export default function UrbainMaintenance() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
             <h2 className="text-lg font-bold mb-4">🔧 Nouvelle intervention</h2>
+            {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-3 text-sm">{error}</div>}
             <div className="space-y-3">
-              <select
-                value={form.vehicleId}
-                onChange={e => setForm({...form, vehicleId: e.target.value})}
-                className="w-full px-3 py-2 border rounded-lg text-sm"
-              >
-                <option value="">Sélectionner un véhicule</option>
-                {vehicles.map(v => (
-                  <option key={v.id} value={v.id}>{v.plate} - {v.model}</option>
-                ))}
-              </select>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Véhicule *</label>
+                <select
+                  value={form.vehicleId}
+                  onChange={e => setForm({...form, vehicleId: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                  required
+                >
+                  <option value="">Sélectionner un véhicule</option>
+                  {vehicles.map(v => (
+                    <option key={v.id} value={v.id}>{v.plate} - {v.model}</option>
+                  ))}
+                </select>
+              </div>
               <select
                 value={form.type}
                 onChange={e => setForm({...form, type: e.target.value})}

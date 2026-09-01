@@ -7,17 +7,17 @@ import { Car, Plus, Search, CheckCircle, Wrench, Truck } from 'lucide-react';
 
 const VEHICLE_TYPES: Record<string, Record<string, string>> = {
   FLEET_MANAGER: {
-    moto: '🏍️ Taxi Moto',
-    voiture: '🚗 Taxi',
-    bus: '🚌 Bus',
-    minivan: '🚐 Mini Van',
-    tricycle: '🛺 Tricycle'
+    MOTO: '🏍️ Taxi Moto',
+    VOITURE: '🚗 Taxi',
+    BUS: '🚌 Bus',
+    MINIVAN: '🚐 Mini Van',
+    TRICYCLE: '🛺 Tricycle'
   },
   COOPERATIVE: {
-    livraison: '📦 Livraison',
-    transport_commun: '🚌 Transport en commun',
-    marchandises: '🚛 Transport de marchandises',
-    location: '🔑 Voiture de location'
+    VOITURE: '📦 Livraison',
+    BUS: '🚌 Transport en commun',
+    MINIVAN: '🚛 Transport de marchandises',
+    VOITURE_LOCATION: '🔑 Voiture de location'
   }
 };
 
@@ -32,7 +32,7 @@ export default function FlotteVehicules() {
   
   const isUrbain = organization?.type === 'FLEET_MANAGER';
   const vehicleTypes = VEHICLE_TYPES[organization?.type || 'FLEET_MANAGER'] || VEHICLE_TYPES.FLEET_MANAGER;
-  const defaultType = isUrbain ? 'voiture' : 'livraison';
+  const defaultType = isUrbain ? 'VOITURE' : 'VOITURE';
   
   const [form, setForm] = useState({
     plate: '',
