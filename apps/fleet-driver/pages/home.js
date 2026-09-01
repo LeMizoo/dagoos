@@ -2494,35 +2494,10 @@ async function loadDriverVehicleInfo() {
 // DÉTECTION FERMETURE APPLICATION
 // ========================================
 
-// À la fermeture du navigateur ou de l'app
-window.addEventListener('beforeunload', function() {
-    if (getDriverToken()) {
-        fetch(getApiUrl() + '/drivers/me/status', {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + getDriverToken()
-            },
-            body: JSON.stringify({ status: 'OFFLINE' }),
-            keepalive: true
-        }).catch(function() {});
-    }
-});
+// Le statut Driver.status est désormais géré exclusivement par
+// POST /drivers/pointage (arrivee, pause, reprise, depart).
+// Aucune modification automatique lors de la fermeture ou mise en arrière-plan.
 
-// Passage en arrière-plan (mobile)
-document.addEventListener('visibilitychange', function() {
-    if (document.hidden && getDriverToken()) {
-        fetch(getApiUrl() + '/drivers/me/status', {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + getDriverToken()
-            },
-            body: JSON.stringify({ status: 'OFFLINE' }),
-            keepalive: true
-        }).catch(function() {});
-    }
-});
 
 window.addEventListener(
     'online',
