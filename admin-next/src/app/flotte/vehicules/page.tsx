@@ -66,7 +66,11 @@ export default function FlotteVehicules() {
   }, [defaultType]);
 
   async function handleAdd() {
-    if (!form.plate || !organization?.id) return;
+    if (!form.plate) {
+      alert('⚠️ Veuillez saisir la plaque d\'immatriculation');
+      return;
+    }
+    if (!organization?.id) return;
     setSaving(true);
     try {
       const res = await apiFetch('/vehicles', {
@@ -178,43 +182,62 @@ export default function FlotteVehicules() {
           <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
             <h2 className="text-lg font-bold mb-4">Ajouter un véhicule</h2>
             <div className="space-y-3">
-              <input
-                type="text"
-                placeholder="Plaque"
-                value={form.plate}
-                onChange={e => setForm({...form, plate: e.target.value})}
-                className="w-full px-3 py-2 border rounded-lg text-sm"
-              />
-              <input
-                type="text"
-                placeholder="Modèle"
-                value={form.model}
-                onChange={e => setForm({...form, model: e.target.value})}
-                className="w-full px-3 py-2 border rounded-lg text-sm"
-              />
-              <select
-                value={form.type}
-                onChange={e => setForm({...form, type: e.target.value})}
-                className="w-full px-3 py-2 border rounded-lg text-sm"
-              >
-                {Object.entries(vehicleTypes).map(([k, v]) => (
-                  <option key={k} value={k}>{v}</option>
-                ))}
-              </select>
-              <input
-                type="number"
-                placeholder="Année"
-                value={form.year}
-                onChange={e => setForm({...form, year: parseInt(e.target.value) || new Date().getFullYear()})}
-                className="w-full px-3 py-2 border rounded-lg text-sm"
-              />
-              <input
-                type="number"
-                placeholder="Kilométrage"
-                value={form.currentKm}
-                onChange={e => setForm({...form, currentKm: parseInt(e.target.value) || 0})}
-                className="w-full px-3 py-2 border rounded-lg text-sm"
-              />
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Plaque d'immatriculation *</label>
+                <input
+                  type="text"
+                  placeholder="Ex: 5432 TBF"
+                  value={form.plate}
+                  onChange={e => setForm({...form, plate: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Modèle du véhicule</label>
+                <input
+                  type="text"
+                  placeholder="Ex: Mitsubishi Lancer"
+                  value={form.model}
+                  onChange={e => setForm({...form, model: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Type de véhicule *</label>
+                <select
+                  value={form.type}
+                  onChange={e => setForm({...form, type: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                >
+                  {Object.entries(vehicleTypes).map(([k, v]) => (
+                    <option key={k} value={k}>{v}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Année de mise en circulation</label>
+                <input
+                  type="number"
+                  placeholder="Ex: 2020"
+                  value={form.year}
+                  onChange={e => setForm({...form, year: parseInt(e.target.value) || new Date().getFullYear()})}
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                  min="1950"
+                  max={new Date().getFullYear() + 1}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Kilométrage actuel (km)</label>
+                <input
+                  type="number"
+                  placeholder="Ex: 75000"
+                  value={form.currentKm}
+                  onChange={e => setForm({...form, currentKm: parseInt(e.target.value) || 0})}
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                  min="0"
+                />
+              </div>
             </div>
             <div className="flex gap-2 mt-4">
               <button
