@@ -115,6 +115,7 @@ export default function FlottePointages() {
                 <th className="px-4 py-3">Véhicule</th>
                 <th className="px-4 py-3">Type</th>
                 <th className="px-4 py-3">Statut</th>
+                <th className="px-4 py-3">Date</th>
                 <th className="px-4 py-3">Heure</th>
               </tr>
             </thead>
@@ -125,6 +126,7 @@ export default function FlottePointages() {
                   <td className="px-4 py-3">{p.driver?.vehicle?.plate || '—'}</td>
                   <td className="px-4 py-3">{typeLabels[p.type] || p.type}</td>
                   <td className="px-4 py-3">{statutLabels[p.statut] || p.statut}</td>
+                  <td className="px-4 py-3">{p.date}</td>
                   <td className="px-4 py-3">{new Date(p.heure).toLocaleTimeString('fr-FR')}</td>
                 </tr>
               ))}
