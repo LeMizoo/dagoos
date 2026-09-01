@@ -35,7 +35,7 @@ export default function InterurbainDeparts() {
       const allDeparts = Array.isArray(dRes?.data) ? dRes.data : [];
       const allVehicles = Array.isArray(vRes?.data) ? vRes.data : [];
       
-      setDeparts(allDeparts.filter((d: any) => d.organizationId === organization.id && d.statut !== 'ARCHIVED'));
+      setDeparts(allDeparts.filter((d: any) => d.organizationId === organization.id));
       setVehicles(allVehicles.filter((v: any) => v.organizationId === organization.id));
     } catch (e: any) {
       setError(e.message);
@@ -210,6 +210,7 @@ export default function InterurbainDeparts() {
           <option value="PUBLISHED">Publiés</option>
           <option value="DRAFT">Brouillons</option>
           <option value="LEFT">Partis</option>
+          <option value="ARCHIVED">Archivés</option>
         </select>
       </div>
 
@@ -247,6 +248,7 @@ export default function InterurbainDeparts() {
                   <span className={`text-xs px-2 py-0.5 rounded-full ${
                     d.statut === 'PUBLISHED' ? 'bg-green-100 text-green-700' :
                     d.statut === 'DRAFT' ? 'bg-yellow-100 text-yellow-700' :
+                    d.statut === 'ARCHIVED' ? 'bg-gray-100 text-gray-500' :
                     'bg-gray-100 text-gray-700'
                   }`}>
                     {d.statut}

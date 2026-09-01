@@ -47,6 +47,7 @@ export default function FlotteDashboard() {
         caJour: statsRes?.today?.ca || 0,
         coursesJour: statsRes?.today?.count || 0,
         departs: orgDeparts.length,
+        draft: orgDeparts.filter((d: any) => d.statut === 'DRAFT').length,
         departsPublies: orgDeparts.filter((d: any) => d.statut === 'PUBLISHED').length,
         departsAujourdhui: orgDeparts.filter((d: any) => {
           const today = new Date().toDateString();
@@ -154,11 +155,11 @@ export default function FlotteDashboard() {
       </div>
 
       {/* Alerte si départs non publiés */}
-      {isInterurbain && stats?.departs > 0 && stats?.departsPublies === 0 && (
+      {isInterurbain && (stats?.draft || 0) > 0 && (
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4 flex items-center gap-3">
           <AlertCircle size={20} className="text-yellow-600" />
           <p className="text-sm text-yellow-700 dark:text-yellow-400">
-            Vous avez {stats.departs} départs en brouillon. Pensez à les publier pour qu'ils soient visibles par les voyageurs.
+            Vous avez {stats.draft} départs en brouillon. Pensez à les publier pour qu'ils soient visibles par les voyageurs.
           </p>
         </div>
       )}
