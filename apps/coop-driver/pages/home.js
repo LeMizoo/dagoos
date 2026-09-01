@@ -37,6 +37,15 @@ async function init_home() {
     try {
         currentDriver = await apiGet('/drivers/me');
         window.currentDriver = currentDriver;
+
+        // Charger le pointage du jour
+        var pointageData = null;
+        try {
+            pointageData = await apiGet('/drivers/me/pointage');
+        } catch (e) {
+            console.warn('Pointage indisponible:', e);
+        }
+        window.currentPointage = pointageData;
         
         // Détecter le type d'organisation
         var orgType = currentDriver?.organization?.type || 'FLEET_MANAGER';
@@ -89,13 +98,34 @@ async function init_home() {
     var orgName = currentOrg ? currentOrg.name : (user.organization || 'Flotte');
     var logo = DAGOOS_CONFIG.logoUrl;
 
-    // Déterminer le statut
-    var driverStatus = currentDriver && currentDriver.status ? currentDriver.status : 'OFFLINE';
-    var isAvailable = driverStatus === 'AVAILABLE' || driverStatus === 'active';
-    var isOnBreak = driverStatus === 'ON_BREAK' || driverStatus === 'pause';
-    var statutPresence = isAvailable ? 'present' : isOnBreak ? 'pause' : 'absent';
-    var statusLabel = isAvailable ? 'En service' : isOnBreak ? 'En pause' : 'Absent';
-    var statusColor = isAvailable ? '#22C55E' : isOnBreak ? '#F59E0B' : '#E74C3C';
+    // Statut dérivé du POINTAGE (pas de Driver.status)
+    var pointageStatut =
+        pointageData && pointageData.statut
+            ? pointageData.statut
+            : 'NON_DEBUTE';
+
+    var statutPresence =
+        pointageStatut === 'PRESENT'
+            ? 'present'
+            : pointageStatut === 'PAUSE'
+                ? 'pause'
+                : 'absent';
+
+    window.statutPresence = statutPresence;
+
+    var statusLabel =
+        statutPresence === 'present'
+            ? 'En service'
+            : statutPresence === 'pause'
+                ? 'En pause'
+                : 'Absent';
+
+    var statusColor =
+        statutPresence === 'present'
+            ? '#22C55E'
+            : statutPresence === 'pause'
+                ? '#F59E0B'
+                : '#E74C3C';
 
     main.innerHTML = 
         // HEADER
@@ -117,6 +147,42 @@ async function init_home() {
                 '<button onclick="goToProfil()" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:#10B981;cursor:pointer;font-size:14px;">👤</button>' +
                 '<button onclick="logout()" style="background:rgba(239,68,68,0.15);border:none;width:32px;height:32px;border-radius:50%;color:#F87171;cursor:pointer;font-size:16px;">⏻</button>' +
             '</div>' +
+        '</div>' +
+
+        // STATUT (pointage)
+        '<div style="display:flex;gap:8px;padding:10px 14px;max-width:600px;margin:0 auto;">' +
+            // Bouton DÉBUT — visible si NON_DEBUTE
+            (
+                statutPresence === 'absent'
+                    ? '<button onclick="changeStatus(\'present\')" style="flex:1;padding:12px 6px;background:#22C55E;color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;">' +
+                        'Début' +
+                    '</button>'
+                    : ''
+            ) +
+            // Bouton PAUSE — visible si PRESENT
+            (
+                statutPresence === 'present'
+                    ? '<button onclick="changeStatus(\'pause\')" style="flex:1;padding:12px 6px;background:#F59E0B;color:#000;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;">' +
+                        'Pause' +
+                    '</button>'
+                    : ''
+            ) +
+            // Bouton REPRISE — visible si PAUSE
+            (
+                statutPresence === 'pause'
+                    ? '<button onclick="changeStatus(\'reprise\')" style="flex:1;padding:12px 6px;background:#22C55E;color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;">' +
+                        'Reprise' +
+                    '</button>'
+                    : ''
+            ) +
+            // Bouton FIN — visible si PRESENT ou PAUSE
+            (
+                statutPresence === 'present' || statutPresence === 'pause'
+                    ? '<button onclick="changeStatus(\'termine\')" style="flex:1;padding:12px 6px;background:#E74C3C;color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;">' +
+                        'Fin' +
+                    '</button>'
+                    : ''
+            ) +
         '</div>' +
 
         '<div style="padding:14px;max-width:600px;margin:auto;">' +
@@ -358,10 +424,50 @@ function loadExpenses() {
 }
 
 window.init_home = init_home;
+window.changeStatus = changeStatus;
 window.marquerPaye = marquerPaye;
 window.addExpense = addExpense;
 
 // Chargement des infos du véhicule
+async function changeStatus(status) {
+    var typePointage =
+        status === 'present'
+            ? 'arrivee'
+            : status === 'pause'
+                ? 'pause'
+                : status === 'reprise'
+                    ? 'reprise'
+                    : 'depart';
+
+    try {
+        var response = await fetch(
+            getApiUrl() + '/drivers/pointage',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + getDriverToken()
+                },
+                body: JSON.stringify({ type: typePointage })
+            }
+        );
+
+        var data = await response.json().catch(function() { return {}; });
+
+        if (!response.ok) {
+            alert(data.error || 'Impossible de modifier le statut');
+            return;
+        }
+
+        window.statutPresence = status;
+        await init_home();
+
+    } catch (e) {
+        console.error('Changement statut:', e);
+        alert('Erreur réseau');
+    }
+}
+
 async function loadDriverVehicleInfo() {
   var vehicleBadge = document.getElementById('vehicleStatusBadge');
   var vehicleNameEl = document.getElementById('assignedVehicleName');

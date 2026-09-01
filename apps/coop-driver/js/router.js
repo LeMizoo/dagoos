@@ -5,6 +5,25 @@ function getAuthHeaders() {
   return headers;
 }
 
+// Fonctions utilitaires communes
+function getDriverToken() {
+  return localStorage.getItem('dagoo_driver_token') || '';
+}
+
+function getDriverUser() {
+  try {
+    return JSON.parse(localStorage.getItem('dagoo_driver_user') || '{}');
+  } catch (e) {
+    return {};
+  }
+}
+
+function getApiUrl() {
+  return (typeof DAGOOS_CONFIG !== 'undefined' && DAGOOS_CONFIG.apiUrl)
+    ? DAGOOS_CONFIG.apiUrl
+    : '';
+}
+
 async function apiFetch(endpoint, options) {
   options = options || {};
   var url = DAGOOS_CONFIG.apiUrl + endpoint;
@@ -28,6 +47,10 @@ async function apiFetch(endpoint, options) {
     throw err;
   }
 }
+
+window.getDriverToken = getDriverToken;
+window.getDriverUser = getDriverUser;
+window.getApiUrl = getApiUrl;
 
 window.apiFetch = apiFetch;
 window.apiGet = function(endpoint) { return apiFetch(endpoint); };
@@ -71,9 +94,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function getHeaderHTML() {
   var user = JSON.parse(localStorage.getItem('dagoo_driver_user') || '{}');
-  var driverStatus = window.currentDriver && window.currentDriver.status ? window.currentDriver.status : 'active';
-  var statusLabel = driverStatus === 'active' ? 'En service' : driverStatus === 'pause' ? 'En pause' : 'Absent';
-  var statusColor = driverStatus === 'active' ? '#22C55E' : driverStatus === 'pause' ? '#F59E0B' : '#E74C3C';
+  // Statut dérivé du pointage (pas de Driver.status)
+  var pointageStatut = window.currentPointage && window.currentPointage.statut
+    ? window.currentPointage.statut
+    : (window.statutPresence === 'present' ? 'PRESENT'
+      : window.statutPresence === 'pause' ? 'PAUSE'
+      : 'NON_DEBUTE');
+  var statusLabel = pointageStatut === 'PRESENT' ? 'En service' : pointageStatut === 'PAUSE' ? 'En pause' : 'Absent';
+  var statusColor = pointageStatut === 'PRESENT' ? '#22C55E' : pointageStatut === 'PAUSE' ? '#F59E0B' : '#E74C3C';
   var plate = window.currentVehicle ? window.currentVehicle.plate : '';
   
   return '<div style="background:#1E293B;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid #DAA520;">' +
@@ -92,7 +120,7 @@ function getHeaderHTML() {
     '<div style="display:flex;gap:4px;">' +
       '<button onclick="loadPage(\'notifications\')" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:#10B981;cursor:pointer;font-size:14px;">🔔</button>' +
       '<button onclick="loadPage(\'profil\')" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:#10B981;cursor:pointer;font-size:14px;">📶</button>' +
-      '<button onclick="window.location.reload()" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:#F87171;cursor:pointer;font-size:16px;">↻</button>' +
+      '<button onclick="logout()" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:#F87171;cursor:pointer;font-size:16px;" aria-label="Déconnexion" title="Déconnexion">⏻</button>' +
     '</div>' +
   '</div>';
 }
