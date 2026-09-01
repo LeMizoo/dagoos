@@ -41,7 +41,7 @@ export default function UrbainMaintenance() {
     try {
       const [mRes, vRes] = await Promise.all([
         apiFetch('/maintenance').then(r => r.ok ? r.json() : []),
-        apiFetch('/vehicles').then(r => r.ok ? r.json() : []),
+        apiFetch('/vehicles?page=1&limit=100').then(r => r.ok ? r.json() : []),
       ]);
       
       const allRecords = Array.isArray(mRes) ? mRes : [];

@@ -29,7 +29,7 @@ export default function InterurbainDeparts() {
     try {
       const [dRes, vRes] = await Promise.all([
         apiFetch('/departs').then(r => r.ok ? r.json() : []),
-        apiFetch('/vehicles').then(r => r.ok ? r.json() : []),
+        apiFetch('/vehicles?page=1&limit=100').then(r => r.ok ? r.json() : []),
       ]);
       
       const allDeparts = Array.isArray(dRes) ? dRes : [];

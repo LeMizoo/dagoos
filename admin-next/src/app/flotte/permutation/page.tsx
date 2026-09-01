@@ -35,7 +35,7 @@ export default function FlottePermutation() {
     try {
       const [dRes, vRes] = await Promise.all([
         apiFetch('/drivers').then(r => r.json()).catch(() => []),
-        apiFetch('/vehicles').then(r => r.json()).catch(() => []),
+        apiFetch('/vehicles?page=1&limit=100').then(r => r.json()).catch(() => []),
       ]);
       
       const allDrivers = Array.isArray(dRes) ? dRes : [];

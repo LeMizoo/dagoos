@@ -27,7 +27,7 @@ export default function InterurbainDriversPage() {
     try {
       const [dRes, vRes] = await Promise.all([
         apiFetch('/drivers?page=1&limit=100').then(r => r.json()),
-        apiFetch('/vehicles').then(r => r.json())
+        apiFetch('/vehicles?page=1&limit=100').then(r => r.json())
       ]);
 
       const resolvedOrgId = organization?.id || null;

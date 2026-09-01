@@ -55,34 +55,50 @@ router.get(
       where.id = organizationId;
     }
 
-    const organizations = await prisma.organization.findMany({
-      where,
-      select: {
-        id: true,
-        name: true,
-        code: true,
-        slug: true,
-        type: true,
-        email: true,
-        phone: true,
-        logo: true,
-        description: true,
-        plan: true,
-        status: true,
-        createdAt: true,
-        _count: {
-          select: {
-            drivers: true,
-            vehicles: true,
+    // Pagination
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 15));
+    const skip = (page - 1) * limit;
+
+    const [organizations, total] = await Promise.all([
+      prisma.organization.findMany({
+        where,
+        select: {
+          id: true,
+          name: true,
+          code: true,
+          slug: true,
+          type: true,
+          email: true,
+          phone: true,
+          plan: true,
+          status: true,
+          createdAt: true,
+          _count: {
+            select: {
+              drivers: true,
+              vehicles: true,
+            },
           },
         },
-      },
-      orderBy: {
-        createdAt: 'desc',
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip,
+        take: limit,
+      }),
+      prisma.organization.count({ where }),
+    ]);
+
+    res.json({
+      data: organizations,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
     });
-
-    res.json(organizations);
   } catch (error) {
     console.error('GET /organizations:', error);
     res.status(500).json({ error: error.message });

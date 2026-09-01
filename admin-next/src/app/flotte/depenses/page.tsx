@@ -24,7 +24,7 @@ export default function FlotteDepenses() {
     try {
       const [expRes, vehRes] = await Promise.all([
         apiFetch('/finances/expenses').then(r => r.ok ? r.json() : []),
-        apiFetch('/vehicles').then(r => r.ok ? r.json() : [])
+        apiFetch('/vehicles?page=1&limit=100').then(r => r.ok ? r.json() : [])
       ]);
       
       const allExpenses = Array.isArray(expRes) ? expRes : [];

@@ -37,7 +37,7 @@ export default function CooperativesPage() {
   const fetchOrgs = async () => {
     setLoading(true);
     try {
-      const res = await apiFetch('/organizations');
+      const res = await apiFetch('/organizations?page=1&limit=100');
       if (!res.ok) throw new Error('Erreur ' + res.status);
       const data = await res.json();
       const arr = Array.isArray(data) ? data : [];

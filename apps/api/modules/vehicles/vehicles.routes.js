@@ -62,16 +62,34 @@ router.get('/', authMiddleware, requirePermission('vehicles.read'), async (req, 
       where = { organizationId };
     }
 
-    const vehicles = await prisma.vehicle.findMany({
-      where,
-      include: {
-        organization: true,
-        proprietaire: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    // Pagination
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 15));
+    const skip = (page - 1) * limit;
 
-    res.json(vehicles);
+    const [vehicles, total] = await Promise.all([
+      prisma.vehicle.findMany({
+        where,
+        include: {
+          organization: true,
+          proprietaire: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.vehicle.count({ where }),
+    ]);
+
+    res.json({
+      data: vehicles,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error('GET /vehicles:', error);
 

@@ -44,7 +44,7 @@ export default function FlotteVehicules() {
 
   const load = useCallback(async () => {
     try {
-      const res = await apiFetch('/vehicles').then(r => r.json());
+      const res = await apiFetch('/vehicles?page=1&limit=100').then(r => r.json());
       const allVehicles = Array.isArray(res) ? res : [];
       const orgId = organization?.id;
       setVehicles(orgId ? allVehicles.filter((v: any) => v.organizationId === orgId) : allVehicles);

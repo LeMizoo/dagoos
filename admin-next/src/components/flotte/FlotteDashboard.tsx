@@ -21,7 +21,7 @@ export default function FlotteDashboard() {
     try {
       const [driversRes, vehiclesRes, statsRes, departsRes, reservationsRes] = await Promise.all([
         apiFetch('/drivers').then(r => r.ok ? r.json() : []),
-        apiFetch('/vehicles').then(r => r.ok ? r.json() : []),
+        apiFetch('/vehicles?page=1&limit=100').then(r => r.ok ? r.json() : []),
         apiFetch('/finances/stats/summary').then(r => r.ok ? r.json() : null),
         isInterurbain ? apiFetch('/departs').then(r => r.ok ? r.json() : []) : Promise.resolve([]),
         isInterurbain ? apiFetch('/reservations').then(r => r.ok ? r.json() : []) : Promise.resolve([]),
