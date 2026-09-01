@@ -855,7 +855,7 @@ router.get('/pointages', authMiddleware, requirePermission('drivers.read'), asyn
             }
           }
         },
-        orderBy: { date: 'desc', heure: 'desc' },
+        orderBy: [{ date: 'desc' }, { heure: 'desc' }],
         skip,
         take,
       }),
