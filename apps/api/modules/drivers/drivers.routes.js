@@ -102,6 +102,7 @@ async function canAccessOrganization(req, organizationId) {
 
 /*
  * GET /api/drivers
+ * Pagination : ?page=1&limit=15
  */
 router.get('/', authMiddleware, requirePermission('drivers.read'), async (req, res) => {
   try {
@@ -119,17 +120,35 @@ router.get('/', authMiddleware, requirePermission('drivers.read'), async (req, r
       where = { organizationId };
     }
 
-    const drivers = await prisma.driver.findMany({
-      where,
-      include: {
-        user: true,
-        organization: true,
-        vehicle: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    // Pagination
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 15));
+    const skip = (page - 1) * limit;
 
-    res.json(drivers.map(sanitizeDriver));
+    const [drivers, total] = await Promise.all([
+      prisma.driver.findMany({
+        where,
+        include: {
+          user: true,
+          organization: true,
+          vehicle: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.driver.count({ where }),
+    ]);
+
+    res.json({
+      data: drivers.map(sanitizeDriver),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error('GET /drivers:', error);
     res.status(500).json({

@@ -18,7 +18,7 @@ export default function FlotteCodes() {
     if (!organization?.id) return;
     
     try {
-      const r = await apiFetch('/drivers');
+      const r = await apiFetch('/drivers?page=1&limit=100');
       const d = await r.json();
       const allDrivers = Array.isArray(d) ? d : [];
       setDrivers(allDrivers.filter((drv: any) => drv.organizationId === organization.id));

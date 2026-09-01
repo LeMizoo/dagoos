@@ -27,14 +27,14 @@ export default function FlotteChauffeurs() {
   const load = useCallback(async () => {
     try {
       const [dRes, vRes] = await Promise.all([
-        apiFetch('/drivers').then(r => r.json()),
+        apiFetch('/drivers?page=1&limit=100').then(r => r.json()),
         apiFetch('/vehicles').then(r => r.json())
       ]);
       
       const resolvedOrgId = organization?.id || null;
       setOrgId(resolvedOrgId);
       
-      const allDrivers = Array.isArray(dRes) ? dRes : [];
+      const allDrivers = Array.isArray(dRes?.data) ? dRes.data : [];
       const allVehicles = Array.isArray(vRes) ? vRes : [];
       
       setDrivers(resolvedOrgId ? allDrivers.filter((d: any) => d.organizationId === resolvedOrgId) : allDrivers);
