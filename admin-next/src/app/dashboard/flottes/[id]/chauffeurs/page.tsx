@@ -7,12 +7,14 @@ import Modal from '@/components/ui/Modal';
 
 interface Driver {
   id: string;
-  firstName: string;
-  lastName: string;
-  code: string;
+  driverCode: string;
+  user?: { name?: string; phone?: string };
   phone?: string;
   status: string;
   vehicle?: { plate: string };
+  license?: string;
+  vehicleId?: string;
+  organizationId: string;
   createdAt: string;
 }
 
@@ -52,8 +54,15 @@ export default function FleetDriversPage() {
   };
 
   const openEdit = (d: Driver) => {
+    const nameParts = (d.user?.name || '').split(' ');
     setEditingDriver(d);
-    setFormData({ firstName: d.firstName, lastName: d.lastName, code: d.code, phone: d.phone || '', status: d.status });
+    setFormData({
+      firstName: d.user?.name ? nameParts[0] || '' : '',
+      lastName: d.user?.name ? nameParts.slice(1).join(' ') : '',
+      code: d.driverCode,
+      phone: d.user?.phone || d.phone || '',
+      status: d.status
+    });
     setModalOpen(true);
   };
 
@@ -63,7 +72,9 @@ export default function FleetDriversPage() {
     try {
       const url = editingDriver ? `/api/proxy/drivers/${editingDriver.id}` : '/api/proxy/drivers';
       const method = editingDriver ? 'PUT' : 'POST';
-      const body = editingDriver ? formData : { ...formData, organizationId: id };
+      const body = editingDriver
+        ? { ...formData, driverCode: formData.code }
+        : { ...formData, driverCode: formData.code, organizationId: id };
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       if (!res.ok) throw new Error('Erreur ' + res.status);
       setModalOpen(false);
@@ -128,9 +139,9 @@ export default function FleetDriversPage() {
               <tbody>
                 {drivers.map(d => (
                   <tr key={d.id} className="border-t hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium">{d.firstName} {d.lastName}</td>
-                    <td className="px-4 py-3 font-mono text-xs">{d.code}</td>
-                    <td className="px-4 py-3 text-gray-500">{d.phone || '-'}</td>
+                    <td className="px-4 py-3 font-medium">{d.user?.name || 'Sans nom'}</td>
+                    <td className="px-4 py-3 font-mono text-xs">{d.driverCode || '-'}</td>
+                    <td className="px-4 py-3 text-gray-500">{d.user?.phone || d.phone || '-'}</td>
                     <td className="px-4 py-3">{d.vehicle?.plate || '-'}</td>
                     <td className="px-4 py-3">
                       <span className={`text-xs px-2 py-0.5 rounded-full ${d.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
@@ -173,7 +184,7 @@ export default function FleetDriversPage() {
 
       <Modal open={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Confirmer">
         <div className="space-y-4">
-          <p className="text-sm">Supprimer <strong>{deleteConfirm?.firstName} {deleteConfirm?.lastName}</strong> ?</p>
+          <p className="text-sm">Supprimer <strong>{deleteConfirm?.user?.name || deleteConfirm?.driverCode}</strong> ?</p>
           <div className="flex justify-end gap-3">
             <button onClick={() => setDeleteConfirm(null)} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">Annuler</button>
             <button onClick={handleDelete} className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700">Supprimer</button>
