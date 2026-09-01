@@ -87,10 +87,24 @@ export default function InterurbainDeparts() {
   async function handleDelete(id: string) {
     if (!confirm('Supprimer ce départ ?')) return;
     try {
-      await apiFetch(`/departs/${id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/departs/${id}`, { method: 'DELETE' });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.status === 409) {
+        alert(data.error || 'Impossible de supprimer ce départ car des réservations sont encore actives.');
+        return;
+      }
+
+      if (!res.ok) {
+        alert(data.error || 'Erreur lors de la suppression');
+        return;
+      }
+
+      alert('✅ Départ supprimé avec succès !');
       load();
     } catch (e: any) {
       setError(e.message);
+      alert('Erreur réseau lors de la suppression');
     }
   }
 
