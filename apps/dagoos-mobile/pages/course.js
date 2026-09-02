@@ -37,7 +37,12 @@ async function estimerPrix() {
   localStorage.setItem('dagoos_trip_arrivee', arrivee);
 
   try {
-    var result = await apiPost('/public/estimate', { depart, arrivee, typeVehicule });
+    var result = await apiPost('/public/estimate', {
+      organizationSlug: 'dagoos-fleet',
+      depart: depart,
+      arrivee: arrivee,
+      typeVehicule: typeVehicule
+    });
     var container = document.getElementById('estimationResult');
 
     if (result && result.prixEstime) {
