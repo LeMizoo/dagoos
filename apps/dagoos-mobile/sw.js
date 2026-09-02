@@ -9,6 +9,8 @@ const STATIC_ASSETS = [
   '/pages/home.js',
   '/pages/course.js',
   '/pages/suivi.js',
+  '/pages/reservations.js',
+  '/pages/location.js',
   '/manifest.json'
 ];
 
