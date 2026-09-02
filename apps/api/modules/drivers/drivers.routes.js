@@ -705,6 +705,53 @@ router.post('/shift/end', authMiddleware, async (req, res) => {
   }
 });
 
+// PUT /api/drivers/me/pin - Chauffeur change son propre PIN
+router.put('/me/pin', authMiddleware, async (req, res) => {
+  try {
+    const { oldPin, newPin } = req.body;
+
+    if (!oldPin || !newPin) {
+      return res.status(400).json({ error: 'Ancien PIN et nouveau PIN requis' });
+    }
+
+    if (String(newPin).length !== 4 || !/^\d+$/.test(String(newPin))) {
+      return res.status(400).json({ error: 'Le PIN doit être composé de 4 chiffres' });
+    }
+
+    const driverId = req.user.driverId;
+    if (!driverId) {
+      return res.status(403).json({ error: 'Compte chauffeur introuvable' });
+    }
+
+    const driver = await prisma.driver.findUnique({
+      where: { id: driverId },
+      select: { pin: true },
+    });
+
+    if (!driver) {
+      return res.status(404).json({ error: 'Chauffeur introuvable' });
+    }
+
+    // Vérifier l'ancien PIN
+    const isValid = await bcrypt.compare(String(oldPin), driver.pin);
+    if (!isValid) {
+      return res.status(401).json({ error: 'Ancien PIN incorrect' });
+    }
+
+    // Hasher et sauvegarder le nouveau PIN
+    const hashedPin = await bcrypt.hash(String(newPin), 12);
+    await prisma.driver.update({
+      where: { id: driverId },
+      data: { pin: hashedPin },
+    });
+
+    res.json({ ok: true, message: 'PIN mis à jour avec succès' });
+  } catch (error) {
+    console.error('PUT /drivers/me/pin:', error);
+    res.status(500).json({ error: 'Erreur changement PIN' });
+  }
+});
+
 // PUT /api/drivers/me/status - Chauffeur change son propre statut
 router.put('/me/status', authMiddleware, async (req, res) => {
   try {

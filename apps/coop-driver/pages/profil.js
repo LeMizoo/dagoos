@@ -54,27 +54,25 @@ async function changePin() {
     var newPin = document.getElementById('newPin').value;
     var confirmPin = document.getElementById('confirmPin').value;
     var msg = document.getElementById('pinMessage');
-    var user = JSON.parse(localStorage.getItem("dagoo_driver_user") || "{}");
 
     if (!oldPin || !newPin || !confirmPin) { msg.innerHTML = '<span style="color:#F87171;">Tous les champs sont requis</span>'; return; }
     if (newPin !== confirmPin) { msg.innerHTML = '<span style="color:#F87171;">Les PIN ne correspondent pas</span>'; return; }
     if (newPin.length !== 4 || !/^\d+$/.test(newPin)) { msg.innerHTML = '<span style="color:#F87171;">Le PIN doit être composé de 4 chiffres</span>'; return; }
 
     try {
-        var data = await apiFetch('/drivers/me', {
+        var result = await apiFetch('/drivers/me/pin', {
             method: 'PUT',
-            body: { pin: newPin }
+            body: { oldPin: oldPin, newPin: newPin }
         });
 
-        if (data && !data.error) {
-            msg.innerHTML = '<span style="color:#22C55E;">PIN changé avec succès !</span>';
+        if (result && result.ok) {
+            msg.innerHTML = '<span style="color:#22C55E;">✅ PIN changé avec succès !</span>';
             document.getElementById('oldPin').value = '';
             document.getElementById('newPin').value = '';
             document.getElementById('confirmPin').value = '';
         } else {
-            msg.innerHTML = '<span style="color:#F87171;">' + ((data && data.error) || 'Erreur') + '</span>';
+            msg.innerHTML = '<span style="color:#F87171;">❌ ' + ((result && result.error) || 'Erreur') + '</span>';
         }
-
     } catch(e) {
         msg.innerHTML = '<span style="color:#F87171;">❌ Erreur réseau</span>';
     }
