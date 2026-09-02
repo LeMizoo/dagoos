@@ -1,0 +1,20 @@
+{
+  "name": "DAGOO'S Mobile",
+  "short_name": "DAGOO'S",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0A1F18",
+  "theme_color": "#10B981",
+  "description": "DAGOO'S - Transport urbain et interurbain à Madagascar",
+  "icons": [
+    {
+      "src": "/b-trans.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "lang": "fr",
+  "categories": ["travel", "transportation", "navigation"]
+}
