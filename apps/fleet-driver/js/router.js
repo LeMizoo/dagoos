@@ -59,6 +59,10 @@ window.getApiUrl = getApiUrl;
 window.apiFetch = apiFetch;
 window.apiGet = function(endpoint) { return apiFetch(endpoint); };
 
+window.apiPost = function(endpoint, body) {
+  return apiFetch(endpoint, { method: 'POST', body: body });
+};
+
 window.logout = function() {
   // Supprimer uniquement la session active
   // Conserver le code chauffeur mémorisé pour la reconnexion rapide
