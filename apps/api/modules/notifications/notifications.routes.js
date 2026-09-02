@@ -28,6 +28,14 @@ router.post('/vehicle-assignment-request', authMiddleware, async (req, res) => {
 
     const reason = String(req.body?.reason || '').trim().slice(0, 300);
 
+    console.log(
+      '[ENCODAGE ASSIGNATION] reason:',
+      JSON.stringify(reason),
+      Array.from(reason).map(c =>
+        c.codePointAt(0).toString(16)
+      )
+    );
+
     const driver = await prisma.driver.findUnique({
       where: { id: driverId },
       include: {
