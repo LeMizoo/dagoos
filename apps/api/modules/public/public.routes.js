@@ -478,6 +478,13 @@ router.post('/estimate-location', async (req, res) => {
 
 // POST /api/public/actions - Créer une action depuis la landing
 router.post('/actions', async (req, res) => {
+    console.log(
+      '[ENCODAGE] clientNom:',
+      JSON.stringify(req.body?.clientNom),
+      Array.from(String(req.body?.clientNom || '')).map(c =>
+        c.codePointAt(0).toString(16)
+      )
+    );
   try {
     const { organizationSlug, type, clientNom, clientTel, details } = req.body;
 
@@ -617,7 +624,7 @@ router.post('/actions', async (req, res) => {
           leadActionId: action.id,
           type: 'lead_action',
           title: `Nouvelle demande : ${type}`,
-          message: `${clientNom} - ${clientTel}`,
+          message: `${clientNomNormalized} - ${clientTelNormalized}`,
           read: false,
         },
       }).catch(() => {});
@@ -653,7 +660,7 @@ router.post('/actions', async (req, res) => {
       const offreClient = details?.offreClient ? Number(details.offreClient) : null;
 
       const messageCourse = [
-        `Client: ${clientNom}`,
+        `Client: ${clientNomNormalized}`,
         `Départ: ${details?.depart || ''}`,
         `Arrivée: ${details?.arrivee || ''}`,
         `Prix suggéré: ${prixEstime} Ar`,
