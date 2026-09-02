@@ -80,7 +80,7 @@ async function envoyerDemande() {
 
   try {
     var result = await apiPost('/public/actions', {
-      organizationSlug: 'dagoos-fleet',
+      organizationSlug: await getFirstOrganizationSlug(),
       type: 'COURSE_REQUEST',
       clientNom: info.name || 'Passager',
       clientTel: info.phone || '0000000000',

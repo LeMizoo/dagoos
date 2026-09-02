@@ -28,9 +28,9 @@ function init_location() {
           <option value="tricycle">🛺 Tricycle</option>
         </select>
         <select id="locTrajet" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:12px;">
-          <option value="aller_simple">Aller simple</option>
-          <option value="aller_retour">Aller-retour</option>
-          <option value="multi_jours">Multi-jours</option>
+          <option value="A_B">Aller simple</option>
+          <option value="A_B_A">Aller-retour</option>
+          <option value="A_B_A_MULTI">Multi-jours</option>
         </select>
         <button onclick="estimerLocation()" style="width:100%;padding:14px;background:#F59E0B;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;">Estimer la location</button>
       </div>
@@ -65,6 +65,7 @@ async function estimerLocation() {
           <div style="font-size:22px;font-weight:800;color:#F59E0B;">${result.distanceKm} km</div>
           <div style="font-size:11px;color:#94A3B8;margin-top:8px;">Prix estimé</div>
           <div style="font-size:26px;font-weight:800;color:#F59E0B;">${result.prixEstime} Ar</div>
+          <button onclick="demanderLocation()" style="width:100%;margin-top:12px;padding:14px;background:#F59E0B;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;">Demander cette location</button>
         </div>
       `;
     }
@@ -73,5 +74,40 @@ async function estimerLocation() {
   }
 }
 
+async function demanderLocation() {
+  var depart = document.getElementById('locDepart').value;
+  var arrivee = document.getElementById('locArrivee').value;
+  var typeVehicule = document.getElementById('locType').value;
+  var typeTrajet = document.getElementById('locTrajet').value;
+  var info = getPassengerInfo();
+
+  try {
+    var result = await apiPost('/public/actions', {
+      organizationSlug: await getFirstOrganizationSlug(),
+      type: 'CAR_RENTAL',
+      clientNom: info.name || 'Passager',
+      clientTel: info.phone || '0000000000',
+      details: {
+        depart: depart,
+        arrivee: arrivee,
+        typeVehicule: typeVehicule,
+        typeTrajet: typeTrajet
+      }
+    });
+
+    if (result && (result.codeSuivi || result.actionId)) {
+      var code = result.codeSuivi || result.actionId;
+      localStorage.setItem('dagoos_mobile_last_code', code);
+      alert('✅ Demande envoyée !\n\nCode de suivi : ' + code);
+      loadPage('suivi');
+    } else {
+      alert('❌ ' + (result.error || 'Erreur lors de la demande'));
+    }
+  } catch(e) {
+    alert('❌ Erreur réseau');
+  }
+}
+
 window.init_location = init_location;
 window.estimerLocation = estimerLocation;
+window.demanderLocation = demanderLocation;

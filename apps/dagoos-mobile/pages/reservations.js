@@ -24,23 +24,22 @@ async function chargerDeparts() {
     var orgs = Array.isArray(result) ? result : [];
     var departs = [];
 
-    // Extraire les départs publiés des organisations actives
+    // Extraire TOUS les départs retournés par l'API
+    // Le backend filtre déjà PUBLISHED via sa requête
     orgs.forEach(function(org) {
       if (org.departs && Array.isArray(org.departs)) {
         org.departs.forEach(function(d) {
-          if (d.statut === 'PUBLISHED' || d.statut === 'EMBARQUEMENT') {
-            departs.push({
-              id: d.id,
-              pointDepart: d.pointDepart,
-              destination: d.destination,
-              date: d.date,
-              heure: d.heure,
-              prix: d.prix,
-              placesTotal: d.placesTotal,
-              statut: d.statut,
-              organization: org.name
-            });
-          }
+          departs.push({
+            id: d.id,
+            pointDepart: d.pointDepart,
+            destination: d.destination,
+            date: d.date,
+            heure: d.heure,
+            prix: d.prix,
+            placesTotal: d.placesTotal || 1,
+            statut: d.statut || 'PUBLISHED',
+            organization: org.name
+          });
         });
       }
     });
@@ -95,11 +94,11 @@ async function reserver(departId) {
       place: place
     });
 
-    if (result && result.id) {
-      alert('✅ Réservation confirmée !');
+    if (result && (result.reservationId || result.id)) {
+      alert('✅ Réservation confirmée !\nRéférence : ' + (result.reservationId || result.id));
       chargerDeparts();
     } else {
-      alert('❌ Erreur de réservation');
+      alert('❌ ' + (result.error || 'Erreur de réservation'));
     }
   } catch(e) {
     alert('❌ Erreur réseau');
