@@ -55,26 +55,24 @@ async function changePin() {
     var newPin = document.getElementById('newPin').value;
     var confirmPin = document.getElementById('confirmPin').value;
     var msg = document.getElementById('pinMessage');
-    var user = JSON.parse(localStorage.getItem("dagoo_driver_user") || "{}");
 
     if (!oldPin || !newPin || !confirmPin) { msg.innerHTML = '<span style="color:#F87171;">Tous les champs sont requis</span>'; return; }
     if (newPin !== confirmPin) { msg.innerHTML = '<span style="color:#F87171;">Les PIN ne correspondent pas</span>'; return; }
     if (newPin.length !== 4 || !/^\d+$/.test(newPin)) { msg.innerHTML = '<span style="color:#F87171;">Le PIN doit être composé de 4 chiffres</span>'; return; }
 
     try {
-        var r = await fetch(DAGOOS_CONFIG.apiUrl + '/drivers/me', {
+        var result = await apiFetch('/drivers/me/pin', {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('dagoo_driver_token') },
-            body: JSON.stringify({ pin: newPin })
+            body: { oldPin: oldPin, newPin: newPin }
         });
-        var data = await r.json();
-        if (r.ok) {
+
+        if (result && result.ok) {
             msg.innerHTML = '<span style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';">✅ PIN changé avec succès !</span>';
             document.getElementById('oldPin').value = '';
             document.getElementById('newPin').value = '';
             document.getElementById('confirmPin').value = '';
         } else {
-            msg.innerHTML = '<span style="color:#F87171;">❌ ' + (data.error || 'Erreur') + '</span>';
+            msg.innerHTML = '<span style="color:#F87171;">❌ ' + ((result && result.error) || 'Erreur') + '</span>';
         }
     } catch(e) {
         msg.innerHTML = '<span style="color:#F87171;">❌ Erreur réseau</span>';
