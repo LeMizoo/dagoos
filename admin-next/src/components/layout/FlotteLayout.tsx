@@ -156,7 +156,7 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
 
   const notificationPath = isInterurbain
     ? '/flotte/interurbain/notifications'
-    : '/flotte/urbain/notifications';
+    : '/flotte/notifications';
 
 
 
