@@ -44,7 +44,7 @@ export default function FlotteNotifications() {
 
   async function handleMarkAsRead(id: string) {
     try {
-      await apiFetch(`/notifications/${id}`, {
+      await apiFetch(`/notifications/${id}/read`, {
         method: 'PUT',
         body: JSON.stringify({ read: true })
       });
@@ -59,7 +59,7 @@ export default function FlotteNotifications() {
       const unreadNotifications = notifications.filter(n => !n.read);
       await Promise.all(
         unreadNotifications.map(n =>
-          apiFetch(`/notifications/${n.id}`, {
+          apiFetch(`/notifications/${n.id}/read`, {
             method: 'PUT',
             body: JSON.stringify({ read: true })
           })
