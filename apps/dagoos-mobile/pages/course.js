@@ -1,3 +1,16 @@
+async function getFirstOrganizationSlug() {
+  try {
+    var orgs = await apiGet('/public/organizations');
+    if (Array.isArray(orgs) && orgs.length > 0) {
+      var org = orgs.find(function(o) { return o.type === 'FLEET_MANAGER'; }) || orgs[0];
+      return org.slug || 'dagoos-fleet';
+    }
+  } catch(e) {}
+  return 'dagoos-fleet';
+}
+
+window.getFirstOrganizationSlug = getFirstOrganizationSlug;
+
 function init_course() {
   var depart = localStorage.getItem('dagoos_trip_depart') || '';
   var arrivee = localStorage.getItem('dagoos_trip_arrivee') || '';
@@ -38,7 +51,7 @@ async function estimerPrix() {
 
   try {
     var result = await apiPost('/public/estimate', {
-      organizationSlug: 'dagoos-fleet',
+      organizationSlug: await getFirstOrganizationSlug(),
       depart: depart,
       arrivee: arrivee,
       typeVehicule: typeVehicule

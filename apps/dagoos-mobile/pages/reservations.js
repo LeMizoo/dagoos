@@ -20,8 +20,30 @@ async function chargerDeparts() {
   container.innerHTML = '<div style="text-align:center;padding:30px;color:#94A3B8;">Chargement des départs...</div>';
 
   try {
-    var result = await apiGet('/public/departs');
-    var departs = Array.isArray(result) ? result : (result.departs || []);
+    var result = await apiGet('/public/organizations');
+    var orgs = Array.isArray(result) ? result : [];
+    var departs = [];
+
+    // Extraire les départs publiés des organisations actives
+    orgs.forEach(function(org) {
+      if (org.departs && Array.isArray(org.departs)) {
+        org.departs.forEach(function(d) {
+          if (d.statut === 'PUBLISHED' || d.statut === 'EMBARQUEMENT') {
+            departs.push({
+              id: d.id,
+              pointDepart: d.pointDepart,
+              destination: d.destination,
+              date: d.date,
+              heure: d.heure,
+              prix: d.prix,
+              placesTotal: d.placesTotal,
+              statut: d.statut,
+              organization: org.name
+            });
+          }
+        });
+      }
+    });
 
     if (departs.length === 0) {
       container.innerHTML = '<div style="text-align:center;padding:30px;color:#94A3B8;">Aucun départ disponible</div>';

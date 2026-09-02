@@ -1,3 +1,16 @@
+async function getFirstOrganizationSlug() {
+  try {
+    var orgs = await apiGet('/public/organizations');
+    if (Array.isArray(orgs) && orgs.length > 0) {
+      var org = orgs.find(function(o) { return o.type === 'FLEET_MANAGER'; }) || orgs[0];
+      return org.slug || 'dagoos-fleet';
+    }
+  } catch(e) {}
+  return 'dagoos-fleet';
+}
+
+window.getFirstOrganizationSlug = getFirstOrganizationSlug;
+
 function init_location() {
   var app = document.getElementById('app');
   app.innerHTML = `
@@ -36,7 +49,7 @@ async function estimerLocation() {
 
   try {
     var result = await apiPost('/public/estimate-location', {
-      organizationSlug: 'dagoos-fleet',
+      organizationSlug: await getFirstOrganizationSlug(),
       typeVehicule: typeVehicule,
       typeTrajet: typeTrajet,
       depart: depart,
