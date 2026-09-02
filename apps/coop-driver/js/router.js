@@ -65,11 +65,10 @@ window.apiPost = function(endpoint, body) {
 
 
 window.logout = function() {
+  // Supprimer uniquement la session active
+  // Conserver le code chauffeur mémorisé pour la reconnexion rapide
   localStorage.removeItem('dagoo_driver_token');
   localStorage.removeItem('dagoo_driver_user');
-  localStorage.removeItem('dagoo_driver_code');
-  localStorage.removeItem('dagoo_driver_org');
-  localStorage.removeItem('dagoo_driver_type');
   localStorage.removeItem('driver_current_page');
   window.location.href = '/';
 };

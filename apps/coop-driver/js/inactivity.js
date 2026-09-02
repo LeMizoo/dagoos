@@ -24,12 +24,11 @@
         return;
       }
 
-      // Déconnexion
+      // Déconnexion — supprimer uniquement la session active
+      // Conserver dagoo_driver_code, dagoo_driver_org, dagoo_driver_type
+      // pour permettre la reconnexion rapide
       localStorage.removeItem('dagoo_driver_token');
       localStorage.removeItem('dagoo_driver_user');
-      localStorage.removeItem('dagoo_driver_code');
-      localStorage.removeItem('dagoo_driver_org');
-      localStorage.removeItem('dagoo_driver_type');
       localStorage.removeItem('driver_current_page');
 
       // Redirection vers la page de login
