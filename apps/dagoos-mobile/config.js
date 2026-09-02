@@ -4,9 +4,9 @@ window.DAGOOS_CONFIG = {
   appName: "DAGOO'S Mobile",
   version: '1.0.0',
   theme: {
-    primary: '#10B981',
-    dark: '#0A1F18',
-    card: '#064E3B',
+    primary: '#F59E0B',
+    dark: '#1A1A2E',
+    card: '#252540',
     text: '#FFFFFF',
     muted: '#94A3B8'
   }

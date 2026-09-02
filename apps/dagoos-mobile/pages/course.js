@@ -4,22 +4,22 @@ function init_course() {
 
   var app = document.getElementById('app');
   app.innerHTML = `
-    <div style="background:#064E3B;padding:16px;display:flex;align-items:center;gap:12px;">
+    <div style="background:#252540;padding:16px;display:flex;align-items:center;gap:12px;">
       <span style="font-size:24px;">🚕</span>
-      <div style="font-size:16px;font-weight:800;color:#10B981;">Demande de course</div>
+      <div style="font-size:16px;font-weight:800;color:#F59E0B;">Demande de course</div>
     </div>
     <div style="padding:16px;">
-      <div style="background:#064E3B;border-radius:12px;padding:16px;">
-        <input id="depart" placeholder="Départ" value="${depart}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#0A1F18;color:#fff;margin-bottom:8px;">
-        <input id="arrivee" placeholder="Arrivée" value="${arrivee}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#0A1F18;color:#fff;margin-bottom:8px;">
-        <select id="typeVehicule" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#0A1F18;color:#fff;margin-bottom:12px;">
+      <div style="background:#252540;border-radius:12px;padding:16px;">
+        <input id="depart" placeholder="Départ" value="${depart}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
+        <input id="arrivee" placeholder="Arrivée" value="${arrivee}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
+        <select id="typeVehicule" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:12px;">
           <option value="moto">🏍️ Taxi Moto</option>
           <option value="voiture">🚕 Taxi</option>
           <option value="bus">🚌 Bus</option>
           <option value="minivan">🚐 Mini Van</option>
           <option value="tricycle">🛺 Tricycle</option>
         </select>
-        <button onclick="estimerPrix()" style="width:100%;padding:14px;background:#10B981;color:#0A1F18;border:none;border-radius:8px;font-weight:700;cursor:pointer;">Estimer le prix</button>
+        <button onclick="estimerPrix()" style="width:100%;padding:14px;background:#F59E0B;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;">Estimer le prix</button>
       </div>
       <div id="estimationResult" style="margin-top:12px;"></div>
     </div>
@@ -47,12 +47,12 @@ async function estimerPrix() {
 
     if (result && result.prixEstime) {
       container.innerHTML = `
-        <div style="background:#064E3B;border-radius:12px;padding:16px;border:1px solid #10B981;">
+        <div style="background:#252540;border-radius:12px;padding:16px;border:1px solid #F59E0B;">
           <div style="font-size:11px;color:#94A3B8;">Distance estimée</div>
-          <div style="font-size:22px;font-weight:800;color:#10B981;">${result.distanceKm} km</div>
+          <div style="font-size:22px;font-weight:800;color:#F59E0B;">${result.distanceKm} km</div>
           <div style="font-size:11px;color:#94A3B8;margin-top:8px;">Prix estimé</div>
-          <div style="font-size:26px;font-weight:800;color:#10B981;">${result.prixEstime} Ar</div>
-          <button onclick="envoyerDemande()" style="width:100%;margin-top:12px;padding:14px;background:#10B981;color:#0A1F18;border:none;border-radius:8px;font-weight:700;cursor:pointer;">Confirmer la demande</button>
+          <div style="font-size:26px;font-weight:800;color:#F59E0B;">${result.prixEstime} Ar</div>
+          <button onclick="envoyerDemande()" style="width:100%;margin-top:12px;padding:14px;background:#F59E0B;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;">Confirmer la demande</button>
         </div>
       `;
     }
