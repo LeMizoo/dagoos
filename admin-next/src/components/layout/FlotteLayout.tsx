@@ -11,7 +11,7 @@ import {
   Calendar, Ticket, FileCheck, FileText, User, ClipboardList,
   ArrowRightLeft, QrCode, Wrench, Receipt, Clock
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTheme } from '@/lib/theme-context';
 import ThemeSwitcher from './ThemeSwitcher';
 
@@ -25,6 +25,7 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
   const { organization } = useOrganization();
   const [isOpen, setIsOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const { theme, setTheme } = useTheme();
 
   const isUrbain = organization?.type === 'FLEET_MANAGER';
@@ -96,6 +97,57 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
   ];
 
   const menu = isUrbain ? fleetMenu : coopMenu;
+
+  // ============================================================
+  // Notifications : compteur non lues
+  // Le backend reste la source de vérité.
+  // apiFetch ajoute automatiquement x-auth-space selon l'URL.
+  // ============================================================
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadUnreadNotifications = async () => {
+      try {
+        const { default: apiFetch } = await import('@/lib/api');
+
+        const response = await apiFetch('/notifications/unread-count');
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data = await response.json();
+        const count = Number(data?.count);
+
+        if (!cancelled) {
+          setUnreadNotifications(
+            Number.isFinite(count) && count > 0
+              ? count
+              : 0
+          );
+        }
+      } catch (error) {
+        console.error('Compteur notifications:', error);
+      }
+    };
+
+    loadUnreadNotifications();
+
+    const interval = window.setInterval(
+      loadUnreadNotifications,
+      30000
+    );
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, []);
+
+  const notificationPath = isInterurbain
+    ? '/flotte/interurbain/notifications'
+    : '/flotte/urbain/notifications';
+
 
 
 
@@ -199,6 +251,24 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Link
+              href={notificationPath}
+              aria-label={
+                unreadNotifications > 0
+                  ? `${unreadNotifications} notification${unreadNotifications > 1 ? 's' : ''} non lue${unreadNotifications > 1 ? 's' : ''}`
+                  : 'Notifications'
+              }
+              className="relative flex items-center justify-center w-10 h-10 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            >
+              <Bell size={21} />
+
+              {unreadNotifications > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-white dark:border-gray-800">
+                  {unreadNotifications > 99 ? '99+' : unreadNotifications}
+                </span>
+              )}
+            </Link>
+
             <ThemeSwitcher />
             <div className="relative">
               <button onClick={() => setShowUserMenu(!showUserMenu)} className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg px-3 py-2 transition">
