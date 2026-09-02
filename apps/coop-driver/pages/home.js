@@ -285,20 +285,61 @@ async function init_home() {
 async function accepterCourse(notificationId) {
   var user = JSON.parse(localStorage.getItem('dagoo_driver_user') || '{}');
   if (!user.driverId) { alert('Chauffeur non identifié'); return; }
-  
+
   try {
-    // Marquer la notification comme lue
-    await apiFetch('/notifications/' + notificationId + '/read', {
-      method: 'PUT'
+    // 1. Récupérer la notification pour extraire leadActionId
+    var notifications = await apiGet('/notifications?read=false');
+    var notification = notifications.find(function(n) {
+      return n.id === notificationId;
     });
-    
+
+    if (!notification || !notification.leadActionId) {
+      alert('Notification introuvable ou action manquante');
+      return;
+    }
+
+    // 2. Appeler la route métier d'acceptation (comme Fleet)
+    var response = await fetch(
+      getApiUrl() + '/actions/' + encodeURIComponent(notification.leadActionId) + '/accept',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + getDriverToken(),
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    var data = {};
+    try { data = await response.json(); } catch(e) {}
+
+    if (!response.ok) {
+      alert(data.error || 'Impossible d\'accepter la course');
+      return;
+    }
+
+    // 3. Sauvegarder localement pour éviter les doublons
+    var coursesAcceptees = [];
+    try {
+      coursesAcceptees = JSON.parse(localStorage.getItem('dagoo_courses_acceptees') || '[]');
+    } catch(e) {}
+
+    coursesAcceptees.push({
+      notificationId: notificationId,
+      actionId: notification.leadActionId,
+      courseId: data.id,
+      acceptedAt: new Date().toISOString()
+    });
+
+    localStorage.setItem('dagoo_courses_acceptees', JSON.stringify(coursesAcceptees));
+
     alert('✅ Course acceptée !');
     loadPage('courses');
   } catch (e) {
+    console.error('Erreur lors de l\'acceptation de la course:', e);
     alert('Erreur lors de l\'acceptation');
   }
 }
-
 async function refuserCourse(notificationId) {
   try {
     await apiFetch('/notifications/' + notificationId + '/read', {
