@@ -133,6 +133,12 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
 
     loadUnreadNotifications();
 
+    const handleNotificationRead = () => {
+      setUnreadNotifications((current) => Math.max(0, current - 1));
+    };
+
+    window.addEventListener('dagoos:notification-read', handleNotificationRead);
+
     const interval = window.setInterval(
       loadUnreadNotifications,
       30000
@@ -141,6 +147,10 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
     return () => {
       cancelled = true;
       window.clearInterval(interval);
+      window.removeEventListener(
+        'dagoos:notification-read',
+        handleNotificationRead
+      );
     };
   }, []);
 

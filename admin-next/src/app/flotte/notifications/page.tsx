@@ -49,6 +49,7 @@ export default function FlotteNotifications() {
         body: JSON.stringify({ read: true })
       });
       load();
+      window.dispatchEvent(new Event('dagoos:notification-read'));
     } catch (e: any) {
       setError(e.message);
     }
@@ -66,6 +67,10 @@ export default function FlotteNotifications() {
         )
       );
       load();
+
+      unreadNotifications.forEach(() => {
+        window.dispatchEvent(new Event('dagoos:notification-read'));
+      });
     } catch (e: any) {
       setError(e.message);
     }
