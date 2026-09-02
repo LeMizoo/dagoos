@@ -823,6 +823,12 @@ async function init_home() {
                     '</div>' +
 
                 '</div>' +
+                '<div id="vehicleAssignmentRequestArea" style="margin-top:10px;">' +
+                    (!plate
+                        ? '<button id="vehicleRequestButton" onclick="demanderVehicule()" style="width:100%;padding:11px;background:' + (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') + ';color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;">🚗 Demander une assignation</button>' +
+                          '<div id="vehicleRequestMessage" style="margin-top:8px;text-align:center;font-size:11px;"></div>'
+                        : '') +
+                '</div>' +
             '</div>' +
 
         '</div>';
@@ -2423,6 +2429,51 @@ function loadExpenses() {
 // ========================================
 // INFOS VEHICULE
 // ========================================
+
+
+async function demanderVehicule() {
+    var button = document.getElementById('vehicleRequestButton');
+    var msg = document.getElementById('vehicleRequestMessage');
+
+    if (button) {
+        button.disabled = true;
+        button.style.opacity = '0.6';
+        button.textContent = '⏳ Envoi en cours...';
+    }
+
+    try {
+        var result = await apiPost('/notifications/vehicle-assignment-request', {
+            reason: 'Demande d’assignation de véhicule depuis l’application chauffeur'
+        });
+
+        if (result && result.ok) {
+            if (msg) {
+                msg.innerHTML = '<span style="color:#22C55E;">✅ Demande envoyée à l’administrateur.</span>';
+            }
+
+            if (button) {
+                button.textContent = '✅ Demande envoyée';
+            }
+        } else {
+            throw new Error((result && result.error) || 'Erreur lors de l’envoi');
+        }
+
+    } catch (e) {
+        console.error('Demande assignation véhicule:', e);
+
+        if (msg) {
+            msg.innerHTML = '<span style="color:#F87171;">❌ ' +
+                (e.message || 'Erreur réseau') +
+                '</span>';
+        }
+
+        if (button) {
+            button.disabled = false;
+            button.style.opacity = '1';
+            button.textContent = '🚗 Demander une assignation';
+        }
+    }
+}
 
 async function loadDriverVehicleInfo() {
 

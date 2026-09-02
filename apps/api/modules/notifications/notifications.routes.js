@@ -194,7 +194,18 @@ router.get('/', authMiddleware, requirePermission('notifications.read'), async (
   }
 });
 router.get('/unread-count', authMiddleware, requirePermission('notifications.read'), async (req, res) => {
-  try { const count = await prisma.notification.count({ where: { read: false } }); res.json({ count }); } catch (e) { res.status(500).json({ error: e.message }); }
+  try {
+    const count = await prisma.notification.count({
+      where: {
+        userId: req.user.id,
+        read: false
+      }
+    });
+
+    res.json({ count });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
