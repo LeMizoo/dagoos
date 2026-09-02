@@ -478,13 +478,6 @@ router.post('/estimate-location', async (req, res) => {
 
 // POST /api/public/actions - Créer une action depuis la landing
 router.post('/actions', async (req, res) => {
-    console.log(
-      '[ENCODAGE] clientNom:',
-      JSON.stringify(req.body?.clientNom),
-      Array.from(String(req.body?.clientNom || '')).map(c =>
-        c.codePointAt(0).toString(16)
-      )
-    );
   try {
     const { organizationSlug, type, clientNom, clientTel, details } = req.body;
 
