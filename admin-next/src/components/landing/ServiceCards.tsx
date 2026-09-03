@@ -189,7 +189,7 @@ export default function ServiceCards({ organizations, coopsAvecDeparts }: Servic
               </button>
             </div>
             <div className="p-6">
-              <DemandeLocation />
+              <DemandeLocation typeOrganisation="COOPERATIVE" />
             </div>
           </div>
         </div>

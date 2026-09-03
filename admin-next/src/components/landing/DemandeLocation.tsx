@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '@/lib/api';
 
-export default function DemandeLocation() {
+export default function DemandeLocation({ typeOrganisation = 'FLEET_MANAGER' }: { typeOrganisation?: string }) {
   const [flottes, setFlottes] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [codeSuivi, setCodeSuivi] = useState<string | null>(null);
@@ -14,7 +14,7 @@ export default function DemandeLocation() {
     apiFetch('/public/organizations')
       .then(r => r.ok ? r.json() : [])
       .then(data => {
-        const fleets = Array.isArray(data) ? data.filter((o: any) => o.type === 'FLEET_MANAGER') : [];
+        const fleets = Array.isArray(data) ? data.filter((o: any) => o.type === typeOrganisation) : [];
         setFlottes(fleets);
       })
       .catch(() => {});
