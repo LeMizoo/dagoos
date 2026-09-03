@@ -98,6 +98,11 @@ enum VehicleType {
   BUS
   MINIVAN
   TRICYCLE
+  FOURGON
+  CAMION
+  SEMI_REMORQUE
+  DEPANNEUSE
+  CAMION_FRIGO
 }
 
 // ========================================

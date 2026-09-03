@@ -3,7 +3,13 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '@/lib/api';
 
-export default function DemandeLocation({ typeOrganisation = 'FLEET_MANAGER' }: { typeOrganisation?: string }) {
+export default function DemandeLocation({ 
+  typeOrganisation = 'FLEET_MANAGER',
+  mode = 'urbain'
+}: { 
+  typeOrganisation?: string;
+  mode?: 'urbain' | 'interurbain' | 'long_haul';
+}) {
   const [flottes, setFlottes] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [codeSuivi, setCodeSuivi] = useState<string | null>(null);
@@ -82,7 +88,7 @@ export default function DemandeLocation({ typeOrganisation = 'FLEET_MANAGER' }: 
         method: 'POST',
         body: JSON.stringify({
           organizationSlug: formData.get('flotte') as string,
-          type: 'CAR_RENTAL',
+          type: mode === 'long_haul' ? 'LONG_HAUL' : 'CAR_RENTAL',
           clientNom: formData.get('nom') as string,
           clientTel: formData.get('tel') as string,
           details,
@@ -126,13 +132,44 @@ export default function DemandeLocation({ typeOrganisation = 'FLEET_MANAGER' }: 
             ))}
           </select>
 
-          <select name="typeVehicule" className="w-full px-4 py-3 border rounded-lg text-sm" required>
-            <option value="moto">🏍️ Moto</option>
-            <option value="voiture">🚗 Voiture</option>
-            <option value="bus">🚌 Bus</option>
-            <option value="minivan">🚐 Mini Van</option>
-            <option value="tricycle">🛺 Tricycle</option>
-          </select>
+          {mode === 'long_haul' ? (
+            <>
+              <select name="typeService" className="w-full px-4 py-3 border rounded-lg text-sm" required>
+                <option value="passagers">👥 Transport passagers</option>
+                <option value="marchandises">📦 Marchandises</option>
+                <option value="demenagement">🏠 Déménagement</option>
+                <option value="depannage">🔧 Dépannage</option>
+                <option value="fret">🚛 Fret lourd</option>
+              </select>
+
+              <select name="typeVehicule" className="w-full px-4 py-3 border rounded-lg text-sm" required>
+                <option value="bus">🚌 Bus</option>
+                <option value="minivan">🚐 Mini Van</option>
+                <option value="fourgon">🚚 Fourgon</option>
+                <option value="camion">🚛 Camion</option>
+                <option value="semi_remorque">🚛 Semi-remorque</option>
+                <option value="depanneuse">🔧 Dépanneuse</option>
+                <option value="camion_frigo">🧊 Camion frigorifique</option>
+              </select>
+            </>
+          ) : (
+            <select name="typeVehicule" className="w-full px-4 py-3 border rounded-lg text-sm" required>
+              {typeOrganisation === 'COOPERATIVE' ? (
+                <>
+                  <option value="bus">🚌 Bus</option>
+                  <option value="minivan">🚐 Mini Van</option>
+                </>
+              ) : (
+                <>
+                  <option value="moto">🏍️ Moto</option>
+                  <option value="voiture">🚗 Voiture</option>
+                  <option value="bus">🚌 Bus</option>
+                  <option value="minivan">🚐 Mini Van</option>
+                  <option value="tricycle">🛺 Tricycle</option>
+                </>
+              )}
+            </select>
+          )}
 
           <select name="typeTrajet" className="w-full px-4 py-3 border rounded-lg text-sm" required>
             <option value="A_B">A → B (aller simple)</option>

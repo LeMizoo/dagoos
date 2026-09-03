@@ -517,6 +517,7 @@ router.post('/actions', async (req, res) => {
       'DELIVERY_REQUEST',
       'CARGO_RESERVATION',
       'CAR_RENTAL',
+      'LONG_HAUL',
       'CONTACT',
     ];
     
@@ -710,6 +711,122 @@ router.post('/actions', async (req, res) => {
       prixEstime = arrondirPrix(prixEstime);
       modePrestation = 'location';
 
+    } else if (type === 'LONG_HAUL') {
+      // ======================================================
+      // LONG_HAUL : transport long-courrier
+      // (passagers, marchandises, déménagement, dépannage)
+      // ======================================================
+
+      const typeVehicule = details?.typeVehicule || 'bus';
+      const typeService = details?.typeService || 'passagers';
+      const depart = details?.depart || '';
+      const arrivee = details?.arrivee || '';
+      const distanceKmLong = await calculerDistance(depart, arrivee);
+
+      // Tarif de l'organisation
+      const tarifLongOrg = await prisma.tarif.findUnique({
+        where: { organizationId: org.id }
+      }).catch(() => null);
+
+      if (!tarifLongOrg) {
+        return res.status(400).json({
+          error: 'Tarif non configuré pour cette organisation'
+        });
+      }
+
+      commissionPct = tarifLongOrg.commissionChauffeur ?? 20;
+
+      // Lecture des tarifs par véhicule
+      let vehiculeTarifsLong = {};
+      if (tarifLongOrg.vehiculeTarifs) {
+        try {
+          vehiculeTarifsLong = JSON.parse(tarifLongOrg.vehiculeTarifs);
+        } catch (e) {
+          console.error('Erreur parsing vehiculeTarifs LONG_HAUL:', e);
+        }
+      }
+
+      const typeMapLong = {
+        'bus': 'bus',
+        'minivan': 'minivan',
+        'fourgon': 'fourgon',
+        'camion': 'camion',
+        'semi_remorque': 'semi_remorque',
+        'depanneuse': 'depanneuse',
+        'camion_frigo': 'camion_frigo'
+      };
+
+      const cleLong = typeMapLong[typeVehicule] || 'bus';
+      const tarifLong = vehiculeTarifsLong[cleLong]?.longueDistance || {};
+
+      // Fallbacks : tarif générique puis valeurs par défaut
+      const prixBaseLong =
+        Number(tarifLong.prixBase) ||
+        Number(tarifLongOrg.prixBase) ||
+        50000;
+
+      const prixKmLong =
+        Number(tarifLong.prixKm) ||
+        Number(tarifLongOrg.prixKm) ||
+        1500;
+
+      const forfaitServiceLong =
+        Number(tarifLong.forfaitService) ||
+        100000;
+
+
+      // Calcul selon le type de service
+      switch (typeService) {
+        case 'passagers':
+          // Tarif par passager + distance
+          const nbPassagersLong = Number(details?.nbPassagers) || 1;
+          prixEstime = arrondirPrix(
+            (prixBaseLong * nbPassagersLong) +
+            (distanceKmLong * prixKmLong)
+          );
+          break;
+
+        case 'marchandises':
+          // Tarif volume + distance
+          const volumeLong = Number(details?.volume) || 1;
+          prixEstime = arrondirPrix(
+            (prixBaseLong * volumeLong) +
+            (distanceKmLong * prixKmLong)
+          );
+          break;
+
+        case 'demenagement':
+          // Forfait + distance
+          prixEstime = arrondirPrix(
+            forfaitServiceLong +
+            (distanceKmLong * prixKmLong)
+          );
+          break;
+
+        case 'depannage':
+          // Forfait + distance
+          prixEstime = arrondirPrix(
+            forfaitServiceLong +
+            (distanceKmLong * prixKmLong * 1.5)
+          );
+          break;
+
+        case 'fret':
+          // Tarif au km uniquement
+          prixEstime = arrondirPrix(
+            distanceKmLong * prixKmLong * 2
+          );
+          break;
+
+        default:
+          prixEstime = arrondirPrix(
+            prixBaseLong + (distanceKmLong * prixKmLong)
+          );
+      }
+
+      distanceKm = distanceKmLong;
+      modePrestation = 'long_haul';
+
     }
 
     // ========================================
@@ -727,7 +844,7 @@ router.post('/actions', async (req, res) => {
           prixEstime,
           modePrestation,
           commissionPct,
-          nbJours: type === 'CAR_RENTAL' ? nbJours : undefined,
+          nbJours: (type === 'CAR_RENTAL' || type === 'LONG_HAUL') ? nbJours : undefined,
           offreClient: details?.offreClient ? Number(details.offreClient) : null,
           codeSuivi: genererCodeSuivi(),
           statutNegociation: details?.offreClient ? 'OFFRE_CLIENT' : 'PRIX_SUGGERE'
@@ -763,6 +880,57 @@ router.post('/actions', async (req, res) => {
           read: false,
         },
       }).catch(() => {});
+    }
+
+    // Notifier les chauffeurs disponibles pour les demandes LONG_HAUL
+    if (type === 'LONG_HAUL') {
+      const vehicleTypeMapLong = {
+        'bus': 'BUS',
+        'minivan': 'MINIVAN',
+        'fourgon': 'FOURGON',
+        'camion': 'CAMION',
+        'semi_remorque': 'SEMI_REMORQUE',
+        'depanneuse': 'DEPANNEUSE',
+        'camion_frigo': 'CAMION_FRIGO'
+      };
+      const vehicleTypeLong = vehicleTypeMapLong[details?.typeVehicule] || null;
+
+      const driverWhereLong = {
+        organizationId: org.id,
+        status: { in: ['AVAILABLE', 'active'] }
+      };
+      if (vehicleTypeLong) {
+        driverWhereLong.vehicle = { type: vehicleTypeLong };
+      }
+
+      const driversLong = await prisma.driver.findMany({
+        where: driverWhereLong,
+        select: { userId: true, driverCode: true }
+      });
+
+      const messageLong = [
+        `Client: ${clientNomNormalized}`,
+        `Départ: ${details?.depart || ''}`,
+        `Arrivée: ${details?.arrivee || ''}`,
+        `Prix suggéré: ${prixEstime} Ar`,
+        `Distance: ${distanceKm} km`,
+        `Mode: ${modePrestation}`,
+        `Commission: ${commissionPct}%`
+      ].filter(Boolean).join(' | ');
+
+      for (const driver of driversLong) {
+        await prisma.notification.create({
+          data: {
+            userId: driver.userId,
+            organizationId: org.id,
+            leadActionId: action.id,
+            type: 'long_haul',
+            title: 'Nouvelle demande long-courrier',
+            message: messageLong,
+            read: false,
+          },
+        }).catch(() => {});
+      }
     }
 
     // Notifier les chauffeurs disponibles pour les demandes de course
