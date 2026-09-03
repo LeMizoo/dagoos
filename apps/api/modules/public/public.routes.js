@@ -756,7 +756,14 @@ router.post('/actions', async (req, res) => {
         'camion_frigo': 'camion_frigo'
       };
 
-      const cleLong = typeMapLong[typeVehicule] || 'bus';
+      const cleLong = typeMapLong[typeVehicule];
+
+      if (!cleLong) {
+        return res.status(400).json({
+          error: `Type de véhicule long-courrier invalide: ${typeVehicule}`
+        });
+      }
+
       const tarifLong = vehiculeTarifsLong[cleLong]?.longueDistance;
 
       // 🔴 RÈGLE MÉTIER : pas de fallback silencieux vers le tarif urbain

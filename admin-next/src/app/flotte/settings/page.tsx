@@ -59,15 +59,13 @@ const COOP_DEFAULT_TARIFS: any = {
     familiale: { tarifJour: 45000 },
     autres: { tarifJour: 35000 },
   },
-  longueDistance: {
-    bus: { prixBase: 50000, prixKm: 1500, forfaitService: 100000 },
-    minivan: { prixBase: 40000, prixKm: 1200, forfaitService: 80000 },
-    fourgon: { prixBase: 60000, prixKm: 1800, forfaitService: 120000 },
-    camion: { prixBase: 80000, prixKm: 2200, forfaitService: 150000 },
-    semi_remorque: { prixBase: 120000, prixKm: 3000, forfaitService: 200000 },
-    depanneuse: { prixBase: 70000, prixKm: 2000, forfaitService: 130000 },
-    camion_frigo: { prixBase: 100000, prixKm: 2500, forfaitService: 180000 },
-  },
+  bus: { longueDistance: { prixBase: 50000, prixKm: 1500, forfaitService: 100000 } },
+  minivan: { longueDistance: { prixBase: 40000, prixKm: 1200, forfaitService: 80000 } },
+  fourgon: { longueDistance: { prixBase: 60000, prixKm: 1800, forfaitService: 120000 } },
+  camion: { longueDistance: { prixBase: 80000, prixKm: 2200, forfaitService: 150000 } },
+  semi_remorque: { longueDistance: { prixBase: 120000, prixKm: 3000, forfaitService: 200000 } },
+  depanneuse: { longueDistance: { prixBase: 70000, prixKm: 2000, forfaitService: 130000 } },
+  camion_frigo: { longueDistance: { prixBase: 100000, prixKm: 2500, forfaitService: 180000 } },
 };
 
 export default function FlotteSettings() {
@@ -132,6 +130,19 @@ export default function FlotteSettings() {
   // ============================================================
   // HANDLERS COOP (INTER-URBAIN)
   // ============================================================
+
+  function updateLongueDistance(vehicle: string, field: string, value: number) {
+    setTarifs((prev: any) => ({
+      ...prev,
+      [vehicle]: {
+        ...prev[vehicle],
+        longueDistance: {
+          ...prev[vehicle]?.longueDistance,
+          [field]: value,
+        },
+      },
+    }));
+  }
 
   function updateCoopTarif(service: string, zone: string, mode: string, field: string, value: number) {
     setTarifs((prev: any) => ({
@@ -326,38 +337,38 @@ export default function FlotteSettings() {
               <p className="text-xs text-gray-500 mb-4">Tarifs par type de véhicule pour le transport long-courrier.</p>
 
               <ZoneSection title="Bus">
-                <ModeRow label="Tarif" base={tarifs.longueDistance?.bus?.prixBase || 0} km={tarifs.longueDistance?.bus?.prixKm || 0} onChange={(f, v) => updateCoopTarif('longueDistance', 'bus', 'prixBase', f, v)} />
-                <JourRow label="Forfait service (Ar)" value={tarifs.longueDistance?.bus?.forfaitService || 0} onChange={(v) => updateCoopTarif('longueDistance', 'bus', 'forfaitService', 'prixJour', v)} />
+                <ModeRow label="Tarif" base={tarifs.bus?.longueDistance?.prixBase || 0} km={tarifs.bus?.longueDistance?.prixKm || 0} onChange={(f, v) => updateLongueDistance('bus', f, v)} />
+                <JourRow label="Forfait service (Ar)" value={tarifs.bus?.longueDistance?.forfaitService || 0} onChange={(v) => updateLongueDistance('bus', 'forfaitService', v)} />
               </ZoneSection>
 
               <ZoneSection title="Mini Van">
-                <ModeRow label="Tarif" base={tarifs.longueDistance?.minivan?.prixBase || 0} km={tarifs.longueDistance?.minivan?.prixKm || 0} onChange={(f, v) => updateCoopTarif('longueDistance', 'minivan', 'prixBase', f, v)} />
-                <JourRow label="Forfait service (Ar)" value={tarifs.longueDistance?.minivan?.forfaitService || 0} onChange={(v) => updateCoopTarif('longueDistance', 'minivan', 'forfaitService', 'prixJour', v)} />
+                <ModeRow label="Tarif" base={tarifs.minivan?.longueDistance?.prixBase || 0} km={tarifs.minivan?.longueDistance?.prixKm || 0} onChange={(f, v) => updateLongueDistance('minivan', f, v)} />
+                <JourRow label="Forfait service (Ar)" value={tarifs.minivan?.longueDistance?.forfaitService || 0} onChange={(v) => updateLongueDistance('minivan', 'forfaitService', v)} />
               </ZoneSection>
 
               <ZoneSection title="Fourgon">
-                <ModeRow label="Tarif" base={tarifs.longueDistance?.fourgon?.prixBase || 0} km={tarifs.longueDistance?.fourgon?.prixKm || 0} onChange={(f, v) => updateCoopTarif('longueDistance', 'fourgon', 'prixBase', f, v)} />
-                <JourRow label="Forfait service (Ar)" value={tarifs.longueDistance?.fourgon?.forfaitService || 0} onChange={(v) => updateCoopTarif('longueDistance', 'fourgon', 'forfaitService', 'prixJour', v)} />
+                <ModeRow label="Tarif" base={tarifs.fourgon?.longueDistance?.prixBase || 0} km={tarifs.fourgon?.longueDistance?.prixKm || 0} onChange={(f, v) => updateLongueDistance('fourgon', f, v)} />
+                <JourRow label="Forfait service (Ar)" value={tarifs.fourgon?.longueDistance?.forfaitService || 0} onChange={(v) => updateLongueDistance('fourgon', 'forfaitService', v)} />
               </ZoneSection>
 
               <ZoneSection title="Camion">
-                <ModeRow label="Tarif" base={tarifs.longueDistance?.camion?.prixBase || 0} km={tarifs.longueDistance?.camion?.prixKm || 0} onChange={(f, v) => updateCoopTarif('longueDistance', 'camion', 'prixBase', f, v)} />
-                <JourRow label="Forfait service (Ar)" value={tarifs.longueDistance?.camion?.forfaitService || 0} onChange={(v) => updateCoopTarif('longueDistance', 'camion', 'forfaitService', 'prixJour', v)} />
+                <ModeRow label="Tarif" base={tarifs.camion?.longueDistance?.prixBase || 0} km={tarifs.camion?.longueDistance?.prixKm || 0} onChange={(f, v) => updateLongueDistance('camion', f, v)} />
+                <JourRow label="Forfait service (Ar)" value={tarifs.camion?.longueDistance?.forfaitService || 0} onChange={(v) => updateLongueDistance('camion', 'forfaitService', v)} />
               </ZoneSection>
 
               <ZoneSection title="Semi-remorque">
-                <ModeRow label="Tarif" base={tarifs.longueDistance?.semi_remorque?.prixBase || 0} km={tarifs.longueDistance?.semi_remorque?.prixKm || 0} onChange={(f, v) => updateCoopTarif('longueDistance', 'semi_remorque', 'prixBase', f, v)} />
-                <JourRow label="Forfait service (Ar)" value={tarifs.longueDistance?.semi_remorque?.forfaitService || 0} onChange={(v) => updateCoopTarif('longueDistance', 'semi_remorque', 'forfaitService', 'prixJour', v)} />
+                <ModeRow label="Tarif" base={tarifs.semi_remorque?.longueDistance?.prixBase || 0} km={tarifs.semi_remorque?.longueDistance?.prixKm || 0} onChange={(f, v) => updateLongueDistance('semi_remorque', f, v)} />
+                <JourRow label="Forfait service (Ar)" value={tarifs.semi_remorque?.longueDistance?.forfaitService || 0} onChange={(v) => updateLongueDistance('semi_remorque', 'forfaitService', v)} />
               </ZoneSection>
 
               <ZoneSection title="Dépanneuse">
-                <ModeRow label="Tarif" base={tarifs.longueDistance?.depanneuse?.prixBase || 0} km={tarifs.longueDistance?.depanneuse?.prixKm || 0} onChange={(f, v) => updateCoopTarif('longueDistance', 'depanneuse', 'prixBase', f, v)} />
-                <JourRow label="Forfait service (Ar)" value={tarifs.longueDistance?.depanneuse?.forfaitService || 0} onChange={(v) => updateCoopTarif('longueDistance', 'depanneuse', 'forfaitService', 'prixJour', v)} />
+                <ModeRow label="Tarif" base={tarifs.depanneuse?.longueDistance?.prixBase || 0} km={tarifs.depanneuse?.longueDistance?.prixKm || 0} onChange={(f, v) => updateLongueDistance('depanneuse', f, v)} />
+                <JourRow label="Forfait service (Ar)" value={tarifs.depanneuse?.longueDistance?.forfaitService || 0} onChange={(v) => updateLongueDistance('depanneuse', 'forfaitService', v)} />
               </ZoneSection>
 
               <ZoneSection title="Camion frigorifique">
-                <ModeRow label="Tarif" base={tarifs.longueDistance?.camion_frigo?.prixBase || 0} km={tarifs.longueDistance?.camion_frigo?.prixKm || 0} onChange={(f, v) => updateCoopTarif('longueDistance', 'camion_frigo', 'prixBase', f, v)} />
-                <JourRow label="Forfait service (Ar)" value={tarifs.longueDistance?.camion_frigo?.forfaitService || 0} onChange={(v) => updateCoopTarif('longueDistance', 'camion_frigo', 'forfaitService', 'prixJour', v)} />
+                <ModeRow label="Tarif" base={tarifs.camion_frigo?.longueDistance?.prixBase || 0} km={tarifs.camion_frigo?.longueDistance?.prixKm || 0} onChange={(f, v) => updateLongueDistance('camion_frigo', f, v)} />
+                <JourRow label="Forfait service (Ar)" value={tarifs.camion_frigo?.longueDistance?.forfaitService || 0} onChange={(v) => updateLongueDistance('camion_frigo', 'forfaitService', v)} />
               </ZoneSection>
             </Card>
           </>
