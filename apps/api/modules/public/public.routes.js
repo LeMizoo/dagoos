@@ -1186,7 +1186,7 @@ router.post('/reservations/batch', async (req, res) => {
     res.status(201).json({
       ok: true,
       otpCode,
-      message: `Code OTP simulé : ${otpCode}`,
+      message: `Réservation en attente. Code OTP : ${otpCode}`,
       reservations,
     });
   } catch (error) {

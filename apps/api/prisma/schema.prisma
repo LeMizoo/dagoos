@@ -548,6 +548,8 @@ model Reservation {
   statut       String   @default("PENDING")
   paiementRef  String?
   paiementInfo String?
+  otpHash      String?
+  otpExpiresAt DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
