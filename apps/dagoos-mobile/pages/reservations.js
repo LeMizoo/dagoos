@@ -292,6 +292,13 @@ async function confirmerReservation() {
       passagers: passagersList
     });
 
+    if (result && result.error === 'Places déjà réservées') {
+      alert('Certaines places viennent d\u00eatre r\u00e9serv\u00e9es. Rechargement...');
+      // Recharger les départs pour mettre à jour les places
+      chargerDeparts();
+      return;
+    }
+
     if (result && (result.otpCode || result.reservationId || result.id)) {
       // Sauvegarder le téléphone
       setPassengerInfo({ name: passagersList[0].passagerNom, phone: tel });
