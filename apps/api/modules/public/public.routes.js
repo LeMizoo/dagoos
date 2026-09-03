@@ -139,7 +139,7 @@ router.get('/departs/:slug', async (req, res) => {
       include: {
         vehicle: { select: { id: true, plate: true, model: true } },
         reservations: {
-          where: { statut: 'CONFIRMED' },
+          where: { statut: { in: ['CONFIRMED', 'PENDING'] } },
           select: { place: true },
         },
       },
@@ -1026,7 +1026,7 @@ router.post('/reservations', async (req, res) => {
       where: { id: departId },
       include: {
         reservations: {
-          where: { statut: 'CONFIRMED' },
+          where: { statut: { in: ['CONFIRMED', 'PENDING'] } },
           select: { place: true },
         },
       },
@@ -1082,7 +1082,7 @@ router.post('/reservations/batch', async (req, res) => {
       where: { id: departId },
       include: {
         reservations: {
-          where: { statut: 'CONFIRMED' },
+          where: { statut: { in: ['CONFIRMED', 'PENDING'] } },
           select: { place: true },
         },
       },
