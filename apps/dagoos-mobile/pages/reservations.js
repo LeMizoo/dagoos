@@ -143,44 +143,56 @@ function afficherFormulaireReservation(depart) {
     `;
   }
 
-  // Rangées A-F (4 sièges chacune = 24)
-  for (var r = 0; r < rangees.length; r++) {
-    var rowLabel = rangees[r];
-    var seatsInRow = [];
+  // Format exact landing:
+  // Conducteur 1A 1B
+  // 2A 2B | 2C 2D
+  // 3A 3B | 3C 3D
+  // 4A 4B | 4C 4D
+  // 5A 5B | 5C 5D
+  // 6A 6B | 6C 6D
+  // 7A 7B | 7C
 
-    // 4 sièges par rangée : 1A, 2A, 3A, 4A puis 1B, 2B...
-    for (var col = 1; col <= 4; col++) {
-      var label = col + rowLabel; // ex: 1A, 2A, 3A, 4A, 1B, 2B...
-      var numeroSeat = (r * 4) + col;
+  // Rangée 1 : Conducteur + 1A 1B
+  gridHtml += `
+    <div style="display:flex;justify-content:center;gap:8px;margin-bottom:8px;">
+      <span style="font-size:12px;color:#94A3B8;display:flex;align-items:center;">🧑‍✈️</span>
+      ${boutonPlace('1A', placesReservees.indexOf('1A') !== -1, selectedPlaces.indexOf('1A') !== -1)}
+      ${boutonPlace('1B', placesReservees.indexOf('1B') !== -1, selectedPlaces.indexOf('1B') !== -1)}
+    </div>
+  `;
 
-      if (numeroSeat <= depart.placesTotal) {
-        var estReservee = placesReservees.indexOf(label) !== -1;
-        var estSelectionnee = selectedPlaces.indexOf(label) !== -1;
-        seatsInRow.push(boutonPlace(label, estReservee, estSelectionnee));
+  // Rangées 2 à 7
+  var rangeesLabels = [
+    ['2A', '2B', '2C', '2D'],
+    ['3A', '3B', '3C', '3D'],
+    ['4A', '4B', '4C', '4D'],
+    ['5A', '5B', '5C', '5D'],
+    ['6A', '6B', '6C', '6D'],
+    ['7A', '7B', '7C', null],
+  ];
+
+  for (var r = 0; r < rangeesLabels.length; r++) {
+    var gaucheHtml = '';
+    var droiteHtml = '';
+
+    rangeesLabels[r].forEach(function(label, index) {
+      if (!label) return;
+      var estRes = placesReservees.indexOf(label) !== -1;
+      var estSel = selectedPlaces.indexOf(label) !== -1;
+      var btn = boutonPlace(label, estRes, estSel);
+
+      if (index < 2) {
+        gaucheHtml += btn;
+      } else {
+        droiteHtml += btn;
       }
-    }
+    });
 
     gridHtml += `
       <div style="display:flex;justify-content:center;gap:16px;margin-bottom:8px;">
-        ${seatsInRow.slice(0, 2).join('')}
+        <div style="display:flex;gap:8px;">${gaucheHtml}</div>
         <span style="width:20px;"></span>
-        ${seatsInRow.slice(2, 4).join('')}
-      </div>
-    `;
-  }
-
-  // Dernière rangée (rangée G - place 7C au centre)
-  if (depart.placesTotal >= 25) {
-    var label25 = '7C';
-    var estReservee25 = placesReservees.indexOf(label25) !== -1;
-    var estSelectionnee25 = selectedPlaces.indexOf(label25) !== -1;
-    var bg25 = estReservee25 ? '#333' : estSelectionnee25 ? '#F59E0B' : '#1A1A2E';
-    var color25 = estReservee25 ? '#666' : estSelectionnee25 ? '#1A1A2E' : '#fff';
-    var cursor25 = estReservee25 ? 'not-allowed' : 'pointer';
-
-    gridHtml += `
-      <div style="display:flex;justify-content:center;margin-bottom:8px;">
-        <button onclick="${estReservee25 ? '' : "togglePlace('7C')"}" style="width:44px;height:44px;border-radius:8px;border:1px solid #333;background:${bg25};color:${color25};font-size:11px;font-weight:700;cursor:${cursor25};">7C</button>
+        <div style="display:flex;gap:8px;">${droiteHtml}</div>
       </div>
     `;
   }
