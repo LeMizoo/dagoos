@@ -134,7 +134,6 @@ router.get('/departs/:slug', async (req, res) => {
       where: {
         organizationId: org.id,
         statut: 'PUBLISHED',
-        date: { gte: new Date() },
       },
       orderBy: [{ date: 'asc' }, { heure: 'asc' }],
       include: {
@@ -144,10 +143,18 @@ router.get('/departs/:slug', async (req, res) => {
           select: { place: true },
         },
       },
-      orderBy: [{ date: 'asc' }, { heure: 'asc' }],
+    });
+
+    // Filtrer les départs dont la date+heure est encore dans le futur
+    const now = new Date();
+    const departsValides = departs.filter(d => {
+      const [h, m] = (d.heure || '00:00').split(':').map(Number);
+      const dt = new Date(d.date);
+      dt.setHours(h, m, 0, 0);
+      return dt.getTime() > now.getTime();
     });
     
-    res.json(departs);
+    res.json(departsValides);
   } catch (error) {
     console.error('GET /public/departs/:slug:', error);
     res.status(500).json({ error: 'Erreur serveur' });
