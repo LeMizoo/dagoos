@@ -757,22 +757,18 @@ router.post('/actions', async (req, res) => {
       };
 
       const cleLong = typeMapLong[typeVehicule] || 'bus';
-      const tarifLong = vehiculeTarifsLong[cleLong]?.longueDistance || {};
+      const tarifLong = vehiculeTarifsLong[cleLong]?.longueDistance;
 
-      // Fallbacks : tarif générique puis valeurs par défaut
-      const prixBaseLong =
-        Number(tarifLong.prixBase) ||
-        Number(tarifLongOrg.prixBase) ||
-        50000;
+      // 🔴 RÈGLE MÉTIER : pas de fallback silencieux vers le tarif urbain
+      if (!tarifLong || typeof tarifLong.prixBase !== 'number' || typeof tarifLong.prixKm !== 'number') {
+        return res.status(400).json({
+          error: `Tarif long-courrier non configuré pour ${typeVehicule}`
+        });
+      }
 
-      const prixKmLong =
-        Number(tarifLong.prixKm) ||
-        Number(tarifLongOrg.prixKm) ||
-        1500;
-
-      const forfaitServiceLong =
-        Number(tarifLong.forfaitService) ||
-        100000;
+      const prixBaseLong = Number(tarifLong.prixBase);
+      const prixKmLong = Number(tarifLong.prixKm);
+      const forfaitServiceLong = Number(tarifLong.forfaitService) || 100000;
 
 
       // Calcul selon le type de service
