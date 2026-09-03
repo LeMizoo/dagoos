@@ -1,3 +1,7 @@
+// ============================================
+// SUIVI.JS — Aligné sur la landing
+// ============================================
+
 function init_suivi() {
   var lastCode = localStorage.getItem('dagoos_mobile_last_code') || '';
 
@@ -31,21 +35,68 @@ async function suivre() {
     var result = await apiGet('/public/suivi/' + code);
 
     if (result && result.statut) {
+      var statutLabels = {
+        'NEW': '⏳ En attente',
+        'ACCEPTED': '✅ Acceptée',
+        'REJECTED': '❌ Refusée',
+        'IN_PROGRESS': '🕐 En cours',
+        'COMPLETED': '✅ Terminée',
+        'CANCELLED': '❌ Annulée'
+      };
+
+      var statutMessages = {
+        'NEW': 'Votre demande est en attente. Les chauffeurs sont notifiés. Patientez quelques instants.',
+        'ACCEPTED': 'Un chauffeur a accepté votre demande ! Restez joignable sur votre téléphone.',
+        'REJECTED': 'Votre demande a été refusée. Vous pouvez réessayer avec une autre flotte.',
+        'IN_PROGRESS': 'Votre course est en cours de traitement.',
+        'COMPLETED': 'Votre course est terminée. Merci de votre confiance !',
+        'CANCELLED': 'Votre course a été annulée.'
+      };
+
+      var statutNegociationLabels = {
+        'PRIX_SUGGERE': 'Prix suggéré',
+        'OFFRE_CLIENT': 'Offre client en attente',
+        'CONTRE_OFFRE_CHAUFFEUR': 'Contre-offre du chauffeur',
+        'ACCEPTED': 'Acceptée',
+        'REJECTED': 'Refusée'
+      };
+
       var statutColor = result.statut === 'ACCEPTED' ? '#22C55E' : result.statut === 'REJECTED' ? '#EF4444' : '#F59E0B';
+      var statutLabel = statutLabels[result.statut] || result.statut;
+      var statutMessage = statutMessages[result.statut] || '';
 
       container.innerHTML = `
         <div style="background:#252540;border-radius:14px;padding:20px;border:1px solid rgba(245,158,11,0.3);">
           <div style="text-align:center;margin-bottom:16px;">
             <span style="font-size:50px;">${result.statut === 'ACCEPTED' ? '✅' : result.statut === 'REJECTED' ? '❌' : '⏳'}</span>
-            <div style="font-size:20px;font-weight:800;margin-top:8px;color:${statutColor};">${result.statut}</div>
+            <div style="font-size:20px;font-weight:800;margin-top:8px;color:${statutColor};">${statutLabel}</div>
+            ${statutMessage ? '<div style="font-size:12px;color:#94A3B8;margin-top:8px;line-height:1.5;">' + statutMessage + '</div>' : ''}
           </div>
+
           <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:12px;">
             <div style="font-size:11px;color:#94A3B8;">Client</div>
             <div style="font-weight:600;margin-bottom:8px;">${result.clientNom || '-'}</div>
-            <div style="font-size:11px;color:#94A3B8;">Départ</div>
-            <div style="font-weight:600;margin-bottom:8px;">${result.depart || '-'}</div>
-            <div style="font-size:11px;color:#94A3B8;">Arrivée</div>
-            <div style="font-weight:600;">${result.arrivee || '-'}</div>
+
+            <div style="font-size:11px;color:#94A3B8;">Trajet</div>
+            <div style="font-weight:600;margin-bottom:8px;">${result.depart || '-'} → ${result.arrivee || '-'}</div>
+
+            <div style="font-size:11px;color:#94A3B8;">Prix estimé</div>
+            <div style="font-weight:600;margin-bottom:8px;color:#F59E0B;">${Number(result.prixEstime || 0).toLocaleString('fr-FR')} Ar</div>
+
+            ${result.offreClient ? `
+              <div style="font-size:11px;color:#94A3B8;">Votre offre</div>
+              <div style="font-weight:600;margin-bottom:8px;color:#22C55E;">${Number(result.offreClient).toLocaleString('fr-FR')} Ar</div>
+            ` : ''}
+
+            ${result.contreOffreChauffeur ? `
+              <div style="font-size:11px;color:#94A3B8;">Contre-offre chauffeur</div>
+              <div style="font-weight:600;margin-bottom:8px;color:#3B82F6;">${Number(result.contreOffreChauffeur).toLocaleString('fr-FR')} Ar</div>
+            ` : ''}
+
+            ${result.statutNegociation ? `
+              <div style="font-size:11px;color:#94A3B8;">Négociation</div>
+              <div style="font-weight:600;margin-bottom:8px;">${statutNegociationLabels[result.statutNegociation] || result.statutNegociation}</div>
+            ` : ''}
           </div>
         </div>
       `;

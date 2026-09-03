@@ -82,7 +82,7 @@ export default function DemandeLocation() {
         method: 'POST',
         body: JSON.stringify({
           organizationSlug: formData.get('flotte') as string,
-          type: 'LOCATION_REQUEST',
+          type: 'CAR_RENTAL',
           clientNom: formData.get('nom') as string,
           clientTel: formData.get('tel') as string,
           details,

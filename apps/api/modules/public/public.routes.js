@@ -422,9 +422,19 @@ router.post('/estimate-location', async (req, res) => {
     const cle = typeMap[typeVehicule] || 'bus';
     const tarifLocation = vehiculeTarifs[cle]?.location || {};
 
-    const prixBase = tarifLocation.prixBase || 100000;
-    const prixKm = tarifLocation.prixKm || 1500;
-    const forfaitJournalier = tarifLocation.forfaitJournalier || 50000;
+    const prixBase =
+      Number(tarifLocation.prixBase) ||
+      Number(tarif.prixBase) ||
+      100000;
+
+    const prixKm =
+      Number(tarifLocation.prixKm) ||
+      Number(tarif.prixKm) ||
+      1500;
+
+    const forfaitJournalier =
+      Number(tarifLocation.forfaitJournalier) ||
+      50000;
 
     // Calculer le nombre de jours
     let nbJours = 1;
@@ -522,6 +532,7 @@ router.post('/actions', async (req, res) => {
     // Distance calculée par le backend via géocodage
     let distanceKm = 0;
     let commissionPct = 20;
+    let nbJours = 1;
 
     if (type === 'COURSE_REQUEST' || type === 'TAXI_RESERVATION') {
       const VEHICLE_TYPE_MAP = {
@@ -569,6 +580,136 @@ router.post('/actions', async (req, res) => {
       } else if (tarif) {
         prixEstime = arrondirPrix(tarif.prixBase + (distanceKm * tarif.prixKm));
       }
+
+    } else if (type === 'CAR_RENTAL') {
+      // ======================================================
+      // LOCATION : calcul 100 % côté backend
+      // ======================================================
+
+      const typeVehicule = details?.typeVehicule || 'bus';
+      const typeTrajet = details?.typeTrajet || 'A_B';
+      const depart = details?.depart || '';
+      const arrivee = details?.arrivee || '';
+      const dateAller = details?.dateAller || null;
+      const dateRetour = details?.dateRetour || null;
+      const carburant = details?.carburant || 'AVEC';
+
+      // Calcul du nombre de jours côté backend
+      if (
+        typeTrajet === 'A_B_A_MULTI' &&
+        dateAller &&
+        dateRetour
+      ) {
+        const debut = new Date(dateAller);
+        const fin = new Date(dateRetour);
+
+        if (
+          !Number.isNaN(debut.getTime()) &&
+          !Number.isNaN(fin.getTime())
+        ) {
+          nbJours = Math.max(
+            1,
+            Math.ceil(
+              (fin.getTime() - debut.getTime()) /
+              (1000 * 3600 * 24)
+            ) + 1
+          );
+        }
+      }
+
+      // Distance calculée exclusivement par le backend
+      distanceKm = await calculerDistance(depart, arrivee);
+
+      // Tarif de l'organisation
+      const tarifLocationOrg = await prisma.tarif.findUnique({
+        where: { organizationId: org.id }
+      }).catch(() => null);
+
+      if (!tarifLocationOrg) {
+        return res.status(400).json({
+          error: 'Tarif non configuré pour cette organisation'
+        });
+      }
+
+      commissionPct = tarifLocationOrg.commissionChauffeur ?? 20;
+
+      // Lecture des tarifs par véhicule
+      let vehiculeTarifsLocation = {};
+
+      if (tarifLocationOrg.vehiculeTarifs) {
+        try {
+          vehiculeTarifsLocation = JSON.parse(
+            tarifLocationOrg.vehiculeTarifs
+          );
+        } catch (e) {
+          console.error(
+            'Erreur parsing vehiculeTarifs location:',
+            e
+          );
+        }
+      }
+
+      const typeMapLocation = {
+        bus: 'bus',
+        minivan: 'minivan',
+        tricycle: 'tricycle'
+      };
+
+      const cleLocation =
+        typeMapLocation[typeVehicule] || 'bus';
+
+      const tarifLocation =
+        vehiculeTarifsLocation[cleLocation]?.location || {};
+
+      const prixBaseLocation =
+        Number(tarifLocation.prixBase) ||
+        Number(tarifLocationOrg.prixBase) ||
+        100000;
+
+      const prixKmLocation =
+        Number(tarifLocation.prixKm) ||
+        Number(tarifLocationOrg.prixKm) ||
+        1500;
+
+      const forfaitJournalierLocation =
+        Number(tarifLocation.forfaitJournalier) ||
+        50000;
+
+      // Calcul du prix selon le trajet
+      switch (typeTrajet) {
+        case 'A_B':
+          if (carburant === 'AVEC') {
+            prixEstime = prixBaseLocation;
+          } else {
+            prixEstime =
+              prixBaseLocation +
+              (distanceKm * prixKmLocation) +
+              (prixBaseLocation * 0.5);
+          }
+          break;
+
+        case 'A_B_A':
+          prixEstime =
+            (2 * prixBaseLocation) +
+            (2 * distanceKm * prixKmLocation);
+          break;
+
+        case 'A_B_A_MULTI':
+          prixEstime =
+            prixBaseLocation +
+            (distanceKm * prixKmLocation) +
+            (forfaitJournalierLocation * nbJours) +
+            (distanceKm * prixKmLocation) +
+            prixBaseLocation;
+          break;
+
+        default:
+          prixEstime = prixBaseLocation;
+      }
+
+      prixEstime = arrondirPrix(prixEstime);
+      modePrestation = 'location';
+
     }
 
     // ========================================
@@ -586,6 +727,7 @@ router.post('/actions', async (req, res) => {
           prixEstime,
           modePrestation,
           commissionPct,
+          nbJours: type === 'CAR_RENTAL' ? nbJours : undefined,
           offreClient: details?.offreClient ? Number(details.offreClient) : null,
           codeSuivi: genererCodeSuivi(),
           statutNegociation: details?.offreClient ? 'OFFRE_CLIENT' : 'PRIX_SUGGERE'

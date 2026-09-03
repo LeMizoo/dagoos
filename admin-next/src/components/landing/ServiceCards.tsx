@@ -188,10 +188,8 @@ export default function ServiceCards({ organizations, coopsAvecDeparts }: Servic
                 <X size={20} className="text-gray-500" />
               </button>
             </div>
-            <div className="p-6 text-center text-gray-500">
-              <p className="text-3xl mb-3">🚌</p>
-              <p className="font-bold text-gray-700">Location interurbain — bientôt disponible</p>
-              <p className="text-sm mt-2">Déplacements vers tout le territoire de Madagascar</p>
+            <div className="p-6">
+              <DemandeLocation />
             </div>
           </div>
         </div>
