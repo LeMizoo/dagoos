@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
   <script src="/config.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#F59E0B">
@@ -40,13 +41,13 @@
   <div id="app"></div>
   <nav class="nav-bottom" id="bottomNav">
     <button data-page="course" onclick="loadPage('course')">
-      <span style="font-size:22px;">🚕</span><span>Taxi</span>
+      <i data-lucide="car" style="font-size:22px;"></i><span>Taxi</span>
     </button>
     <button data-page="home" onclick="loadPage('home')">
-      <span style="font-size:22px;">🏠</span><span>Accueil</span>
+      <i data-lucide="home" style="font-size:22px;"></i><span>Accueil</span>
     </button>
     <button data-page="suivi" onclick="loadPage('suivi')">
-      <span style="font-size:22px;">📋</span><span>Suivi</span>
+      <i data-lucide="clipboard-list" style="font-size:22px;"></i><span>Suivi</span>
     </button>
   </nav>
   <script src="/js/router.js"></script>

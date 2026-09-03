@@ -8,13 +8,13 @@ function init_suivi() {
   var app = document.getElementById('app');
   app.innerHTML = `
     <div style="background:#252540;padding:16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;border-bottom:1px solid rgba(245,158,11,0.2);">
-      <span style="font-size:24px;">📋</span>
+      <i data-lucide="clipboard-list" style="font-size:22px;"></i>
       <div style="font-size:16px;font-weight:800;color:#F59E0B;">Suivi de demande</div>
     </div>
     <div style="padding:16px;">
       <div style="background:#252540;border-radius:12px;padding:16px;">
         <input id="codeSuivi" placeholder="Entrez votre code (ex: DG-XXXX)" value="${lastCode}" style="width:100%;padding:14px;border-radius:8px;border:1px solid #F59E0B;background:#1A1A2E;color:#F59E0B;font-size:16px;text-align:center;margin-bottom:12px;text-transform:uppercase;">
-        <button onclick="suivre()" style="width:100%;padding:14px;background:#F59E0B;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;">🔍 Rechercher</button>
+        <button onclick="suivre()" style="width:100%;padding:14px;background:#F59E0B;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;"><i data-lucide="search" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Rechercher</button>
       </div>
       <div id="suiviResult" style="margin-top:12px;"></div>
     </div>
@@ -36,12 +36,12 @@ async function suivre() {
 
     if (result && result.statut) {
       var statutLabels = {
-        'NEW': '⏳ En attente',
-        'ACCEPTED': '✅ Acceptée',
-        'REJECTED': '❌ Refusée',
-        'IN_PROGRESS': '🕐 En cours',
-        'COMPLETED': '✅ Terminée',
-        'CANCELLED': '❌ Annulée'
+        'NEW': '<i data-lucide="clock" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> En attente',
+        'ACCEPTED': '<i data-lucide="check-circle" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Acceptée',
+        'REJECTED': '<i data-lucide="x-circle" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Refusée',
+        'IN_PROGRESS': '<i data-lucide="clock" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> En cours',
+        'COMPLETED': '<i data-lucide="check-circle" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Terminée',
+        'CANCELLED': '<i data-lucide="x-circle" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Annulée'
       };
 
       var statutMessages = {

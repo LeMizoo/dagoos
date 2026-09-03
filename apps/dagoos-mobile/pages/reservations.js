@@ -10,13 +10,13 @@ function init_reservations() {
   var app = document.getElementById('app');
   app.innerHTML = `
     <div style="background:#252540;padding:16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;border-bottom:1px solid rgba(245,158,11,0.2);">
-      <span style="font-size:24px;">🚌</span>
+      <i data-lucide="bus" style="font-size:22px;"></i>
       <div style="font-size:16px;font-weight:800;color:#F59E0B;">Départs inter-urbains</div>
     </div>
     <div style="padding:16px;">
       <div id="departList" style="margin-bottom:16px;"></div>
-      <button onclick="chargerDeparts()" style="width:100%;padding:14px;background:#F59E0B;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;">🔄 Actualiser</button>
-      <button onclick="afficherGestion()" style="width:100%;margin-top:8px;padding:14px;background:#1E293B;color:#94A3B8;border:1px solid #333;border-radius:8px;font-weight:600;cursor:pointer;">📋 Gérer ma réservation (OTP)</button>
+      <button onclick="chargerDeparts()" style="width:100%;padding:14px;background:#F59E0B;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;"><i data-lucide="refresh-cw" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Actualiser</button>
+      <button onclick="afficherGestion()" style="width:100%;margin-top:8px;padding:14px;background:#1E293B;color:#94A3B8;border:1px solid #333;border-radius:8px;font-weight:600;cursor:pointer;"><i data-lucide="clipboard-list" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Gérer ma réservation (OTP)</button>
       <div id="gestionContainer" style="margin-top:12px;"></div>
     </div>
   `;
@@ -71,9 +71,9 @@ async function chargerDeparts() {
             <span style="background:rgba(245,158,11,0.15);color:#F59E0B;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;">${depart.organization || ''}</span>
           </div>
           <div style="display:flex;gap:16px;font-size:11px;color:#94A3B8;margin-bottom:8px;">
-            <span>📅 ${new Date(depart.date).toLocaleDateString('fr-FR')}</span>
-            <span>🕐 ${depart.heure || '--:--'}</span>
-            <span>💺 ${placesDisponibles} / ${depart.placesTotal} places</span>
+            <span><i data-lucide="calendar" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> ${new Date(depart.date).toLocaleDateString('fr-FR')}</span>
+            <span><i data-lucide="clock" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> ${depart.heure || '--:--'}</span>
+            <span><i data-lucide="armchair" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> ${placesDisponibles} / ${depart.placesTotal} places</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;">
             <div style="font-size:18px;font-weight:800;color:#F59E0B;">${Number(depart.prix || 0).toLocaleString('fr-FR')} Ar</div>
@@ -139,13 +139,13 @@ function afficherFormulaireReservation(depart) {
 
   container.innerHTML = `
     <div style="background:#252540;border-radius:14px;padding:16px;border:1px solid #F59E0B;">
-      <button onclick="chargerDeparts()" style="background:none;border:none;color:#94A3B8;font-size:12px;cursor:pointer;margin-bottom:12px;">← Retour aux départs</button>
+      <button onclick="chargerDeparts()" style="background:none;border:none;color:#94A3B8;font-size:12px;cursor:pointer;margin-bottom:12px;"><i data-lucide="arrow-left" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Retour aux départs</button>
 
       <h3 style="font-size:18px;font-weight:800;color:#F59E0B;margin-bottom:8px;text-align:center;">1. Choisissez vos places</h3>
 
       <div style="text-align:center;margin-bottom:16px;">
         <p style="font-size:12px;color:#94A3B8;margin-bottom:4px;">${depart.pointDepart} → ${depart.destination}</p>
-        <p style="font-size:11px;color:#94A3B8;">📅 ${new Date(depart.date).toLocaleDateString('fr-FR')} à ${depart.heure || '--:--'}</p>
+        <p style="font-size:11px;color:#94A3B8;"><i data-lucide="calendar" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> ${new Date(depart.date).toLocaleDateString('fr-FR')} à ${depart.heure || '--:--'}</p>
       </div>
 
       <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:2px;margin-bottom:16px;">
@@ -182,7 +182,7 @@ function afficherFormulaireReservation(depart) {
         <input id="resPaiementRef" placeholder="Référence paiement" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;">
       </div>
 
-      <button onclick="confirmerReservation()" style="width:100%;padding:14px;background:#F59E0B;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;">💾 Enregistrer la réservation (${selectedPlaces.length} place(s))</button>
+      <button onclick="confirmerReservation()" style="width:100%;padding:14px;background:#F59E0B;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;"><i data-lucide="save" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Enregistrer la réservation (${selectedPlaces.length} place(s))</button>
     </div>
   `;
 }
@@ -244,15 +244,15 @@ async function confirmerReservation() {
         localStorage.setItem('dagoos_mobile_last_code', otp);
       }
 
-      alert('✅ Réservation en attente !\n\nCode OTP : ' + (otp || 'N/A') + '\n\nConservez ce code pour gérer votre réservation.');
+      alert('Réservation en attente !\n\nCode OTP : ' + (otp || 'N/A') + '\n\nConservez ce code pour gérer votre réservation.');
       selectedPlaces = [];
       passagers = {};
       chargerDeparts();
     } else {
-      alert('❌ ' + (result.error || 'Erreur de réservation'));
+      alert((result.error || 'Erreur de réservation'));
     }
   } catch(e) {
-    alert('❌ Erreur réseau');
+    alert('Erreur réseau');
   }
 }
 
@@ -267,7 +267,7 @@ function afficherGestion() {
 
   container.innerHTML = `
     <div style="background:#252540;border-radius:14px;padding:16px;border:1px solid #333;">
-      <h3 style="font-size:16px;font-weight:800;color:#F59E0B;margin-bottom:12px;text-align:center;">📋 Gérer ma réservation</h3>
+      <h3 style="font-size:16px;font-weight:800;color:#F59E0B;margin-bottom:12px;text-align:center;"><i data-lucide="clipboard-list" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Gérer ma réservation</h3>
 
       <input id="manageTel" placeholder="Téléphone" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
       <input id="manageNom" placeholder="Nom du passager" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
@@ -304,8 +304,8 @@ async function gererReservation() {
         html += `
           <div style="background:#1A1A2E;border-radius:8px;padding:12px;margin-bottom:8px;border:1px solid #333;">
             <p style="font-size:13px;font-weight:600;color:#fff;margin-bottom:4px;">${r.depart?.pointDepart || ''} → ${r.depart?.destination || ''}</p>
-            <p style="font-size:11px;color:#94A3B8;margin-bottom:4px;">📅 ${r.depart ? new Date(r.depart.date).toLocaleDateString('fr-FR') : ''} à ${r.depart?.heure || '--:--'}</p>
-            <p style="font-size:11px;color:#94A3B8;margin-bottom:4px;">💺 Place : ${r.place || '-'}</p>
+            <p style="font-size:11px;color:#94A3B8;margin-bottom:4px;"><i data-lucide="calendar" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> ${r.depart ? new Date(r.depart.date).toLocaleDateString('fr-FR') : ''} à ${r.depart?.heure || '--:--'}</p>
+            <p style="font-size:11px;color:#94A3B8;margin-bottom:4px;"><i data-lucide="armchair" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Place : ${r.place || '-'}</p>
             <p style="font-size:11px;color:#94A3B8;">Statut : ${r.statut || '-'}</p>
           </div>
         `;

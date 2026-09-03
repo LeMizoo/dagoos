@@ -15,7 +15,7 @@ function init_home() {
 
       <!-- Taxi Urbain -->
       <div onclick="loadPage('course')" style="background:#252540;border-radius:14px;padding:16px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:14px;border:1px solid rgba(16,185,129,0.2);">
-        <span style="font-size:32px;">🚕</span>
+        <i data-lucide="car" style="font-size:22px;"></i>
         <div style="flex:1;">
           <div style="font-size:15px;font-weight:700;color:#fff;">Demandez un taxi</div>
           <div style="font-size:11px;color:#94A3B8;margin-top:2px;">Taxi ou moto à proximité, suivi en direct</div>
@@ -29,7 +29,7 @@ function init_home() {
 
       <!-- Départs Inter-urbains -->
       <div onclick="loadPage('reservations')" style="background:#252540;border-radius:14px;padding:16px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:14px;border:1px solid rgba(16,185,129,0.2);">
-        <span style="font-size:32px;">🚌</span>
+        <i data-lucide="bus" style="font-size:22px;"></i>
         <div style="flex:1;">
           <div style="font-size:15px;font-weight:700;color:#fff;">Départs inter-urbains</div>
           <div style="font-size:11px;color:#94A3B8;margin-top:2px;">Consultez les départs et réservez votre place</div>
@@ -43,7 +43,7 @@ function init_home() {
 
       <!-- Location Urbaine -->
       <div onclick="loadPage('location')" style="background:#252540;border-radius:14px;padding:16px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:14px;border:1px solid rgba(16,185,129,0.2);">
-        <span style="font-size:32px;">🚐</span>
+        <i data-lucide="bus" style="font-size:22px;"></i>
         <div style="flex:1;">
           <div style="font-size:15px;font-weight:700;color:#fff;">Location urbaine</div>
           <div style="font-size:11px;color:#94A3B8;margin-top:2px;">Bus, minivan ou tricycle pour vos événements</div>
@@ -71,7 +71,7 @@ function init_home() {
 
       <!-- Suivi -->
       <div onclick="loadPage('suivi')" style="background:#252540;border-radius:14px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;border:1px solid rgba(16,185,129,0.2);">
-        <span style="font-size:32px;">📋</span>
+        <i data-lucide="clipboard-list" style="font-size:22px;"></i>
         <div style="flex:1;">
           <div style="font-size:15px;font-weight:700;color:#fff;">Suivre ma demande</div>
           <div style="font-size:11px;color:#94A3B8;margin-top:2px;">Vérifiez le statut avec votre code de suivi</div>

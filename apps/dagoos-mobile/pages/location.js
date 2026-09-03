@@ -10,7 +10,7 @@ function init_location() {
   var app = document.getElementById('app');
   app.innerHTML = `
     <div style="background:#252540;padding:16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;border-bottom:1px solid rgba(245,158,11,0.2);">
-      <span style="font-size:24px;">🚐</span>
+      <i data-lucide="bus" style="font-size:22px;"></i>
       <div style="font-size:16px;font-weight:800;color:#F59E0B;">Demander une location</div>
     </div>
     <div style="padding:16px;">
@@ -25,11 +25,11 @@ function init_location() {
         </select>
 
         <select id="locType" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
-          <option value="moto">🏍️ Moto</option>
-          <option value="voiture">🚗 Voiture</option>
-          <option value="bus">🚌 Bus</option>
-          <option value="minivan">🚐 Mini Van</option>
-          <option value="tricycle">🛺 Tricycle</option>
+          <option value="moto"><i data-lucide="bike" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Moto</option>
+          <option value="voiture"><i data-lucide="car" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Voiture</option>
+          <option value="bus"><i data-lucide="bus" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Bus</option>
+          <option value="minivan"><i data-lucide="bus" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Mini Van</option>
+          <option value="tricycle"><i data-lucide="bike" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Tricycle</option>
         </select>
 
         <select id="locTrajet" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
@@ -185,13 +185,13 @@ async function demanderLocation() {
     if (result && (result.codeSuivi || result.actionId)) {
       var code = result.codeSuivi || result.actionId;
       localStorage.setItem('dagoos_mobile_last_code', code);
-      alert('✅ Demande envoyée !\n\nCode de suivi : ' + code);
+      alert('Demande envoyée !\n\nCode de suivi : ' + code);
       loadPage('suivi');
     } else {
-      alert('❌ ' + (result.error || 'Erreur lors de la demande'));
+      alert((result.error || 'Erreur lors de la demande'));
     }
   } catch(e) {
-    alert('❌ Erreur réseau');
+    alert('Erreur réseau');
   }
 }
 

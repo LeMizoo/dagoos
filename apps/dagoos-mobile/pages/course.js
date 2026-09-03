@@ -30,7 +30,7 @@ function init_course() {
   var app = document.getElementById('app');
   app.innerHTML = `
     <div style="background:#252540;padding:16px;display:flex;align-items:center;gap:12px;">
-      <span style="font-size:24px;">🚕</span>
+      <i data-lucide="car" style="font-size:22px;"></i>
       <div style="font-size:16px;font-weight:800;color:#F59E0B;">Demander un taxi</div>
     </div>
     <div style="padding:16px;">
@@ -50,8 +50,8 @@ function init_course() {
         <input id="arrivee" placeholder="Adresse d'arrivée" value="${arrivee}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
 
         <select id="typeVehicule" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
-          <option value="moto">🏍️ Taxi moto</option>
-          <option value="voiture">🚕 Taxi voiture</option>
+          <option value="moto"><i data-lucide="bike" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Taxi moto</option>
+          <option value="voiture"><i data-lucide="car" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Taxi voiture</option>
         </select>
 
         <div id="flotteContainer" style="margin-bottom:8px;"></div>
@@ -105,7 +105,7 @@ function updateUI() {
         <select id="flotte" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;" onchange="estimerPrix()">
           ${optionsHtml}
         </select>
-        <p style="text-align:center;color:#94A3B8;font-size:11px;margin-bottom:8px;">💡 Choisissez une flotte puis saisissez départ et arrivée pour voir l'estimation</p>
+        <p style="text-align:center;color:#94A3B8;font-size:11px;margin-bottom:8px;"><i data-lucide="lightbulb" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Choisissez une flotte puis saisissez départ et arrivée pour voir l'estimation</p>
       `;
     } else {
       flotteContainer.innerHTML = '';
@@ -116,7 +116,7 @@ function updateUI() {
   if (positionContainer) {
     if (mode === 'proche') {
       positionContainer.innerHTML = `
-        <button onclick="detecterPosition()" type="button" style="width:100%;padding:10px;background:#1E293B;color:#94A3B8;border:1px solid #333;border-radius:8px;font-size:12px;cursor:pointer;">📍 Détecter ma position</button>
+        <button onclick="detecterPosition()" type="button" style="width:100%;padding:10px;background:#1E293B;color:#94A3B8;border:1px solid #333;border-radius:8px;font-size:12px;cursor:pointer;"><i data-lucide="map-pin" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Détecter ma position</button>
         <div id="posDetectee"></div>
       `;
     } else {
@@ -147,14 +147,14 @@ function detecterPosition() {
         }
         var posDiv = document.getElementById('posDetectee');
         if (posDiv) {
-          posDiv.innerHTML = '<p style="text-align:center;color:#22C55E;font-size:12px;margin-top:8px;">✅ Position détectée : ' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4) + '</p>';
+          posDiv.innerHTML = '<p style="text-align:center;color:#22C55E;font-size:12px;margin-top:8px;"><i data-lucide="check-circle" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Position détectée : ' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4) + '</p>';
         }
         estimerPrix();
       },
-      function() { alert('❌ Géolocalisation refusée'); }
+      function() { alert('Géolocalisation refusée'); }
     );
   } else {
-    alert('❌ Géolocalisation non supportée');
+    alert('Géolocalisation non supportée');
   }
 }
 
@@ -200,7 +200,7 @@ async function estimerPrix() {
           <div style="font-size:11px;color:#94A3B8;margin-top:8px;">Prix de la course</div>
           <div style="font-size:26px;font-weight:800;color:#F59E0B;">${Number(result.prixEstime).toLocaleString('fr-FR')} Ar</div>
           <input id="offreClient" type="number" placeholder="Votre offre (Ar)" min="0" style="width:100%;margin-top:8px;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;text-align:center;">
-          <p style="text-align:center;color:#94A3B8;font-size:10px;margin-top:4px;">💡 Proposez votre prix — le chauffeur accepte ou refuse</p>
+          <p style="text-align:center;color:#94A3B8;font-size:10px;margin-top:4px;"><i data-lucide="lightbulb" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Proposez votre prix — le chauffeur accepte ou refuse</p>
         </div>
       `;
     }
@@ -252,7 +252,7 @@ async function envoyerDemande() {
           if (res && res.ok !== false) sent++;
         } catch(e) {}
       }
-      alert('✅ Demande envoyée à ' + sent + ' flotte(s) !');
+      alert('Demande envoyée à ' + sent + ' flotte(s) !');
       loadPage('suivi');
     } else if (mode === 'proche') {
       if (flottesDisponibles.length === 0) {
@@ -268,10 +268,10 @@ async function envoyerDemande() {
       });
       if (result && result.codeSuivi) {
         localStorage.setItem('dagoos_mobile_last_code', result.codeSuivi);
-        alert('✅ Demande envoyée !\n\nCode de suivi : ' + result.codeSuivi);
+        alert('Demande envoyée !\n\nCode de suivi : ' + result.codeSuivi);
         loadPage('suivi');
       } else {
-        alert('❌ ' + (result.error || 'Erreur envoi'));
+        alert((result.error || 'Erreur envoi'));
       }
     } else {
       // Mode choisir
@@ -288,13 +288,13 @@ async function envoyerDemande() {
       });
       if (result && result.codeSuivi) {
         localStorage.setItem('dagoos_mobile_last_code', result.codeSuivi);
-        alert('✅ Demande envoyée !\n\nCode de suivi : ' + result.codeSuivi);
+        alert('Demande envoyée !\n\nCode de suivi : ' + result.codeSuivi);
         loadPage('suivi');
       } else {
-        alert('❌ ' + (result.error || 'Erreur envoi'));
+        alert((result.error || 'Erreur envoi'));
       }
     }
-  } catch(e) { alert('❌ Erreur réseau'); }
+  } catch(e) { alert('Erreur réseau'); }
 }
 
 window.init_course = init_course;

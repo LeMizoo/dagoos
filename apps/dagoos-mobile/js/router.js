@@ -39,6 +39,10 @@ window.loadPage = async function(pageName) {
       console.log('Page chargée:', pageName);
       var initFn = window['init_' + pageName];
       if (typeof initFn === 'function') initFn();
+      // Remplacer les <i data-lucide> par les SVG Lucide
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+      }
     };
     script.onerror = function() {
       container.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#E74C3C;">Erreur de chargement</div>';
