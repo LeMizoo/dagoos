@@ -237,6 +237,13 @@ async function confirmerReservation() {
       setPassengerInfo({ name: passagersList[0].passagerNom, phone: tel });
 
       var otp = result.otpCode || '';
+
+      // Sauvegarder le code OTP en mémoire locale
+      if (otp) {
+        localStorage.setItem('dagoos_mobile_last_otp', otp);
+        localStorage.setItem('dagoos_mobile_last_code', otp);
+      }
+
       alert('✅ Réservation en attente !\n\nCode OTP : ' + (otp || 'N/A') + '\n\nConservez ce code pour gérer votre réservation.');
       selectedPlaces = [];
       passagers = {};
@@ -264,7 +271,7 @@ function afficherGestion() {
 
       <input id="manageTel" placeholder="Téléphone" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
       <input id="manageNom" placeholder="Nom du passager" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
-      <input id="manageOtp" placeholder="Code OTP" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:12px;">
+      <input id="manageOtp" placeholder="Code OTP" value="${localStorage.getItem('dagoos_mobile_last_otp') || ''}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:12px;">
 
       <button onclick="gererReservation()" style="width:100%;padding:14px;background:#F59E0B;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;">Vérifier</button>
 
