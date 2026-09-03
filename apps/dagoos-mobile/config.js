@@ -1,6 +1,6 @@
 window.DAGOOS_CONFIG = {
   apiUrl: 'https://dagoos-api.onrender.com/api',
-  logoUrl: '/b-trans.svg',
+  logoUrl: 'https://dago-mobility.vercel.app/icons/logo-pass.png',
   appName: "DAGOO'S Mobile",
   version: '1.0.0',
   theme: {

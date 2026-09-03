@@ -5,6 +5,7 @@ function init_home() {
     <div style="background:#252540;padding:16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;">
       <img src="/b-trans.svg" style="width:36px;height:36px;object-fit:contain;border-radius:8px;">
       <div>
+        <img src="https://dago-mobility.vercel.app/icons/logo-pass.png" style="width:36px;height:36px;object-fit:contain;border-radius:8px;" alt="DAGOO'S">
         <div style="font-size:16px;font-weight:800;color:#F59E0B;">DAGOO'S</div>
         <div style="font-size:10px;color:#94A3B8;">Chez les potes, ça roule.</div>
       </div>
