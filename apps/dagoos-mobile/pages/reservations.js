@@ -122,64 +122,65 @@ function afficherFormulaireReservation(depart) {
   var placesDisponibles = depart.placesTotal - placesReservees.length;
 
   // Générer la grille de places style bus
-  // Format: 2 sièges gauche | allée | 2 sièges droite
-  // Rangées: A, B, C, D, E, F (4 sièges chacune = 24)
-  // Dernière rangée: 1 siège central
+  // Labels alignés sur la landing : 1A, 2A, 3A, 4A, 1B, 2B...
   var rangees = ['A', 'B', 'C', 'D', 'E', 'F'];
   var gridHtml = '';
 
   // Chauffeur
   gridHtml += `
     <div style="text-align:center;margin-bottom:12px;">
-      <span style="font-size:12px;color:#94A3B8;">🚌 Chauffeur</span>
+      <span style="font-size:12px;color:#94A3B8;">🧑‍✈️ Conducteur</span>
     </div>
   `;
 
-  // Rangées A-F
+  // Fonction pour générer un bouton place avec label formaté
+  function boutonPlace(label, estReservee, estSelectionnee) {
+    var bg = estReservee ? '#333' : estSelectionnee ? '#F59E0B' : '#1A1A2E';
+    var color = estReservee ? '#666' : estSelectionnee ? '#1A1A2E' : '#fff';
+    var cursor = estReservee ? 'not-allowed' : 'pointer';
+    return `
+      <button onclick="${estReservee ? '' : "togglePlace('" + label + "')"}" style="width:44px;height:44px;border-radius:8px;border:1px solid #333;background:${bg};color:${color};font-size:11px;font-weight:700;cursor:${cursor};">${label}</button>
+    `;
+  }
+
+  // Rangées A-F (4 sièges chacune = 24)
   for (var r = 0; r < rangees.length; r++) {
-    var numeroRangee = r + 1;
-    var placesRangee = [];
+    var rowLabel = rangees[r];
+    var seatsInRow = [];
 
-    // Siège gauche 1 (colonne 1)
-    var place1 = String((numeroRangee * 4) - 3); // 1, 5, 9, 13, 17, 21
-    var place2 = String((numeroRangee * 4) - 2); // 2, 6, 10, 14, 18, 22
-    var place3 = String((numeroRangee * 4) - 1); // 3, 7, 11, 15, 19, 23
-    var place4 = String((numeroRangee * 4));     // 4, 8, 12, 16, 20, 24
+    // 4 sièges par rangée : 1A, 2A, 3A, 4A puis 1B, 2B...
+    for (var col = 1; col <= 4; col++) {
+      var label = col + rowLabel; // ex: 1A, 2A, 3A, 4A, 1B, 2B...
+      var numeroSeat = (r * 4) + col;
 
-    [place1, place2, place3, place4].forEach(function(place) {
-      if (Number(place) <= depart.placesTotal) {
-        var estReservee = placesReservees.indexOf(place) !== -1;
-        var estSelectionnee = selectedPlaces.indexOf(place) !== -1;
-        var bg = estReservee ? '#333' : estSelectionnee ? '#F59E0B' : '#1A1A2E';
-        var color = estReservee ? '#666' : estSelectionnee ? '#1A1A2E' : '#fff';
-        var cursor = estReservee ? 'not-allowed' : 'pointer';
-        placesRangee.push(`
-          <button onclick="${estReservee ? '' : "togglePlace('" + place + "')"}" style="width:40px;height:40px;border-radius:8px;border:1px solid #333;background:${bg};color:${color};font-size:12px;font-weight:700;cursor:${cursor};">${place}</button>
-        `);
+      if (numeroSeat <= depart.placesTotal) {
+        var estReservee = placesReservees.indexOf(label) !== -1;
+        var estSelectionnee = selectedPlaces.indexOf(label) !== -1;
+        seatsInRow.push(boutonPlace(label, estReservee, estSelectionnee));
       }
-    });
+    }
 
     gridHtml += `
       <div style="display:flex;justify-content:center;gap:16px;margin-bottom:8px;">
-        ${placesRangee.slice(0, 2).join('')}
-        <span style="width:16px;"></span>
-        ${placesRangee.slice(2, 4).join('')}
+        ${seatsInRow.slice(0, 2).join('')}
+        <span style="width:20px;"></span>
+        ${seatsInRow.slice(2, 4).join('')}
       </div>
     `;
   }
 
-  // Dernière rangée (place 25 au centre)
+  // Dernière rangée (rangée G - place 7C au centre)
   if (depart.placesTotal >= 25) {
-    var place25 = '25';
-    var estReservee25 = placesReservees.indexOf(place25) !== -1;
-    var estSelectionnee25 = selectedPlaces.indexOf(place25) !== -1;
+    var label25 = '7C';
+    var estReservee25 = placesReservees.indexOf(label25) !== -1;
+    var estSelectionnee25 = selectedPlaces.indexOf(label25) !== -1;
     var bg25 = estReservee25 ? '#333' : estSelectionnee25 ? '#F59E0B' : '#1A1A2E';
     var color25 = estReservee25 ? '#666' : estSelectionnee25 ? '#1A1A2E' : '#fff';
     var cursor25 = estReservee25 ? 'not-allowed' : 'pointer';
 
     gridHtml += `
       <div style="display:flex;justify-content:center;margin-bottom:8px;">
-        <button onclick="${estReservee25 ? '' : "togglePlace('25')"}" style="width:40px;height:40px;border-radius:8px;border:1px solid #333;background:${bg25};color:${color25};font-size:12px;font-weight:700;cursor:${cursor25};">25</button>
+        <button onclick="${estReservee25 ? '' : "togglePlace('7C')"}" style="width:44px;height:44px;border-radius:8px;border:1px solid #333;background:${bg25};color:${color25};font-size:11px;font-weight:700;cursor:${cursor25};">7C</button>
       </div>
     `;
   }

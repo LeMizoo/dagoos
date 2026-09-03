@@ -570,6 +570,16 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
                       </div>
                     </div>
                   )}
+                  {selectedPlaces.map(place => (
+                    <input
+                      key={place}
+                      type="text"
+                      placeholder={`Nom du passager - Place ${place}`}
+                      value={passagers[place] || ''}
+                      onChange={e => setPassagers({ ...passagers, [place]: e.target.value })}
+                      className="w-full px-4 py-3 border rounded-lg text-sm"
+                    />
+                  ))}
                   <input
                     type="tel"
                     placeholder="Votre téléphone"
@@ -611,16 +621,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
                       className="flex-1 px-3 py-2 border rounded-lg text-sm"
                     />
                   </div>
-                  {selectedPlaces.map(place => (
-                    <input
-                      key={place}
-                      type="text"
-                      placeholder={`Nom du passager - Place ${place}`}
-                      value={passagers[place] || ''}
-                      onChange={e => setPassagers({ ...passagers, [place]: e.target.value })}
-                      className="w-full px-4 py-3 border rounded-lg text-sm"
-                    />
-                  ))}
+
                   {!editingReservation ? (
                     <button
                       onClick={() => setEditingReservation(true)}
