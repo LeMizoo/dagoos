@@ -1,20 +1,26 @@
 {
-  "name": "DAGOO'S Mobile",
-  "short_name": "DAGOO'S",
-  "start_url": "/",
+  "name": "Dagoos Mobile",
+  "short_name": "Dagoos",
+  "start_url": "/splash.html",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#1A1A2E",
-  "theme_color": "#F59E0B",
-  "description": "DAGOO'S - Transport urbain et interurbain à Madagascar",
+  "background_color": "#16213E",
+  "theme_color": "#F39C12",
+  "description": "Application passager Dagoo's - Transport à Madagascar",
   "icons": [
     {
-      "src": "/b-trans.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],
   "lang": "fr",
-  "categories": ["travel", "transportation", "navigation"]
+  "categories": ["navigation", "transportation", "productivity"]
 }
