@@ -1,6 +1,7 @@
 'use client';
 import { useEffect } from 'react';
 import { X } from 'lucide-react';
+import CarAnimation from './CarAnimation';
 
 interface ModalProps {
   open: boolean;
@@ -8,6 +9,7 @@ interface ModalProps {
   title: string;
   children: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl';
+  carColor?: string;
 }
 
 const sizes = {
@@ -17,7 +19,7 @@ const sizes = {
   xl: 'max-w-4xl',
 };
 
-export default function Modal({ open, onClose, title, children, size = 'md' }: ModalProps) {
+export default function Modal({ open, onClose, title, children, size = 'md', carColor = '#3b82f6' }: ModalProps) {
   useEffect(() => {
     if (open) {
       document.body.style.overflow = 'hidden';
@@ -51,7 +53,12 @@ export default function Modal({ open, onClose, title, children, size = 'md' }: M
       `}>
         {/* En-tête */}
         <div className="sticky top-0 flex items-center justify-between p-5 border-b border-gray-200 bg-white rounded-t-2xl z-10">
-          <h2 className="text-lg font-bold text-gray-900 tracking-tight">{title}</h2>
+          <div className="flex-1">
+            <h2 className="text-lg font-bold text-gray-900 tracking-tight">{title}</h2>
+            <div className="mt-1.5">
+              <CarAnimation color={carColor} duration={3} />
+            </div>
+          </div>
           <button 
             onClick={onClose} 
             className="p-2 hover:bg-gray-100 rounded-full transition-all duration-200 hover:rotate-90"
