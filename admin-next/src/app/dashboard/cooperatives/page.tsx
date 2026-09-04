@@ -358,7 +358,7 @@ export default function CooperativesPage() {
               className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition"
             >
               Annuler
-            </Button>
+            </button>
             <button
               type="submit"
               disabled={saving}
