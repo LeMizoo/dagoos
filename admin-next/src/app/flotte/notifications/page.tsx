@@ -29,7 +29,7 @@ export default function FlotteNotifications() {
       const res = await apiFetch('/notifications').then(r => r.ok ? r.json() : []);
       const allNotifications = Array.isArray(res) ? res : [];
       setNotifications(allNotifications.filter((n: any) => 
-        n.organizationId === organization.id || n.userId === organization.id
+        n.organizationId === organization.id
       ));
     } catch (e: any) {
       setError(e.message);
