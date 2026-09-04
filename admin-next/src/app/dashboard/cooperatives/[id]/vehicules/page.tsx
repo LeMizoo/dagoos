@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Plus, Pencil, Trash2, Car, AlertCircle } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
+import Button from '@/components/ui/Button';
 
 interface Vehicle {
   id: string;
@@ -105,15 +106,15 @@ export default function CoopVehiclesPage() {
             <option value="active">Actif</option><option value="maintenance">En maintenance</option><option value="inactive">Inactif</option>
           </select>
           <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">Annuler</button>
-            <button type="submit" disabled={saving} className="px-4 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50">{saving ? '...' : editingVehicle ? 'Enregistrer' : 'Ajouter'}</button>
+            <Button variant="secondary" onClick={() => setModalOpen(false)}>Annuler</Button>
+            <Button type="submit" disabled={saving}>{saving ? '...' : editingVehicle ? 'Enregistrer' : 'Ajouter'}</Button>
           </div>
         </form>
       </Modal>
       <Modal open={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Confirmer">
         <div className="space-y-4"><p className="text-sm">Supprimer <strong>{deleteConfirm?.plate}</strong> ?</p>
           <div className="flex justify-end gap-3">
-            <button onClick={() => setDeleteConfirm(null)} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">Annuler</button>
+            <Button variant="secondary" onClick={() => setDeleteConfirm(null)}>Annuler</Button>
             <button onClick={handleDelete} className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700">Supprimer</button>
           </div>
         </div>

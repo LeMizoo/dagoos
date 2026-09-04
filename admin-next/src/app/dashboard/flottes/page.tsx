@@ -4,6 +4,7 @@ import { apiFetch } from '@/lib/api';
 import Link from 'next/link';
 import { Plus, Pencil, Trash2, Truck, Search, ChevronRight, AlertCircle } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
+import Button from '@/components/ui/Button';
 
 interface Organization {
   id: string;
