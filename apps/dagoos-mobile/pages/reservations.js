@@ -135,8 +135,8 @@ function afficherFormulaireReservation(depart) {
 
   // Fonction pour générer un bouton place avec label formaté
   function boutonPlace(label, estReservee, estSelectionnee) {
-    var bg = estReservee ? '#333' : estSelectionnee ? '#F59E0B' : '#1A1A2E';
-    var color = estReservee ? '#666' : estSelectionnee ? '#1A1A2E' : '#fff';
+    var bg = estReservee ? '#EF4444' : estSelectionnee ? '#3B82F6' : '#1A1A2E';
+    var color = estReservee ? '#fff' : estSelectionnee ? '#fff' : '#fff';
     var cursor = estReservee ? 'not-allowed' : 'pointer';
     return `
       <button onclick="${estReservee ? '' : "togglePlace('" + label + "')"}" style="width:44px;height:44px;border-radius:8px;border:1px solid #333;background:${bg};color:${color};font-size:11px;font-weight:700;cursor:${cursor};">${label}</button>
@@ -215,7 +215,9 @@ function afficherFormulaireReservation(depart) {
       <div style="display:flex;justify-content:center;gap:16px;font-size:11px;margin-bottom:16px;">
         <span style="color:#22C55E;">● ${placesDisponibles} disponible(s)</span>
         <span style="color:#EF4444;">● ${placesReservees.length} réservée(s)</span>
-        <span style="color:#F59E0B;">● ${selectedPlaces.length} sélectionnée(s)</span>
+        <span style="color:#3B82F6;">● ${selectedPlaces.length} sélectionnée(s)</span>
+        <span style="color:#EF4444;">● ${placesReservees.length} réservée(s)</span>
+        <span style="color:#3B82F6;">● ${selectedPlaces.length} sélectionnée(s)</span>
       </div>
 
       <h3 style="font-size:16px;font-weight:800;color:#F59E0B;margin-bottom:12px;text-align:center;">2. Informations passagers</h3>

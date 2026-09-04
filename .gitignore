@@ -44,3 +44,18 @@ admin-next/tsconfig.tsbuildinfo
 # Fichiers temporaires
 tmp/
 *.tar.gz
+
+# Suppléments sécurité
+*.sql
+!apps/api/prisma/migrations/**/*.sql
+apps/api/prisma/sync-supabase.sql
+*login.json
+*token*.json
+*credentials*.json
+__pycache__/
+*.pyc
+apps/api/reset-admin.js
+apps/api/reset-super-admin.js
+backend/reset-super-admin.js
+reset-admin.fixed.js
+reset-super-admin.fixed.js

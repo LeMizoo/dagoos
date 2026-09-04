@@ -2,6 +2,7 @@
 # check-api.py - Vérification de l'API sans jq
 
 import json
+import os
 import subprocess
 import sys
 
@@ -65,12 +66,28 @@ def main():
     print("\n🔐 TEST DE CONNEXION:")
     
     test_users = [
-        ("admin@dagoos.mg", "admin123", "Super Admin"),
-        ("fleet-premium@test.mg", "123456", "Fleet Manager"),
-        ("contact@sonatra.mg", "Test123", "Coop Manager"),
+        (
+            os.getenv("DAGOOS_CHECK_ADMIN_EMAIL"),
+            os.getenv("DAGOOS_CHECK_ADMIN_PASSWORD"),
+            "Super Admin",
+        ),
+        (
+            os.getenv("DAGOOS_CHECK_FLEET_EMAIL"),
+            os.getenv("DAGOOS_CHECK_FLEET_PASSWORD"),
+            "Fleet Manager",
+        ),
+        (
+            os.getenv("DAGOOS_CHECK_COOP_EMAIL"),
+            os.getenv("DAGOOS_CHECK_COOP_PASSWORD"),
+            "Coop Manager",
+        ),
     ]
-    
+
     for email, password, role in test_users:
+        if not email or not password:
+            print(f"⏭️ {role}: credentials absents des variables d'environnement")
+            continue
+
         print(f"\n📝 {role}: {email}")
         response = run_curl(
             'https://dagoos-api.onrender.com/api/auth/login',
@@ -105,7 +122,6 @@ def main():
     
     # 3. Vérification des fichiers
     print("\n📁 VÉRIFICATION DES FICHIERS:")
-    import os
     files = [
         '/d/Dagoos/admin-next/lib/api.js',
         '/d/Dagoos/admin-next/lib/auth.js',

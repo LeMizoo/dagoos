@@ -1190,6 +1190,14 @@ router.post('/reservations/batch', async (req, res) => {
       reservations,
     });
   } catch (error) {
+    // Gérer la violation de contrainte unique (place déjà réservée)
+    if (error.code === 'P2002') {
+      console.warn('Tentative de double réservation détectée');
+      return res.status(409).json({
+        error: 'Places déjà réservées',
+        message: 'Une ou plusieurs places viennent d\'être réservées par un autre passager'
+      });
+    }
     console.error('POST /public/reservations/batch:', error);
     res.status(500).json({ error: 'Erreur serveur' });
   }
