@@ -34,6 +34,16 @@ self.addEventListener('activate', (event) => {
     })
   );
   self.clients.claim();
+
+  // Notifier tous les clients qu'une mise à jour est disponible
+  self.clients.matchAll({ type: 'window' }).then((clients) => {
+    clients.forEach((client) => {
+      client.postMessage({
+        type: 'UPDATE_AVAILABLE',
+        message: 'Une nouvelle version est disponible.'
+      });
+    });
+  });
 });
 
 self.addEventListener('fetch', (event) => {
