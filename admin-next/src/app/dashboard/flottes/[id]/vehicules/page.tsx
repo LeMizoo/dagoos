@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Plus, Pencil, Trash2, Car, AlertCircle, Check, X } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
+import Button from '@/components/ui/Button';
 
 interface Vehicle {
   id: string;

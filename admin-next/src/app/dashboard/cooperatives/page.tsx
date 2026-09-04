@@ -4,6 +4,7 @@ import { apiFetch } from '@/lib/api';
 import Link from 'next/link';
 import { Plus, Pencil, Trash2, Building2, Search, ChevronRight, AlertCircle } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
+import Button from '@/components/ui/Button';
 
 interface Organization {
   id: string;
@@ -357,7 +358,7 @@ export default function CooperativesPage() {
               className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition"
             >
               Annuler
-            </button>
+            </Button>
             <button
               type="submit"
               disabled={saving}
