@@ -5,17 +5,17 @@ secrets dans le repo. Elle ne les **invalide pas**. Tant que ces étapes ne
 sont pas faites, les identifiants trouvés restent utilisables par quiconque
 les a déjà vus (fork, clone existant, cache GitHub, etc.).
 
-## 1. Mot de passe réutilisé (`ByDagoos2026!`)
+## 1. Mot de passe réutilisé (`[MOT_DE_PASSE_EXPOSÉ]`)
 
 Trouvé en clair dans `reset-admin.js` et `reset-super-admin.js`, associé à
 `tovoniaina.rahendrison@gmail.com` (et un compte `admin@dagoos.mg` avec
-`admin123`).
+`[MOT_DE_PASSE_EXPOSÉ]`).
 
 - [ ] Changer ce mot de passe dans la base Dagoos (via un script one-shot,
       pas un fichier versionné — voir section 3)
 - [ ] Si ce mot de passe est réutilisé ailleurs (email perso, autres
       services), le changer aussi là-bas
-- [ ] Supprimer/désactiver le compte `admin@dagoos.mg / admin123` s'il ne
+- [ ] Supprimer/désactiver le compte `admin@dagoos.mg / [MOT_DE_PASSE_EXPOSÉ]` s'il ne
       sert à rien de spécifique — un mot de passe aussi simple ne devrait
       jamais exister, même temporairement
 
