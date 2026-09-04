@@ -67,16 +67,48 @@
     <div class="splash-subtitle">Transport inter-urbain</div>
     <div class="spinner"></div>
   </div>
-  <script>
-    // Remplacer par le logo de la coop si disponible en localStorage
-    const savedLogo = localStorage.getItem('dagoos_logo_coop');
+    <script>
+    // Remplacer par le logo de la flotte si disponible en localStorage
+    const savedLogo = localStorage.getItem('dagoos_logo_fleet');
     if (savedLogo) {
       document.getElementById('logo').src = savedLogo;
     }
-    // Rediriger après chargement
-    setTimeout(() => {
-      window.location.href = '/index.html';
-    }, 2500);
+
+    // Vérifier si l'API est accessible avant de rediriger
+    async function checkApiAndRedirect() {
+      const API_URL = window.DAGOOS_CONFIG?.apiUrl || 'https://dagoos-api.onrender.com/api';
+      const MIN_SPLASH_TIME = 2500; // 2.5 secondes minimum
+      const MAX_SPLASH_TIME = 8000; // 8 secondes maximum
+      
+      const startTime = Date.now();
+      
+      try {
+        // Essayer de contacter l'API
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        
+        await fetch(`${API_URL}/health`, { 
+          signal: controller.signal,
+          cache: 'no-store'
+        });
+        
+        clearTimeout(timeoutId);
+      } catch (error) {
+        // API inaccessible, attendre un peu plus
+        console.log('API inaccessible, attente...');
+      }
+      
+      // Calculer le temps restant pour atteindre le minimum de 2.5s
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, MIN_SPLASH_TIME - elapsed);
+      
+      // Rediriger après le temps restant (ou maximum)
+      setTimeout(() => {
+        window.location.replace('/dashboard.html');
+      }, Math.min(remaining, MAX_SPLASH_TIME));
+    }
+    
+    checkApiAndRedirect();
   </script>
 </body>
 </html>

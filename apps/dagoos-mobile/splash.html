@@ -73,10 +73,38 @@
     if (savedLogo) {
       document.getElementById('logo').src = savedLogo;
     }
-    // Rediriger après chargement
-    setTimeout(() => {
-      window.location.href = '/index.html';
-    }, 2500);
+
+    // Vérifier si l'API est accessible avant de rediriger
+    async function checkApiAndRedirect() {
+      const API_URL = window.DAGOOS_CONFIG?.apiUrl || 'https://dagoos-api.onrender.com/api';
+      const MIN_SPLASH_TIME = 2500;
+      const MAX_SPLASH_TIME = 8000;
+      
+      const startTime = Date.now();
+      
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        
+        await fetch(`${API_URL}/health`, { 
+          signal: controller.signal,
+          cache: 'no-store'
+        });
+        
+        clearTimeout(timeoutId);
+      } catch (error) {
+        console.log('API inaccessible, attente...');
+      }
+      
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, MIN_SPLASH_TIME - elapsed);
+      
+      setTimeout(() => {
+        window.location.replace('/index.html');
+      }, Math.min(remaining, MAX_SPLASH_TIME));
+    }
+    
+    checkApiAndRedirect();
   </script>
 </body>
 </html>
