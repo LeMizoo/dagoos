@@ -120,8 +120,8 @@ export default function FlotteFinances() {
                     <th className="px-4 py-3">Véhicule</th>
                     <th className="px-4 py-3">Km</th>
                     <th className="px-4 py-3">CA brut</th>
-                    <th className="px-4 py-3">Commission</th>
-                    <th className="px-4 py-3">Net</th>
+                    <th className="px-4 py-3">Net organisation</th>
+                    <th className="px-4 py-3">Commission chauffeur</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -135,8 +135,8 @@ export default function FlotteFinances() {
                         <td className="px-4 py-3">{c.vehicle?.plate || '-'}</td>
                         <td className="px-4 py-3">{c.distanceKm || 0} km</td>
                         <td className="px-4 py-3 text-green-600 font-medium">{(c.price || 0).toLocaleString()} Ar</td>
-                        <td className="px-4 py-3 text-red-600">{(c.commission || 0).toLocaleString()} Ar</td>
-                        <td className="px-4 py-3 font-medium text-emerald-600">{((c.price || 0) - (c.commission || 0)).toLocaleString()} Ar</td>
+                        <td className="px-4 py-3 font-medium text-emerald-600">{(c.commission || 0).toLocaleString()} Ar</td>
+                        <td className="px-4 py-3 text-red-600">{((c.price || 0) - (c.commission || 0)).toLocaleString()} Ar</td>
                       </tr>
                     ))
                   )}

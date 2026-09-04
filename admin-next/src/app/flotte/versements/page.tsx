@@ -77,7 +77,7 @@ export default function FlotteVersements() {
                     <th className="px-4 py-3">Code</th>
                     <th className="px-4 py-3">Période</th>
                     <th className="px-4 py-3">Montant</th>
-                    <th className="px-4 py-3">Commission</th>
+                    <th className="px-4 py-3">Net organisation</th>
                     <th className="px-4 py-3">Net</th>
                     <th className="px-4 py-3">Statut</th>
                   </tr>
