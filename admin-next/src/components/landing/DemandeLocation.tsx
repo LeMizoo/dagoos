@@ -117,17 +117,44 @@ export default function DemandeLocation({
       setLoading(false);
     }
   }
+  function toggleRetour() {
+    const retourContainer = document.getElementById("retourContainer");
+    const btn = document.getElementById("btnAjouterRetour");
+    if (!retourContainer) return;
+
+    const isHidden = retourContainer.style.display === "none";
+    retourContainer.style.display = isHidden ? "block" : "none";
+    if (btn) {
+      btn.textContent = isHidden ? "- Retirer le retour" : "+ Ajouter un retour";
+    }
+  }
+
 
   function updateVehiculeOptions() {
     const service = (document.getElementById('typeService') as HTMLSelectElement)?.value || 'passagers';
     const vehiculeSelect = document.getElementById('typeVehicule') as HTMLSelectElement;
     const passagersContainer = document.getElementById('passagersContainer');
+    const retourContainer = document.getElementById("retourContainer");
+    const btnRetour = document.getElementById("btnAjouterRetour");
     
     // Afficher/masquer les champs selon le service
     if (passagersContainer) {
       passagersContainer.style.display = service === 'passagers' ? 'block' : 'none';
     }
     
+
+    // Retour : visible par defaut pour passagers/marchandises, sinon bouton
+    const servicesAvecRetour = ["passagers", "marchandises"];
+    if (retourContainer && btnRetour) {
+      if (servicesAvecRetour.includes(service)) {
+        retourContainer.style.display = "block";
+        btnRetour.style.display = "none";
+      } else {
+        retourContainer.style.display = "none";
+        btnRetour.style.display = "block";
+        btnRetour.textContent = "+ Ajouter un retour";
+      }
+    }
     if (!vehiculeSelect) return;
 
     // Règles métier : véhicules compatibles par type de service
@@ -240,6 +267,7 @@ export default function DemandeLocation({
               <input name="heureDepart" type="time" className="w-full px-3 py-2 border rounded-lg text-sm" required onBlur={estimerLocation} />
             </div>
           </div>
+          <div id="retourContainer" style={{ display: 'none' }}>
 
           <div className="grid grid-cols-2 gap-2">
             <div>
@@ -251,6 +279,9 @@ export default function DemandeLocation({
               <input name="heureRetour" type="time" className="w-full px-3 py-2 border rounded-lg text-sm" onBlur={estimerLocation} />
             </div>
           </div>
+          <button type="button" id="btnAjouterRetour" onClick={() => toggleRetour()} className="w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg border border-dashed border-blue-300 transition">
+            + Ajouter un retour
+          </button>
 
           <div id="passagersContainer" style={{ display: 'none' }}>
             <input name="nbPassagers" type="number" placeholder="Nombre de passagers" min="1" className="w-full px-4 py-3 border rounded-lg text-sm" required />
