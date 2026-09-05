@@ -128,7 +128,7 @@ function updateUI() {
 
   if (modeLocation === 'long_haul') {
     serviceContainer.innerHTML = `
-      <select id="locTypeService" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
+      <select id="locTypeService" onchange="updateVehiculeOptions()" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
         <option value="passagers">Transport passagers</option>
         <option value="marchandises">Marchandises</option>
         <option value="demenagement">Déménagement</option>
@@ -137,17 +137,7 @@ function updateUI() {
       </select>
     `;
 
-    vehiculeContainer.innerHTML = `
-      <select id="locType" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
-        <option value="bus">Bus</option>
-        <option value="minivan">Mini Van</option>
-        <option value="fourgon">Fourgon</option>
-        <option value="camion">Camion</option>
-        <option value="semi_remorque">Semi-remorque</option>
-        <option value="depanneuse">Dépanneuse</option>
-        <option value="camion_frigo">Camion frigorifique</option>
-      </select>
-    `;
+    updateVehiculeOptions();
   } else {
     serviceContainer.innerHTML = '';
     vehiculeContainer.innerHTML = `
@@ -160,6 +150,44 @@ function updateUI() {
       </select>
     `;
   }
+}
+
+function updateVehiculeOptions() {
+  var vehiculeContainer = document.getElementById('vehiculeContainer');
+  if (!vehiculeContainer) return;
+
+  var service = document.getElementById('locTypeService') ? document.getElementById('locTypeService').value : 'passagers';
+
+  var vehiclesByService = {
+    'passagers': [
+      { value: 'bus', label: 'Bus' },
+      { value: 'minivan', label: 'Mini Van' }
+    ],
+    'marchandises': [
+      { value: 'fourgon', label: 'Fourgon' },
+      { value: 'camion_frigo', label: 'Camion frigorifique' }
+    ],
+    'demenagement': [
+      { value: 'fourgon', label: 'Fourgon' },
+      { value: 'camion', label: 'Camion' }
+    ],
+    'depannage': [
+      { value: 'depanneuse', label: 'Dépanneuse' }
+    ],
+    'fret': [
+      { value: 'camion', label: 'Camion' },
+      { value: 'semi_remorque', label: 'Semi-remorque' }
+    ]
+  };
+
+  var vehicles = vehiclesByService[service] || vehiclesByService['passagers'];
+
+  var options = '';
+  for (var i = 0; i < vehicles.length; i++) {
+    options += '<option value="' + vehicles[i].value + '">' + vehicles[i].label + '</option>';
+  }
+
+  vehiculeContainer.innerHTML = '<select id="locType" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">' + options + '</select>';
 }
 
 async function estimerLocationMobile() {
