@@ -15,7 +15,7 @@ function init_location() {
       <div style="font-size:16px;font-weight:800;color:#F59E0B;">Location de véhicules</div>
     </div>
     <div style="padding:16px;">
-      <p style="text-align:center;color:#94A3B8;font-size:12px;margin-bottom:12px;">Bus, minivan ou tricycle pour vos événements et déplacements</p>
+      <p id="locSubtitle" style="text-align:center;color:#94A3B8;font-size:12px;margin-bottom:12px;">Location de véhicules en ville</p>
 
       <div style="display:flex;gap:8px;margin-bottom:16px;justify-content:center;">
         <button id="btnUrbain" onclick="setModeLocation('urbain')" style="padding:8px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid #F59E0B;background:#F59E0B;color:#1A1A2E;cursor:pointer;">Urbain</button>
@@ -53,7 +53,7 @@ function init_location() {
           </div>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <div id="retourContainer" style="display:none;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
           <div>
             <label style="font-size:10px;color:#94A3B8;display:block;margin-bottom:4px;">Date retour</label>
             <input id="locDateRetour" type="date" style="width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;" onchange="estimerLocationMobile()">
@@ -69,7 +69,9 @@ function init_location() {
           <option value="SANS">Sans carburant</option>
         </select>
 
-        <input id="locNbPassagers" type="number" placeholder="Nombre de passagers / volume" min="1" value="1" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:12px;">
+        <div id="passagersContainer" style="display:none;margin-bottom:12px;">
+          <input id="locNbPassagers" type="number" placeholder="Nombre de passagers / volume" min="1" value="1" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;">
+        </div>
 
         <div id="locEstimationResult" style="margin-bottom:12px;"></div>
 
@@ -85,6 +87,10 @@ function setModeLocation(nouveauMode) {
   modeLocation = nouveauMode;
   var btnUrbain = document.getElementById('btnUrbain');
   var btnLongHaul = document.getElementById('btnLongHaul');
+  var subtitle = document.getElementById('locSubtitle');
+  var retourContainer = document.getElementById('retourContainer');
+  var passagersContainer = document.getElementById('passagersContainer');
+  var trajetSelect = document.getElementById('locTrajet');
 
   [btnUrbain, btnLongHaul].forEach(function(btn) {
     if (btn) {
@@ -97,6 +103,34 @@ function setModeLocation(nouveauMode) {
   if (btnActif) {
     btnActif.style.background = '#F59E0B';
     btnActif.style.color = '#1A1A2E';
+  }
+
+  // Mettre à jour le sous-titre
+  if (subtitle) {
+    subtitle.textContent = modeLocation === 'urbain'
+      ? 'Location de véhicules en ville'
+      : 'Transport longue distance inter-urbain';
+  }
+
+  // Afficher/masquer les champs selon le mode
+  if (retourContainer) {
+    retourContainer.style.display = modeLocation === 'urbain' ? 'none' : 'grid';
+  }
+  if (passagersContainer) {
+    passagersContainer.style.display = modeLocation === 'urbain' ? 'none' : 'block';
+  }
+
+  // Ajuster les options de trajet
+  if (trajetSelect) {
+    if (modeLocation === 'urbain') {
+      trajetSelect.innerHTML = '<option value="A_B">A → B (aller simple)</option>';
+    } else {
+      trajetSelect.innerHTML = `
+        <option value="A_B">A → B (aller simple)</option>
+        <option value="A_B_A">A → B → A (aller-retour même jour)</option>
+        <option value="A_B_A_MULTI">A → B → A (multi-jours)</option>
+      `;
+    }
   }
 
   chargerOrganisations();
