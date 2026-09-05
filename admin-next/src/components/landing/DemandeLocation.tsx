@@ -121,6 +121,13 @@ export default function DemandeLocation({
   function updateVehiculeOptions() {
     const service = (document.getElementById('typeService') as HTMLSelectElement)?.value || 'passagers';
     const vehiculeSelect = document.getElementById('typeVehicule') as HTMLSelectElement;
+    const passagersContainer = document.getElementById('passagersContainer');
+    
+    // Afficher/masquer les champs selon le service
+    if (passagersContainer) {
+      passagersContainer.style.display = service === 'passagers' ? 'block' : 'none';
+    }
+    
     if (!vehiculeSelect) return;
 
     // Règles métier : véhicules compatibles par type de service
@@ -244,11 +251,6 @@ export default function DemandeLocation({
               <input name="heureRetour" type="time" className="w-full px-3 py-2 border rounded-lg text-sm" onBlur={estimerLocation} />
             </div>
           </div>
-
-          <select name="carburant" className="w-full px-4 py-3 border rounded-lg text-sm" required>
-            <option value="AVEC">Avec carburant</option>
-            <option value="SANS">Sans carburant</option>
-          </select>
 
           <input name="nbPassagers" type="number" placeholder="Nombre de passagers" min="1" className="w-full px-4 py-3 border rounded-lg text-sm" required />
 
