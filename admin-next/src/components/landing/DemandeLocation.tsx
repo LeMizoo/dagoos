@@ -113,6 +113,41 @@ export default function DemandeLocation({
     }
   }
 
+  function updateVehiculeOptions() {
+    const service = (document.getElementById('typeService') as HTMLSelectElement)?.value || 'passagers';
+    const vehiculeSelect = document.getElementById('typeVehicule') as HTMLSelectElement;
+    if (!vehiculeSelect) return;
+
+    // Règles métier : véhicules compatibles par type de service
+    const vehiclesByService: Record<string, Array<{value: string, label: string}>> = {
+      'passagers': [
+        { value: 'bus', label: '🚌 Bus' },
+        { value: 'minivan', label: '🚐 Mini Van' }
+      ],
+      'marchandises': [
+        { value: 'fourgon', label: '🚚 Fourgon' },
+        { value: 'camion_frigo', label: '🧊 Camion frigorifique' }
+      ],
+      'demenagement': [
+        { value: 'fourgon', label: '🚚 Fourgon' },
+        { value: 'camion', label: '🚛 Camion' }
+      ],
+      'depannage': [
+        { value: 'depanneuse', label: '🔧 Dépanneuse' }
+      ],
+      'fret': [
+        { value: 'camion', label: '🚛 Camion' },
+        { value: 'semi_remorque', label: '🚛 Semi-remorque' }
+      ]
+    };
+
+    const vehicles = vehiclesByService[service] || vehiclesByService['passagers'];
+
+    vehiculeSelect.innerHTML = vehicles.map(v => 
+      `<option value="${v.value}">${v.label}</option>`
+    ).join('');
+  }
+
   return (
     <section className="py-8 bg-white">
       <div className="max-w-md mx-auto px-4">
@@ -134,7 +169,7 @@ export default function DemandeLocation({
 
           {mode === 'long_haul' ? (
             <>
-              <select name="typeService" className="w-full px-4 py-3 border rounded-lg text-sm" required>
+              <select name="typeService" id="typeService" onChange={() => updateVehiculeOptions()} className="w-full px-4 py-3 border rounded-lg text-sm" required>
                 <option value="passagers">👥 Transport passagers</option>
                 <option value="marchandises">📦 Marchandises</option>
                 <option value="demenagement">🏠 Déménagement</option>
@@ -142,14 +177,9 @@ export default function DemandeLocation({
                 <option value="fret">🚛 Fret lourd</option>
               </select>
 
-              <select name="typeVehicule" className="w-full px-4 py-3 border rounded-lg text-sm" required>
+              <select name="typeVehicule" id="typeVehicule" className="w-full px-4 py-3 border rounded-lg text-sm" required>
                 <option value="bus">🚌 Bus</option>
                 <option value="minivan">🚐 Mini Van</option>
-                <option value="fourgon">🚚 Fourgon</option>
-                <option value="camion">🚛 Camion</option>
-                <option value="semi_remorque">🚛 Semi-remorque</option>
-                <option value="depanneuse">🔧 Dépanneuse</option>
-                <option value="camion_frigo">🧊 Camion frigorifique</option>
               </select>
             </>
           ) : (
