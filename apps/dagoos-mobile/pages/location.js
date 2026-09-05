@@ -26,12 +26,12 @@ function init_location() {
         <input id="locNom" placeholder="Votre nom" value="${info.name || ''}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
         <input id="locTel" placeholder="Votre téléphone" value="${info.phone || ''}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
 
+        <div id="serviceContainer" style="margin-bottom:8px;"></div>
+        <div id="vehiculeContainer" style="margin-bottom:8px;"></div>
+
         <select id="locFlotte" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
           <option value="">-- Choisir une organisation --</option>
         </select>
-
-        <div id="serviceContainer" style="margin-bottom:8px;"></div>
-        <div id="vehiculeContainer" style="margin-bottom:8px;"></div>
 
         <select id="locTrajet" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
           <option value="A_B">A → B (aller simple)</option>
@@ -162,6 +162,7 @@ function updateUI() {
 
   if (modeLocation === 'long_haul') {
     serviceContainer.innerHTML = `
+      <label style="font-size:10px;color:#94A3B8;display:block;margin-bottom:4px;">👥 Type de service</label>
       <select id="locTypeService" onchange="updateVehiculeOptions()" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
         <option value="passagers">Transport passagers</option>
         <option value="marchandises">Marchandises</option>
@@ -221,7 +222,7 @@ function updateVehiculeOptions() {
     options += '<option value="' + vehicles[i].value + '">' + vehicles[i].label + '</option>';
   }
 
-  vehiculeContainer.innerHTML = '<select id="locType" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">' + options + '</select>';
+  vehiculeContainer.innerHTML = '<label style="font-size:10px;color:#94A3B8;display:block;margin-bottom:4px;">🚌 Véhicule compatible</label><select id="locType" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">' + options + '</select>';
 }
 
 async function estimerLocationMobile() {
