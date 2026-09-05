@@ -24,6 +24,11 @@ export default function DemandeLocation({
         setFlottes(fleets);
       })
       .catch(() => {});
+
+    // Initialiser les options de véhicules selon le mode
+    if (mode === 'long_haul') {
+      setTimeout(() => updateVehiculeOptions(), 100);
+    }
   }, []);
 
   async function estimerLocation() {
@@ -153,7 +158,9 @@ export default function DemandeLocation({
       <div className="max-w-md mx-auto px-4">
         <h2 className="font-display text-2xl font-bold text-center mb-4">🚐 Demander une location</h2>
         <p className="text-center text-gray-500 text-sm mb-6">
-          Bus, minivan ou tricycle pour vos événements et déplacements
+          {mode === 'long_haul'
+            ? 'Transport longue distance inter-urbain avec véhicule adapté'
+            : 'Bus, minivan ou tricycle pour vos événements et déplacements'}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-3 bg-gray-50 p-6 rounded-xl border">
