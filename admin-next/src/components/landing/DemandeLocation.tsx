@@ -252,7 +252,9 @@ export default function DemandeLocation({
             </div>
           </div>
 
-          <input name="nbPassagers" type="number" placeholder="Nombre de passagers" min="1" className="w-full px-4 py-3 border rounded-lg text-sm" required />
+          <div id="passagersContainer" style={{ display: 'none' }}>
+            <input name="nbPassagers" type="number" placeholder="Nombre de passagers" min="1" className="w-full px-4 py-3 border rounded-lg text-sm" required />
+          </div>
 
           {estimating && (
             <p className="text-sm text-gray-500 text-center">Calcul en cours...</p>
