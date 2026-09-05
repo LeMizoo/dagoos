@@ -27,7 +27,7 @@ export default function DemandeLocation({
 
     // Initialiser les options de véhicules selon le mode
     if (mode === 'long_haul') {
-      setTimeout(() => updateVehiculeOptions(), 100);
+      updateVehiculeOptions();
     }
   }, []);
 
@@ -152,6 +152,12 @@ export default function DemandeLocation({
       `<option value="${v.value}">${v.label}</option>`
     ).join('');
   }
+
+  useEffect(() => {
+    if (mode === 'long_haul') {
+      updateVehiculeOptions();
+    }
+  }, [mode]);
 
   return (
     <section className="py-8 bg-white">
