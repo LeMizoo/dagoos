@@ -637,12 +637,20 @@ router.post('/actions', async (req, res) => {
       return res.status(400).json({ error: 'Tous les champs sont requis' });
     }
     
-    const org = await prisma.organization.findUnique({
-      where: { slug: organizationSlug },
-      select: { id: true },
-    });
-    
-    if (!org) return res.status(404).json({ error: 'Organisation introuvable' });
+    let org = null;
+
+    if (organizationSlug) {
+      org = await prisma.organization.findUnique({
+        where: { slug: organizationSlug },
+        select: { id: true, email: true },
+      });
+
+      if (!org) {
+        return res.status(404).json({ error: 'Organisation introuvable' });
+      }
+    } else if (!['CONTACT', 'LONG_HAUL', 'CAR_RENTAL', 'COURSE_REQUEST', 'TAXI_RESERVATION'].includes(type)) {
+      return res.status(400).json({ error: 'organisationSlug requis pour ce type' });
+    }
     
     const VALID_TYPES = [
       'COURSE_REQUEST',
