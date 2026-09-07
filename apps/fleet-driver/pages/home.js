@@ -459,20 +459,36 @@ async function init_home() {
     // ------------------------------------
 
     try {
-        if (currentDriver && currentDriver.vehicleId) {
-            var vehicles = await apiGet('/vehicles');
+        // /drivers/me est la source de vérité :
+        // l'API fournit directement le véhicule permanent assigné.
+        if (currentDriver && currentDriver.vehicle) {
+            currentVehicle = currentDriver.vehicle;
+            window.currentVehicle = currentVehicle;
+        } else if (currentDriver && currentDriver.vehicleId) {
+            // Fallback si l'API ne fournit que vehicleId.
+            // /vehicles peut retourner directement un tableau
+            // ou un objet paginé { data: [...] }.
+            var vehiclesResponse = await apiGet('/vehicles');
 
-            if (Array.isArray(vehicles)) {
-                currentVehicle = vehicles.find(function (vehicle) {
-                    return vehicle.id === currentDriver.vehicleId;
-                });
+            var vehicles = Array.isArray(vehiclesResponse)
+                ? vehiclesResponse
+                : (Array.isArray(vehiclesResponse?.data)
+                    ? vehiclesResponse.data
+                    : []);
 
-                window.currentVehicle = currentVehicle || null;
-            }
+            currentVehicle = vehicles.find(function (vehicle) {
+                return vehicle.id === currentDriver.vehicleId;
+            }) || null;
+
+            window.currentVehicle = currentVehicle;
+        } else {
+            currentVehicle = null;
+            window.currentVehicle = null;
         }
     } catch (e) {
         console.error('Chargement véhicule:', e);
         currentVehicle = null;
+        window.currentVehicle = null;
     }
 
     // Les types de course dépendent de la catégorie du véhicule
