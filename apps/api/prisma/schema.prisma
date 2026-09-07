@@ -560,16 +560,17 @@ model Reservation {
 // V7 PRO — ACTIONS CLIENTS (LEADS)
 // ========================================
 model LeadAction {
-  id             String         @id @default(cuid())
-  organizationId String
-  organization   Organization   @relation(fields: [organizationId], references: [id])
-  type           String
-  clientNom      String
-  clientTel      String
-  details        Json?
-  statut         String         @default("NEW")
-  notifications  Notification[]
-  course         Course?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  id                     String         @id @default(cuid())
+  organizationId         String?
+  organization           Organization?  @relation(fields: [organizationId], references: [id])
+  organizationPreference String?        // Préférence client (optionnel)
+  type                   String
+  clientNom              String
+  clientTel              String
+  details                Json?
+  statut                 String         @default("NEW")
+  notifications          Notification[]
+  course                 Course?
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
 }
