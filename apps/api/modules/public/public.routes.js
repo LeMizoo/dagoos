@@ -1079,9 +1079,16 @@ router.post('/actions', async (req, res) => {
       const vehicleTypeLong = vehicleTypeMapLong[details?.typeVehicule] || null;
 
       const driverWhereLong = {
-        organizationId: org?.id,
         status: { in: ['AVAILABLE', 'active'] }
       };
+
+      // Si des organisations compatibles ont été trouvées (matching auto)
+      // ou si une organisation est spécifiée, filtrer par organizationId
+      if (organizationsToNotify && organizationsToNotify.length > 0) {
+        driverWhereLong.organizationId = { in: organizationsToNotify.map(o => o.id) };
+      } else if (org) {
+        driverWhereLong.organizationId = org.id;
+      }
       if (vehicleTypeLong) {
         driverWhereLong.vehicle = { type: vehicleTypeLong };
       }
