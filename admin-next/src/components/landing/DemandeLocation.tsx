@@ -138,7 +138,12 @@ export default function DemandeLocation({
 
     // Afficher/masquer les champs selon le service
     if (passagersContainer) {
-      passagersContainer.style.display = service === 'passagers' ? 'block' : 'none';
+      const isPassagers = service === 'passagers';
+      passagersContainer.style.display = isPassagers ? 'block' : 'none';
+      const nbPassagersInput = document.getElementById('nbPassagers') as HTMLInputElement;
+      if (nbPassagersInput) {
+        nbPassagersInput.required = isPassagers;
+      }
     }
 
     // Retour : visible par défaut pour passagers/marchandises, sinon bouton
@@ -278,7 +283,7 @@ export default function DemandeLocation({
           </button>
 
           <div id="passagersContainer" style={{ display: 'none' }}>
-            <input name="nbPassagers" type="number" placeholder="Nombre de passagers" min="1" className="w-full px-4 py-3 border rounded-lg text-sm" required />
+            <input name="nbPassagers" id="nbPassagers" type="number" placeholder="Nombre de passagers" min="1" className="w-full px-4 py-3 border rounded-lg text-sm" />
           </div>
 
           {estimating && (
