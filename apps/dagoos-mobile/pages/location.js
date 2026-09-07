@@ -69,8 +69,12 @@ function init_location() {
           <option value="SANS">Sans carburant</option>
         </select>
 
+        <div id="volumeContainer" style="display:none;margin-bottom:12px;">
+          <input id="locVolume" type="number" placeholder="Volume (m³)" min="1" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;">
+        </div>
+
         <div id="passagersContainer" style="display:none;margin-bottom:12px;">
-          <input id="locNbPassagers" type="number" placeholder="Nombre de passagers / volume" min="1" value="1" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;">
+          <input id="locNbPassagers" type="number" placeholder="Nombre de passagers" min="1" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;">
         </div>
 
         <div id="locEstimationResult" style="margin-bottom:12px;"></div>
@@ -189,9 +193,20 @@ function updateUI() {
 
 function updateVehiculeOptions() {
   var vehiculeContainer = document.getElementById('vehiculeContainer');
-  if (!vehiculeContainer) return;
+  var passagersContainer = document.getElementById('passagersContainer');
+  var volumeContainer = document.getElementById('volumeContainer');
 
   var service = document.getElementById('locTypeService') ? document.getElementById('locTypeService').value : 'passagers';
+
+  // Afficher/masquer les champs selon le service
+  if (passagersContainer) {
+    passagersContainer.style.display = service === 'passagers' ? 'block' : 'none';
+  }
+  if (volumeContainer) {
+    volumeContainer.style.display = service === 'marchandises' ? 'block' : 'none';
+  }
+
+  if (!vehiculeContainer) return;
 
   var vehiclesByService = {
     'passagers': [
@@ -309,8 +324,8 @@ async function demanderLocationMobile() {
         dateRetour: dateRetour || null,
         heureDepart: heureDepart || null,
         heureRetour: heureRetour || null,
-        carburant: carburant,
-        nbPassagers: Number(nbPassagers) || 1,
+        nbPassagers: typeService === 'passagers' ? (Number(nbPassagers) || 1) : undefined,
+        volume: typeService === 'marchandises' ? (Number(document.getElementById('locVolume').value) || 1) : undefined,
         ...(typeService && { typeService })
       }
     });
