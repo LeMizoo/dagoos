@@ -138,7 +138,7 @@ router.get('/departs/:slug', async (req, res) => {
     
     const departs = await prisma.depart.findMany({
       where: {
-        organizationId: org.id,
+        organizationId: org?.id,
         statut: 'PUBLISHED',
       },
       orderBy: [{ date: 'asc' }, { heure: 'asc' }],
@@ -311,7 +311,7 @@ router.post('/estimate', async (req, res) => {
     const cleTarif = VEHICLE_TYPE_MAP[typeVehicule] || 'moto';
 
     const tarif = await prisma.tarif.findUnique({
-      where: { organizationId: org.id }
+      where: { organizationId: org?.id }
     }).catch(() => null);
 
     let prixEstime = 2000;
@@ -440,7 +440,7 @@ router.post('/estimate-location', async (req, res) => {
 
     // Récupérer le tarif
     const tarif = await prisma.tarif.findUnique({
-      where: { organizationId: org.id }
+      where: { organizationId: org?.id }
     }).catch(() => null);
 
     if (!tarif) {
@@ -634,7 +634,7 @@ router.post('/actions', async (req, res) => {
     const clientNomNormalized = normalize(clientNom);
     const clientTelNormalized = normalize(clientTel);
     
-    if (!organizationSlug || !type || !clientNom || !clientTel) {
+    if (!type || !clientNom || !clientTel) {
       return res.status(400).json({ error: 'Tous les champs sont requis' });
     }
     
@@ -685,7 +685,7 @@ router.post('/actions', async (req, res) => {
       distanceKm = await calculerDistance(details?.depart, details?.arrivee);
 
       const tarif = await prisma.tarif.findUnique({
-        where: { organizationId: org.id }
+        where: { organizationId: org?.id }
       }).catch(() => null);
 
       commissionPct = tarif?.commissionChauffeur ?? 20;
@@ -758,7 +758,7 @@ router.post('/actions', async (req, res) => {
 
       // Tarif de l'organisation
       const tarifLocationOrg = await prisma.tarif.findUnique({
-        where: { organizationId: org.id }
+        where: { organizationId: org?.id }
       }).catch(() => null);
 
       if (!tarifLocationOrg) {
@@ -860,7 +860,7 @@ router.post('/actions', async (req, res) => {
 
       // Tarif de l'organisation
       const tarifLongOrg = await prisma.tarif.findUnique({
-        where: { organizationId: org.id }
+        where: { organizationId: org?.id }
       }).catch(() => null);
 
       if (!tarifLongOrg) {
@@ -978,7 +978,7 @@ router.post('/actions', async (req, res) => {
     // ========================================
     const action = await prisma.leadAction.create({
       data: {
-        organizationId: org.id,
+        organizationId: org?.id,
         type,
         clientNom: clientNomNormalized,
         clientTel: clientTelNormalized,
@@ -1000,7 +1000,7 @@ router.post('/actions', async (req, res) => {
     // Créer une notification pour tous les managers de l'organisation
     // Trouver les managers par l'email de l'organisation
     const orgData = await prisma.organization.findUnique({
-      where: { id: org.id },
+      where: { id: org?.id },
       select: { email: true },
     });
     
@@ -1016,7 +1016,7 @@ router.post('/actions', async (req, res) => {
       await prisma.notification.create({
         data: {
           userId: manager.id,
-          organizationId: org.id,
+          organizationId: org?.id,
           leadActionId: action.id,
           type: 'lead_action',
           title: `Nouvelle demande : ${type}`,
@@ -1040,7 +1040,7 @@ router.post('/actions', async (req, res) => {
       const vehicleTypeLong = vehicleTypeMapLong[details?.typeVehicule] || null;
 
       const driverWhereLong = {
-        organizationId: org.id,
+        organizationId: org?.id,
         status: { in: ['AVAILABLE', 'active'] }
       };
       if (vehicleTypeLong) {
@@ -1066,7 +1066,7 @@ router.post('/actions', async (req, res) => {
         await prisma.notification.create({
           data: {
             userId: driver.userId,
-            organizationId: org.id,
+            organizationId: org?.id,
             leadActionId: action.id,
             type: 'long_haul',
             title: 'Nouvelle demande long-courrier',
@@ -1091,7 +1091,7 @@ router.post('/actions', async (req, res) => {
       const vehicleType = vehicleTypeMap[details?.typeVehicule] || null;
 
       const driverWhere = {
-        organizationId: org.id,
+        organizationId: org?.id,
         status: { in: ['AVAILABLE', 'active'] }
       };
       if (vehicleType) {
@@ -1121,7 +1121,7 @@ router.post('/actions', async (req, res) => {
         await prisma.notification.create({
           data: {
             userId: driver.userId,
-            organizationId: org.id,
+            organizationId: org?.id,
             leadActionId: action.id,
             type: 'course_request',
             title: 'Nouvelle course disponible',
