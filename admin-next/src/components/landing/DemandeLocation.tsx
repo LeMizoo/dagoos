@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '@/lib/api';
 
-export default function DemandeLocation({ 
+export default function DemandeLocation({
   typeOrganisation = 'FLEET_MANAGER',
   mode = 'urbain'
-}: { 
+}: {
   typeOrganisation?: string;
   mode?: 'urbain' | 'interurbain' | 'long_haul';
 }) {
@@ -24,12 +24,13 @@ export default function DemandeLocation({
         setFlottes(fleets);
       })
       .catch(() => {});
+  }, []);
 
-    // Initialiser les options de véhicules selon le mode
+  useEffect(() => {
     if (mode === 'long_haul') {
       updateVehiculeOptions();
     }
-  }, []);
+  }, [mode]);
 
   async function estimerLocation() {
     const form = document.querySelector('form') as HTMLFormElement;
@@ -43,7 +44,6 @@ export default function DemandeLocation({
     const arrivee = formData.get('arrivee') as string;
     const dateAller = formData.get('dateAller') as string;
     const dateRetour = formData.get('dateRetour') as string;
-    const carburant = formData.get('carburant') as string;
 
     if (!flotte || !depart || !arrivee || !dateAller) {
       setEstimation(null);
@@ -63,7 +63,6 @@ export default function DemandeLocation({
           arrivee,
           dateAller,
           dateRetour: dateRetour || null,
-          carburant
         }),
       });
 
@@ -117,44 +116,44 @@ export default function DemandeLocation({
       setLoading(false);
     }
   }
+
   function toggleRetour() {
-    const retourContainer = document.getElementById("retourContainer");
-    const btn = document.getElementById("btnAjouterRetour");
+    const retourContainer = document.getElementById('retourContainer');
+    const btn = document.getElementById('btnAjouterRetour');
     if (!retourContainer) return;
 
-    const isHidden = retourContainer.style.display === "none";
-    retourContainer.style.display = isHidden ? "block" : "none";
+    const isHidden = retourContainer.style.display === 'none';
+    retourContainer.style.display = isHidden ? 'block' : 'none';
     if (btn) {
-      btn.textContent = isHidden ? "- Retirer le retour" : "+ Ajouter un retour";
+      btn.textContent = isHidden ? '− Retirer le retour' : '+ Ajouter un retour';
     }
   }
-
 
   function updateVehiculeOptions() {
     const service = (document.getElementById('typeService') as HTMLSelectElement)?.value || 'passagers';
     const vehiculeSelect = document.getElementById('typeVehicule') as HTMLSelectElement;
     const passagersContainer = document.getElementById('passagersContainer');
-    const retourContainer = document.getElementById("retourContainer");
-    const btnRetour = document.getElementById("btnAjouterRetour");
-    
+    const retourContainer = document.getElementById('retourContainer');
+    const btnRetour = document.getElementById('btnAjouterRetour');
+
     // Afficher/masquer les champs selon le service
     if (passagersContainer) {
       passagersContainer.style.display = service === 'passagers' ? 'block' : 'none';
     }
-    
 
-    // Retour : visible par defaut pour passagers/marchandises, sinon bouton
-    const servicesAvecRetour = ["passagers", "marchandises"];
+    // Retour : visible par défaut pour passagers/marchandises, sinon bouton
+    const servicesAvecRetour = ['passagers', 'marchandises'];
     if (retourContainer && btnRetour) {
       if (servicesAvecRetour.includes(service)) {
-        retourContainer.style.display = "block";
-        btnRetour.style.display = "none";
+        retourContainer.style.display = 'block';
+        btnRetour.style.display = 'none';
       } else {
-        retourContainer.style.display = "none";
-        btnRetour.style.display = "block";
-        btnRetour.textContent = "+ Ajouter un retour";
+        retourContainer.style.display = 'none';
+        btnRetour.style.display = 'block';
+        btnRetour.textContent = '+ Ajouter un retour';
       }
     }
+
     if (!vehiculeSelect) return;
 
     // Règles métier : véhicules compatibles par type de service
@@ -182,16 +181,10 @@ export default function DemandeLocation({
 
     const vehicles = vehiclesByService[service] || vehiclesByService['passagers'];
 
-    vehiculeSelect.innerHTML = vehicles.map(v => 
+    vehiculeSelect.innerHTML = vehicles.map(v =>
       `<option value="${v.value}">${v.label}</option>`
     ).join('');
   }
-
-  useEffect(() => {
-    if (mode === 'long_haul') {
-      updateVehiculeOptions();
-    }
-  }, [mode]);
 
   return (
     <section className="py-8 bg-white">
@@ -267,18 +260,18 @@ export default function DemandeLocation({
               <input name="heureDepart" type="time" className="w-full px-3 py-2 border rounded-lg text-sm" required onBlur={estimerLocation} />
             </div>
           </div>
-          <div id="retourContainer" style={{ display: 'none' }}>
 
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-xs text-gray-500">Date retour</label>
-              <input name="dateRetour" type="date" className="w-full px-3 py-2 border rounded-lg text-sm" onBlur={estimerLocation} />
+          <div id="retourContainer" style={{ display: 'none' }}>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-xs text-gray-500">Date retour</label>
+                <input name="dateRetour" type="date" className="w-full px-3 py-2 border rounded-lg text-sm" onBlur={estimerLocation} />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500">Heure retour</label>
+                <input name="heureRetour" type="time" className="w-full px-3 py-2 border rounded-lg text-sm" onBlur={estimerLocation} />
+              </div>
             </div>
-            <div>
-              <label className="text-xs text-gray-500">Heure retour</label>
-              <input name="heureRetour" type="time" className="w-full px-3 py-2 border rounded-lg text-sm" onBlur={estimerLocation} />
-            </div>
-          </div>
           </div>
           <button type="button" id="btnAjouterRetour" onClick={() => toggleRetour()} className="w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg border border-dashed border-blue-300 transition">
             + Ajouter un retour
@@ -294,32 +287,23 @@ export default function DemandeLocation({
 
           {estimation && !estimating && (
             <div className="bg-emerald-50 rounded-lg p-3 text-center border border-emerald-200">
-              <p className="text-sm font-semibold text-emerald-700">Estimation</p>
-              <p className="text-xs text-emerald-600">
-                Distance : <strong>{estimation.distanceKm} km</strong>
-              </p>
-              <p className="text-xs text-emerald-600">
-                Prix : <strong>{estimation.prixEstime.toLocaleString('fr-FR')} Ar</strong>
-              </p>
+              <p className="text-sm font-semibold text-emerald-700">Estimation : {estimation.prixEstime?.toLocaleString()} Ar</p>
+              <p className="text-xs text-emerald-600">{estimation.distanceKm} km</p>
             </div>
           )}
 
-          <button type="submit" disabled={loading} className="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-[#154360] transition disabled:opacity-50">
+          <button type="submit" disabled={loading} className="w-full py-3 bg-primary text-white font-bold rounded-xl disabled:opacity-50">
             {loading ? 'Envoi...' : 'Envoyer la demande'}
           </button>
-
-          {codeSuivi && (
-            <div className="bg-amber-50 border-2 border-amber-400 rounded-xl p-5 text-center mt-4">
-              <p className="text-sm font-bold text-amber-800 mb-2">✅ Demande envoyée !</p>
-              <p className="text-sm font-bold text-red-600 mb-2">⚠️ RETENEZ BIEN VOTRE CODE AVANT DE FERMER</p>
-              <p className="text-4xl font-mono font-black tracking-widest text-amber-900 bg-white rounded-lg py-3 border-2 border-amber-300">{codeSuivi}</p>
-              <p className="text-xs text-gray-600 mt-3">📋 Notez ce code ou faites une capture d'écran</p>
-              <a href="/suivi" className="inline-block mt-3 bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#154360] transition">
-                Suivre ma demande →
-              </a>
-            </div>
-          )}
         </form>
+
+        {codeSuivi && (
+          <div className="mt-4 bg-blue-50 p-4 rounded-xl text-center">
+            <p className="text-sm font-bold">📋 Code de suivi</p>
+            <p className="text-2xl font-mono font-bold text-blue-700">{codeSuivi}</p>
+            <p className="text-xs text-gray-500 mt-1">Gardez ce code pour suivre votre demande</p>
+          </div>
+        )}
       </div>
     </section>
   );
