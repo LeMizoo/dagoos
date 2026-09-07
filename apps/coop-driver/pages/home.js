@@ -52,15 +52,17 @@ async function init_home() {
         var isCoop = true; // Toujours Coop dans cette application
         
         // Charger le départ du jour et le manifest
+        // IMPORTANT : le véhicule du départ du jour est distinct
+        // du véhicule permanent assigné au chauffeur.
         try {
             var departData = await apiGet('/departs/mine').catch(() => ({ depart: null }));
             window.currentDepart = departData.depart || null;
-            window.currentVehicle = departData.vehicle || null;
+            window.currentDepartVehicle = departData.vehicle || null;
             window.currentPassagers = departData.passagers || [];
             window.currentFinance = departData.finance || null;
         } catch(e) {
             window.currentDepart = null;
-            window.currentVehicle = null;
+            window.currentDepartVehicle = null;
             window.currentPassagers = [];
             window.currentFinance = null;
         }
@@ -73,14 +75,23 @@ async function init_home() {
           orgSlug: currentDriver?.organization?.slug || '',
         };
 
-        if (currentDriver && currentDriver.vehicleId) {
-            var vehicles = await apiGet('/vehicles');
-            if (Array.isArray(vehicles)) {
-                currentVehicle = vehicles.find(function(v) {
-                    return v.id === currentDriver.vehicleId;
-                });
-                window.currentVehicle = currentVehicle;
-            }
+        // Véhicule permanent assigné au chauffeur.
+        // /drivers/me est la source de vérité et fournit déjà l'objet vehicle.
+        if (currentDriver && currentDriver.vehicle) {
+            currentVehicle = currentDriver.vehicle;
+            window.currentVehicle = currentVehicle;
+        } else if (currentDriver && currentDriver.vehicleId) {
+            // Fallback si l'API ne fournit que vehicleId.
+            var vehiclesResponse = await apiGet('/vehicles');
+            var vehicles = Array.isArray(vehiclesResponse)
+                ? vehiclesResponse
+                : (Array.isArray(vehiclesResponse?.data) ? vehiclesResponse.data : []);
+
+            currentVehicle = vehicles.find(function(v) {
+                return v.id === currentDriver.vehicleId;
+            }) || null;
+
+            window.currentVehicle = currentVehicle;
         }
 
         if (currentDriver && currentDriver.organizationId) {
@@ -420,12 +431,12 @@ async function loadHomeData() {
     try {
         var departData = await apiGet('/departs/mine').catch(() => ({ depart: null }));
         window.currentDepart = departData.depart || null;
-        window.currentVehicle = departData.vehicle || null;
+        window.currentDepartVehicle = departData.vehicle || null;
         window.currentPassagers = departData.passagers || [];
         window.currentFinance = departData.finance || null;
     } catch(e) {
         window.currentDepart = null;
-        window.currentVehicle = null;
+        window.currentDepartVehicle = null;
         window.currentPassagers = [];
         window.currentFinance = null;
     }
