@@ -8,6 +8,9 @@
         updateReady = true;
         showUpdateBanner();
       }
+      if (event.data && event.data.type === 'FORCE_RELOAD') {
+        window.location.reload();
+      }
     });
 
     // Vérifier aussi au chargement si une mise à jour est en attente
