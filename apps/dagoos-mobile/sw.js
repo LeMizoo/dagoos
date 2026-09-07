@@ -1,5 +1,5 @@
-const CACHE_NAME = 'dagoos-mobile-v3';
-const STATIC_CACHE = 'dagoos-mobile-static-v3';
+const CACHE_NAME = 'dagoos-mobile-v4';
+const STATIC_CACHE = 'dagoos-mobile-static-v4';
 
 const STATIC_ASSETS = [
   '/',
