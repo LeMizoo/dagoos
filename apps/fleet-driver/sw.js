@@ -1,5 +1,5 @@
-const CACHE_NAME = 'dagoos-driver-v11';
-const STATIC_CACHE = 'dagoos-static-v12';
+const CACHE_NAME = 'dagoos-driver-v12';
+const STATIC_CACHE = 'dagoos-static-v13';
 
 const STATIC_ASSETS = [
   '/',
@@ -41,6 +41,13 @@ self.addEventListener('activate', (event) => {
     })
   );
   self.clients.claim();
+
+  // Force reload des clients existants
+  self.clients.matchAll({ type: 'window' }).then((clients) => {
+    clients.forEach((client) => {
+      client.navigate(client.url);
+    });
+  });
 
   // Notifier tous les clients qu'une mise à jour est disponible
   self.clients.matchAll({ type: 'window' }).then((clients) => {

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dagoos-mobile-v4';
+const CACHE_NAME = 'dagoos-mobile-v5';
 const STATIC_CACHE = 'dagoos-mobile-static-v4';
 
 const STATIC_ASSETS = [
@@ -34,6 +34,13 @@ self.addEventListener('activate', (event) => {
     })
   );
   self.clients.claim();
+
+  // Force reload des clients existants
+  self.clients.matchAll({ type: 'window' }).then((clients) => {
+    clients.forEach((client) => {
+      client.navigate(client.url);
+    });
+  });
 
   // Notifier tous les clients qu'une mise à jour est disponible
   self.clients.matchAll({ type: 'window' }).then((clients) => {
