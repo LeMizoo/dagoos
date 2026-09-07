@@ -74,7 +74,7 @@ test_combinaison "fret" "camion" 0
 test_combinaison "fret" "semi_remorque" 0
 
 echo ""
-echo "📋 COMBINAISONS INVALIDES (8)"
+echo "📋 COMBINAISONS INVALIDES (12)"
 echo "----------------------------------------"
 
 test_combinaison "passagers" "fourgon" 1

@@ -505,7 +505,7 @@ router.post('/estimate-location', async (req, res) => {
           break;
 
         case 'demenagement':
-          if (!Number.isFinite(forfaitServiceLong)) {
+          if (!Number.isFinite(forfaitServiceLong) || forfaitServiceLong <= 0) {
             return res.status(400).json({
               error: `Forfait déménagement non configuré pour ${typeVehicule}`
             });
@@ -516,7 +516,7 @@ router.post('/estimate-location', async (req, res) => {
           break;
 
         case 'depannage':
-          if (!Number.isFinite(forfaitServiceLong)) {
+          if (!Number.isFinite(forfaitServiceLong) || forfaitServiceLong <= 0) {
             return res.status(400).json({
               error: `Forfait dépannage non configuré pour ${typeVehicule}`
             });
@@ -930,7 +930,7 @@ router.post('/actions', async (req, res) => {
           break;
 
         case 'demenagement':
-          if (!Number.isFinite(forfaitServiceLong)) {
+          if (!Number.isFinite(forfaitServiceLong) || forfaitServiceLong <= 0) {
             return res.status(400).json({
               error: `Forfait déménagement non configuré pour ${typeVehicule}`
             });
@@ -943,7 +943,7 @@ router.post('/actions', async (req, res) => {
           break;
 
         case 'depannage':
-          if (!Number.isFinite(forfaitServiceLong)) {
+          if (!Number.isFinite(forfaitServiceLong) || forfaitServiceLong <= 0) {
             return res.status(400).json({
               error: `Forfait dépannage non configuré pour ${typeVehicule}`
             });
