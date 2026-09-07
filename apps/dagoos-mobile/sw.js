@@ -35,10 +35,12 @@ self.addEventListener('activate', (event) => {
   );
   self.clients.claim();
 
-  // Force reload des clients existants
+  // Demander aux clients de se recharger
   self.clients.matchAll({ type: 'window' }).then((clients) => {
     clients.forEach((client) => {
-      client.navigate(client.url);
+      client.postMessage({
+        type: 'FORCE_RELOAD',
+      });
     });
   });
 
