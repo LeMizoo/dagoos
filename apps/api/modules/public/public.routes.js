@@ -906,7 +906,7 @@ router.post('/actions', async (req, res) => {
 
       const prixBaseLong = Number(tarifLong.prixBase);
       const prixKmLong = Number(tarifLong.prixKm);
-      const forfaitServiceLong = Number(tarifLong.forfaitService) || 100000;
+      const forfaitServiceLong = Number(tarifLong.forfaitService);
 
 
       // Calcul selon le type de service
@@ -930,6 +930,11 @@ router.post('/actions', async (req, res) => {
           break;
 
         case 'demenagement':
+          if (!Number.isFinite(forfaitServiceLong)) {
+            return res.status(400).json({
+              error: `Forfait déménagement non configuré pour ${typeVehicule}`
+            });
+          }
           // Forfait + distance
           prixEstime = arrondirPrix(
             forfaitServiceLong +
@@ -938,6 +943,11 @@ router.post('/actions', async (req, res) => {
           break;
 
         case 'depannage':
+          if (!Number.isFinite(forfaitServiceLong)) {
+            return res.status(400).json({
+              error: `Forfait dépannage non configuré pour ${typeVehicule}`
+            });
+          }
           // Forfait + distance
           prixEstime = arrondirPrix(
             forfaitServiceLong +
