@@ -26,6 +26,12 @@ app.use(express.json({
   limit: "100kb",
   type: ['application/json', 'application/json; charset=utf-8']
 }));
+
+// Forcer le charset UTF-8 sur toutes les réponses JSON
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  next();
+});
 app.use(express.urlencoded({ extended: true, limit: "100kb" }));
 
 // =========================================================
