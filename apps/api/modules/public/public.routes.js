@@ -391,9 +391,26 @@ router.get('/suivi/:code', async (req, res) => {
 // POST /api/public/estimate-location - Estimer une location
 router.post('/estimate-location', async (req, res) => {
   try {
-    const { organizationSlug, typeVehicule, typeTrajet, depart, arrivee, dateAller, dateRetour, carburant } = req.body;
+    const {
+      organizationSlug,
+      type,
+      typeVehicule,
+      typeTrajet,
+      typeService,
+      nbPassagers,
+      volume,
+      depart,
+      arrivee,
+      dateAller,
+      dateRetour,
+      carburant
+    } = req.body;
 
-    if (!organizationSlug || !depart || !arrivee || !typeTrajet) {
+    if (!organizationSlug || !depart || !arrivee) {
+      return res.status(400).json({ error: 'Informations manquantes' });
+    }
+
+    if (type !== 'LONG_HAUL' && !typeTrajet) {
       return res.status(400).json({ error: 'Informations manquantes' });
     }
 
@@ -422,6 +439,121 @@ router.post('/estimate-location', async (req, res) => {
       try {
         vehiculeTarifs = JSON.parse(tarif.vehiculeTarifs);
       } catch(e) {}
+    }
+
+    // ========================================
+    // ESTIMATION LONG_HAUL
+    // ========================================
+    if (type === 'LONG_HAUL') {
+      const validLongHaulServices = [
+        'passagers',
+        'marchandises',
+        'demenagement',
+        'depannage',
+        'fret'
+      ];
+
+      if (!validLongHaulServices.includes(typeService)) {
+        return res.status(400).json({
+          error: `Type de service long-courrier invalide: ${typeService}`
+        });
+      }
+
+      const typeMapLong = {
+        'bus': 'bus',
+        'minivan': 'minivan',
+        'fourgon': 'fourgon',
+        'camion': 'camion',
+        'semi_remorque': 'semi_remorque',
+        'depanneuse': 'depanneuse',
+        'camion_frigo': 'camion_frigo'
+      };
+
+      const cleLong = typeMapLong[typeVehicule];
+
+      if (!cleLong) {
+        return res.status(400).json({
+          error: `Type de véhicule long-courrier invalide: ${typeVehicule}`
+        });
+      }
+
+      const tarifLong = vehiculeTarifs[cleLong]?.longueDistance;
+
+      if (
+        !tarifLong ||
+        typeof tarifLong.prixBase !== 'number' ||
+        typeof tarifLong.prixKm !== 'number'
+      ) {
+        return res.status(400).json({
+          error: `Tarif long-courrier non configuré pour ${typeVehicule}`
+        });
+      }
+
+      const prixBaseLong = Number(tarifLong.prixBase);
+      const prixKmLong = Number(tarifLong.prixKm);
+      const forfaitServiceLong = Number(tarifLong.forfaitService);
+
+      let prixEstimeLong = 0;
+
+      switch (typeService) {
+        case 'passagers':
+          prixEstimeLong =
+            (prixBaseLong * (Number(nbPassagers) || 1)) +
+            (distanceKm * prixKmLong);
+          break;
+
+        case 'marchandises':
+          prixEstimeLong =
+            (prixBaseLong * (Number(volume) || 1)) +
+            (distanceKm * prixKmLong);
+          break;
+
+        case 'demenagement':
+          if (!Number.isFinite(forfaitServiceLong)) {
+            return res.status(400).json({
+              error: `Forfait déménagement non configuré pour ${typeVehicule}`
+            });
+          }
+          prixEstimeLong =
+            forfaitServiceLong +
+            (distanceKm * prixKmLong);
+          break;
+
+        case 'depannage':
+          if (!Number.isFinite(forfaitServiceLong)) {
+            return res.status(400).json({
+              error: `Forfait dépannage non configuré pour ${typeVehicule}`
+            });
+          }
+          prixEstimeLong =
+            forfaitServiceLong +
+            (distanceKm * prixKmLong * 1.5);
+          break;
+
+        case 'fret':
+          prixEstimeLong =
+            distanceKm * prixKmLong * 2;
+          break;
+
+        default:
+          prixEstimeLong =
+            prixBaseLong +
+            (distanceKm * prixKmLong);
+      }
+
+      return res.json({
+        distanceKm,
+        prixEstime: arrondirPrix(prixEstimeLong),
+        type: 'LONG_HAUL',
+        typeVehicule,
+        typeService,
+        nbPassagers: typeService === 'passagers'
+          ? (Number(nbPassagers) || 1)
+          : undefined,
+        volume: typeService === 'marchandises'
+          ? (Number(volume) || 1)
+          : undefined
+      });
     }
 
     // Récupérer le tarif location du type de véhicule

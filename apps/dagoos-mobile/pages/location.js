@@ -257,10 +257,30 @@ async function estimerLocationMobile() {
   }
 
   try {
+    var typeService = document.getElementById('locTypeService')
+      ? document.getElementById('locTypeService').value
+      : null;
+
+    var nbPassagers = document.getElementById('locNbPassagers')
+      ? document.getElementById('locNbPassagers').value
+      : null;
+
+    var volume = document.getElementById('locVolume')
+      ? document.getElementById('locVolume').value
+      : null;
+
     var result = await apiPost('/public/estimate-location', {
       organizationSlug: flotte,
+      type: modeLocation === 'long_haul' ? 'LONG_HAUL' : 'CAR_RENTAL',
       typeVehicule: typeVehicule,
       typeTrajet: typeTrajet,
+      typeService: typeService,
+      nbPassagers: typeService === 'passagers'
+        ? (Number(nbPassagers) || 1)
+        : undefined,
+      volume: typeService === 'marchandises'
+        ? (Number(volume) || 1)
+        : undefined,
       depart: depart,
       arrivee: arrivee,
       dateAller: dateAller || null,
@@ -324,6 +344,7 @@ async function demanderLocationMobile() {
         dateRetour: dateRetour || null,
         heureDepart: heureDepart || null,
         heureRetour: heureRetour || null,
+        carburant: carburant,
         nbPassagers: typeService === 'passagers' ? (Number(nbPassagers) || 1) : undefined,
         volume: typeService === 'marchandises' ? (Number(document.getElementById('locVolume').value) || 1) : undefined,
         ...(typeService && { typeService })
