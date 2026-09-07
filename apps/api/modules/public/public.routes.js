@@ -5,6 +5,12 @@ const crypto = require('crypto');
 
 const router = express.Router();
 
+// Matrice LONG_HAUL - Source de vérité unique
+const {
+  VALID_LONG_HAUL_SERVICES,
+  isVehicleCompatibleWithService
+} = require('./long-haul-matrix');
+
 // =========================================================
 // ORGANISATION PUBLIQUE
 // =========================================================
@@ -893,23 +899,19 @@ router.post('/actions', async (req, res) => {
         }
       }
 
-      const typeMapLong = {
-        'bus': 'bus',
-        'minivan': 'minivan',
-        'fourgon': 'fourgon',
-        'camion': 'camion',
-        'semi_remorque': 'semi_remorque',
-        'depanneuse': 'depanneuse',
-        'camion_frigo': 'camion_frigo'
-      };
-
-      const cleLong = typeMapLong[typeVehicule];
-
-      if (!cleLong) {
+      if (!VALID_LONG_HAUL_SERVICES.includes(typeService)) {
         return res.status(400).json({
-          error: `Type de véhicule long-courrier invalide: ${typeVehicule}`
+          error: `Type de service long-courrier invalide: ${typeService}`
         });
       }
+
+      if (!isVehicleCompatibleWithService(typeService, typeVehicule)) {
+        return res.status(400).json({
+          error: `Véhicule ${typeVehicule} incompatible avec le service ${typeService}`
+        });
+      }
+
+      const cleLong = typeVehicule;
 
       const tarifLong = vehiculeTarifsLong[cleLong]?.longueDistance;
 
