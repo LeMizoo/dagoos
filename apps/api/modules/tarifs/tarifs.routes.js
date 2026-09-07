@@ -19,7 +19,7 @@ const DEFAULT_TARIFS = {
 router.get('/:organizationId', authMiddleware, requirePermission('tarifs.read'), async (req, res) => {
   try {
     const { organizationId } = req.params;
-    let tarifs = await prisma.tarif.findUnique({ where: { organizationId } });
+    let tarifs = await prisma.tarif.findUnique({ where: { organizationId }, select: { id: true, organizationId: true, prixBase: true, prixKm: true, locationJournalier: true, commissionChauffeur: true, adyVarotraActif: true, courseNormalActif: true, locationActif: true, vehiculeTarifs: true, mobileMoney: true, createdAt: true, updatedAt: true } });
     if (!tarifs) {
       return res.json(DEFAULT_TARIFS);
     }
