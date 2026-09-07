@@ -169,7 +169,9 @@ export default function DemandeLocation({
       ],
       'marchandises': [
         { value: 'fourgon', label: '🚚 Fourgon' },
-        { value: 'camion_frigo', label: '🧊 Camion frigorifique' }
+        { value: 'camion', label: '🚛 Camion' },
+        { value: 'camion_frigo', label: '🧊 Camion frigorifique' },
+        { value: 'semi_remorque', label: '🚛 Semi-remorque' }
       ],
       'demenagement': [
         { value: 'fourgon', label: '🚚 Fourgon' },
