@@ -2,6 +2,10 @@ const express = require('express');
 const prisma = require('../../lib/prisma');
 const { authMiddleware } = require('../../middleware/auth');
 const { requirePermission } = require('../../security/require-permission');
+const {
+  VALID_LONG_HAUL_SERVICES,
+  isVehicleCompatibleWithService
+} = require('../public/long-haul-matrix');
 
 const router = express.Router();
 
@@ -181,7 +185,7 @@ router.post('/:id/accept', authMiddleware, async (req, res) => {
 
     const vehicle = await prisma.vehicle.findUnique({
       where: { id: finalVehicleId },
-      select: { id: true, organizationId: true }
+      select: { id: true, organizationId: true, type: true }
     });
 
     if (!vehicle) {
@@ -194,6 +198,35 @@ router.post('/:id/accept', authMiddleware, async (req, res) => {
 
     // 6. Récupérer les détails calculés depuis LeadAction.details
     const details = action.details || {};
+
+    // 6bis. Vérification métier LONG_HAUL côté serveur
+    if (action.type === 'LONG_HAUL') {
+      const typeService = details?.typeService;
+      const typeVehicule = details?.typeVehicule;
+
+      if (!VALID_LONG_HAUL_SERVICES.includes(typeService)) {
+        return res.status(400).json({
+          error: `Type de service long-courrier invalide: ${typeService}`
+        });
+      }
+
+      if (!isVehicleCompatibleWithService(typeService, typeVehicule)) {
+        return res.status(400).json({
+          error: `Véhicule ${typeVehicule} incompatible avec le service ${typeService}`
+        });
+      }
+
+      const vehicleType = vehicle.type
+        ? String(vehicle.type).toLowerCase()
+        : null;
+
+      if (vehicleType !== typeVehicule) {
+        return res.status(400).json({
+          error: `Le véhicule du chauffeur (${vehicleType || 'inconnu'}) ne correspond pas au véhicule demandé (${typeVehicule})`
+        });
+      }
+    }
+
     const prixEstime = Number(details.prixEstime || 0);
     const distanceKm = Number(details.distanceKm || 0);
     const modePrestation = details.modePrestation || 'NORMALE';
