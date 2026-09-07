@@ -192,7 +192,15 @@ async function geocodeAdresse(adresse) {
   if (!adresse) return null;
 
   try {
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(adresse + ', Antananarivo, Madagascar')}&limit=1`;
+    // Essayer d'abord avec Madagascar uniquement (meilleur pour les villes)
+    // Vérifier si l'adresse contient déjà une virgule (adresse complète)
+    const aDejaVirgule = adresse.includes(',');
+
+    const query = aDejaVirgule
+      ? `${adresse}, Madagascar`
+      : `${adresse}, Madagascar`;
+
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=mg`;
     const response = await fetch(url, {
       headers: { 'User-Agent': 'DAGOOS/1.0' }
     });
