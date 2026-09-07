@@ -763,37 +763,7 @@ router.post('/actions', async (req, res) => {
 
     } else if (type === 'CAR_RENTAL') {
   
-    // ========================================
-    // MATCHING AUTOMATIQUE LONG_HAUL (sans organisation)
-    // ========================================
-    let organizationsToNotify = [];
 
-    if (type === 'LONG_HAUL' && !org) {
-      const typeService = details?.typeService || 'passagers';
-      const typeVehicule = details?.typeVehicule || 'bus';
-
-      // Chercher les organisations qui ont le tarif LONG_HAUL pour ce véhicule
-      const orgsCompatibles = await prisma.organization.findMany({
-        where: {
-          type: 'COOPERATIVE',
-          status: 'active',
-        },
-        include: {
-          tarif: true,
-        },
-      }).catch(() => []);
-
-      for (const o of orgsCompatibles) {
-        if (o.tarif?.vehiculeTarifs) {
-          try {
-            const vt = JSON.parse(o.tarif.vehiculeTarifs);
-            if (vt[typeVehicule]?.longueDistance) {
-              organizationsToNotify.push(o);
-            }
-          } catch(e) {}
-        }
-      }
-    }
     // ======================================================
       // LOCATION : calcul 100 % côté backend
       // ======================================================
