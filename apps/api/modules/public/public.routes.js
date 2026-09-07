@@ -676,21 +676,34 @@ router.post('/actions', async (req, res) => {
       const typeService = details?.typeService || 'passagers';
       const typeVehicule = details?.typeVehicule || 'bus';
 
-      // Chercher les organisations qui ont le tarif LONG_HAUL pour ce véhicule
+      // Chercher les organisations COOPERATIVE actives
       const orgsCompatibles = await prisma.organization.findMany({
         where: {
           type: 'COOPERATIVE',
           status: 'active',
         },
-        include: {
-          tarif: true,
+      }).catch(() => []);
+
+      // Les tarifs sont liés par organizationId (pas par une relation Prisma)
+      const tarifsCompatibles = await prisma.tarif.findMany({
+        where: {
+          organizationId: {
+            in: orgsCompatibles.map(o => o.id),
+          },
         },
       }).catch(() => []);
 
+      const tarifsParOrganisation = new Map(
+        tarifsCompatibles.map(t => [t.organizationId, t])
+      );
+
       for (const o of orgsCompatibles) {
-        if (o.tarif?.vehiculeTarifs) {
+        const tarif = tarifsParOrganisation.get(o.id);
+
+        if (tarif?.vehiculeTarifs) {
           try {
-            const vt = JSON.parse(o.tarif.vehiculeTarifs);
+            const vt = JSON.parse(tarif.vehiculeTarifs);
+
             if (vt[typeVehicule]?.longueDistance) {
               organizationsToNotify.push(o);
             }
