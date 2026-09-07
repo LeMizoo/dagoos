@@ -138,7 +138,8 @@ router.get('/departs/:slug', async (req, res) => {
     
     const departs = await prisma.depart.findMany({
       where: {
-        organizationId: org?.id,
+        organizationId: org?.id || null,
+        organizationPreference: organizationSlug || null,
         statut: 'PUBLISHED',
       },
       orderBy: [{ date: 'asc' }, { heure: 'asc' }],
