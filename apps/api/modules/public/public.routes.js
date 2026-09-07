@@ -668,6 +668,43 @@ router.post('/actions', async (req, res) => {
     }
     
     // ========================================
+    // MATCHING AUTOMATIQUE LONG_HAUL (sans organisation)
+    // ========================================
+    let organizationsToNotify = [];
+
+    if (type === 'LONG_HAUL' && !org) {
+      const typeService = details?.typeService || 'passagers';
+      const typeVehicule = details?.typeVehicule || 'bus';
+
+      // Chercher les organisations qui ont le tarif LONG_HAUL pour ce véhicule
+      const orgsCompatibles = await prisma.organization.findMany({
+        where: {
+          type: 'COOPERATIVE',
+          status: 'active',
+        },
+        include: {
+          tarif: true,
+        },
+      }).catch(() => []);
+
+      for (const o of orgsCompatibles) {
+        if (o.tarif?.vehiculeTarifs) {
+          try {
+            const vt = JSON.parse(o.tarif.vehiculeTarifs);
+            if (vt[typeVehicule]?.longueDistance) {
+              organizationsToNotify.push(o);
+            }
+          } catch(e) {}
+        }
+      }
+
+      // Si des organisations sont trouvées, utiliser la première pour le calcul
+      if (organizationsToNotify.length > 0) {
+        org = organizationsToNotify[0];
+      }
+    }
+
+    // ========================================
     // CALCUL DU PRIX (backend uniquement)
     // ========================================
     let prixEstime = 2000;
