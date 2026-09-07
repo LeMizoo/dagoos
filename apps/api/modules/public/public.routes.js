@@ -73,22 +73,20 @@ router.get('/organizations', async (req, res) => {
 // GET /api/public/organizations/:slug - Infos publiques de l'organisation
 router.get('/organizations/:slug', async (req, res) => {
   try {
-    const org = await prisma.organization.findUnique({
-      where: { slug: req.params.slug },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        type: true,
-        phone: true,
-        logo: true,
-        description: true,
-        plan: true,
-        createdAt: true,
-      },
-    });
-    
-    if (!org) return res.status(404).json({ error: 'Organisation introuvable' });
+    let org = null;
+
+    if (organizationSlug) {
+      org = await prisma.organization.findUnique({
+        where: { slug: organizationSlug },
+        select: { id: true, email: true },
+      });
+
+      if (!org) {
+        return res.status(404).json({ error: 'Organisation introuvable' });
+      }
+    } else if (!['CONTACT', 'LONG_HAUL', 'CAR_RENTAL', 'COURSE_REQUEST', 'TAXI_RESERVATION'].includes(type)) {
+      return res.status(400).json({ error: 'organisationSlug requis pour ce type' });
+    }
     
     if (org.status && org.status !== 'active') {
       return res.status(404).json({ error: 'Organisation indisponible' });
