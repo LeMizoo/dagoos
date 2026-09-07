@@ -459,37 +459,19 @@ router.post('/estimate-location', async (req, res) => {
     // ESTIMATION LONG_HAUL
     // ========================================
     if (type === 'LONG_HAUL') {
-      const validLongHaulServices = [
-        'passagers',
-        'marchandises',
-        'demenagement',
-        'depannage',
-        'fret'
-      ];
-
-      if (!validLongHaulServices.includes(typeService)) {
+      if (!VALID_LONG_HAUL_SERVICES.includes(typeService)) {
         return res.status(400).json({
           error: `Type de service long-courrier invalide: ${typeService}`
         });
       }
 
-      const typeMapLong = {
-        'bus': 'bus',
-        'minivan': 'minivan',
-        'fourgon': 'fourgon',
-        'camion': 'camion',
-        'semi_remorque': 'semi_remorque',
-        'depanneuse': 'depanneuse',
-        'camion_frigo': 'camion_frigo'
-      };
-
-      const cleLong = typeMapLong[typeVehicule];
-
-      if (!cleLong) {
+      if (!isVehicleCompatibleWithService(typeService, typeVehicule)) {
         return res.status(400).json({
-          error: `Type de véhicule long-courrier invalide: ${typeVehicule}`
+          error: `Véhicule ${typeVehicule} incompatible avec le service ${typeService}`
         });
       }
+
+      const cleLong = typeVehicule;
 
       const tarifLong = vehiculeTarifs[cleLong]?.longueDistance;
 
