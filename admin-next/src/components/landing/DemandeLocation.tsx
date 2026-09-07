@@ -279,6 +279,7 @@ export default function DemandeLocation({
               <input name="heureRetour" type="time" className="w-full px-3 py-2 border rounded-lg text-sm" onBlur={estimerLocation} />
             </div>
           </div>
+          </div>
           <button type="button" id="btnAjouterRetour" onClick={() => toggleRetour()} className="w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg border border-dashed border-blue-300 transition">
             + Ajouter un retour
           </button>
