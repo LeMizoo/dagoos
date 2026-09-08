@@ -112,7 +112,7 @@
           cursor: pointer;
         ">Plus tard</button>
         
-        <button onclick="window.location.reload()" style="
+        <button onclick="forceUpdate()" style="
           background: #1a1a2e;
           color: #ffffff;
           border: none;
@@ -142,5 +142,21 @@
 
     overlay.appendChild(card);
     document.body.appendChild(overlay);
+
+    // Définir forceUpdate globalement
+    window.forceUpdate = function() {
+      if (navigator.serviceWorker) {
+        navigator.serviceWorker.ready.then(function(registration) {
+          if (registration.waiting) {
+            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+          }
+          setTimeout(function() {
+            window.location.reload();
+          }, 300);
+        });
+      } else {
+        window.location.reload();
+      }
+    };
   }
 })();

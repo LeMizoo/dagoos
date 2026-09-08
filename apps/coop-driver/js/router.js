@@ -36,8 +36,16 @@ async function apiFetch(endpoint, options) {
     var response = await fetch(url, config);
     window.dagooApiPending = Math.max(0, (window.dagooApiPending || 1) - 1);
     if (response.status === 401) {
+      // Arrêter toutes les boucles setInterval
+      var highestIntervalId = setInterval(function() {});
+      for (var i = 0; i <= highestIntervalId; i++) {
+        clearInterval(i);
+        clearTimeout(i);
+      }
+      // Supprimer le token expiré
       localStorage.removeItem('dagoo_driver_token');
       localStorage.removeItem('dagoo_driver_user');
+      // Rediriger vers login
       window.location.href = '/';
       return null;
     }
