@@ -24,6 +24,102 @@ function init_home() {
           </p>
         </div>
 
+        <!-- RECHERCHE D'ORGANISATION -->
+        <div
+          id="recherchePartenaire"
+          style="
+            margin:0 auto 16px;
+            max-width:420px;
+            position:relative;
+          "
+        >
+          <div
+            style="
+              position:relative;
+              display:flex;
+              align-items:center;
+              background:#1E293B;
+              border:1px solid rgba(255,255,255,.10);
+              border-radius:14px;
+              min-height:46px;
+              box-sizing:border-box;
+              box-shadow:0 6px 18px rgba(0,0,0,.12);
+            "
+          >
+            <span
+              aria-hidden="true"
+              style="
+                width:42px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-size:17px;
+                color:#94A3B8;
+                flex-shrink:0;
+              "
+            >⌕</span>
+
+            <input
+              id="partenaireRechercheInput"
+              type="search"
+              autocomplete="off"
+              autocapitalize="none"
+              spellcheck="false"
+              placeholder="Rechercher une organisation..."
+              aria-label="Rechercher une organisation"
+              style="
+                flex:1;
+                min-width:0;
+                height:44px;
+                border:0;
+                outline:none;
+                background:transparent;
+                color:#fff;
+                font-size:13px;
+                font-family:inherit;
+                padding:0 4px;
+                -webkit-appearance:none;
+              "
+            >
+
+            <button
+              id="partenaireRechercheClear"
+              type="button"
+              aria-label="Effacer la recherche"
+              style="
+                display:none;
+                width:34px;
+                height:34px;
+                margin-right:6px;
+                border:0;
+                border-radius:50%;
+                background:rgba(255,255,255,.08);
+                color:#CBD5E1;
+                font-size:18px;
+                line-height:1;
+                cursor:pointer;
+                flex-shrink:0;
+              "
+            >×</button>
+          </div>
+
+          <div
+            id="partenaireRechercheResultats"
+            style="
+              display:none;
+              margin-top:8px;
+              background:#252540;
+              border:1px solid rgba(255,255,255,.08);
+              border-radius:14px;
+              overflow:hidden;
+              box-shadow:0 12px 30px rgba(0,0,0,.28);
+              text-align:left;
+              position:relative;
+              z-index:40;
+            "
+          ></div>
+        </div>
+
         <div
           id="partenairesScene"
           style="
@@ -243,6 +339,7 @@ async function chargerPartenaires() {
     }
 
     afficherPartenaires3D();
+    initialiserRecherchePartenaires();
     installerControlesPartenaires();
     demarrerRotationPartenaires();
 
@@ -442,6 +539,351 @@ function afficherPartenaires3D() {
 // ============================================================
 // Contrôles précédent / suivant + swipe mobile
 // ============================================================
+
+// ============================================================
+// RECHERCHE D'ORGANISATION
+// ============================================================
+
+function normaliserTextePartenaire(value) {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+}
+
+
+function escapeHtmlPartenaire(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+
+function obtenirTypePartenaire(org) {
+  return org && org.type === 'FLEET_MANAGER'
+    ? 'URBAIN'
+    : 'INTERURBAIN';
+}
+
+
+function obtenirIconePartenaire(org) {
+  return org && org.type === 'FLEET_MANAGER'
+    ? '🚕'
+    : '🚌';
+}
+
+
+function obtenirStyleBadgePlanPartenaire(plan) {
+  if (plan === 'Premium') {
+    return 'background:#F59E0B;color:#1A1A2E;';
+  }
+
+  if (plan === 'Standard') {
+    return 'background:#3B82F6;color:#fff;';
+  }
+
+  return 'background:#252540;color:#94A3B8;';
+}
+
+
+function rechercherPartenaires(query) {
+
+  var texte = normaliserTextePartenaire(query);
+
+  if (!texte) {
+    return [];
+  }
+
+  return partenairesData
+    .filter(function(org) {
+
+      var contenu = [
+        org.name,
+        org.slug,
+        org.plan,
+        obtenirTypePartenaire(org),
+        org.type
+      ]
+        .map(normaliserTextePartenaire)
+        .join(' ');
+
+      return contenu.indexOf(texte) !== -1;
+    })
+    .slice(0, 8);
+}
+
+
+function afficherResultatsRecherchePartenaires(resultats, query) {
+
+  var container =
+    document.getElementById('partenaireRechercheResultats');
+
+  if (!container) {
+    return;
+  }
+
+  if (!query) {
+    container.innerHTML = '';
+    container.style.display = 'none';
+    return;
+  }
+
+  if (!resultats.length) {
+    container.innerHTML =
+      '<div style="' +
+        'padding:16px 14px;' +
+        'text-align:center;' +
+        'color:#94A3B8;' +
+        'font-size:11px;' +
+      '">' +
+        'Aucune organisation trouvée' +
+      '</div>';
+
+    container.style.display = 'block';
+    return;
+  }
+
+  var html = '';
+
+  resultats.forEach(function(org) {
+
+    var nom = escapeHtmlPartenaire(
+      org.name || 'Organisation'
+    );
+
+    var slug = escapeHtmlPartenaire(
+      org.slug || ''
+    );
+
+    var plan = escapeHtmlPartenaire(
+      (org.plan || 'Freemium').toUpperCase()
+    );
+
+    var type = obtenirTypePartenaire(org);
+
+    var logoHtml;
+
+    if (org.logo) {
+      logoHtml =
+        '<img' +
+          ' src="' + escapeHtmlPartenaire(org.logo) + '"' +
+          ' alt=""' +
+          ' style="' +
+            'width:42px;' +
+            'height:42px;' +
+            'border-radius:11px;' +
+            'object-fit:contain;' +
+            'background:#fff;' +
+            'padding:4px;' +
+            'box-sizing:border-box;' +
+            'flex-shrink:0;' +
+          '"' +
+        '>';
+    } else {
+      logoHtml =
+        '<div style="' +
+          'width:42px;' +
+          'height:42px;' +
+          'border-radius:11px;' +
+          'background:#1E293B;' +
+          'display:flex;' +
+          'align-items:center;' +
+          'justify-content:center;' +
+          'font-size:20px;' +
+          'flex-shrink:0;' +
+        '">' +
+          obtenirIconePartenaire(org) +
+        '</div>';
+    }
+
+    html +=
+      '<button' +
+        ' type="button"' +
+        ' class="partenaireRechercheResultat"' +
+        ' data-slug="' + slug + '"' +
+        ' style="' +
+          'width:100%;' +
+          'display:flex;' +
+          'align-items:center;' +
+          'gap:11px;' +
+          'padding:10px 12px;' +
+          'border:0;' +
+          'border-bottom:1px solid rgba(255,255,255,.06);' +
+          'background:transparent;' +
+          'color:#fff;' +
+          'text-align:left;' +
+          'cursor:pointer;' +
+          'font-family:inherit;' +
+        '"' +
+      '>' +
+
+        logoHtml +
+
+        '<div style="' +
+          'min-width:0;' +
+          'flex:1;' +
+        '">' +
+
+          '<div style="' +
+            'font-size:12px;' +
+            'font-weight:700;' +
+            'color:#fff;' +
+            'white-space:nowrap;' +
+            'overflow:hidden;' +
+            'text-overflow:ellipsis;' +
+            'margin-bottom:4px;' +
+          '">' +
+            nom +
+          '</div>' +
+
+          '<div style="' +
+            'display:flex;' +
+            'align-items:center;' +
+            'gap:5px;' +
+            'flex-wrap:wrap;' +
+          '">' +
+
+            '<span style="' +
+              obtenirStyleBadgePlanPartenaire(org.plan) +
+              'padding:2px 7px;' +
+              'border-radius:20px;' +
+              'font-size:8px;' +
+              'font-weight:700;' +
+            '">' +
+              plan +
+            '</span>' +
+
+            '<span style="' +
+              'background:#1E293B;' +
+              'color:#94A3B8;' +
+              'padding:2px 7px;' +
+              'border-radius:20px;' +
+              'font-size:8px;' +
+              'font-weight:600;' +
+            '">' +
+              type +
+            '</span>' +
+
+          '</div>' +
+
+        '</div>' +
+
+        '<span style="' +
+          'font-size:20px;' +
+          'color:#64748B;' +
+          'flex-shrink:0;' +
+        '">›</span>' +
+
+      '</button>';
+  });
+
+  container.innerHTML = html;
+  container.style.display = 'block';
+}
+
+
+function initialiserRecherchePartenaires() {
+
+  var input =
+    document.getElementById('partenaireRechercheInput');
+
+  var clear =
+    document.getElementById('partenaireRechercheClear');
+
+  var resultats =
+    document.getElementById('partenaireRechercheResultats');
+
+  if (!input || !clear || !resultats) {
+    return;
+  }
+
+  if (input.dataset.ready === 'true') {
+    return;
+  }
+
+  input.dataset.ready = 'true';
+
+  input.addEventListener('input', function() {
+
+    var query = input.value.trim();
+
+    clear.style.display =
+      query ? 'flex' : 'none';
+
+    var matches =
+      rechercherPartenaires(query);
+
+    afficherResultatsRecherchePartenaires(
+      matches,
+      query
+    );
+  });
+
+  clear.addEventListener('click', function() {
+
+    input.value = '';
+
+    clear.style.display = 'none';
+
+    afficherResultatsRecherchePartenaires(
+      [],
+      ''
+    );
+
+    input.focus();
+  });
+
+  input.addEventListener('keydown', function(event) {
+
+    if (event.key === 'Escape') {
+
+      input.value = '';
+
+      clear.style.display = 'none';
+
+      afficherResultatsRecherchePartenaires(
+        [],
+        ''
+      );
+
+      input.blur();
+    }
+  });
+
+  resultats.addEventListener('click', function(event) {
+
+    var button =
+      event.target.closest(
+        '.partenaireRechercheResultat'
+      );
+
+    if (!button) {
+      return;
+    }
+
+    var slug =
+      button.getAttribute('data-slug');
+
+    if (!slug) {
+      return;
+    }
+
+    afficherResultatsRecherchePartenaires(
+      [],
+      ''
+    );
+
+    input.value = '';
+    clear.style.display = 'none';
+
+    ouvrirPartenaire(slug);
+  });
+}
+
 
 function installerControlesPartenaires() {
 
