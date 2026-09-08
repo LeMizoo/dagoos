@@ -274,6 +274,373 @@ router.get('/coop/:slug', async (req, res) => {
 });
 
 // =========================================================
+// GET /api/organizations/:id/landing
+// Configuration publique/personnalisation du landing
+//
+// SUPER_ADMIN    : toutes les organisations
+// FLEET_MANAGER  : sa propre organisation
+// COOP_MANAGER   : sa propre organisation
+// =========================================================
+
+router.get(
+  '/:id/landing',
+  authMiddleware,
+  requirePermission('landing.manage'),
+  async (req, res) => {
+    try {
+      const organizationId = req.params.id;
+
+      if (!['SUPER_ADMIN', 'FLEET_MANAGER', 'COOP_MANAGER'].includes(req.user?.role)) {
+        return res.status(403).json({
+          error: 'Accès interdit',
+        });
+      }
+
+      if (!canAccessOrganization(req, organizationId)) {
+        return res.status(403).json({
+          error: 'Accès interdit à cette organisation',
+        });
+      }
+
+      const organization = await prisma.organization.findUnique({
+        where: {
+          id: organizationId,
+        },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          type: true,
+          plan: true,
+          logo: true,
+          description: true,
+
+          slogan: true,
+          coverImage: true,
+          primaryColor: true,
+          secondaryColor: true,
+          landingEnabled: true,
+          landingTemplate: true,
+          address: true,
+          facebook: true,
+          whatsapp: true,
+          landingConfig: true,
+        },
+      });
+
+      if (!organization) {
+        return res.status(404).json({
+          error: 'Organisation introuvable',
+        });
+      }
+
+      res.json(organization);
+    } catch (error) {
+      console.error('GET /organizations/:id/landing:', error);
+
+      res.status(500).json({
+        error: 'Erreur serveur',
+      });
+    }
+  }
+);
+
+// =========================================================
+// PUT /api/organizations/:id/landing
+// Modifier uniquement la personnalisation du landing
+//
+// SUPER_ADMIN    : toutes les organisations
+// FLEET_MANAGER  : sa propre organisation
+// COOP_MANAGER   : sa propre organisation
+//
+// IMPORTANT : aucune donnée administrative/sensible ne peut
+// être modifiée depuis cet endpoint.
+// =========================================================
+
+router.put(
+  '/:id/landing',
+  authMiddleware,
+  requirePermission('landing.manage'),
+  async (req, res) => {
+    try {
+      const organizationId = req.params.id;
+
+      if (!['SUPER_ADMIN', 'FLEET_MANAGER', 'COOP_MANAGER'].includes(req.user?.role)) {
+        return res.status(403).json({
+          error: 'Accès interdit',
+        });
+      }
+
+      if (!canAccessOrganization(req, organizationId)) {
+        return res.status(403).json({
+          error: 'Accès interdit à cette organisation',
+        });
+      }
+
+      const {
+        slogan,
+        coverImage,
+        primaryColor,
+        secondaryColor,
+        landingEnabled,
+        landingTemplate,
+        address,
+        facebook,
+        whatsapp,
+        landingConfig,
+      } = req.body || {};
+
+      const data = {};
+
+      // -------------------------------------------------------
+      // Validation simple des champs texte
+      // -------------------------------------------------------
+
+      if (slogan !== undefined) {
+        if (slogan !== null && typeof slogan !== 'string') {
+          return res.status(400).json({
+            error: 'slogan doit être une chaîne de caractères ou null',
+          });
+        }
+
+        if (typeof slogan === 'string' && slogan.length > 255) {
+          return res.status(400).json({
+            error: 'slogan trop long',
+          });
+        }
+
+        data.slogan = slogan;
+      }
+
+      if (coverImage !== undefined) {
+        if (coverImage !== null && typeof coverImage !== 'string') {
+          return res.status(400).json({
+            error: 'coverImage doit être une chaîne de caractères ou null',
+          });
+        }
+
+        if (typeof coverImage === 'string' && coverImage.length > 2000) {
+          return res.status(400).json({
+            error: 'coverImage trop longue',
+          });
+        }
+
+        data.coverImage = coverImage;
+      }
+
+      if (address !== undefined) {
+        if (address !== null && typeof address !== 'string') {
+          return res.status(400).json({
+            error: 'address doit être une chaîne de caractères ou null',
+          });
+        }
+
+        if (typeof address === 'string' && address.length > 500) {
+          return res.status(400).json({
+            error: 'address trop longue',
+          });
+        }
+
+        data.address = address;
+      }
+
+      if (facebook !== undefined) {
+        if (facebook !== null && typeof facebook !== 'string') {
+          return res.status(400).json({
+            error: 'facebook doit être une chaîne de caractères ou null',
+          });
+        }
+
+        if (typeof facebook === 'string' && facebook.length > 500) {
+          return res.status(400).json({
+            error: 'facebook trop longue',
+          });
+        }
+
+        data.facebook = facebook;
+      }
+
+      if (whatsapp !== undefined) {
+        if (whatsapp !== null && typeof whatsapp !== 'string') {
+          return res.status(400).json({
+            error: 'whatsapp doit être une chaîne de caractères ou null',
+          });
+        }
+
+        if (typeof whatsapp === 'string' && whatsapp.length > 50) {
+          return res.status(400).json({
+            error: 'whatsapp trop long',
+          });
+        }
+
+        data.whatsapp = whatsapp;
+      }
+
+      // -------------------------------------------------------
+      // Couleurs
+      // -------------------------------------------------------
+
+      const colorPattern = /^#[0-9A-Fa-f]{6}$/;
+
+      if (primaryColor !== undefined) {
+        if (
+          primaryColor !== null &&
+          (
+            typeof primaryColor !== 'string' ||
+            !colorPattern.test(primaryColor)
+          )
+        ) {
+          return res.status(400).json({
+            error: 'primaryColor doit être une couleur hexadécimale valide (#RRGGBB)',
+          });
+        }
+
+        data.primaryColor = primaryColor;
+      }
+
+      if (secondaryColor !== undefined) {
+        if (
+          secondaryColor !== null &&
+          (
+            typeof secondaryColor !== 'string' ||
+            !colorPattern.test(secondaryColor)
+          )
+        ) {
+          return res.status(400).json({
+            error: 'secondaryColor doit être une couleur hexadécimale valide (#RRGGBB)',
+          });
+        }
+
+        data.secondaryColor = secondaryColor;
+      }
+
+      // -------------------------------------------------------
+      // Activation du landing
+      // -------------------------------------------------------
+
+      if (landingEnabled !== undefined) {
+        if (typeof landingEnabled !== 'boolean') {
+          return res.status(400).json({
+            error: 'landingEnabled doit être un booléen',
+          });
+        }
+
+        data.landingEnabled = landingEnabled;
+      }
+
+      // -------------------------------------------------------
+      // Template
+      // -------------------------------------------------------
+
+      if (landingTemplate !== undefined) {
+        if (
+          landingTemplate !== null &&
+          typeof landingTemplate !== 'string'
+        ) {
+          return res.status(400).json({
+            error: 'landingTemplate doit être une chaîne de caractères ou null',
+          });
+        }
+
+        if (
+          typeof landingTemplate === 'string' &&
+          landingTemplate.length > 100
+        ) {
+          return res.status(400).json({
+            error: 'landingTemplate trop long',
+          });
+        }
+
+        data.landingTemplate = landingTemplate;
+      }
+
+      // -------------------------------------------------------
+      // Configuration JSON extensible
+      // -------------------------------------------------------
+
+      if (landingConfig !== undefined) {
+        if (
+          landingConfig !== null &&
+          (
+            typeof landingConfig !== 'object' ||
+            Array.isArray(landingConfig)
+          )
+        ) {
+          return res.status(400).json({
+            error: 'landingConfig doit être un objet JSON ou null',
+          });
+        }
+
+        if (landingConfig !== null) {
+          let serialized;
+
+          try {
+            serialized = JSON.stringify(landingConfig);
+          } catch {
+            return res.status(400).json({
+              error: 'landingConfig invalide',
+            });
+          }
+
+          if (serialized.length > 100000) {
+            return res.status(400).json({
+              error: 'landingConfig trop volumineux',
+            });
+          }
+        }
+
+        data.landingConfig = landingConfig;
+      }
+
+      // -------------------------------------------------------
+      // Rien à modifier
+      // -------------------------------------------------------
+
+      if (Object.keys(data).length === 0) {
+        return res.status(400).json({
+          error: 'Aucune donnée de landing à modifier',
+        });
+      }
+
+      const organization = await prisma.organization.update({
+        where: {
+          id: organizationId,
+        },
+        data,
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          type: true,
+          plan: true,
+          logo: true,
+          description: true,
+
+          slogan: true,
+          coverImage: true,
+          primaryColor: true,
+          secondaryColor: true,
+          landingEnabled: true,
+          landingTemplate: true,
+          address: true,
+          facebook: true,
+          whatsapp: true,
+          landingConfig: true,
+        },
+      });
+
+      res.json(organization);
+    } catch (error) {
+      console.error('PUT /organizations/:id/landing:', error);
+
+      res.status(500).json({
+        error: 'Erreur serveur',
+      });
+    }
+  }
+);
+
+// =========================================================
 // GET /api/organizations/:id
 // SUPER_ADMIN : toute organisation
 // Autres utilisateurs : uniquement leur organisation
