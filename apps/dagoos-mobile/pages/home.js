@@ -316,7 +316,13 @@ async function chargerPartenaires() {
       'Freemium': 3
     };
 
-    partenairesData = orgs.slice().sort(function(a, b) {
+    // Filtrer : uniquement les organisations avec au moins 1 service actif
+    var orgsAvecServices = orgs.filter(function(org) {
+      return Array.isArray(org.organizationServices) &&
+             org.organizationServices.length > 0;
+    });
+
+    partenairesData = orgsAvecServices.slice().sort(function(a, b) {
       var pa = prioritePlan[a.plan] !== undefined
         ? prioritePlan[a.plan]
         : 99;
@@ -387,6 +393,11 @@ function afficherPartenaires3D() {
       org.type === 'FLEET_MANAGER'
         ? 'URBAIN'
         : 'INTERURBAIN';
+
+    // Récupérer les labels des services
+    var serviceLabels = (org.organizationServices || []).map(function(s) {
+      return s.service;
+    }).join(' · ');
 
     var planLabel =
       (org.plan || 'Freemium').toUpperCase();
@@ -528,6 +539,20 @@ function afficherPartenaires3D() {
             ${typeLabel}
           </span>
         </div>
+
+        ${serviceLabels ? `
+          <div style="
+            margin-top:8px;
+            padding-top:8px;
+            border-top:1px solid rgba(255,255,255,.06);
+            font-size:8px;
+            color:#94A3B8;
+            line-height:1.4;
+            text-align:center;
+          ">
+            ${serviceLabels}
+          </div>
+        ` : ''}
       </button>
     `;
   });
