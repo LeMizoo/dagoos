@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { apiFetch } from '@/lib/api';
 import { useOrganization } from '@/lib/organization-context';
 import { Save, AlertCircle, CheckCircle, Palette } from 'lucide-react';
+import LandingPageSettings from '@/components/settings/LandingPageSettings';
 import { useTheme } from '@/lib/theme-context';
 
 // ============================================================
@@ -457,6 +458,24 @@ export default function FlotteSettings() {
           ))}
         </div>
       </Card>
+
+      {/* ============================================================
+          LANDING PAGE PREMIUM
+          Le composant est partagé entre Fleet et Coop.
+          Le template dépend automatiquement du type d'organisation.
+          ============================================================ */}
+
+      {isUrbain && (
+        <div className="mt-6">
+          <LandingPageSettings app="fleet" />
+        </div>
+      )}
+
+      {isInterurbain && (
+        <div className="mt-6">
+          <LandingPageSettings app="coop" />
+        </div>
+      )}
 
       <button
         onClick={handleSave}

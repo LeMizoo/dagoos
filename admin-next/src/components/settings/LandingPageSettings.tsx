@@ -255,7 +255,7 @@ export default function LandingPageSettings({
             primaryColor: data.primaryColor || null,
             secondaryColor: data.secondaryColor || null,
             landingEnabled: data.landingEnabled,
-            landingTemplate: data.landingTemplate || null,
+            landingTemplate: app === 'fleet' ? 'premium-fleet' : 'premium-coop',
             address: data.address || null,
             facebook: data.facebook || null,
             whatsapp: data.whatsapp || null,
@@ -478,23 +478,13 @@ export default function LandingPageSettings({
               Template
             </label>
 
-            <select
-              value={data.landingTemplate}
-              onChange={(e) =>
-                setData({
-                  ...data,
-                  landingTemplate: e.target.value,
-                })
-              }
-              className="w-full px-3 py-2 border rounded-lg text-sm bg-white"
-            >
-              <option value="premium-fleet">
-                Premium Fleet
-              </option>
-              <option value="premium-coop">
-                Premium Coop
-              </option>
-            </select>
+            <div className="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
+              {app === 'fleet' ? 'Premium Fleet' : 'Premium Coop'}
+            </div>
+
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Le template est automatiquement défini selon le type d’organisation.
+            </p>
           </div>
         </div>
       </div>
