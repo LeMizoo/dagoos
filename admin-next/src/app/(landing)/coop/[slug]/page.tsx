@@ -651,7 +651,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
                 disabled={estParti}
                 className={`group relative text-left rounded-[1.5rem] border p-6 transition-all duration-300 ${
                   isSelected
-                    ? 'border-emerald-500 shadow-2xl scale-[1.02] bg-white'
+                    ? 'border-emerald-500 shadow-2xl sm:scale-[1.02] bg-white'
                     : 'border-slate-200 bg-white hover:border-emerald-400 hover:shadow-xl hover:-translate-y-1'
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
@@ -662,7 +662,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
                 )}
 
                 {/* Destination et point de départ */}
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <h3 className="text-xl font-black text-slate-900">
                       {d.destination}
@@ -698,7 +698,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
                 )}
 
                 {/* Date + heure */}
-                <div className="mt-4 flex items-center gap-4">
+                <div className="mt-4 flex flex-wrap items-center gap-2 sm:gap-4">
                   <span className="inline-flex items-center gap-1.5 text-sm text-slate-600">
                     <Calendar size={15} className="text-emerald-600" />
                     {new Date(d.date).toLocaleDateString('fr-FR')}
@@ -753,7 +753,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
                   className="mt-4 rounded-xl px-4 py-3 text-center text-sm font-bold text-white transition"
                   style={{ backgroundColor: isSelected ? '#059669' : primaryColor }}
                 >
-                  {isSelected ? '✓ Sélectionné' : 'Réserver cette place →'}
+                  {isSelected ? '✓ Sélectionné' : 'Choisir ce départ →'}
                 </div>
               </button>
             );
@@ -843,7 +843,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
                     key={r.id}
                     className="rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:shadow-lg"
                   >
-                    <div className="flex items-start justify-between gap-4">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div>
                         <p className="font-bold text-slate-900">
                           {r.depart?.pointDepart} → {r.depart?.destination}
@@ -865,7 +865,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
                     </div>
 
                     {changingPlace === r.id ? (
-                      <div className="mt-4 flex gap-2">
+                      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                         <input
                           type="text"
                           placeholder="Nouvelle place (ex: 2B)"
@@ -953,7 +953,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
                     />
                   </div>
 
-                  <div className="mt-4 flex justify-center gap-6 text-xs font-semibold">
+                  <div className="mt-4 flex flex-wrap justify-center gap-4 text-xs font-semibold sm:gap-6">
                     <span className="flex items-center gap-1.5">
                       <span className="h-3 w-3 rounded bg-green-500"></span>
                       Disponible
@@ -1041,21 +1041,21 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
                       </p>
 
                       <div className="mt-3 space-y-2">
-                        <div className="flex items-center justify-between rounded-xl bg-yellow-400 px-4 py-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-yellow-400 px-4 py-3">
                           <span className="text-sm font-bold text-black">MVola</span>
                           <span className="font-mono text-sm font-extrabold text-black">
                             {cooperative?.mvolaNumber || '034 00 000 00'}
                           </span>
                         </div>
 
-                        <div className="flex items-center justify-between rounded-xl bg-black px-4 py-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-black px-4 py-3">
                           <span className="text-sm font-bold text-orange-500">Orange Money</span>
                           <span className="font-mono text-sm font-extrabold text-orange-400">
                             {cooperative?.orangeNumber || '032 00 000 00'}
                           </span>
                         </div>
 
-                        <div className="flex items-center justify-between rounded-xl bg-red-600 px-4 py-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-red-600 px-4 py-3">
                           <span className="text-sm font-bold text-white">Airtel Money</span>
                           <span className="font-mono text-sm font-extrabold text-white">
                             {cooperative?.airtelNumber || '033 00 000 00'}
@@ -1109,66 +1109,458 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
         </section>
       )}
 
-      {/* Demande de livraison */}      {/* Demande de livraison */}
-      <section className="py-8 bg-gray-50 border-t">
-        <div className="max-w-md mx-auto px-4">
-          <h2 className="text-xl font-bold text-center mb-4">📦 Demande de livraison</h2>
-          <form onSubmit={async (e) => {
-            e.preventDefault();
-            const res = await apiFetch('/public/actions', {
-              method: 'POST',
-              body: JSON.stringify({
-                organizationSlug: params.slug,
-                type: 'DELIVERY_REQUEST',
-                clientNom: (e.target as any).nom.value,
-                clientTel: (e.target as any).tel.value,
-                details: {
-                  depart: (e.target as any).depart.value,
-                  arrivee: (e.target as any).arrivee.value,
-                  description: (e.target as any).desc.value,
-                },
-              }),
-            });
-            if (res.ok) {
-              setError('');
-              (e.target as any).reset();
-              alert('✅ Demande envoyée !');
-            }
-          }} className="space-y-3">
-            <input name="nom" placeholder="Votre nom" className="w-full px-4 py-3 border rounded-lg text-sm" required />
-            <input name="tel" type="tel" placeholder="Votre téléphone" className="w-full px-4 py-3 border rounded-lg text-sm" required />
-            <input name="depart" placeholder="Adresse de ramassage" className="w-full px-4 py-3 border rounded-lg text-sm" required />
-            <input name="arrivee" placeholder="Adresse de livraison" className="w-full px-4 py-3 border rounded-lg text-sm" required />
-            <textarea name="desc" placeholder="Description du colis" rows={2} className="w-full px-4 py-3 border rounded-lg text-sm" />
-            <button type="submit" className="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition">
-              Envoyer la demande
-            </button>
-          </form>
+      {/* ======================================================
+          LIVRAISON + CONTACT — PREMIUM
+          ====================================================== */}
+      <section className="border-t border-slate-200 bg-slate-50 py-16 sm:py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+
+          <div className="mb-10 text-center">
+            <span
+              className="text-xs font-bold uppercase tracking-[0.2em]"
+              style={{ color: primaryColor }}
+            >
+              Services complémentaires
+            </span>
+
+            <h2 className="mt-3 text-3xl font-black text-slate-900 sm:text-4xl">
+              Plus qu&apos;un voyage
+            </h2>
+
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
+              Besoin d&apos;envoyer un colis ou de nous contacter ?
+              Notre équipe est à votre écoute.
+            </p>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+
+            {/* ==================================================
+                LIVRAISON PREMIUM
+                ================================================== */}
+            <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl">
+
+              <div
+                className="p-6 text-white sm:p-8"
+                style={{
+                  background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
+                }}
+              >
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+
+                  <div className="min-w-0">
+                    <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 text-2xl backdrop-blur">
+                      📦
+                    </span>
+
+                    <h3 className="mt-5 text-2xl font-black">
+                      Envoyer un colis
+                    </h3>
+
+                    <p className="mt-2 max-w-md text-sm leading-6 text-white/75">
+                      Confiez-nous vos colis et marchandises pour un transport
+                      simple et pratique.
+                    </p>
+                  </div>
+
+                  {whatsappUrl && (
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="shrink-0 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs font-bold backdrop-blur transition hover:bg-white/20"
+                    >
+                      WhatsApp
+                    </a>
+                  )}
+
+                </div>
+              </div>
+
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+
+                  const form = e.currentTarget;
+                  const data = new FormData(form);
+
+                  try {
+                    const res = await apiFetch('/public/actions', {
+                      method: 'POST',
+                      body: JSON.stringify({
+                        organizationSlug: params.slug,
+                        type: 'DELIVERY_REQUEST',
+                        clientNom: String(data.get('nom') || ''),
+                        clientTel: String(data.get('tel') || ''),
+                        details: {
+                          depart: String(data.get('depart') || ''),
+                          arrivee: String(data.get('arrivee') || ''),
+                          description: String(data.get('desc') || ''),
+                        },
+                      }),
+                    });
+
+                    if (res.ok) {
+                      setError('');
+                      form.reset();
+                      setSuccess('Votre demande de livraison a bien été envoyée.');
+                      setTimeout(() => setSuccess(''), 4000);
+                    } else {
+                      const err = await res.json().catch(() => ({}));
+                      setError(
+                        err.error || 'Impossible d’envoyer la demande.'
+                      );
+                    }
+                  } catch (e: any) {
+                    setError(e.message || 'Une erreur est survenue.');
+                  }
+                }}
+                className="space-y-4 p-6 sm:p-8"
+              >
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <input
+                    name="nom"
+                    placeholder="Votre nom"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
+                    required
+                  />
+
+                  <input
+                    name="tel"
+                    type="tel"
+                    placeholder="Votre téléphone"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
+                    required
+                  />
+                </div>
+
+                <input
+                  name="depart"
+                  placeholder="Adresse de ramassage"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
+                  required
+                />
+
+                <input
+                  name="arrivee"
+                  placeholder="Adresse de livraison"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
+                  required
+                />
+
+                <textarea
+                  name="desc"
+                  placeholder="Description du colis"
+                  rows={4}
+                  className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
+                />
+
+                <button
+                  type="submit"
+                  className="w-full rounded-xl px-5 py-4 text-sm font-bold text-white transition hover:opacity-95"
+                  style={{ backgroundColor: primaryColor }}
+                >
+                  📦 Envoyer ma demande
+                </button>
+
+              </form>
+            </div>
+
+            {/* ==================================================
+                CONTACT PREMIUM
+                ================================================== */}
+            <div
+              id="contact"
+              className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl"
+            >
+              <div className="p-6 sm:p-8">
+
+                <span
+                  className="inline-flex h-12 w-12 items-center justify-center rounded-2xl text-2xl"
+                  style={{ backgroundColor: `${primaryColor}15` }}
+                >
+                  💬
+                </span>
+
+                <h3 className="mt-5 text-2xl font-black text-slate-900">
+                  Contactez-nous
+                </h3>
+
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  Une question sur un départ, une réservation ou un service ?
+                  Notre équipe vous répond.
+                </p>
+
+                <div className="mt-7 space-y-3">
+
+                  {cooperative?.phone && (
+                    <a
+                      href={`tel:${cooperative.phone}`}
+                      className="flex min-w-0 items-center gap-3 rounded-xl bg-slate-50 p-3 transition hover:bg-slate-100"
+                    >
+                      <span
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                        style={{ backgroundColor: `${primaryColor}15` }}
+                      >
+                        <Phone size={17} style={{ color: primaryColor }} />
+                      </span>
+
+                      <span className="min-w-0 break-words text-sm font-semibold text-slate-700">
+                        {cooperative.phone}
+                      </span>
+                    </a>
+                  )}
+
+                  {cooperative?.email && (
+                    <a
+                      href={`mailto:${cooperative.email}`}
+                      className="flex min-w-0 items-center gap-3 rounded-xl bg-slate-50 p-3 transition hover:bg-slate-100"
+                    >
+                      <span
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                        style={{ backgroundColor: `${primaryColor}15` }}
+                      >
+                        ✉️
+                      </span>
+
+                      <span className="min-w-0 break-words text-sm font-semibold text-slate-700">
+                        {cooperative.email}
+                      </span>
+                    </a>
+                  )}
+
+                  {cooperative?.address && (
+                    <div className="flex min-w-0 items-center gap-3 rounded-xl bg-slate-50 p-3">
+                      <span
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                        style={{ backgroundColor: `${primaryColor}15` }}
+                      >
+                        <MapPin size={17} style={{ color: primaryColor }} />
+                      </span>
+
+                      <span className="min-w-0 break-words text-sm font-semibold text-slate-700">
+                        {cooperative.address}
+                      </span>
+                    </div>
+                  )}
+
+                  {whatsappUrl && (
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold text-white transition hover:opacity-95"
+                      style={{ backgroundColor: primaryColor }}
+                    >
+                      <span className="text-lg">💬</span>
+                      <span>Nous écrire sur WhatsApp</span>
+                    </a>
+                  )}
+
+                </div>
+
+                <div className="my-7 border-t border-slate-100" />
+
+                <form
+                  onSubmit={handleContact}
+                  className="space-y-4"
+                >
+                  <div className="grid gap-4 sm:grid-cols-2">
+
+                    <input
+                      type="text"
+                      placeholder="Votre nom"
+                      value={contactNom}
+                      onChange={e => setContactNom(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
+                      required
+                    />
+
+                    <input
+                      type="tel"
+                      placeholder="Votre téléphone"
+                      value={contactTel}
+                      onChange={e => setContactTel(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
+                      required
+                    />
+
+                  </div>
+
+                  <textarea
+                    placeholder="Votre message"
+                    value={contactMessage}
+                    onChange={e => setContactMessage(e.target.value)}
+                    rows={4}
+                    className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
+                    required
+                  />
+
+                  {contactSent && (
+                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-center text-sm font-semibold text-emerald-700">
+                      ✅ Message envoyé avec succès.
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="w-full rounded-xl px-5 py-4 text-sm font-bold text-white transition hover:opacity-95"
+                    style={{ backgroundColor: primaryColor }}
+                  >
+                    💬 Envoyer le message
+                  </button>
+
+                </form>
+              </div>
+            </div>
+
+          </div>
         </div>
       </section>
 
-      {/* Contact */}
-      <section id="contact" className="py-8 bg-white border-t">
-        <div className="max-w-md mx-auto px-4">
-          <h2 className="text-xl font-bold text-center mb-4">💬 Contactez-nous</h2>
-          {contactSent && <div className="bg-green-50 text-green-700 p-3 rounded-lg mb-3 text-center">✅ Message envoyé !</div>}
-          <form onSubmit={handleContact} className="space-y-3">
-            <input type="text" placeholder="Votre nom" value={contactNom} onChange={e => setContactNom(e.target.value)} className="w-full px-4 py-3 border rounded-lg text-sm" />
-            <input type="tel" placeholder="Votre téléphone" value={contactTel} onChange={e => setContactTel(e.target.value)} className="w-full px-4 py-3 border rounded-lg text-sm" />
-            <textarea placeholder="Votre message" value={contactMessage} onChange={e => setContactMessage(e.target.value)} rows={3} className="w-full px-4 py-3 border rounded-lg text-sm" />
-            <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
-              Envoyer le message
-            </button>
-          </form>
-        </div>
-      </section>
+      {/* ======================================================
+          FOOTER PREMIUM
+          ====================================================== */}
+      <footer className="bg-slate-950 text-white">
+        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-14">
 
-      <footer className="bg-gray-900 text-gray-400 py-8 text-center text-sm">
-        <p>Propulsé par <Link href="/" className="text-secondary hover:underline">Dagoo Mobility</Link></p>
-        <Link href="/" className="inline-block mt-2 text-white hover:underline text-sm">
-          ← Retour à l'accueil
-        </Link>
+          <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
+
+            {/* Branding */}
+            <div>
+              <div className="flex items-center gap-3">
+
+                {cooperative?.logo ? (
+                  <img
+                    src={cooperative.logo}
+                    alt=""
+                    className="h-12 w-12 shrink-0 rounded-2xl bg-white object-contain p-1"
+                  />
+                ) : (
+                  <div
+                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-xl"
+                    style={{ backgroundColor: primaryColor }}
+                  >
+                    🚌
+                  </div>
+                )}
+
+                <div className="min-w-0">
+                  <p className="break-words text-lg font-black">
+                    {cooperative?.name || 'Coopérative'}
+                  </p>
+
+                  <p className="text-xs text-white/50">
+                    Propulsé par Dagoo Mobility
+                  </p>
+                </div>
+
+              </div>
+
+              {(cooperative?.slogan || cooperative?.description) && (
+                <p className="mt-5 max-w-md text-sm leading-6 text-white/55">
+                  {cooperative?.slogan || cooperative?.description}
+                </p>
+              )}
+            </div>
+
+            {/* Contact */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/40">
+                Contact
+              </p>
+
+              <div className="mt-5 space-y-3 text-sm">
+
+                {cooperative?.phone && (
+                  <a
+                    href={`tel:${cooperative.phone}`}
+                    className="block break-words text-white/70 transition hover:text-white"
+                  >
+                    ☎ {cooperative.phone}
+                  </a>
+                )}
+
+                {cooperative?.email && (
+                  <a
+                    href={`mailto:${cooperative.email}`}
+                    className="block break-words text-white/70 transition hover:text-white"
+                  >
+                    ✉ {cooperative.email}
+                  </a>
+                )}
+
+                {cooperative?.address && (
+                  <p className="break-words text-white/70">
+                    📍 {cooperative.address}
+                  </p>
+                )}
+
+              </div>
+            </div>
+
+            {/* Navigation */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/40">
+                Navigation
+              </p>
+
+              <div className="mt-5 space-y-3 text-sm">
+
+                <a
+                  href="#departs"
+                  className="block text-white/70 transition hover:text-white"
+                >
+                  Voir les départs
+                </a>
+
+                <a
+                  href="#contact"
+                  className="block text-white/70 transition hover:text-white"
+                >
+                  Nous contacter
+                </a>
+
+                {whatsappUrl && (
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block font-semibold transition hover:opacity-80"
+                    style={{ color: primaryColor }}
+                  >
+                    WhatsApp
+                  </a>
+                )}
+
+              </div>
+            </div>
+
+          </div>
+
+          <div className="mt-10 border-t border-white/10 pt-6">
+
+            <div className="flex flex-col gap-4 text-xs text-white/40 sm:flex-row sm:items-center sm:justify-between">
+
+              <p>
+                © {new Date().getFullYear()} {cooperative?.name || 'Coopérative'}.
+                Tous droits réservés.
+              </p>
+
+              <Link
+                href="/"
+                className="transition hover:text-white"
+              >
+                ← Retour à Dagoo Mobility
+              </Link>
+
+            </div>
+
+          </div>
+
+        </div>
       </footer>
+
     </div>
   );
 }
