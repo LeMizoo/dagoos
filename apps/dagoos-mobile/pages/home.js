@@ -108,7 +108,11 @@ function init_home() {
   `;
 
   appliquerBrandingMobile(getBrandingMobile());
-  chargerPartenaires();
+
+  // Appeler chargerPartenaires après un délai pour s'assurer que le DOM est prêt
+  setTimeout(function() {
+    chargerPartenaires();
+  }, 100);
 }
 
 
