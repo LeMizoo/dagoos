@@ -13,8 +13,8 @@ function init_home() {
     <div style="padding:16px;">
       <h2 style="font-size:18px;font-weight:800;margin-bottom:12px;">Choisissez un service</h2>
 
-      <!-- NOS PARTENAIRES -->
-      <div style="margin-bottom:20px;padding:16px;background:#1E293B;border-radius:14px;border:1px solid rgba(245,158,11,0.15);">
+      <!-- NOS PARTENAIRES - CARROUSEL 3D -->
+      <div style="margin-bottom:24px;overflow:hidden;position:relative;">
         <div style="text-align:center;margin-bottom:12px;">
           <div style="font-size:9px;font-weight:700;color:#F59E0B;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">
             ⭐ Nos partenaires
@@ -24,13 +24,16 @@ function init_home() {
           </p>
         </div>
 
-        <div id="partenairesList" style="margin-bottom:8px;">
-          <div style="text-align:center;padding:10px;color:#94A3B8;font-size:11px;">
+        <div
+          id="partenairesCarrousel"
+          style="display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:8px 4px 16px;scrollbar-width:none;"
+        >
+          <div style="text-align:center;padding:20px;color:#94A3B8;font-size:11px;min-width:160px;">
             Chargement...
           </div>
         </div>
 
-        <div style="text-align:center;">
+        <div style="text-align:center;margin-top:4px;">
           <span id="partenairesCompteur" style="font-size:11px;color:#94A3B8;font-weight:600;"></span>
         </div>
       </div>
@@ -118,7 +121,7 @@ async function chargerPartenaires() {
     var orgs = await apiGet('/public/organizations');
 
     if (!Array.isArray(orgs) || orgs.length === 0) {
-      var containerEmpty = document.getElementById('partenairesList');
+      var containerEmpty = document.getElementById('partenairesCarrousel');
       if (containerEmpty) {
         containerEmpty.innerHTML = '<div style="text-align:center;color:#94A3B8;font-size:11px;">Aucun partenaire disponible</div>';
       }
@@ -152,33 +155,30 @@ async function chargerPartenaires() {
           : 'background:#252540;color:#94A3B8;';
 
       var logoHtml = org.logo
-        ? '<img src="' + org.logo + '" style="width:48px;height:48px;border-radius:10px;object-fit:contain;background:#fff;padding:4px;" alt="">'
-        : '<div style="width:48px;height:48px;border-radius:10px;background:#252540;display:flex;align-items:center;justify-content:center;font-size:22px;">' + (org.type === 'FLEET_MANAGER' ? '🚕' : '🚌') + '</div>';
+        ? '<img src="' + org.logo + '" style="width:64px;height:64px;border-radius:16px;object-fit:contain;background:#fff;padding:6px;margin:0 auto 12px;" alt="">'
+        : '<div style="width:64px;height:64px;border-radius:16px;background:#1E293B;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 12px;">' + (org.type === 'FLEET_MANAGER' ? '🚕' : '🚌') + '</div>';
 
       html += `
         <button
           onclick="ouvrirPartenaire('${org.slug}')"
-          style="width:100%;background:#252540;border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;transition:transform 0.2s;margin-bottom:10px;"
-          onmouseover="this.style.transform='translateY(-2px)'"
-          onmouseout="this.style.transform='translateY(0)'"
+          style="min-width:180px;flex-shrink:0;scroll-snap-align:center;background:#252540;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:20px 16px;cursor:pointer;text-align:center;transition:transform 0.3s ease;"
+          onmouseover="this.style.transform='scale(1.05)'"
+          onmouseout="this.style.transform='scale(1)'"
         >
           ${logoHtml}
 
-          <div style="flex:1;min-width:0;">
-            <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-              ${org.name}
-            </div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <span style="${badgeClass}padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;">
-                ${planLabel}
-              </span>
-              <span style="background:#1E293B;color:#94A3B8;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;">
-                ${typeLabel}
-              </span>
-            </div>
+          <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;">
+            ${org.name}
           </div>
 
-          <span style="color:#F59E0B;font-size:18px;">→</span>
+          <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+            <span style="${badgeClass}padding:3px 10px;border-radius:20px;font-size:9px;font-weight:700;">
+              ${planLabel}
+            </span>
+            <span style="background:#1E293B;color:#94A3B8;padding:3px 10px;border-radius:20px;font-size:9px;font-weight:600;">
+              ${typeLabel}
+            </span>
+          </div>
         </button>
       `;
     });
