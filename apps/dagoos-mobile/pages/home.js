@@ -78,10 +78,142 @@ function init_home() {
         </div>
         <span style="color:#F59E0B;font-size:20px;">→</span>
       </div>
+
+      <!-- NOS PARTENAIRES -->
+      <div style="margin-top:24px;padding:20px 0;border-top:1px solid rgba(255,255,255,0.06);">
+        <div style="text-align:center;margin-bottom:16px;">
+          <div style="font-size:10px;font-weight:700;color:#F59E0B;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">
+            ⭐ Nos partenaires
+          </div>
+          <h2 style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;">
+            Ils nous font confiance
+          </h2>
+          <p style="font-size:11px;color:#94A3B8;line-height:1.5;max-width:300px;margin:0 auto;">
+            Des flottes et coopératives qui utilisent DAGOO'S pour vous offrir leurs services.
+          </p>
+        </div>
+
+        <div id="partenairesList" style="margin-bottom:12px;">
+          <div style="text-align:center;padding:20px;color:#94A3B8;font-size:12px;">
+            Chargement des partenaires...
+          </div>
+        </div>
+
+        <div style="text-align:center;margin-bottom:12px;">
+          <span id="partenairesCompteur" style="font-size:12px;color:#94A3B8;font-weight:600;"></span>
+        </div>
+
+        <button
+          onclick="loadPage('course')"
+          style="width:100%;padding:12px;background:transparent;border:1px solid #F59E0B;border-radius:12px;color:#F59E0B;font-size:12px;font-weight:700;cursor:pointer;"
+        >
+          Voir tous nos partenaires →
+        </button>
+      </div>
     </div>
   `;
 
   appliquerBrandingMobile(getBrandingMobile());
 }
+
+
+// ============================================
+// SECTION NOS PARTENAIRES
+// ============================================
+
+async function chargerPartenaires() {
+  try {
+    var orgs = await apiGet('/public/organizations');
+
+    if (!Array.isArray(orgs) || orgs.length === 0) {
+      return;
+    }
+
+    // Trier : Premium d'abord, puis Standard, puis les autres
+    var prioritePlan = { 'Premium': 0, 'Standard': 1, 'Basic': 2, 'Freemium': 3 };
+
+    orgs.sort(function(a, b) {
+      var pa = prioritePlan[a.plan] ?? 99;
+      var pb = prioritePlan[b.plan] ?? 99;
+      return pa - pb;
+    });
+
+    // Prendre les 6 premiers
+    var partenaires = orgs.slice(0, 6);
+
+    var container = document.getElementById('partenairesList');
+    if (!container) return;
+
+    var html = '';
+
+    partenaires.forEach(function(org) {
+      var typeLabel = org.type === 'FLEET_MANAGER' ? 'URBAIN' : 'INTERURBAIN';
+      var planLabel = (org.plan || 'FREEMIUM').toUpperCase();
+      var badgeClass = org.plan === 'Premium'
+        ? 'background:#F59E0B;color:#1A1A2E;'
+        : org.plan === 'Standard'
+          ? 'background:#3B82F6;color:#fff;'
+          : 'background:#252540;color:#94A3B8;';
+
+      var logoHtml = org.logo
+        ? '<img src="' + org.logo + '" style="width:48px;height:48px;border-radius:10px;object-fit:contain;background:#fff;padding:4px;" alt="">'
+        : '<div style="width:48px;height:48px;border-radius:10px;background:#252540;display:flex;align-items:center;justify-content:center;font-size:22px;">' + (org.type === 'FLEET_MANAGER' ? '🚕' : '🚌') + '</div>';
+
+      html += `
+        <button
+          onclick="ouvrirPartenaire('${org.slug}')"
+          style="width:100%;background:#252540;border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;transition:transform 0.2s;margin-bottom:10px;"
+          onmouseover="this.style.transform='translateY(-2px)'"
+          onmouseout="this.style.transform='translateY(0)'"
+        >
+          ${logoHtml}
+
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+              ${org.name}
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <span style="${badgeClass}padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;">
+                ${planLabel}
+              </span>
+              <span style="background:#1E293B;color:#94A3B8;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;">
+                ${typeLabel}
+              </span>
+            </div>
+          </div>
+
+          <span style="color:#F59E0B;font-size:18px;">→</span>
+        </button>
+      `;
+    });
+
+    container.innerHTML = html;
+
+    // Mettre à jour le compteur
+    var compteur = document.getElementById('partenairesCompteur');
+    if (compteur) {
+      compteur.textContent = orgs.length + ' organisations partenaires';
+    }
+  } catch (e) {
+    console.warn('Chargement partenaires impossible', e);
+  }
+}
+
+function ouvrirPartenaire(slug) {
+  if (!slug) return;
+
+  // Sauvegarder le slug
+  localStorage.setItem('dagoos_selected_fleet_slug', slug);
+
+  // Charger le branding
+  chargerBrandingOrganisation(slug).then(function() {
+    // Naviguer vers Course ou Départs selon le type d'organisation
+    // Pour l'instant, rediriger vers Course
+    loadPage('course');
+  });
+}
+
+window.chargerPartenaires = chargerPartenaires;
+window.ouvrirPartenaire = ouvrirPartenaire;
 
 window.init_home = init_home;
