@@ -75,6 +75,7 @@ model Organization {
   departs         Depart[]
   leadActions     LeadAction[]
   expenses        Expense[]
+  organizationServices OrganizationService[]
 }
 
 // ========================================
@@ -438,6 +439,25 @@ model Tarif {
   mobileMoney         Json?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+}
+
+// ========================================
+// SERVICES PAR ORGANISATION
+// ========================================
+
+model OrganizationService {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  service        String // TAXI, LOCATION_URBAINE, DEPARTS_INTERURBAINS, etc.
+  active         Boolean      @default(true)
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([organizationId, service])
+  @@index([service, active])
 }
 
 // ========================================
