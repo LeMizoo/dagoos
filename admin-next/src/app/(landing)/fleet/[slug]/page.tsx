@@ -289,7 +289,7 @@ export default function FleetLandingPage({
         )}
 
         <div className="relative mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <Link
               href="/"
               className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-medium text-white backdrop-blur-md transition hover:bg-white/20"
@@ -531,7 +531,7 @@ export default function FleetLandingPage({
             <input
               name="nom"
               placeholder="Votre nom"
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-[var(--primary)] focus:bg-white"
+              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
               required
             />
 
@@ -539,27 +539,27 @@ export default function FleetLandingPage({
               name="tel"
               type="tel"
               placeholder="Votre téléphone"
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-[var(--primary)] focus:bg-white"
+              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
               required
             />
 
             <input
               name="depart"
               placeholder="Adresse de départ"
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-[var(--primary)] focus:bg-white"
+              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
               required
             />
 
             <input
               name="arrivee"
               placeholder="Adresse d'arrivée"
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-[var(--primary)] focus:bg-white"
+              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
               required
             />
 
             <select
               name="typeVehicule"
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-[var(--primary)] focus:bg-white sm:col-span-2"
+              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-slate-400 focus:bg-white sm:col-span-2"
             >
               <option value="moto">Taxi Moto</option>
               <option value="voiture">Taxi</option>
@@ -697,7 +697,7 @@ export default function FleetLandingPage({
               {fleet?.phone && (
                 <a
                   href={`tel:${fleet.phone}`}
-                  className="flex items-center gap-3 text-sm font-semibold"
+                  className="flex min-w-0 items-center gap-3 text-sm font-semibold"
                 >
                   <span
                     className="flex h-10 w-10 items-center justify-center rounded-xl"
@@ -712,7 +712,7 @@ export default function FleetLandingPage({
               {fleet?.email && (
                 <a
                   href={`mailto:${fleet.email}`}
-                  className="flex items-center gap-3 text-sm font-semibold"
+                  className="flex min-w-0 items-center gap-3 text-sm font-semibold"
                 >
                   <span
                     className="flex h-10 w-10 items-center justify-center rounded-xl"
@@ -725,7 +725,7 @@ export default function FleetLandingPage({
               )}
 
               {fleet?.address && (
-                <div className="flex items-center gap-3 text-sm font-semibold">
+                <div className="flex min-w-0 items-center gap-3 text-sm font-semibold">
                   <span
                     className="flex h-10 w-10 items-center justify-center rounded-xl"
                     style={{ backgroundColor: `${primary}15` }}
@@ -741,7 +741,7 @@ export default function FleetLandingPage({
                   href={whatsappUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-3 text-sm font-semibold"
+                  className="flex min-w-0 items-center gap-3 text-sm font-semibold"
                 >
                   <span
                     className="flex h-10 w-10 items-center justify-center rounded-xl"
@@ -805,7 +805,7 @@ export default function FleetLandingPage({
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <div className="flex items-center gap-3">
+              <div className="flex min-w-0 items-center gap-3">
                 {fleet?.logo ? (
                   <img
                     src={fleet.logo}
@@ -834,7 +834,7 @@ export default function FleetLandingPage({
 
             <Link
               href="/"
-              className="text-sm text-white/60 transition hover:text-white"
+              className="break-words text-sm text-white/60 transition hover:text-white"
             >
               ← Retour à Dagoo Mobility
             </Link>
