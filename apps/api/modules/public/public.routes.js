@@ -31,6 +31,10 @@ router.get('/organizations', async (req, res) => {
         airtelNumber: true,
         logo: true,
         plan: true,
+        organizationServices: {
+          where: { active: true },
+          select: { service: true },
+        },
         createdAt: true,
         departs: {
           where: {
@@ -110,6 +114,11 @@ router.get('/organizations/:slug', async (req, res) => {
         facebook: true,
         whatsapp: true,
         landingConfig: true,
+
+        organizationServices: {
+          where: { active: true },
+          select: { service: true },
+        },
 
         createdAt: true,
       },
