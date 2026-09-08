@@ -71,33 +71,53 @@ router.get('/organizations', async (req, res) => {
 });
 
 // GET /api/public/organizations/:slug - Infos publiques de l'organisation
+// GET /api/public/organizations/:slug - Infos publiques de l'organisation
 router.get('/organizations/:slug', async (req, res) => {
   try {
-    let org = null;
+    const { slug } = req.params;
 
-    if (organizationSlug) {
-      org = await prisma.organization.findUnique({
-        where: { slug: organizationSlug },
-        select: { id: true, email: true },
+    if (!slug) {
+      return res.status(400).json({
+        error: 'slug requis',
       });
+    }
 
-      if (!org) {
-        return res.status(404).json({ error: 'Organisation introuvable' });
-      }
-    } else if (!['CONTACT', 'LONG_HAUL', 'CAR_RENTAL', 'COURSE_REQUEST', 'TAXI_RESERVATION'].includes(type)) {
-      return res.status(400).json({ error: 'organisationSlug requis pour ce type' });
+    const org = await prisma.organization.findUnique({
+      where: { slug },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        type: true,
+        email: true,
+        phone: true,
+        logo: true,
+        description: true,
+        plan: true,
+        status: true,
+        mvolaNumber: true,
+        orangeNumber: true,
+        airtelNumber: true,
+        createdAt: true,
+      },
+    });
+
+    if (!org || org.status !== 'active') {
+      return res.status(404).json({
+        error: 'Organisation introuvable',
+      });
     }
-    
-    if (org.status && org.status !== 'active') {
-      return res.status(404).json({ error: 'Organisation indisponible' });
-    }
-    
-    res.json(org);
+
+    return res.json(org);
   } catch (error) {
     console.error('GET /public/organizations/:slug:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
+
+    return res.status(500).json({
+      error: 'Erreur serveur',
+    });
   }
 });
+
 
 // GET /api/public/departs/:slug - Départs publiés d'une organisation
 router.get('/departs/:slug', async (req, res) => {
@@ -136,8 +156,7 @@ router.get('/departs/:slug', async (req, res) => {
     
     const departs = await prisma.depart.findMany({
       where: {
-        organizationId: org?.id || null,
-        organizationPreference: organizationSlug || null,
+        organizationId: org.id,
         statut: 'PUBLISHED',
       },
       orderBy: [{ date: 'asc' }, { heure: 'asc' }],
