@@ -26,7 +26,8 @@ self.addEventListener('install', (event) => {
       return cache.addAll(STATIC_ASSETS);
     })
   );
-  self.skipWaiting();
+  // NE PAS appeler skipWaiting automatiquement.
+  // Le nouveau SW attendra que l'utilisateur clique "Mettre à jour".
 });
 
 self.addEventListener('activate', (event) => {
