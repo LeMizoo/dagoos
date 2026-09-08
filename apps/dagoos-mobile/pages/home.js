@@ -114,6 +114,7 @@ function init_home() {
   `;
 
   appliquerBrandingMobile(getBrandingMobile());
+  chargerPartenaires();
 }
 
 
