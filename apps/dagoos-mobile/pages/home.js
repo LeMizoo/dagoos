@@ -80,6 +80,8 @@ function init_home() {
       </div>
     </div>
   `;
+
+  appliquerBrandingMobile(getBrandingMobile());
 }
 
 window.init_home = init_home;

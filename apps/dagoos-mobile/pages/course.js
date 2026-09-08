@@ -102,7 +102,7 @@ function updateUI() {
         optionsHtml += '<option value="' + f.slug + '">' + f.name + '</option>';
       });
       flotteContainer.innerHTML = `
-        <select id="flotte" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;" onchange="estimerPrix()">
+        <select id="flotte" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;" onchange="localStorage.setItem('dagoos_selected_fleet_slug', this.value); chargerBrandingOrganisation(this.value); estimerPrix()">
           ${optionsHtml}
         </select>
         <p style="text-align:center;color:#94A3B8;font-size:11px;margin-bottom:8px;"><i data-lucide="lightbulb" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Choisissez une flotte puis saisissez départ et arrivée pour voir l'estimation</p>

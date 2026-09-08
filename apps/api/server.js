@@ -144,24 +144,6 @@ app.get('/api/public/vehicles/:driverId', authMiddleware, async (req, res) => {
   }
 });
 
-// Organisations publiques
-app.get('/api/public/organizations', async (req, res) => {
-  try {
-    const organizations = await prisma.organization.findMany({
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
-
-    res.json(organizations);
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
 // Courses d'un chauffeur
 
 app.get('/api/public/plans', async (req, res) => {
