@@ -144,7 +144,7 @@ async function chargerPartenaires() {
     // Prendre les 6 premiers
     var partenaires = orgs.slice(0, 6);
 
-    var container = document.getElementById('partenairesList');
+    var container = document.getElementById('partenairesCarrousel');
     if (!container) return;
 
     var html = '';
@@ -196,7 +196,7 @@ async function chargerPartenaires() {
     }
   } catch (e) {
     console.warn('Chargement partenaires impossible', e);
-    var containerError = document.getElementById('partenairesList');
+    var containerError = document.getElementById('partenairesCarrousel');
     if (containerError) {
       containerError.innerHTML = '<div style="text-align:center;color:#E74C3C;font-size:11px;">Impossible de charger les partenaires</div>';
     }
