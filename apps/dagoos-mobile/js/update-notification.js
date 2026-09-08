@@ -145,18 +145,38 @@
 
     // Définir forceUpdate globalement
     window.forceUpdate = function() {
-      if (navigator.serviceWorker) {
-        navigator.serviceWorker.ready.then(function(registration) {
-          if (registration.waiting) {
-            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-          }
-          setTimeout(function() {
-            window.location.reload();
-          }, 300);
-        });
-      } else {
+      if (!('serviceWorker' in navigator)) {
+        window.location.reload();
+        return;
+      }
+
+      var reloaded = false;
+
+      function reloadOnce() {
+        if (reloaded) return;
+        reloaded = true;
         window.location.reload();
       }
+
+      navigator.serviceWorker.addEventListener('controllerchange', reloadOnce, { once: true });
+
+      navigator.serviceWorker.ready.then(function(registration) {
+        if (registration.waiting) {
+          registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        } else {
+          registration.update().then(function() {
+            if (registration.waiting) {
+              registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+            } else {
+              reloadOnce();
+            }
+          }).catch(function() {
+            reloadOnce();
+          });
+        }
+      }).catch(function() {
+        reloadOnce();
+      });
     };
   }
 })();
