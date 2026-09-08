@@ -13,6 +13,28 @@ function init_home() {
     <div style="padding:16px;">
       <h2 style="font-size:18px;font-weight:800;margin-bottom:12px;">Choisissez un service</h2>
 
+      <!-- NOS PARTENAIRES -->
+      <div style="margin-bottom:20px;padding:16px;background:#1E293B;border-radius:14px;border:1px solid rgba(245,158,11,0.15);">
+        <div style="text-align:center;margin-bottom:12px;">
+          <div style="font-size:9px;font-weight:700;color:#F59E0B;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">
+            ⭐ Nos partenaires
+          </div>
+          <p style="font-size:10px;color:#94A3B8;line-height:1.4;">
+            Des flottes et coopératives qui utilisent DAGOO'S
+          </p>
+        </div>
+
+        <div id="partenairesList" style="margin-bottom:8px;">
+          <div style="text-align:center;padding:10px;color:#94A3B8;font-size:11px;">
+            Chargement...
+          </div>
+        </div>
+
+        <div style="text-align:center;">
+          <span id="partenairesCompteur" style="font-size:11px;color:#94A3B8;font-weight:600;"></span>
+        </div>
+      </div>
+
       <!-- Taxi Urbain -->
       <div onclick="loadPage('course')" style="background:#252540;border-radius:14px;padding:16px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:14px;border:1px solid rgba(16,185,129,0.2);">
         <i data-lucide="car" style="font-size:22px;"></i>
@@ -79,37 +101,6 @@ function init_home() {
         <span style="color:#F59E0B;font-size:20px;">→</span>
       </div>
 
-      <!-- NOS PARTENAIRES -->
-      <div style="margin-top:24px;padding:20px 0;border-top:1px solid rgba(255,255,255,0.06);">
-        <div style="text-align:center;margin-bottom:16px;">
-          <div style="font-size:10px;font-weight:700;color:#F59E0B;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">
-            ⭐ Nos partenaires
-          </div>
-          <h2 style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;">
-            Ils nous font confiance
-          </h2>
-          <p style="font-size:11px;color:#94A3B8;line-height:1.5;max-width:300px;margin:0 auto;">
-            Des flottes et coopératives qui utilisent DAGOO'S pour vous offrir leurs services.
-          </p>
-        </div>
-
-        <div id="partenairesList" style="margin-bottom:12px;">
-          <div style="text-align:center;padding:20px;color:#94A3B8;font-size:12px;">
-            Chargement des partenaires...
-          </div>
-        </div>
-
-        <div style="text-align:center;margin-bottom:12px;">
-          <span id="partenairesCompteur" style="font-size:12px;color:#94A3B8;font-weight:600;"></span>
-        </div>
-
-        <button
-          onclick="loadPage('course')"
-          style="width:100%;padding:12px;background:transparent;border:1px solid #F59E0B;border-radius:12px;color:#F59E0B;font-size:12px;font-weight:700;cursor:pointer;"
-        >
-          Voir tous nos partenaires →
-        </button>
-      </div>
     </div>
   `;
 
@@ -127,6 +118,10 @@ async function chargerPartenaires() {
     var orgs = await apiGet('/public/organizations');
 
     if (!Array.isArray(orgs) || orgs.length === 0) {
+      var containerEmpty = document.getElementById('partenairesList');
+      if (containerEmpty) {
+        containerEmpty.innerHTML = '<div style="text-align:center;color:#94A3B8;font-size:11px;">Aucun partenaire disponible</div>';
+      }
       return;
     }
 
@@ -197,6 +192,10 @@ async function chargerPartenaires() {
     }
   } catch (e) {
     console.warn('Chargement partenaires impossible', e);
+    var containerError = document.getElementById('partenairesList');
+    if (containerError) {
+      containerError.innerHTML = '<div style="text-align:center;color:#E74C3C;font-size:11px;">Impossible de charger les partenaires</div>';
+    }
   }
 }
 
