@@ -41,6 +41,7 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
       code: user.organizationCode,
       type: user.role === 'FLEET_MANAGER' ? 'FLEET_MANAGER' : user.role === 'COOP_MANAGER' ? 'COOPERATIVE' : undefined,
       email: user.email,
+      phone: user.phone,
     };
   }, [user]);
 

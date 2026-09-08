@@ -98,6 +98,19 @@ router.get('/organizations/:slug', async (req, res) => {
         mvolaNumber: true,
         orangeNumber: true,
         airtelNumber: true,
+
+        // Branding public de la landing Premium
+        slogan: true,
+        coverImage: true,
+        primaryColor: true,
+        secondaryColor: true,
+        landingEnabled: true,
+        landingTemplate: true,
+        address: true,
+        facebook: true,
+        whatsapp: true,
+        landingConfig: true,
+
         createdAt: true,
       },
     });

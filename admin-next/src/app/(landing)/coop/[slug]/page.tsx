@@ -6,6 +6,24 @@ import Link from 'next/link';
 import { apiFetch } from '@/lib/api';
 import PlanVehicule from '@/components/flotte/PlanVehicule';
 
+
+interface LandingService {
+  icon?: string;
+  title?: string;
+  desc?: string;
+}
+
+interface LandingConfig {
+  hero?: {
+    title?: string;
+    subtitle?: string;
+  };
+  about?: {
+    text?: string;
+  };
+  services?: LandingService[];
+}
+
 export default function CooperativeLandingPage({ params }: { params: { slug: string } }) {
   const [cooperative, setCooperative] = useState<any | null>(null);
   const [departs, setDeparts] = useState<any[]>([]);
@@ -73,6 +91,62 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
   }
 
   const departsFiltres = villeFiltre ? departs.filter(d => d.pointDepart === villeFiltre) : departs;
+
+
+  const landingConfig: LandingConfig =
+    cooperative?.landingConfig &&
+    typeof cooperative.landingConfig === 'object' &&
+    !Array.isArray(cooperative.landingConfig)
+      ? cooperative.landingConfig
+      : {};
+
+  const primaryColor =
+    cooperative?.primaryColor || '#059669';
+
+  const secondaryColor =
+    cooperative?.secondaryColor || '#047857';
+
+  const heroTitle =
+    landingConfig.hero?.title ||
+    cooperative?.name ||
+    'Votre voyage commence ici';
+
+  const heroSubtitle =
+    landingConfig.hero?.subtitle ||
+    cooperative?.slogan ||
+    cooperative?.description ||
+    'Réservez votre place simplement et voyagez en toute sérénité.';
+
+  const aboutText =
+    landingConfig.about?.text ||
+    cooperative?.description ||
+    'Une solution de transport interurbain pensée pour simplifier vos déplacements.';
+
+  const landingServices: LandingService[] =
+    Array.isArray(landingConfig.services) &&
+    landingConfig.services.length > 0
+      ? landingConfig.services
+      : [
+          {
+            icon: '🚌',
+            title: 'Transport interurbain',
+            desc: 'Voyagez entre les principales destinations.',
+          },
+          {
+            icon: '💺',
+            title: 'Réservation de places',
+            desc: 'Choisissez votre place avant le départ.',
+          },
+          {
+            icon: '📦',
+            title: 'Transport de colis',
+            desc: 'Envoyez vos marchandises simplement.',
+          },
+        ];
+
+  const whatsappUrl = cooperative?.whatsapp
+    ? `https://wa.me/${String(cooperative.whatsapp).replace(/\D/g, '')}`
+    : null;
 
   function handleSelectDepart(d: any) {
     setSelectedDepart(d);
@@ -336,23 +410,203 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="relative bg-gradient-to-r from-emerald-600 to-emerald-800 text-white py-12">
-        <div className="max-w-5xl mx-auto px-4 text-center">
-          <Link href="/" className="absolute top-4 left-4 text-white/80 hover:text-white transition text-sm flex items-center gap-2">
-            ← Retour à l'accueil
-          </Link>
-          <h1 className="text-3xl font-bold mb-2">{cooperative?.name || 'Coopérative'}</h1>
-          <p className="text-emerald-100">Réservez votre place en ligne</p>
-          {cooperative?.phone && (
-            <p className="text-emerald-100/80 mt-2 flex items-center justify-center gap-2">
-              <Phone size={16} /> {cooperative.phone}
-            </p>
-          )}
+      <header className="relative isolate overflow-hidden bg-slate-950 text-white">
+        {cooperative?.coverImage ? (
+          <>
+            <img
+              src={cooperative.coverImage}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-slate-950/70" />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/70 to-slate-950/30" />
+          </>
+        ) : (
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
+            }}
+          />
+        )}
+
+        <div className="relative mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-medium backdrop-blur-md transition hover:bg-white/20"
+            >
+              ← Dagoo Mobility
+            </Link>
+
+            {cooperative?.phone && (
+              <a
+                href={`tel:${cooperative.phone}`}
+                className="hidden items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold backdrop-blur-md sm:inline-flex"
+              >
+                <Phone size={14} />
+                {cooperative.phone}
+              </a>
+            )}
+          </div>
         </div>
+
+        <div className="relative mx-auto max-w-7xl px-4 pb-24 pt-16 sm:px-6 sm:pb-28 lg:px-8 lg:pt-24">
+          <div className="max-w-3xl">
+            {cooperative?.logo ? (
+              <div className="mb-7 flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-white p-2 shadow-2xl">
+                <img
+                  src={cooperative.logo}
+                  alt={cooperative.name || 'Logo'}
+                  className="max-h-full max-w-full object-contain"
+                />
+              </div>
+            ) : (
+              <div
+                className="mb-7 flex h-20 w-20 items-center justify-center rounded-2xl text-3xl shadow-2xl"
+                style={{ backgroundColor: primaryColor }}
+              >
+                🚌
+              </div>
+            )}
+
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] backdrop-blur-md">
+              ✦ Coop Premium
+            </div>
+
+            <h1 className="text-4xl font-black tracking-tight sm:text-6xl lg:text-7xl">
+              {heroTitle}
+            </h1>
+
+            {cooperative?.slogan && cooperative.slogan !== heroTitle && (
+              <p className="mt-4 text-lg font-medium text-white/90 sm:text-2xl">
+                {cooperative.slogan}
+              </p>
+            )}
+
+            <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">
+              {heroSubtitle}
+            </p>
+
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <a
+                href="#departs"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-4 text-sm font-bold text-white shadow-xl transition hover:-translate-y-0.5"
+                style={{ backgroundColor: primaryColor }}
+              >
+                Voir les départs
+                <span>→</span>
+              </a>
+
+              <a
+                href="#contact"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-6 py-4 text-sm font-bold backdrop-blur-md transition hover:bg-white/20"
+              >
+                Nous contacter
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-slate-50 to-transparent" />
       </header>
 
+      {/* SERVICES PREMIUM */}
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+        <div className="mx-auto max-w-2xl text-center">
+          <span
+            className="text-xs font-bold uppercase tracking-[0.2em]"
+            style={{ color: primaryColor }}
+          >
+            Nos services
+          </span>
+
+          <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">
+            Voyager simplement
+          </h2>
+
+          <p className="mt-4 text-slate-500">
+            Découvrez les services proposés par {cooperative?.name || 'notre coopérative'}.
+          </p>
+        </div>
+
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {landingServices.map((service, index) => (
+            <article
+              key={`${service.title || 'service'}-${index}`}
+              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+            >
+              <div
+                className="flex h-14 w-14 items-center justify-center rounded-2xl text-2xl"
+                style={{ backgroundColor: `${primaryColor}15` }}
+              >
+                {service.icon || '✓'}
+              </div>
+
+              <h3 className="mt-5 text-lg font-bold">
+                {service.title || 'Service'}
+              </h3>
+
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                {service.desc || ''}
+              </p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* ABOUT PREMIUM */}
+      <section className="bg-white">
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8 lg:py-20">
+          <div>
+            <span
+              className="text-xs font-bold uppercase tracking-[0.2em]"
+              style={{ color: primaryColor }}
+            >
+              À propos
+            </span>
+
+            <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">
+              Une coopérative proche de ses voyageurs
+            </h2>
+
+            <p className="mt-5 whitespace-pre-line text-base leading-8 text-slate-600">
+              {aboutText}
+            </p>
+          </div>
+
+          <div
+            className="relative overflow-hidden rounded-[2rem] p-8 text-white"
+            style={{
+              background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
+            }}
+          >
+            {cooperative?.coverImage && (
+              <img
+                src={cooperative.coverImage}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover opacity-20"
+              />
+            )}
+
+            <div className="relative">
+              <div className="text-5xl">🚌</div>
+
+              <h3 className="mt-6 text-2xl font-black">
+                {cooperative?.name || 'Votre coopérative'}
+              </h3>
+
+              <p className="mt-3 text-white/75">
+                {cooperative?.slogan ||
+                  'Votre partenaire pour vos déplacements interurbains.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Filtres villes */}
-      <section className="py-8 max-w-5xl mx-auto px-4">
+      <section id="departs" className="py-8 max-w-5xl mx-auto px-4">
         <div className="flex flex-wrap gap-2 justify-center mb-6">
           <span className="text-sm text-gray-500 flex items-center gap-1"><MapPin size={14} /> Départ :</span>
           <button
@@ -376,131 +630,259 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
           ))}
         </div>
 
-        {/* Liste des départs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Liste des départs Premium */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {departsFiltres.map((d: any) => {
             const placesReservees = (d.reservations || []).map((r: any) => r.place);
             const placesDisponibles = d.placesTotal - placesReservees.length;
             const isSelected = selectedDepart?.id === d.id;
+            const departTime = (() => {
+              const [h, m] = (d.heure || '00:00').split(':').map(Number);
+              const dt = new Date(d.date);
+              dt.setHours(h, m, 0, 0);
+              return dt;
+            })();
+            const estParti = departTime.getTime() <= Date.now();
 
             return (
               <button
                 key={d.id}
                 onClick={() => handleSelectDepart(d)}
-                disabled={(() => {
-                  const [h, m] = d.heure.split(':').map(Number);
-                  const dt = new Date(d.date);
-                  dt.setHours(h, m, 0, 0);
-                  return dt.getTime() <= Date.now();
-                })()}
-                className={`text-left bg-white rounded-xl p-5 border-2 transition ${
-                  isSelected ? 'border-emerald-500 shadow-lg' : 'border-gray-200 hover:border-emerald-300'
+                disabled={estParti}
+                className={`group relative text-left rounded-[1.5rem] border p-6 transition-all duration-300 ${
+                  isSelected
+                    ? 'border-emerald-500 shadow-2xl scale-[1.02] bg-white'
+                    : 'border-slate-200 bg-white hover:border-emerald-400 hover:shadow-xl hover:-translate-y-1'
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
-                <h3 className="font-bold text-gray-800 text-lg">
-                  {d.destination}
-                </h3>
-                {d.vehicle && (
-                  <p className="text-sm text-gray-600 mt-1 flex items-center gap-1">
-                    🚐 <span className="font-semibold">{d.vehicle.model || 'Véhicule'}</span>
-                    <span className="text-gray-400">•</span>
-                    <span className="font-mono">{d.vehicle.plate}</span>
-                    <span className="text-xs bg-green-100 text-green-700 rounded-full px-2 py-0.5 ml-auto">✓ Véhicule récent</span>
-                  </p>
-                )}
-                <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
-                  <Calendar size={14} /> {new Date(d.date).toLocaleDateString('fr-FR')}
-                  <Clock size={14} /> {d.heure}
-                  <span className="text-xs font-semibold text-blue-600 bg-blue-50 rounded-full px-2 py-0.5 ml-auto">
-                    {getCountdown(d.date, d.heure)}
+                {isSelected && (
+                  <span className="absolute top-4 right-4 rounded-full bg-emerald-500 px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider">
+                    Sélectionné
                   </span>
-                </p>
-                <p className="text-2xl font-bold text-emerald-600 mt-3">
-                  {Number(d.prix).toLocaleString()} Ar
-                </p>
-                <p className={`text-xs mt-2 ${placesDisponibles > 5 ? 'text-green-600' : 'text-red-600'}`}>
-                  {placesDisponibles} places disponibles
-                </p>
+                )}
+
+                {/* Destination et point de départ */}
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="text-xl font-black text-slate-900">
+                      {d.destination}
+                    </h3>
+                    <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-500">
+                      <MapPin size={14} className="text-emerald-600" />
+                      {d.pointDepart}
+                    </p>
+                  </div>
+
+                  <div
+                    className="flex h-14 w-14 items-center justify-center rounded-2xl text-2xl"
+                    style={{ backgroundColor: `${primaryColor}15` }}
+                  >
+                    🚌
+                  </div>
+                </div>
+
+                {/* Véhicule */}
+                {d.vehicle && (
+                  <div className="mt-4 flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2">
+                    <span className="text-sm font-semibold text-slate-700">
+                      {d.vehicle.model || 'Véhicule'}
+                    </span>
+                    <span className="text-slate-300">•</span>
+                    <span className="font-mono text-xs text-slate-500">
+                      {d.vehicle.plate}
+                    </span>
+                    <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                      ✓ Récent
+                    </span>
+                  </div>
+                )}
+
+                {/* Date + heure */}
+                <div className="mt-4 flex items-center gap-4">
+                  <span className="inline-flex items-center gap-1.5 text-sm text-slate-600">
+                    <Calendar size={15} className="text-emerald-600" />
+                    {new Date(d.date).toLocaleDateString('fr-FR')}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 text-sm text-slate-600">
+                    <Clock size={15} className="text-emerald-600" />
+                    {d.heure}
+                  </span>
+                  <span
+                    className={`ml-auto rounded-full px-3 py-1 text-[11px] font-bold ${
+                      estParti
+                        ? 'bg-red-100 text-red-700'
+                        : 'bg-blue-50 text-blue-700'
+                    }`}
+                  >
+                    {estParti ? 'Parti' : getCountdown(d.date, d.heure)}
+                  </span>
+                </div>
+
+                {/* Prix + places */}
+                <div className="mt-5 flex items-end justify-between border-t border-slate-100 pt-4">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      Tarif
+                    </p>
+                    <p
+                      className="text-2xl font-black"
+                      style={{ color: primaryColor }}
+                    >
+                      {Number(d.prix).toLocaleString()} Ar
+                    </p>
+                  </div>
+
+                  <div className="text-right">
+                    <p
+                      className={`text-sm font-bold ${
+                        placesDisponibles > 5
+                          ? 'text-emerald-600'
+                          : 'text-red-600'
+                      }`}
+                    >
+                      {placesDisponibles} places
+                    </p>
+                    <p className="text-[10px] text-slate-400">
+                      sur {d.placesTotal}
+                    </p>
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <div
+                  className="mt-4 rounded-xl px-4 py-3 text-center text-sm font-bold text-white transition"
+                  style={{ backgroundColor: isSelected ? '#059669' : primaryColor }}
+                >
+                  {isSelected ? '✓ Sélectionné' : 'Réserver cette place →'}
+                </div>
               </button>
             );
           })}
+
           {departsFiltres.length === 0 && (
-            <p className="col-span-full text-center text-gray-500 py-8">Aucun départ pour cette ville.</p>
+            <div className="col-span-full rounded-[1.5rem] border border-dashed border-slate-300 bg-white py-16 text-center">
+              <div className="text-5xl">🗓️</div>
+              <h3 className="mt-4 text-lg font-bold text-slate-700">
+                Aucun départ pour cette ville
+              </h3>
+              <p className="mt-2 text-sm text-slate-500">
+                Revenez bientôt ou contactez-nous pour plus d'informations.
+              </p>
+            </div>
           )}
         </div>
       </section>
 
-      {/* Gérer ma réservation */}
-      <section className="py-8 bg-gray-50 border-t">
-        <div className="max-w-md mx-auto px-4">
-          <h2 className="text-xl font-bold text-center mb-4">🔍 Gérer ma réservation</h2>
-          <div className="space-y-3">
-            <input
-              type="tel"
-              placeholder="Votre téléphone"
-              value={manageTel}
-              onChange={e => setManageTel(e.target.value)}
-              className="w-full px-4 py-3 border rounded-lg text-sm"
-            />
-            <input
-              type="text"
-              placeholder="Nom du passager"
-              value={manageNom}
-              onChange={e => setManageNom(e.target.value)}
-              className="w-full px-4 py-3 border rounded-lg text-sm"
-            />
-            <input
-              type="text"
-              inputMode="numeric"
-              maxLength={6}
-              placeholder="Code OTP de reservation"
-              value={otpCode}
-              onChange={e => setOtpCode(e.target.value)}
-              className="w-full px-4 py-3 border rounded-lg text-sm"
-            />
+      {/* Gérer ma réservation Premium */}
+      <section className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+        <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl">
+          <div className="p-6 sm:p-8">
+            <div className="text-center">
+              <span
+                className="text-xs font-bold uppercase tracking-[0.2em]"
+                style={{ color: primaryColor }}
+              >
+                Déjà réservé ?
+              </span>
+
+              <h2 className="mt-3 text-3xl font-black text-slate-900">
+                Gérer ma réservation
+              </h2>
+
+              <p className="mt-3 text-sm text-slate-500">
+                Retrouvez votre réservation avec votre téléphone et votre code OTP.
+              </p>
+            </div>
+
+            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+              <input
+                type="tel"
+                placeholder="Téléphone"
+                value={manageTel}
+                onChange={e => setManageTel(e.target.value)}
+                className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-[var(--primary)] focus:bg-white"
+              />
+
+              <input
+                type="text"
+                placeholder="Nom du passager"
+                value={manageNom}
+                onChange={e => setManageNom(e.target.value)}
+                className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-[var(--primary)] focus:bg-white"
+              />
+
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                placeholder="Code OTP"
+                value={otpCode}
+                onChange={e => setOtpCode(e.target.value)}
+                className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-mono tracking-widest outline-none transition focus:border-[var(--primary)] focus:bg-white"
+              />
+            </div>
+
             <button
               onClick={handleManage}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl px-5 py-4 text-sm font-bold text-white transition hover:opacity-95"
+              style={{ backgroundColor: primaryColor }}
             >
-              Rechercher mes réservations
+              🔍 Rechercher mes réservations
             </button>
-            {manageError && <p className="text-red-500 text-sm text-center">{manageError}</p>}
+
+            {manageError && (
+              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                {manageError}
+              </div>
+            )}
+
             {manageResult?.reservations && (
-              <div className="space-y-2 mt-4">
+              <div className="mt-6 space-y-4">
                 {manageResult.reservations.map((r: any) => (
-                  <div key={r.id} className="bg-white rounded-lg p-3 border">
-                    <div className="flex justify-between items-center mb-2">
+                  <div
+                    key={r.id}
+                    className="rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:shadow-lg"
+                  >
+                    <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-sm font-semibold">{r.depart?.pointDepart} → {r.depart?.destination}</p>
-                        <p className="text-xs text-gray-500">Place actuelle : <span className="font-bold text-emerald-600">{r.place}</span></p>
-                        <p className="text-xs text-gray-400">{new Date(r.depart?.date).toLocaleDateString('fr-FR')} à {r.depart?.heure}</p>
+                        <p className="font-bold text-slate-900">
+                          {r.depart?.pointDepart} → {r.depart?.destination}
+                        </p>
+                        <p className="mt-1 text-sm text-slate-500">
+                          📅 {new Date(r.depart?.date).toLocaleDateString('fr-FR')} à {r.depart?.heure}
+                        </p>
+                        <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">
+                          💺 Place : {r.place}
+                        </p>
                       </div>
+
                       <button
                         onClick={() => handleCancelReservation(r.id)}
-                        className="text-red-500 hover:underline text-xs"
+                        className="rounded-xl border border-red-200 px-4 py-2 text-xs font-bold text-red-600 transition hover:bg-red-50"
                       >
                         Annuler
                       </button>
                     </div>
-                    
+
                     {changingPlace === r.id ? (
-                      <div className="flex gap-2 items-center mt-2">
+                      <div className="mt-4 flex gap-2">
                         <input
                           type="text"
                           placeholder="Nouvelle place (ex: 2B)"
                           value={newPlace}
                           onChange={e => setNewPlace(e.target.value.toUpperCase())}
-                          className="flex-1 px-3 py-2 border rounded text-sm"
+                          className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none"
                         />
                         <button
                           onClick={() => handleChangePlace(r.id)}
-                          className="bg-blue-600 text-white px-3 py-2 rounded text-xs font-semibold hover:bg-blue-700"
+                          className="rounded-xl px-5 py-3 text-xs font-bold text-white"
+                          style={{ backgroundColor: primaryColor }}
                         >
                           Valider
                         </button>
                         <button
                           onClick={() => { setChangingPlace(null); setNewPlace(''); }}
-                          className="text-gray-400 hover:underline text-xs"
+                          className="rounded-xl border border-slate-200 px-4 py-3 text-xs font-bold text-slate-500"
                         >
                           ✕
                         </button>
@@ -508,7 +890,8 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
                     ) : (
                       <button
                         onClick={() => { setChangingPlace(r.id); setNewPlace(''); }}
-                        className="text-blue-600 hover:underline text-xs mt-2"
+                        className="mt-3 text-xs font-bold"
+                        style={{ color: primaryColor }}
                       >
                         🔄 Changer de place
                       </button>
@@ -521,128 +904,204 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
         </div>
       </section>
 
-      {/* Formulaire de réservation */}
+      {/* Formulaire de réservation Premium */}
       {showReservation && selectedDepart && (
-        <section id="reservation-form" className="py-8 bg-white border-t">
-          <div className="max-w-4xl mx-auto px-4">
-            <h2 className="text-2xl font-bold text-center mb-6">
-              Réserver : {selectedDepart.destination} - {selectedDepart.heure}
-            </h2>
+        <section id="reservation-form" className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+          <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl">
+            <div className="p-6 sm:p-10">
+              <div className="text-center">
+                <span
+                  className="text-xs font-bold uppercase tracking-[0.2em]"
+                  style={{ color: primaryColor }}
+                >
+                  Réservation
+                </span>
 
-            {success && <div className="bg-green-50 text-green-700 p-4 rounded-lg mb-4 text-center">{success}</div>}
-            {error && <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4 text-center">{error}</div>}
+                <h2 className="mt-3 text-3xl font-black text-slate-900">
+                  {selectedDepart.destination} • {selectedDepart.heure}
+                </h2>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Plan */}
-              <div>
-                <h3 className="font-semibold mb-2 text-center">1. Choisissez vos places</h3>
-                <PlanVehicule
-                  placesTotal={selectedDepart.placesTotal}
-                  placesReservees={(selectedDepart.reservations || []).map((r: any) => r.place)}
-                  placesSelectionnees={selectedPlaces}
-                  onPlaceClick={handlePlaceClick}
-                />
-                <div className="mt-4 text-center space-y-1 bg-gray-50 rounded-lg p-3">
-                  <p className="text-sm font-semibold text-gray-700">
-                    Places : <span className="text-emerald-600 font-bold">{selectedDepart.placesTotal}</span>
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Disponible(s) : <span className="font-bold text-green-600">{selectedDepart.placesTotal - (selectedDepart.reservations || []).length}</span>
-                    {' · '}
-                    Réservée(s) : <span className="font-bold text-red-600">{(selectedDepart.reservations || []).length}</span>
-                  </p>
-                </div>
+                <p className="mt-2 text-sm text-slate-500">
+                  {selectedDepart.pointDepart} → {selectedDepart.destination} • {new Date(selectedDepart.date).toLocaleDateString('fr-FR')}
+                </p>
               </div>
 
-              {/* Formulaire */}
-              <div>
-                <h3 className="font-semibold mb-2 text-center">2. Informations passagers</h3>
-                <div className="space-y-3">
-                  {selectedPlaces.length > 0 && (
-                    <div className="bg-emerald-50 rounded-lg p-3 text-sm">
-                      <p className="font-semibold text-emerald-700 mb-2">Places sélectionnées :</p>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedPlaces.map(place => (
-                          <span key={place} className="bg-emerald-600 text-white px-3 py-1 rounded-full text-xs font-bold">
-                            {place}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {selectedPlaces.map(place => (
-                    <input
-                      key={place}
-                      type="text"
-                      placeholder={`Nom du passager - Place ${place}`}
-                      value={passagers[place] || ''}
-                      onChange={e => setPassagers({ ...passagers, [place]: e.target.value })}
-                      className="w-full px-4 py-3 border rounded-lg text-sm"
-                    />
-                  ))}
-                  <input
-                    type="tel"
-                    placeholder="Votre téléphone"
-                    value={telephone}
-                    onChange={e => setTelephone(e.target.value)}
-                    className="w-full px-4 py-3 border rounded-lg text-sm"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Réf du transfert Mobile Money (optionnel)"
-                    value={paiementRef}
-                    onChange={e => setPaiementRef(e.target.value)}
-                    className="w-full px-4 py-3 border rounded-lg text-sm"
-                  />
-                  
-                  {/* Numéros Mobile Money */}
-                  <div className="space-y-2 mt-2">
-                    <p className="text-xs font-semibold text-gray-500">💰 Payez par Mobile Money :</p>
-                    <div className="flex items-center gap-2 bg-yellow-400 rounded-lg px-3 py-2">
-                      <span className="font-bold text-black text-sm">MVola</span>
-                      <span className="text-black font-extrabold text-sm tracking-wider">{cooperative?.mvolaNumber || '034 00 000 00'}</span>
-                    </div>
-                    <div className="flex items-center gap-2 bg-black rounded-lg px-3 py-2">
-                      <span className="font-bold text-orange-500 text-sm">Orange Money</span>
-                      <span className="text-orange-400 font-extrabold text-sm tracking-wider">{cooperative?.orangeNumber || '032 00 000 00'}</span>
-                    </div>
-                    <div className="flex items-center gap-2 bg-red-600 rounded-lg px-3 py-2">
-                      <span className="font-bold text-white text-sm">Airtel Money</span>
-                      <span className="text-white font-extrabold text-sm tracking-wider">{cooperative?.airtelNumber || '033 00 000 00'}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold whitespace-nowrap">{captchaQuestion.a} + {captchaQuestion.b} = ?</span>
-                    <input
-                      type="number"
-                      placeholder="?"
-                      value={captchaAnswer}
-                      onChange={e => setCaptchaAnswer(e.target.value)}
-                      className="flex-1 px-3 py-2 border rounded-lg text-sm"
+              {success && (
+                <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-center text-sm font-semibold text-emerald-700">
+                  {success}
+                </div>
+              )}
+              {error && (
+                <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-center text-sm font-semibold text-red-700">
+                  {error}
+                </div>
+              )}
+
+              <div className="mt-8 grid gap-8 lg:grid-cols-2">
+                {/* Plan véhicule */}
+                <div>
+                  <h3 className="mb-4 text-center text-lg font-bold text-slate-900">
+                    1. Choisissez vos places
+                  </h3>
+
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <PlanVehicule
+                      placesTotal={selectedDepart.placesTotal}
+                      placesReservees={(selectedDepart.reservations || []).map((r: any) => r.place)}
+                      placesSelectionnees={selectedPlaces}
+                      onPlaceClick={handlePlaceClick}
                     />
                   </div>
 
-                  {!editingReservation ? (
+                  <div className="mt-4 flex justify-center gap-6 text-xs font-semibold">
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-3 w-3 rounded bg-green-500"></span>
+                      Disponible
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-3 w-3 rounded bg-red-500"></span>
+                      Réservé
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-3 w-3 rounded bg-blue-500"></span>
+                      Sélectionné
+                    </span>
+                  </div>
+
+                  <div className="mt-4 rounded-xl bg-slate-50 p-4 text-center">
+                    <p className="text-sm font-bold text-slate-700">
+                      {selectedDepart.placesTotal} places au total
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      <span className="font-bold text-green-600">{selectedDepart.placesTotal - (selectedDepart.reservations || []).length} disponible(s)</span>
+                      {' · '}
+                      <span className="font-bold text-red-600">{(selectedDepart.reservations || []).length} réservée(s)</span>
+                      {' · '}
+                      <span className="font-bold text-blue-600">{selectedPlaces.length} sélectionnée(s)</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Formulaire passagers */}
+                <div>
+                  <h3 className="mb-4 text-center text-lg font-bold text-slate-900">
+                    2. Informations passagers
+                  </h3>
+
+                  <div className="space-y-4">
+                    {selectedPlaces.length > 0 && (
+                      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                        <p className="text-sm font-bold text-emerald-700">
+                          Places sélectionnées :
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {selectedPlaces.map(place => (
+                            <span
+                              key={place}
+                              className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold text-white"
+                            >
+                              {place}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedPlaces.map(place => (
+                      <input
+                        key={place}
+                        type="text"
+                        placeholder={`Nom du passager - Place ${place}`}
+                        value={passagers[place] || ''}
+                        onChange={e => setPassagers({ ...passagers, [place]: e.target.value })}
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-[var(--primary)] focus:bg-white"
+                      />
+                    ))}
+
+                    <input
+                      type="tel"
+                      placeholder="Votre téléphone"
+                      value={telephone}
+                      onChange={e => setTelephone(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-[var(--primary)] focus:bg-white"
+                    />
+
+                    <input
+                      type="text"
+                      placeholder="Réf du transfert Mobile Money (optionnel)"
+                      value={paiementRef}
+                      onChange={e => setPaiementRef(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-[var(--primary)] focus:bg-white"
+                    />
+
+                    {/* Mobile Money Premium */}
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                      <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        💰 Payez par Mobile Money
+                      </p>
+
+                      <div className="mt-3 space-y-2">
+                        <div className="flex items-center justify-between rounded-xl bg-yellow-400 px-4 py-3">
+                          <span className="text-sm font-bold text-black">MVola</span>
+                          <span className="font-mono text-sm font-extrabold text-black">
+                            {cooperative?.mvolaNumber || '034 00 000 00'}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between rounded-xl bg-black px-4 py-3">
+                          <span className="text-sm font-bold text-orange-500">Orange Money</span>
+                          <span className="font-mono text-sm font-extrabold text-orange-400">
+                            {cooperative?.orangeNumber || '032 00 000 00'}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between rounded-xl bg-red-600 px-4 py-3">
+                          <span className="text-sm font-bold text-white">Airtel Money</span>
+                          <span className="font-mono text-sm font-extrabold text-white">
+                            {cooperative?.airtelNumber || '033 00 000 00'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Captcha */}
+                    <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                      <span className="text-sm font-bold whitespace-nowrap text-slate-700">
+                        {captchaQuestion.a} + {captchaQuestion.b} = ?
+                      </span>
+                      <input
+                        type="number"
+                        placeholder="?"
+                        value={captchaAnswer}
+                        onChange={e => setCaptchaAnswer(e.target.value)}
+                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-center text-sm outline-none"
+                      />
+                    </div>
+
+                    {!editingReservation ? (
+                      <button
+                        onClick={() => setEditingReservation(true)}
+                        className="w-full rounded-xl px-5 py-4 text-sm font-bold text-white transition"
+                        style={{ backgroundColor: primaryColor }}
+                      >
+                        ✅ Valider ma sélection
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handleReservation}
+                        className="w-full rounded-xl bg-emerald-600 px-5 py-4 text-sm font-bold text-white transition hover:bg-emerald-700"
+                      >
+                        💾 Enregistrer la réservation ({selectedPlaces.length} place{selectedPlaces.length > 1 ? 's' : ''})
+                      </button>
+                    )}
+
                     <button
-                      onClick={() => setEditingReservation(true)}
-                      className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition text-lg"
+                      onClick={() => setShowReservation(false)}
+                      className="w-full rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-500 transition hover:bg-slate-50"
                     >
-                      ✅ Valider ma sélection
+                      Annuler et retourner aux départs
                     </button>
-                  ) : (
-                    <button
-                      onClick={handleReservation}
-                      className="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition text-lg"
-                    >
-                      💾 Enregistrer la réservation ({selectedPlaces.length} place{selectedPlaces.length > 1 ? 's' : ''})
-                    </button>
-                  )}
-                  <button
-                    onClick={() => setShowReservation(false)}
-                    className="w-full text-gray-500 py-2 text-sm hover:underline"
-                  >
-                    Annuler et retourner aux départs
-                  </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -650,7 +1109,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
         </section>
       )}
 
-      {/* Demande de livraison */}
+      {/* Demande de livraison */}      {/* Demande de livraison */}
       <section className="py-8 bg-gray-50 border-t">
         <div className="max-w-md mx-auto px-4">
           <h2 className="text-xl font-bold text-center mb-4">📦 Demande de livraison</h2>
@@ -689,7 +1148,7 @@ export default function CooperativeLandingPage({ params }: { params: { slug: str
       </section>
 
       {/* Contact */}
-      <section className="py-8 bg-white border-t">
+      <section id="contact" className="py-8 bg-white border-t">
         <div className="max-w-md mx-auto px-4">
           <h2 className="text-xl font-bold text-center mb-4">💬 Contactez-nous</h2>
           {contactSent && <div className="bg-green-50 text-green-700 p-3 rounded-lg mb-3 text-center">✅ Message envoyé !</div>}
