@@ -25,12 +25,84 @@ function init_home() {
         </div>
 
         <div
-          id="partenairesCarrousel"
-          style="display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:8px 4px 16px;scrollbar-width:none;"
+          id="partenairesScene"
+          style="
+            position:relative;
+            height:260px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            overflow:hidden;
+            perspective:1200px;
+            touch-action:pan-y;
+          "
         >
-          <div style="text-align:center;padding:20px;color:#94A3B8;font-size:11px;min-width:160px;">
-            Chargement...
+          <button
+            id="partenairePrev"
+            type="button"
+            aria-label="Partenaire précédent"
+            style="
+              position:absolute;
+              left:4px;
+              top:50%;
+              transform:translateY(-50%);
+              z-index:30;
+              width:36px;
+              height:36px;
+              border-radius:50%;
+              border:1px solid rgba(255,255,255,.15);
+              background:rgba(255,255,255,.08);
+              color:#fff;
+              font-size:22px;
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              cursor:pointer;
+            "
+          >‹</button>
+
+          <div
+            id="partenaires3D"
+            style="
+              position:relative;
+              width:100%;
+              height:220px;
+              transform-style:preserve-3d;
+            "
+          >
+            <div style="
+              text-align:center;
+              padding-top:80px;
+              color:#94A3B8;
+              font-size:11px;
+            ">
+              Chargement...
+            </div>
           </div>
+
+          <button
+            id="partenaireNext"
+            type="button"
+            aria-label="Partenaire suivant"
+            style="
+              position:absolute;
+              right:4px;
+              top:50%;
+              transform:translateY(-50%);
+              z-index:30;
+              width:36px;
+              height:36px;
+              border-radius:50%;
+              border:1px solid rgba(255,255,255,.15);
+              background:rgba(255,255,255,.08);
+              color:#fff;
+              font-size:22px;
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              cursor:pointer;
+            "
+          >›</button>
         </div>
 
         <div style="text-align:center;margin-top:4px;">
@@ -120,102 +192,420 @@ function init_home() {
 // SECTION NOS PARTENAIRES
 // ============================================
 
+var partenairesData = [];
+var partenaireIndex = 0;
+var partenaireTimer = null;
+var partenaireTouchStartX = null;
+var partenaireTouchStartY = null;
+
+
+// ============================================================
+// Chargement des partenaires
+// ============================================================
+
 async function chargerPartenaires() {
   try {
     var orgs = await apiGet('/public/organizations');
 
     if (!Array.isArray(orgs) || orgs.length === 0) {
-      var containerEmpty = document.getElementById('partenairesCarrousel');
-      if (containerEmpty) {
-        containerEmpty.innerHTML = '<div style="text-align:center;color:#94A3B8;font-size:11px;">Aucun partenaire disponible</div>';
-      }
+      afficherErreurPartenaires('Aucun partenaire disponible');
       return;
     }
 
-    // Trier : Premium d'abord, puis Standard, puis les autres
-    var prioritePlan = { 'Premium': 0, 'Standard': 1, 'Basic': 2, 'Freemium': 3 };
+    // Premium en premier, puis Standard, Basic et Freemium.
+    var prioritePlan = {
+      'Premium': 0,
+      'Standard': 1,
+      'Basic': 2,
+      'Freemium': 3
+    };
 
-    orgs.sort(function(a, b) {
-      var pa = prioritePlan[a.plan] ?? 99;
-      var pb = prioritePlan[b.plan] ?? 99;
+    partenairesData = orgs.slice().sort(function(a, b) {
+      var pa = prioritePlan[a.plan] !== undefined
+        ? prioritePlan[a.plan]
+        : 99;
+
+      var pb = prioritePlan[b.plan] !== undefined
+        ? prioritePlan[b.plan]
+        : 99;
+
       return pa - pb;
     });
 
-    // Prendre les 6 premiers
-    var partenaires = orgs.slice(0, 6);
+    partenaireIndex = 0;
 
-    var container = document.getElementById('partenairesCarrousel');
-    if (!container) return;
-
-    var html = '';
-
-    partenaires.forEach(function(org) {
-      var typeLabel = org.type === 'FLEET_MANAGER' ? 'URBAIN' : 'INTERURBAIN';
-      var planLabel = (org.plan || 'FREEMIUM').toUpperCase();
-      var badgeClass = org.plan === 'Premium'
-        ? 'background:#F59E0B;color:#1A1A2E;'
-        : org.plan === 'Standard'
-          ? 'background:#3B82F6;color:#fff;'
-          : 'background:#252540;color:#94A3B8;';
-
-      var logoHtml = org.logo
-        ? '<img src="' + org.logo + '" style="width:64px;height:64px;border-radius:16px;object-fit:contain;background:#fff;padding:6px;margin:0 auto 12px;" alt="">'
-        : '<div style="width:64px;height:64px;border-radius:16px;background:#1E293B;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 12px;">' + (org.type === 'FLEET_MANAGER' ? '🚕' : '🚌') + '</div>';
-
-      html += `
-        <button
-          onclick="ouvrirPartenaire('${org.slug}')"
-          style="min-width:180px;flex-shrink:0;scroll-snap-align:center;background:#252540;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:20px 16px;cursor:pointer;text-align:center;transition:transform 0.3s ease;"
-          onmouseover="this.style.transform='scale(1.05)'"
-          onmouseout="this.style.transform='scale(1)'"
-        >
-          ${logoHtml}
-
-          <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;">
-            ${org.name}
-          </div>
-
-          <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
-            <span style="${badgeClass}padding:3px 10px;border-radius:20px;font-size:9px;font-weight:700;">
-              ${planLabel}
-            </span>
-            <span style="background:#1E293B;color:#94A3B8;padding:3px 10px;border-radius:20px;font-size:9px;font-weight:600;">
-              ${typeLabel}
-            </span>
-          </div>
-        </button>
-      `;
-    });
-
-    container.innerHTML = html;
-
-    // Mettre à jour le compteur
+    // Nombre TOTAL réel d'organisations.
     var compteur = document.getElementById('partenairesCompteur');
+
     if (compteur) {
-      compteur.textContent = orgs.length + ' organisations partenaires';
+      compteur.textContent =
+        partenairesData.length + ' organisations partenaires';
     }
+
+    afficherPartenaires3D();
+    installerControlesPartenaires();
+    demarrerRotationPartenaires();
+
   } catch (e) {
     console.warn('Chargement partenaires impossible', e);
-    var containerError = document.getElementById('partenairesCarrousel');
-    if (containerError) {
-      containerError.innerHTML = '<div style="text-align:center;color:#E74C3C;font-size:11px;">Impossible de charger les partenaires</div>';
-    }
+    afficherErreurPartenaires(
+      'Impossible de charger les partenaires'
+    );
   }
 }
 
+
+// ============================================================
+// Affichage des 5 cartes visibles
+// Positions : -2, -1, 0, +1, +2
+// ============================================================
+
+function afficherPartenaires3D() {
+  var scene = document.getElementById('partenaires3D');
+
+  if (!scene || !partenairesData.length) {
+    return;
+  }
+
+  var positions = [-2, -1, 0, 1, 2];
+  var html = '';
+
+  positions.forEach(function(position) {
+
+    var index =
+      (partenaireIndex + position + partenairesData.length) %
+      partenairesData.length;
+
+    var org = partenairesData[index];
+
+    // Même logique que TrustSection.tsx
+    var angle = position * 25;
+    var translateX = position * 105;
+    var translateZ = -Math.abs(position) * 150;
+    var scale = position === 0 ? 1 : 0.75;
+    var opacity = position === 0 ? 1 : 0.5;
+    var zIndex = 5 - Math.abs(position);
+
+    var typeLabel =
+      org.type === 'FLEET_MANAGER'
+        ? 'URBAIN'
+        : 'INTERURBAIN';
+
+    var planLabel =
+      (org.plan || 'Freemium').toUpperCase();
+
+    var badgeStyle;
+
+    if (org.plan === 'Premium') {
+      badgeStyle =
+        'background:#F59E0B;color:#1A1A2E;';
+    } else if (org.plan === 'Standard') {
+      badgeStyle =
+        'background:#3B82F6;color:#fff;';
+    } else {
+      badgeStyle =
+        'background:#252540;color:#94A3B8;';
+    }
+
+    var logoHtml;
+
+    if (org.logo) {
+      logoHtml =
+        '<img' +
+        ' src="' + org.logo + '"' +
+        ' alt=""' +
+        ' style="' +
+          'width:64px;' +
+          'height:64px;' +
+          'border-radius:16px;' +
+          'object-fit:contain;' +
+          'background:#fff;' +
+          'padding:6px;' +
+          'margin:0 auto 12px;' +
+          'display:block;' +
+        '"' +
+        '>';
+    } else {
+      logoHtml =
+        '<div style="' +
+          'width:64px;' +
+          'height:64px;' +
+          'border-radius:16px;' +
+          'background:#1E293B;' +
+          'display:flex;' +
+          'align-items:center;' +
+          'justify-content:center;' +
+          'font-size:30px;' +
+          'margin:0 auto 12px;' +
+        '">' +
+        (
+          org.type === 'FLEET_MANAGER'
+            ? '🚕'
+            : '🚌'
+        ) +
+        '</div>';
+    }
+
+    html += `
+      <button
+        type="button"
+        data-partenaire-index="${index}"
+        onclick="ouvrirPartenaire('${org.slug}')"
+        aria-label="Voir ${org.name}"
+        style="
+          position:absolute;
+          left:50%;
+          top:50%;
+          width:180px;
+          min-height:190px;
+          margin-left:-90px;
+          margin-top:-95px;
+          padding:18px 14px;
+          border-radius:20px;
+          border:1px solid rgba(255,255,255,.08);
+          background:#252540;
+          color:#fff;
+          cursor:pointer;
+          text-align:center;
+
+          transform:
+            translateX(${translateX}px)
+            translateZ(${translateZ}px)
+            rotateY(${-angle}deg)
+            scale(${scale});
+
+          transform-style:preserve-3d;
+
+          z-index:${zIndex};
+          opacity:${opacity};
+          filter:${position === 0 ? 'blur(0px)' : 'blur(1px)'};
+
+          transition:
+            transform .7s ease,
+            opacity .7s ease,
+            filter .7s ease;
+
+          box-shadow:
+            ${position === 0
+              ? '0 12px 30px rgba(0,0,0,.28)'
+              : '0 6px 18px rgba(0,0,0,.15)'};
+        "
+      >
+        ${logoHtml}
+
+        <div style="
+          font-size:14px;
+          font-weight:700;
+          margin-bottom:7px;
+          white-space:nowrap;
+          overflow:hidden;
+          text-overflow:ellipsis;
+        ">
+          ${org.name}
+        </div>
+
+        <div style="
+          display:flex;
+          gap:5px;
+          justify-content:center;
+          flex-wrap:wrap;
+        ">
+          <span style="
+            ${badgeStyle}
+            padding:3px 9px;
+            border-radius:20px;
+            font-size:8px;
+            font-weight:700;
+          ">
+            ${planLabel}
+          </span>
+
+          <span style="
+            background:#1E293B;
+            color:#94A3B8;
+            padding:3px 9px;
+            border-radius:20px;
+            font-size:8px;
+            font-weight:600;
+          ">
+            ${typeLabel}
+          </span>
+        </div>
+      </button>
+    `;
+  });
+
+  scene.innerHTML = html;
+}
+
+
+// ============================================================
+// Contrôles précédent / suivant + swipe mobile
+// ============================================================
+
+function installerControlesPartenaires() {
+
+  var prev = document.getElementById('partenairePrev');
+  var next = document.getElementById('partenaireNext');
+  var scene = document.getElementById('partenairesScene');
+
+  if (prev) {
+    prev.onclick = function() {
+      rotationPartenaire(-1);
+      redemarrerRotationPartenaires();
+    };
+  }
+
+  if (next) {
+    next.onclick = function() {
+      rotationPartenaire(1);
+      redemarrerRotationPartenaires();
+    };
+  }
+
+  if (!scene || scene.dataset.swipeReady === 'true') {
+    return;
+  }
+
+  scene.dataset.swipeReady = 'true';
+
+  scene.addEventListener('touchstart', function(event) {
+    if (!event.touches || !event.touches.length) {
+      return;
+    }
+
+    partenaireTouchStartX = event.touches[0].clientX;
+    partenaireTouchStartY = event.touches[0].clientY;
+  }, { passive: true });
+
+  scene.addEventListener('touchend', function(event) {
+    if (
+      partenaireTouchStartX === null ||
+      !event.changedTouches ||
+      !event.changedTouches.length
+    ) {
+      return;
+    }
+
+    var endX = event.changedTouches[0].clientX;
+    var endY = event.changedTouches[0].clientY;
+
+    var deltaX = endX - partenaireTouchStartX;
+    var deltaY = endY - partenaireTouchStartY;
+
+    partenaireTouchStartX = null;
+    partenaireTouchStartY = null;
+
+    // On ne déclenche que sur un vrai swipe horizontal.
+    if (
+      Math.abs(deltaX) < 45 ||
+      Math.abs(deltaX) < Math.abs(deltaY)
+    ) {
+      return;
+    }
+
+    if (deltaX < 0) {
+      rotationPartenaire(1);
+    } else {
+      rotationPartenaire(-1);
+    }
+
+    redemarrerRotationPartenaires();
+  }, { passive: true });
+}
+
+
+// ============================================================
+// Rotation
+// ============================================================
+
+function rotationPartenaire(direction) {
+
+  if (!partenairesData.length) {
+    return;
+  }
+
+  partenaireIndex =
+    (
+      partenaireIndex +
+      direction +
+      partenairesData.length
+    ) % partenairesData.length;
+
+  afficherPartenaires3D();
+}
+
+
+// ============================================================
+// Rotation automatique
+// ============================================================
+
+function demarrerRotationPartenaires() {
+
+  if (partenaireTimer) {
+    clearInterval(partenaireTimer);
+  }
+
+  partenaireTimer = setInterval(function() {
+    rotationPartenaire(1);
+  }, 3500);
+}
+
+
+function redemarrerRotationPartenaires() {
+
+  if (partenaireTimer) {
+    clearInterval(partenaireTimer);
+  }
+
+  demarrerRotationPartenaires();
+}
+
+
+// ============================================================
+// Erreur / état vide
+// ============================================================
+
+function afficherErreurPartenaires(message) {
+
+  var scene = document.getElementById('partenaires3D');
+
+  if (!scene) {
+    return;
+  }
+
+  scene.innerHTML =
+    '<div style="' +
+      'text-align:center;' +
+      'padding-top:80px;' +
+      'color:#94A3B8;' +
+      'font-size:11px;' +
+    '">' +
+      message +
+    '</div>';
+}
+
+
+// ============================================================
+// Navigation vers le partenaire
+// ============================================================
+
 function ouvrirPartenaire(slug) {
-  if (!slug) return;
 
-  // Sauvegarder le slug
-  localStorage.setItem('dagoos_selected_fleet_slug', slug);
+  if (!slug) {
+    return;
+  }
 
-  // Charger le branding
+  localStorage.setItem(
+    'dagoos_selected_fleet_slug',
+    slug
+  );
+
   chargerBrandingOrganisation(slug).then(function() {
-    // Naviguer vers Course ou Départs selon le type d'organisation
-    // Pour l'instant, rediriger vers Course
     loadPage('course');
   });
 }
+
 
 window.chargerPartenaires = chargerPartenaires;
 window.ouvrirPartenaire = ouvrirPartenaire;
