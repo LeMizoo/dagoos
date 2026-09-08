@@ -101,7 +101,7 @@
       ">Une nouvelle version de DAGOOS est disponible. Mettez à jour pour profiter des dernières améliorations.</p>
       
       <div style="display: flex; gap: 10px; justify-content: center;">
-        <button onclick="document.getElementById('dagoos-update-overlay').remove()" style="
+        <button id="dagoos-update-later" style="
           background: #f3f4f6;
           color: #4b5563;
           border: none;
@@ -112,7 +112,7 @@
           cursor: pointer;
         ">Plus tard</button>
         
-        <button onclick="forceUpdate()" style="
+        <button id="dagoos-update-now" style="
           background: #1a1a2e;
           color: #ffffff;
           border: none;
@@ -142,6 +142,19 @@
 
     overlay.appendChild(card);
     document.body.appendChild(overlay);
+
+    // Event listeners
+    document.getElementById('dagoos-update-later')?.addEventListener('click', function() {
+      overlay.remove();
+    });
+
+    document.getElementById('dagoos-update-now')?.addEventListener('click', function() {
+      if (window.forceUpdate) {
+        window.forceUpdate();
+      } else {
+        window.location.reload();
+      }
+    });
 
     // Définir forceUpdate globalement
     window.forceUpdate = function() {
