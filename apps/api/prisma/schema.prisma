@@ -78,7 +78,6 @@ model Organization {
   organizationServices OrganizationService[]
 
   businessActivities BusinessActivity[]
-  services           Service[]
   operations         Operation[]
 }
 
@@ -666,8 +665,6 @@ model Service {
   tariffs            ServiceTariff[]
   vehicleAssignments VehicleAssignment[]
   operations         Operation[]
-  Organization       Organization?       @relation(fields: [organizationId], references: [id])
-  organizationId     String?
 
   @@unique([businessActivityId, code])
   @@index([category])
