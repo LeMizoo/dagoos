@@ -31,51 +31,55 @@ model User {
 // ORGANISATIONS
 // ========================================
 model Organization {
-  id              String         @id @default(cuid())
-  name            String
-  code            String         @unique
-  slug            String         @unique
-  type            String // FLEET_MANAGER, COOPERATIVE
-  email           String         @unique
-  phone           String?
-  mvolaNumber     String?
-  orangeNumber    String?
-  airtelNumber    String?
-  logo            String?
-  description     String?
+  id           String  @id @default(cuid())
+  name         String
+  code         String  @unique
+  slug         String  @unique
+  type         String // FLEET_MANAGER, COOPERATIVE
+  email        String  @unique
+  phone        String?
+  mvolaNumber  String?
+  orangeNumber String?
+  airtelNumber String?
+  logo         String?
+  description  String?
 
-  slogan          String?
-  coverImage      String?
-  primaryColor    String?
-  secondaryColor  String?
+  slogan         String?
+  coverImage     String?
+  primaryColor   String?
+  secondaryColor String?
 
-  landingEnabled  Boolean        @default(false)
+  landingEnabled  Boolean @default(false)
   landingTemplate String?
 
-  address         String?
-  facebook        String?
-  whatsapp        String?
+  address  String?
+  facebook String?
+  whatsapp String?
 
-  landingConfig   Json?
+  landingConfig Json?
 
-  plan            String         @default("Freemium")
-  paymentStatus   String?        @default("unpaid")
-  paymentRef      String?
-  paymentAmount   Int?
-  subscriptionEnd DateTime?
-  status          String         @default("pending")
-  createdAt       DateTime       @default(now())
-  drivers         Driver[]
-  users           User[]
-  messages        Message[]
-  vehicles        Vehicle[]
-  societes        Societe[]
-  notifications   Notification[]
-  proprietaires   Proprietaire[]
-  departs         Depart[]
-  leadActions     LeadAction[]
-  expenses        Expense[]
+  plan                 String                @default("Freemium")
+  paymentStatus        String?               @default("unpaid")
+  paymentRef           String?
+  paymentAmount        Int?
+  subscriptionEnd      DateTime?
+  status               String                @default("pending")
+  createdAt            DateTime              @default(now())
+  drivers              Driver[]
+  users                User[]
+  messages             Message[]
+  vehicles             Vehicle[]
+  societes             Societe[]
+  notifications        Notification[]
+  proprietaires        Proprietaire[]
+  departs              Depart[]
+  leadActions          LeadAction[]
+  expenses             Expense[]
   organizationServices OrganizationService[]
+
+  businessActivities BusinessActivity[]
+  services           Service[]
+  operations         Operation[]
 }
 
 // ========================================
@@ -103,6 +107,8 @@ model Driver {
   expenses      Expense[]
   pointages     Pointage[]
   dossier       DriverDossier?
+
+  operations Operation[]
 }
 
 // ========================================
@@ -125,28 +131,33 @@ enum VehicleType {
 // VÉHICULES
 // ========================================
 model Vehicle {
-  id             String        @id @default(cuid())
-  organizationId String?
-  placesTotal    Int           @default(0)
-  departs        Depart[]
-  organization   Organization? @relation(fields: [organizationId], references: [id])
-  proprietaireId String?
-  proprietaire   Proprietaire? @relation(fields: [proprietaireId], references: [id])
-  plate          String        @unique
-  model          String?
-  year           Int?
-  currentKm      Int           @default(0)
-  status         String        @default("active")
-  type           VehicleType?  @default(VOITURE)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  drivers        Driver[]
-  maintenances   Maintenance[]
-  assurances     Assurance[]
-  vignettes      Vignette[]
-  courses        Course[]
-  trips          Trip[]
-  expenses       Expense[]
+  id                String           @id @default(cuid())
+  organizationId    String?
+  placesTotal       Int              @default(0)
+  departs           Depart[]
+  organization      Organization?    @relation(fields: [organizationId], references: [id])
+  proprietaireId    String?
+  proprietaire      Proprietaire?    @relation(fields: [proprietaireId], references: [id])
+  plate             String           @unique
+  model             String?
+  year              Int?
+  currentKm         Int              @default(0)
+  status            String           @default("active")
+  type              VehicleType?     @default(VOITURE)
+  vehicleCategoryId String?
+  vehicleCategory   VehicleCategory? @relation(fields: [vehicleCategoryId], references: [id], onDelete: SetNull)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  drivers           Driver[]
+  maintenances      Maintenance[]
+  assurances        Assurance[]
+  vignettes         Vignette[]
+  courses           Course[]
+  trips             Trip[]
+  expenses          Expense[]
+
+  vehicleAssignments VehicleAssignment[]
+  operations         Operation[]
 }
 
 // ========================================
@@ -450,11 +461,11 @@ model OrganizationService {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  service        String // TAXI, LOCATION_URBAINE, DEPARTS_INTERURBAINS, etc.
-  active         Boolean      @default(true)
+  service String // TAXI, LOCATION_URBAINE, DEPARTS_INTERURBAINS, etc.
+  active  Boolean @default(true)
 
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([organizationId, service])
   @@index([service, active])
@@ -606,6 +617,175 @@ model LeadAction {
   statut                 String         @default("NEW")
   notifications          Notification[]
   course                 Course?
+  operation              Operation?
   createdAt              DateTime       @default(now())
   updatedAt              DateTime       @updatedAt
+}
+
+// ============================================================
+// DAGOOS MOBILITY — NOUVELLE ARCHITECTURE MÉTIER
+// ============================================================
+
+model BusinessActivity {
+  id String @id @default(cuid())
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  type String
+  zone String?
+
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  services           Service[]
+  vehicleAssignments VehicleAssignment[]
+  operations         Operation[]
+
+  @@unique([organizationId, type, zone])
+  @@index([organizationId, active])
+  @@index([type, active])
+  @@index([zone])
+}
+
+model Service {
+  id String @id @default(cuid())
+
+  businessActivityId String
+  businessActivity   BusinessActivity @relation(fields: [businessActivityId], references: [id], onDelete: Cascade)
+
+  code     String
+  label    String
+  category String?
+
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tariffs            ServiceTariff[]
+  vehicleAssignments VehicleAssignment[]
+  operations         Operation[]
+  Organization       Organization?       @relation(fields: [organizationId], references: [id])
+  organizationId     String?
+
+  @@unique([businessActivityId, code])
+  @@index([category])
+  @@index([active])
+}
+
+model VehicleCategory {
+  id String @id @default(cuid())
+
+  code        String      @unique
+  label       String
+  vehicleType VehicleType
+  capacity    Int?
+  description String?
+
+  vehicles Vehicle[]
+  tariffs  ServiceTariff[]
+
+  @@index([vehicleType])
+}
+
+model VehicleAssignment {
+  id String @id @default(cuid())
+
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  businessActivityId String
+  businessActivity   BusinessActivity @relation(fields: [businessActivityId], references: [id], onDelete: Cascade)
+
+  serviceId String?
+  service   Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  isPrimary Boolean   @default(false)
+  startDate DateTime?
+  endDate   DateTime?
+  active    Boolean   @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([vehicleId, businessActivityId, serviceId])
+  @@index([businessActivityId])
+  @@index([serviceId])
+  @@index([active])
+}
+
+model ServiceTariff {
+  id String @id @default(cuid())
+
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  vehicleCategoryId String?
+  vehicleCategory   VehicleCategory? @relation(fields: [vehicleCategoryId], references: [id], onDelete: SetNull)
+
+  pricingModel String
+
+  basePrice     Float?
+  unitPrice     Float?
+  minimumPrice  Float?
+  commissionPct Float  @default(20)
+  currency      String @default("MGA")
+  configuration Json?
+
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([serviceId, active])
+  @@index([vehicleCategoryId])
+  @@index([pricingModel])
+}
+
+model Operation {
+  id String @id @default(cuid())
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  businessActivityId String?
+  businessActivity   BusinessActivity? @relation(fields: [businessActivityId], references: [id], onDelete: SetNull)
+
+  serviceId String?
+  service   Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  vehicleId String?
+  vehicle   Vehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+
+  driverId String?
+  driver   Driver? @relation(fields: [driverId], references: [id], onDelete: SetNull)
+
+  leadActionId String?     @unique
+  leadAction   LeadAction? @relation(fields: [leadActionId], references: [id], onDelete: SetNull)
+
+  type   String
+  statut String @default("EN_ATTENTE")
+
+  clientNom String?
+  clientTel String?
+  depart    String?
+  arrivee   String?
+
+  prix       Float @default(0)
+  distanceKm Float @default(0)
+
+  details Json?
+
+  createdAt   DateTime  @default(now())
+  acceptedAt  DateTime?
+  startedAt   DateTime?
+  completedAt DateTime?
+  cancelledAt DateTime?
+
+  @@index([organizationId, type, statut])
+  @@index([businessActivityId])
+  @@index([serviceId])
+  @@index([vehicleId])
+  @@index([driverId])
+  @@index([createdAt])
 }
