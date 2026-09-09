@@ -1009,14 +1009,29 @@ router.post('/actions', async (req, res) => {
               slug: true,
               email: true
             }
-          }).catch(() => []);
+          }).catch((error) => {
+            console.error(
+              '[LONG_HAUL MATCHING] Erreur Prisma:',
+              error?.message || error
+            );
+            return [];
+          });
+
+          console.log('[LONG_HAUL MATCHING] Résultat:', {
+            typeService,
+            typeVehicule,
+            vehicleCategoryCode,
+            serviceCode: mapping.serviceCode,
+            organizations: orgsCompatibles.map(o => ({
+              id: o.id,
+              name: o.name,
+              slug: o.slug
+            }))
+          });
 
           organizationsToNotify = orgsCompatibles;
-
-          // Si des organisations sont trouvées, utiliser la première pour le calcul
-          if (organizationsToNotify.length > 0) {
-            org = organizationsToNotify[0];
-          }
+          // NE PAS affecter org ici - attendre l'acceptation d'un chauffeur
+          // org sera défini lors de l'acceptation par le premier chauffeur
         }
       }
     }
@@ -1276,10 +1291,30 @@ router.post('/actions', async (req, res) => {
         });
       }
 
-      // Trouver l'activité INTERURBAN
+      // ======================================================
+      // TARIF V2 POUR UNE DEMANDE PUBLIQUE
+      // ======================================================
+      // IMPORTANT :
+      // - org reste NULL pour préserver le broadcast public
+      // - on utilise une organisation compatible uniquement comme
+      //   référence tarifaire pour l'estimation
+      // - l'organisation définitive sera celle du premier chauffeur
+      //   qui accepte la demande
+      // ======================================================
+
+      const pricingOrganization =
+        org || organizationsToNotify[0] || null;
+
+      if (!pricingOrganization) {
+        return res.status(404).json({
+          error: `Aucune organisation compatible pour ${typeService}/${vehicleCategoryCode}`
+        });
+      }
+
+      // Trouver l'activité INTERURBAN de l'organisation tarifaire
       const activity = await prisma.businessActivity.findFirst({
         where: {
-          organizationId: org?.id,
+          organizationId: pricingOrganization.id,
           type: 'INTERURBAN',
           active: true
         },
@@ -1320,7 +1355,7 @@ router.post('/actions', async (req, res) => {
         });
       }
 
-      // Trouver le tarif V2
+      // Trouver le tarif V2 de référence
       const tariff = await prisma.serviceTariff.findFirst({
         where: {
           serviceId: service.id,
@@ -1332,7 +1367,8 @@ router.post('/actions', async (req, res) => {
           pricingModel: true,
           basePrice: true,
           unitPrice: true,
-          configuration: true
+          configuration: true,
+          commissionPct: true
         }
       });
 
@@ -1392,33 +1428,38 @@ router.post('/actions', async (req, res) => {
       },
     });
     
-    // Créer une notification pour tous les managers de l'organisation
-    // Trouver les managers par l'email de l'organisation
-    const orgData = await prisma.organization.findUnique({
-      where: { id: org?.id },
-      select: { email: true },
-    });
+    // Créer une notification pour les managers uniquement
+    // lorsqu'une organisation est déjà explicitement rattachée.
+    // LONG_HAUL public reste sans organisation jusqu'à la première acceptation.
+    if (org?.id) {
+      // Créer une notification pour tous les managers de l'organisation
+      // Trouver les managers par l'email de l'organisation
+      const orgData = await prisma.organization.findUnique({
+        where: { id: org?.id },
+        select: { email: true },
+      });
     
-    const managers = orgData?.email ? await prisma.user.findMany({
-      where: {
-        role: { in: ['FLEET_MANAGER', 'COOPERATIVE', 'COOP_MANAGER'] },
-        email: orgData.email,
-      },
-      select: { id: true },
-    }).catch(() => []) : [];
-
-    for (const manager of managers) {
-      await prisma.notification.create({
-        data: {
-          userId: manager.id,
-          organizationId: org?.id,
-          leadActionId: action.id,
-          type: 'lead_action',
-          title: `Nouvelle demande : ${type}`,
-          message: `${clientNomNormalized} - ${clientTelNormalized}`,
-          read: false,
+      const managers = orgData?.email ? await prisma.user.findMany({
+        where: {
+          role: { in: ['FLEET_MANAGER', 'COOPERATIVE', 'COOP_MANAGER'] },
+          email: orgData.email,
         },
-      }).catch(() => {});
+        select: { id: true },
+      }).catch(() => []) : [];
+
+      for (const manager of managers) {
+        await prisma.notification.create({
+          data: {
+            userId: manager.id,
+            organizationId: org?.id,
+            leadActionId: action.id,
+            type: 'lead_action',
+            title: `Nouvelle demande : ${type}`,
+            message: `${clientNomNormalized} - ${clientTelNormalized}`,
+            read: false,
+          },
+        }).catch(() => {});
+      }
     }
 
     // Notifier les chauffeurs disponibles pour les demandes LONG_HAUL
@@ -1451,7 +1492,7 @@ router.post('/actions', async (req, res) => {
 
       const driversLong = await prisma.driver.findMany({
         where: driverWhereLong,
-        select: { userId: true, driverCode: true }
+        select: { userId: true, driverCode: true, organizationId: true }
       });
 
       const messageLong = [
@@ -1467,10 +1508,13 @@ router.post('/actions', async (req, res) => {
       ].filter(Boolean).join(' | ');
 
       for (const driver of driversLong) {
+        // Utiliser l'organisation du chauffeur, pas org?.id (qui peut être null pour public)
+        const driverOrgId = driver.organizationId || org?.id;
+        
         await prisma.notification.create({
           data: {
             userId: driver.userId,
-            organizationId: org?.id,
+            organizationId: driverOrgId,
             leadActionId: action.id,
             type: 'long_haul',
             title: 'Nouvelle demande long-courrier',

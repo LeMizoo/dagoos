@@ -167,9 +167,94 @@ router.post('/:id/accept', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Demande introuvable' });
     }
 
-    // 3. Vérifier que l'action appartient à l'organisation du chauffeur
-    if (action.organizationId !== driver.organizationId) {
+    // 3. Définir si c'est une demande LONG_HAUL publique
+    const isPublicLongHaul =
+      action.type === 'LONG_HAUL' &&
+      !action.organizationId;
+
+    // Vérifier que l'action appartient à l'organisation du chauffeur
+    // OU que c'est une demande LONG_HAUL publique
+    if (!isPublicLongHaul && action.organizationId !== driver.organizationId) {
       return res.status(403).json({ error: 'Accès refusé' });
+    }
+
+    // Pour les demandes LONG_HAUL publiques, vérifier la compatibilité V2 complète
+    if (isPublicLongHaul) {
+      const typeService = action.details?.typeService;
+      const typeVehicule = action.details?.typeVehicule;
+      const vehicleCategoryCode = typeVehicule?.toUpperCase().replace(/-/g, '_');
+
+      // Vérifier que le chauffeur a un véhicule
+      const driverVehicle = await prisma.vehicle.findUnique({
+        where: { id: driver.vehicleId },
+        select: {
+          id: true,
+          type: true,
+          organizationId: true,
+          vehicleCategory: {
+            select: { code: true }
+          }
+        }
+      }).catch(() => null);
+
+      if (!driverVehicle) {
+        return res.status(400).json({ error: 'Véhicule du chauffeur introuvable' });
+      }
+
+      // Vérifier la correspondance du véhicule
+      const vehicleType = driverVehicle.type
+        ? String(driverVehicle.type).toLowerCase()
+        : null;
+
+      if (vehicleType !== typeVehicule) {
+        return res.status(400).json({
+          error: `Véhicule incompatible: ${vehicleType || 'inconnu'} vs ${typeVehicule}`
+        });
+      }
+
+      // Vérifier que l'organisation du chauffeur a le service V2 compatible
+      const serviceCode = {
+        passagers: 'LOCATION_INTERURBAINE',
+        marchandises: 'MARCHANDISES',
+        demenagement: 'MARCHANDISES',
+        depannage: 'DEPANNAGE',
+        fret: 'FRET'
+      }[typeService];
+
+      if (!serviceCode) {
+        return res.status(400).json({
+          error: `Type de service non mappé V2: ${typeService}`
+        });
+      }
+
+      const compatibleOrg = await prisma.businessActivity.findFirst({
+        where: {
+          organizationId: driver.organizationId,
+          type: 'INTERURBAN',
+          active: true,
+          services: {
+            some: {
+              code: serviceCode,
+              active: true,
+              tariffs: {
+                some: {
+                  active: true,
+                  vehicleCategory: {
+                    code: vehicleCategoryCode
+                  }
+                }
+              }
+            }
+          }
+        },
+        select: { id: true }
+      }).catch(() => null);
+
+      if (!compatibleOrg) {
+        return res.status(403).json({
+          error: `Votre organisation n'est pas compatible avec ce service ${typeService}/${typeVehicule}`
+        });
+      }
     }
 
     // 4. Vérifier que l'action est encore NEW
@@ -247,9 +332,21 @@ router.post('/:id/accept', authMiddleware, async (req, res) => {
       courseCree = await prisma.$transaction(async (tx) => {
         // Réserver atomiquement la LeadAction (NEW → ACCEPTED)
         // Si count === 0, un autre chauffeur a déjà accepté
+        // Pour les demandes publiques, conditionner sur organizationId = null
         const reservation = await tx.leadAction.updateMany({
-          where: { id: actionId, statut: 'NEW' },
-          data: { statut: 'ACCEPTED' }
+          where: {
+            id: actionId,
+            statut: 'NEW',
+            ...(isPublicLongHaul
+              ? { organizationId: null }
+              : { organizationId: driver.organizationId })
+          },
+          data: {
+            statut: 'ACCEPTED',
+            ...(isPublicLongHaul
+              ? { organizationId: driver.organizationId }
+              : {})
+          }
         });
 
         if (reservation.count === 0) {
