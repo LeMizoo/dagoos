@@ -698,6 +698,14 @@ model VehicleAssignment {
   serviceId String?
   service   Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
 
+  // Capacité commerciale contextuelle
+  // Exemples :
+  //   capacityValue = 10.0, capacityUnit = "TONNES"
+  //   capacityValue = 12.5, capacityUnit = "M3"
+  // NULL = capacité commerciale non renseignée
+  capacityValue Float?
+  capacityUnit  String?
+
   isPrimary Boolean   @default(false)
   startDate DateTime?
   endDate   DateTime?

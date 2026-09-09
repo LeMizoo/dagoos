@@ -323,10 +323,17 @@ function arrondirPrix(prix) {
 // POST /api/public/estimate - Estimer distance et prix
 router.post('/estimate', async (req, res) => {
   try {
-    const { organizationSlug, depart, arrivee, typeVehicule } = req.body;
+    const {
+      organizationSlug,
+      depart,
+      arrivee,
+      typeVehicule
+    } = req.body;
 
     if (!organizationSlug || !depart || !arrivee) {
-      return res.status(400).json({ error: 'Départ et arrivée requis' });
+      return res.status(400).json({
+        error: 'Départ et arrivée requis'
+      });
     }
 
     const org = await prisma.organization.findUnique({
@@ -334,58 +341,225 @@ router.post('/estimate', async (req, res) => {
       select: { id: true }
     });
 
-    if (!org) return res.status(404).json({ error: 'Organisation introuvable' });
-
-    // Calculer la distance
-    const distanceKm = await calculerDistance(depart, arrivee);
-
-    // Récupérer le tarif
-    const VEHICLE_TYPE_MAP = {
-      'moto': 'moto',
-      'voiture': 'voiture',
-      'taxi': 'voiture',
-      'bus': 'bus',
-      'minivan': 'minivan',
-      'tricycle': 'tricycle'
-    };
-    const cleTarif = VEHICLE_TYPE_MAP[typeVehicule] || 'moto';
-
-    const tarif = await prisma.tarif.findUnique({
-      where: { organizationId: org?.id }
-    }).catch(() => null);
-
-    let prixEstime = 2000;
-    let modePrestation = 'courseNormale';
-
-    if (tarif?.vehiculeTarifs) {
-      try {
-        const vehiculeTarifs = JSON.parse(tarif.vehiculeTarifs);
-        const tarifVehicule = vehiculeTarifs[cleTarif];
-
-        if (tarifVehicule) {
-          if (['bus', 'minivan', 'tricycle'].includes(cleTarif)) {
-            prixEstime = tarifVehicule?.tarifFixe?.prixTrajet || tarif.prixBase;
-            modePrestation = 'tarifFixe';
-          } else if (tarifVehicule?.courseNormale) {
-            const prixBase = tarifVehicule.courseNormale.prixBase || tarif.prixBase;
-            const prixKm = tarifVehicule.courseNormale.prixKm || tarif.prixKm;
-            prixEstime = arrondirPrix(prixBase + (distanceKm * prixKm));
-            modePrestation = 'courseNormale';
-          }
-        }
-      } catch(e) {}
-    } else if (tarif) {
-      prixEstime = arrondirPrix(tarif.prixBase + (distanceKm * tarif.prixKm));
+    if (!org) {
+      return res.status(404).json({
+        error: 'Organisation introuvable'
+      });
     }
 
-    res.json({
+    const distanceKm = await calculerDistance(depart, arrivee);
+
+    /*
+     * ========================================================
+     * MOTEUR TARIFAIRE V2
+     * ========================================================
+     *
+     * Contrat HTTP conservé :
+     * {
+     *   organizationSlug,
+     *   depart,
+     *   arrivee,
+     *   typeVehicule
+     * }
+     *
+     * La source tarifaire est désormais :
+     *
+     * Organization
+     *   -> BusinessActivity (URBAN)
+     *   -> Service
+     *   -> VehicleCategory
+     *   -> ServiceTariff
+     *
+     * Aucun fallback V1.
+     */
+
+    const VEHICLE_CONFIG = {
+      moto: {
+        serviceCode: 'TAXI',
+        categoryCode: 'MOTO',
+        pricingModel: 'PER_KM',
+        modePrestation: 'courseNormale'
+      },
+
+      voiture: {
+        serviceCode: 'TAXI',
+        categoryCode: 'VOITURE',
+        pricingModel: 'PER_KM',
+        modePrestation: 'courseNormale'
+      },
+
+      taxi: {
+        serviceCode: 'TAXI',
+        categoryCode: 'VOITURE',
+        pricingModel: 'PER_KM',
+        modePrestation: 'courseNormale'
+      },
+
+      bus: {
+        serviceCode: 'LOCATION_URBAINE',
+        categoryCode: 'BUS',
+        pricingModel: 'FIXED',
+        modePrestation: 'tarifFixe'
+      },
+
+      minivan: {
+        serviceCode: 'LOCATION_URBAINE',
+        categoryCode: 'MINIVAN',
+        pricingModel: 'FIXED',
+        modePrestation: 'tarifFixe'
+      },
+
+      tricycle: {
+        serviceCode: 'LOCATION_URBAINE',
+        categoryCode: 'TRICYCLE',
+        pricingModel: 'FIXED',
+        modePrestation: 'tarifFixe'
+      }
+    };
+
+    const vehicleConfig = VEHICLE_CONFIG[typeVehicule];
+
+    if (!vehicleConfig) {
+      return res.status(400).json({
+        error: `Type de véhicule invalide: ${typeVehicule}`
+      });
+    }
+
+    /*
+     * 1. Activité URBAN
+     */
+    const activity = await prisma.businessActivity.findFirst({
+      where: {
+        organizationId: org.id,
+        type: 'URBAN',
+        active: true
+      },
+      select: {
+        id: true
+      }
+    });
+
+    if (!activity) {
+      return res.status(404).json({
+        error: 'Activité urbaine non configurée'
+      });
+    }
+
+    /*
+     * 2. Service V2
+     */
+    const service = await prisma.service.findFirst({
+      where: {
+        businessActivityId: activity.id,
+        code: vehicleConfig.serviceCode,
+        active: true
+      },
+      select: {
+        id: true,
+        code: true
+      }
+    });
+
+    if (!service) {
+      return res.status(404).json({
+        error: `Service ${vehicleConfig.serviceCode} non configuré`
+      });
+    }
+
+    /*
+     * 3. Catégorie véhicule V2
+     */
+    const category = await prisma.vehicleCategory.findUnique({
+      where: {
+        code: vehicleConfig.categoryCode
+      },
+      select: {
+        id: true,
+        code: true
+      }
+    });
+
+    if (!category) {
+      return res.status(404).json({
+        error: `Catégorie véhicule ${vehicleConfig.categoryCode} introuvable`
+      });
+    }
+
+    /*
+     * 4. Tarif V2
+     */
+    const tariff = await prisma.serviceTariff.findFirst({
+      where: {
+        serviceId: service.id,
+        vehicleCategoryId: category.id,
+        pricingModel: vehicleConfig.pricingModel,
+        active: true
+      },
+      select: {
+        id: true,
+        pricingModel: true,
+        basePrice: true,
+        unitPrice: true
+      }
+    });
+
+    if (!tariff) {
+      return res.status(404).json({
+        error:
+          `Tarif V2 non configuré pour ${vehicleConfig.categoryCode} ` +
+          `sur ${vehicleConfig.serviceCode}`
+      });
+    }
+
+    /*
+     * 5. Calcul V2
+     */
+    let prixEstime;
+
+    if (tariff.pricingModel === 'PER_KM') {
+      if (
+        typeof tariff.basePrice !== 'number' ||
+        typeof tariff.unitPrice !== 'number'
+      ) {
+        return res.status(500).json({
+          error: 'Configuration tarifaire V2 invalide'
+        });
+      }
+
+      prixEstime = arrondirPrix(
+        tariff.basePrice +
+        (distanceKm * tariff.unitPrice)
+      );
+    } else if (tariff.pricingModel === 'FIXED') {
+      if (typeof tariff.basePrice !== 'number') {
+        return res.status(500).json({
+          error: 'Configuration tarifaire fixe V2 invalide'
+        });
+      }
+
+      prixEstime = tariff.basePrice;
+    } else {
+      return res.status(500).json({
+        error:
+          `Modèle tarifaire V2 non supporté: ${tariff.pricingModel}`
+      });
+    }
+
+    /*
+     * 6. Contrat HTTP historique conservé
+     */
+    return res.json({
       distanceKm,
       prixEstime,
-      modePrestation
+      modePrestation: vehicleConfig.modePrestation
     });
+
   } catch (error) {
     console.error('POST /public/estimate:', error);
-    res.status(500).json({ error: error.message });
+
+    return res.status(500).json({
+      error: error.message
+    });
   }
 });
 
@@ -442,7 +616,6 @@ router.get('/suivi/:code', async (req, res) => {
   }
 });
 
-// POST /api/public/estimate-location - Estimer une location
 router.post('/estimate-location', async (req, res) => {
   try {
     const {
@@ -496,7 +669,7 @@ router.post('/estimate-location', async (req, res) => {
     }
 
     // ========================================
-    // ESTIMATION LONG_HAUL
+    // ESTIMATION LONG_HAUL - MOTEUR V2
     // ========================================
     if (type === 'LONG_HAUL') {
       if (!VALID_LONG_HAUL_SERVICES.includes(typeService)) {
@@ -511,75 +684,131 @@ router.post('/estimate-location', async (req, res) => {
         });
       }
 
-      const cleLong = typeVehicule;
+      // Mapping V1 → V2
+      const LONG_HAUL_MAPPING = {
+        passagers: {
+          serviceCode: 'LOCATION_INTERURBAINE',
+          vehicleCategories: ['BUS', 'MINIVAN'],
+          pricingModel: 'PER_KM'
+        },
+        marchandises: {
+          serviceCode: 'MARCHANDISES',
+          vehicleCategories: ['CAMION'],
+          pricingModel: 'NEGOTIATED'
+        },
+        demenagement: {
+          serviceCode: 'MARCHANDISES',
+          vehicleCategories: ['FOURGON', 'CAMION'],
+          pricingModel: 'NEGOTIATED'
+        },
+        depannage: {
+          serviceCode: 'DEPANNAGE',
+          vehicleCategories: ['DEPANNEUSE'],
+          pricingModel: 'NEGOTIATED'
+        },
+        fret: {
+          serviceCode: 'FRET',
+          vehicleCategories: ['CAMION', 'SEMI_REMORQUE'],
+          pricingModel: 'NEGOTIATED'
+        }
+      };
 
-      const tarifLong = vehiculeTarifs[cleLong]?.longueDistance;
-
-      if (
-        !tarifLong ||
-        typeof tarifLong.prixBase !== 'number' ||
-        typeof tarifLong.prixKm !== 'number'
-      ) {
+      const mapping = LONG_HAUL_MAPPING[typeService];
+      if (!mapping) {
         return res.status(400).json({
-          error: `Tarif long-courrier non configuré pour ${typeVehicule}`
+          error: `Mapping V2 non trouvé pour ${typeService}`
         });
       }
 
-      const prixBaseLong = Number(tarifLong.prixBase);
-      const prixKmLong = Number(tarifLong.prixKm);
-      const forfaitServiceLong = Number(tarifLong.forfaitService);
-
-      let prixEstimeLong = 0;
-
-      switch (typeService) {
-        case 'passagers':
-          prixEstimeLong =
-            (prixBaseLong * (Number(nbPassagers) || 1)) +
-            (distanceKm * prixKmLong);
-          break;
-
-        case 'marchandises':
-          prixEstimeLong =
-            (prixBaseLong * (Number(volume) || 1)) +
-            (distanceKm * prixKmLong);
-          break;
-
-        case 'demenagement':
-          if (!Number.isFinite(forfaitServiceLong) || forfaitServiceLong <= 0) {
-            return res.status(400).json({
-              error: `Forfait déménagement non configuré pour ${typeVehicule}`
-            });
-          }
-          prixEstimeLong =
-            forfaitServiceLong +
-            (distanceKm * prixKmLong);
-          break;
-
-        case 'depannage':
-          if (!Number.isFinite(forfaitServiceLong) || forfaitServiceLong <= 0) {
-            return res.status(400).json({
-              error: `Forfait dépannage non configuré pour ${typeVehicule}`
-            });
-          }
-          prixEstimeLong =
-            forfaitServiceLong +
-            (distanceKm * prixKmLong * 1.5);
-          break;
-
-        case 'fret':
-          prixEstimeLong =
-            distanceKm * prixKmLong * 2;
-          break;
-
-        default:
-          prixEstimeLong =
-            prixBaseLong +
-            (distanceKm * prixKmLong);
+      // Convertir typeVehicule V1 → VehicleCategory code V2
+      const vehicleCategoryCode = typeVehicule.toUpperCase().replace(/-/g, '_');
+      if (!mapping.vehicleCategories.includes(vehicleCategoryCode)) {
+        return res.status(400).json({
+          error: `Véhicule ${typeVehicule} non supporté en V2 pour ${typeService}`
+        });
       }
 
+      // Trouver l'activité INTERURBAN de l'organisation
+      const activity = await prisma.businessActivity.findFirst({
+        where: {
+          organizationId: org.id,
+          type: 'INTERURBAN',
+          active: true
+        },
+        select: { id: true }
+      });
+
+      if (!activity) {
+        return res.status(404).json({
+          error: 'Activité interurbaine non configurée'
+        });
+      }
+
+      // Trouver le service V2
+      const service = await prisma.service.findFirst({
+        where: {
+          businessActivityId: activity.id,
+          code: mapping.serviceCode,
+          active: true
+        },
+        select: { id: true, code: true }
+      });
+
+      if (!service) {
+        return res.status(404).json({
+          error: `Service ${mapping.serviceCode} non configuré`
+        });
+      }
+
+      // Trouver la catégorie de véhicule
+      const category = await prisma.vehicleCategory.findUnique({
+        where: { code: vehicleCategoryCode },
+        select: { id: true, code: true }
+      });
+
+      if (!category) {
+        return res.status(404).json({
+          error: `Catégorie véhicule ${vehicleCategoryCode} introuvable`
+        });
+      }
+
+      // Trouver le tarif V2
+      const tariff = await prisma.serviceTariff.findFirst({
+        where: {
+          serviceId: service.id,
+          vehicleCategoryId: category.id,
+          active: true
+        },
+        select: {
+          id: true,
+          pricingModel: true,
+          basePrice: true,
+          unitPrice: true,
+          configuration: true
+        }
+      });
+
+      if (!tariff) {
+        return res.status(404).json({
+          error: `Tarif V2 non configuré pour ${mapping.serviceCode}/${vehicleCategoryCode}`
+        });
+      }
+
+      // Calculer avec le moteur V2
+      const pricingEngine = require('../../services/pricingEngine');
+      const pricingResult = pricingEngine.calculatePrice(
+        tariff,
+        distanceKm,
+        {
+          nbPassagers: typeService === 'passagers' ? (Number(nbPassagers) || 1) : undefined,
+          tonnage: typeService === 'marchandises' ? (Number(volume) || 1) : undefined
+        }
+      );
+
+      // Réponse V2
       return res.json({
         distanceKm,
-        prixEstime: arrondirPrix(prixEstimeLong),
+        ...pricingResult,
         type: 'LONG_HAUL',
         typeVehicule,
         typeService,
@@ -710,6 +939,7 @@ router.post('/actions', async (req, res) => {
     
     // ========================================
     // MATCHING AUTOMATIQUE LONG_HAUL (sans organisation)
+    // V2 : basé sur ServiceTariff + VehicleAssignment
     // ========================================
     let organizationsToNotify = [];
 
@@ -717,44 +947,77 @@ router.post('/actions', async (req, res) => {
       const typeService = details?.typeService || 'passagers';
       const typeVehicule = details?.typeVehicule || 'bus';
 
-      // Chercher les organisations COOPERATIVE actives
-      const orgsCompatibles = await prisma.organization.findMany({
-        where: {
-          type: 'COOPERATIVE',
-          status: 'active',
+      // Mapping V2 pour trouver les organisations compatibles
+      const LONG_HAUL_MAPPING = {
+        passagers: {
+          serviceCode: 'LOCATION_INTERURBAINE',
+          vehicleCategories: ['BUS', 'MINIVAN']
         },
-      }).catch(() => []);
-
-      // Les tarifs sont liés par organizationId (pas par une relation Prisma)
-      const tarifsCompatibles = await prisma.tarif.findMany({
-        where: {
-          organizationId: {
-            in: orgsCompatibles.map(o => o.id),
-          },
+        marchandises: {
+          serviceCode: 'MARCHANDISES',
+          vehicleCategories: ['CAMION']
         },
-      }).catch(() => []);
-
-      const tarifsParOrganisation = new Map(
-        tarifsCompatibles.map(t => [t.organizationId, t])
-      );
-
-      for (const o of orgsCompatibles) {
-        const tarif = tarifsParOrganisation.get(o.id);
-
-        if (tarif?.vehiculeTarifs) {
-          try {
-            const vt = JSON.parse(tarif.vehiculeTarifs);
-
-            if (vt[typeVehicule]?.longueDistance) {
-              organizationsToNotify.push(o);
-            }
-          } catch(e) {}
+        demenagement: {
+          serviceCode: 'MARCHANDISES',
+          vehicleCategories: ['FOURGON', 'CAMION']
+        },
+        depannage: {
+          serviceCode: 'DEPANNAGE',
+          vehicleCategories: ['DEPANNEUSE']
+        },
+        fret: {
+          serviceCode: 'FRET',
+          vehicleCategories: ['CAMION', 'SEMI_REMORQUE']
         }
-      }
+      };
 
-      // Si des organisations sont trouvées, utiliser la première pour le calcul
-      if (organizationsToNotify.length > 0) {
-        org = organizationsToNotify[0];
+      const mapping = LONG_HAUL_MAPPING[typeService];
+      
+      if (mapping) {
+        const vehicleCategoryCode = typeVehicule.toUpperCase().replace(/-/g, '_');
+        
+        if (mapping.vehicleCategories.includes(vehicleCategoryCode)) {
+          // Trouver les organisations COOPERATIVE actives avec le bon service V2
+          const orgsCompatibles = await prisma.organization.findMany({
+            where: {
+              type: 'COOPERATIVE',
+              status: 'active',
+              businessActivities: {
+                some: {
+                  type: 'INTERURBAN',
+                  active: true,
+                  services: {
+                    some: {
+                      code: mapping.serviceCode,
+                      active: true,
+                      tariffs: {
+                        some: {
+                          active: true,
+                          vehicleCategory: {
+                            code: vehicleCategoryCode
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              email: true
+            }
+          }).catch(() => []);
+
+          organizationsToNotify = orgsCompatibles;
+
+          // Si des organisations sont trouvées, utiliser la première pour le calcul
+          if (organizationsToNotify.length > 0) {
+            org = organizationsToNotify[0];
+          }
+        }
       }
     }
 
@@ -948,8 +1211,7 @@ router.post('/actions', async (req, res) => {
 
     } else if (type === 'LONG_HAUL') {
       // ======================================================
-      // LONG_HAUL : transport long-courrier
-      // (passagers, marchandises, déménagement, dépannage)
+      // LONG_HAUL : moteur V2 (ServiceTariff + pricingEngine)
       // ======================================================
 
       const typeVehicule = details?.typeVehicule || 'bus';
@@ -957,29 +1219,6 @@ router.post('/actions', async (req, res) => {
       const depart = details?.depart || '';
       const arrivee = details?.arrivee || '';
       const distanceKmLong = await calculerDistance(depart, arrivee);
-
-      // Tarif de l'organisation
-      const tarifLongOrg = await prisma.tarif.findUnique({
-        where: { organizationId: org?.id }
-      }).catch(() => null);
-
-      if (!tarifLongOrg) {
-        return res.status(400).json({
-          error: 'Tarif non configuré pour cette organisation'
-        });
-      }
-
-      commissionPct = tarifLongOrg.commissionChauffeur ?? 20;
-
-      // Lecture des tarifs par véhicule
-      let vehiculeTarifsLong = {};
-      if (tarifLongOrg.vehiculeTarifs) {
-        try {
-          vehiculeTarifsLong = JSON.parse(tarifLongOrg.vehiculeTarifs);
-        } catch (e) {
-          console.error('Erreur parsing vehiculeTarifs LONG_HAUL:', e);
-        }
-      }
 
       if (!VALID_LONG_HAUL_SERVICES.includes(typeService)) {
         return res.status(400).json({
@@ -993,83 +1232,139 @@ router.post('/actions', async (req, res) => {
         });
       }
 
-      const cleLong = typeVehicule;
+      // Mapping V1 → V2 (identique à /estimate-location)
+      const LONG_HAUL_MAPPING = {
+        passagers: {
+          serviceCode: 'LOCATION_INTERURBAINE',
+          vehicleCategories: ['BUS', 'MINIVAN'],
+          pricingModel: 'PER_KM'
+        },
+        marchandises: {
+          serviceCode: 'MARCHANDISES',
+          vehicleCategories: ['CAMION'],
+          pricingModel: 'NEGOTIATED'
+        },
+        demenagement: {
+          serviceCode: 'MARCHANDISES',
+          vehicleCategories: ['FOURGON', 'CAMION'],
+          pricingModel: 'NEGOTIATED'
+        },
+        depannage: {
+          serviceCode: 'DEPANNAGE',
+          vehicleCategories: ['DEPANNEUSE'],
+          pricingModel: 'NEGOTIATED'
+        },
+        fret: {
+          serviceCode: 'FRET',
+          vehicleCategories: ['CAMION', 'SEMI_REMORQUE'],
+          pricingModel: 'NEGOTIATED'
+        }
+      };
 
-      const tarifLong = vehiculeTarifsLong[cleLong]?.longueDistance;
-
-      // 🔴 RÈGLE MÉTIER : pas de fallback silencieux vers le tarif urbain
-      if (!tarifLong || typeof tarifLong.prixBase !== 'number' || typeof tarifLong.prixKm !== 'number') {
+      const mapping = LONG_HAUL_MAPPING[typeService];
+      if (!mapping) {
         return res.status(400).json({
-          error: `Tarif long-courrier non configuré pour ${typeVehicule}`
+          error: `Mapping V2 non trouvé pour ${typeService}`
         });
       }
 
-      const prixBaseLong = Number(tarifLong.prixBase);
-      const prixKmLong = Number(tarifLong.prixKm);
-      const forfaitServiceLong = Number(tarifLong.forfaitService);
-
-
-      // Calcul selon le type de service
-      switch (typeService) {
-        case 'passagers':
-          // Tarif par passager + distance
-          const nbPassagersLong = Number(details?.nbPassagers) || 1;
-          prixEstime = arrondirPrix(
-            (prixBaseLong * nbPassagersLong) +
-            (distanceKmLong * prixKmLong)
-          );
-          break;
-
-        case 'marchandises':
-          // Tarif volume + distance
-          const volumeLong = Number(details?.volume) || 1;
-          prixEstime = arrondirPrix(
-            (prixBaseLong * volumeLong) +
-            (distanceKmLong * prixKmLong)
-          );
-          break;
-
-        case 'demenagement':
-          if (!Number.isFinite(forfaitServiceLong) || forfaitServiceLong <= 0) {
-            return res.status(400).json({
-              error: `Forfait déménagement non configuré pour ${typeVehicule}`
-            });
-          }
-          // Forfait + distance
-          prixEstime = arrondirPrix(
-            forfaitServiceLong +
-            (distanceKmLong * prixKmLong)
-          );
-          break;
-
-        case 'depannage':
-          if (!Number.isFinite(forfaitServiceLong) || forfaitServiceLong <= 0) {
-            return res.status(400).json({
-              error: `Forfait dépannage non configuré pour ${typeVehicule}`
-            });
-          }
-          // Forfait + distance
-          prixEstime = arrondirPrix(
-            forfaitServiceLong +
-            (distanceKmLong * prixKmLong * 1.5)
-          );
-          break;
-
-        case 'fret':
-          // Tarif au km uniquement
-          prixEstime = arrondirPrix(
-            distanceKmLong * prixKmLong * 2
-          );
-          break;
-
-        default:
-          prixEstime = arrondirPrix(
-            prixBaseLong + (distanceKmLong * prixKmLong)
-          );
+      // Convertir typeVehicule V1 → VehicleCategory code V2
+      const vehicleCategoryCode = typeVehicule.toUpperCase().replace(/-/g, '_');
+      if (!mapping.vehicleCategories.includes(vehicleCategoryCode)) {
+        return res.status(400).json({
+          error: `Véhicule ${typeVehicule} non supporté en V2 pour ${typeService}`
+        });
       }
 
+      // Trouver l'activité INTERURBAN
+      const activity = await prisma.businessActivity.findFirst({
+        where: {
+          organizationId: org?.id,
+          type: 'INTERURBAN',
+          active: true
+        },
+        select: { id: true }
+      });
+
+      if (!activity) {
+        return res.status(404).json({
+          error: 'Activité interurbaine non configurée'
+        });
+      }
+
+      // Trouver le service V2
+      const service = await prisma.service.findFirst({
+        where: {
+          businessActivityId: activity.id,
+          code: mapping.serviceCode,
+          active: true
+        },
+        select: { id: true, code: true }
+      });
+
+      if (!service) {
+        return res.status(404).json({
+          error: `Service ${mapping.serviceCode} non configuré`
+        });
+      }
+
+      // Trouver la catégorie
+      const category = await prisma.vehicleCategory.findUnique({
+        where: { code: vehicleCategoryCode },
+        select: { id: true, code: true }
+      });
+
+      if (!category) {
+        return res.status(404).json({
+          error: `Catégorie véhicule ${vehicleCategoryCode} introuvable`
+        });
+      }
+
+      // Trouver le tarif V2
+      const tariff = await prisma.serviceTariff.findFirst({
+        where: {
+          serviceId: service.id,
+          vehicleCategoryId: category.id,
+          active: true
+        },
+        select: {
+          id: true,
+          pricingModel: true,
+          basePrice: true,
+          unitPrice: true,
+          configuration: true
+        }
+      });
+
+      if (!tariff) {
+        return res.status(404).json({
+          error: `Tarif V2 non configuré pour ${mapping.serviceCode}/${vehicleCategoryCode}`
+        });
+      }
+
+      // Calculer avec le moteur V2
+      const pricingEngine = require('../../services/pricingEngine');
+      const pricingResult = pricingEngine.calculatePrice(
+        tariff,
+        distanceKmLong,
+        {
+          nbPassagers: typeService === 'passagers' ? (Number(details?.nbPassagers) || 1) : undefined,
+          tonnage: typeService === 'marchandises' ? (Number(details?.volume) || 1) : undefined
+        }
+      );
+
+      // Mettre à jour les variables pour la création LeadAction
       distanceKm = distanceKmLong;
-      modePrestation = 'long_haul';
+      prixEstime = pricingResult.price || 0;
+      modePrestation = pricingResult.pricingModel === 'NEGOTIATED' ? 'negociation' : 'long_haul';
+      commissionPct = tariff.commissionPct || 20;
+
+      // Stocker le résultat V2 dans details
+      details.pricingModel = pricingResult.pricingModel;
+      details.estimated = pricingResult.estimated;
+      details.price = pricingResult.price;
+      details.status = pricingResult.status;
+      details.negotiation = pricingResult.negotiation || null;
 
     }
 
@@ -1163,7 +1458,9 @@ router.post('/actions', async (req, res) => {
         `Client: ${clientNomNormalized}`,
         `Départ: ${details?.depart || ''}`,
         `Arrivée: ${details?.arrivee || ''}`,
-        `Prix suggéré: ${prixEstime} Ar`,
+        details?.pricingModel === 'NEGOTIATED' 
+          ? `Tarification: à négocier`
+          : `Prix suggéré: ${prixEstime} Ar`,
         `Distance: ${distanceKm} km`,
         `Mode: ${modePrestation}`,
         `Commission: ${commissionPct}%`
