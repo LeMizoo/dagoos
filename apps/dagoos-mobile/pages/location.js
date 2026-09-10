@@ -292,13 +292,43 @@ async function estimerLocationMobile() {
 
     locationEstimation = result;
 
-    if (result && result.prixEstime && container) {
+    if (!result || !container) return;
+
+    // Cas 1 : Estimation calculée (PER_KM, FIXED, BAREME, PER_DAY)
+    if (result.status === 'ESTIMATED' && result.price) {
       container.innerHTML = `
         <div style="background:#1E293B;border-radius:12px;padding:16px;border:1px solid #F59E0B;">
           <p style="text-align:center;color:#F59E0B;font-size:13px;font-weight:600;">Estimation</p>
           <div style="font-size:11px;color:#94A3B8;">Distance</div>
           <div style="font-size:22px;font-weight:800;color:#F59E0B;">${result.distanceKm} km</div>
           ${result.nbJours > 1 ? '<div style="font-size:11px;color:#94A3B8;margin-top:6px;">Nombre de jours</div><div style="font-weight:600;">' + result.nbJours + ' jours</div>' : ''}
+          <div style="font-size:11px;color:#94A3B8;margin-top:8px;">Prix estimé</div>
+          <div style="font-size:26px;font-weight:800;color:#F59E0B;">${Number(result.price).toLocaleString('fr-FR')} Ar</div>
+          ${result.details && result.details.pricingMethod ? '<p style="text-align:center;color:#94A3B8;font-size:10px;margin-top:8px;">Tarif ' + result.details.pricingMethod + '</p>' : ''}
+        </div>
+      `;
+    }
+    // Cas 2 : Négociation requise (NEGOTIATED)
+    else if (result.status === 'NEGOTIATION_REQUIRED') {
+      container.innerHTML = `
+        <div style="background:#1E293B;border-radius:12px;padding:16px;border:1px solid #3B82F6;">
+          <p style="text-align:center;color:#3B82F6;font-size:13px;font-weight:600;">💬 Prix à négocier</p>
+          <div style="font-size:11px;color:#94A3B8;">Distance</div>
+          <div style="font-size:22px;font-weight:800;color:#3B82F6;">${result.distanceKm} km</div>
+          <div style="font-size:12px;color:#CBD5E1;margin-top:12px;line-height:1.5;text-align:center;">
+            Le transporteur va vous contacter avec un prix personnalisé pour ce service.
+          </div>
+          <p style="text-align:center;color:#94A3B8;font-size:10px;margin-top:8px;">Service : ${result.typeService || result.pricingModel}</p>
+        </div>
+      `;
+    }
+    // Cas fallback (ancienne API)
+    else if (result.prixEstime) {
+      container.innerHTML = `
+        <div style="background:#1E293B;border-radius:12px;padding:16px;border:1px solid #F59E0B;">
+          <p style="text-align:center;color:#F59E0B;font-size:13px;font-weight:600;">Estimation</p>
+          <div style="font-size:11px;color:#94A3B8;">Distance</div>
+          <div style="font-size:22px;font-weight:800;color:#F59E0B;">${result.distanceKm} km</div>
           <div style="font-size:11px;color:#94A3B8;margin-top:8px;">Prix</div>
           <div style="font-size:26px;font-weight:800;color:#F59E0B;">${Number(result.prixEstime).toLocaleString('fr-FR')} Ar</div>
         </div>
