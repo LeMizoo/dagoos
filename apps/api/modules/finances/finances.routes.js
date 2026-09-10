@@ -794,17 +794,26 @@ router.get('/expenses', authMiddleware, requirePermission('finances.expenses.rea
 // POST /api/finances/expenses
 router.post('/expenses', authMiddleware, requirePermission('finances.expenses.create'), async (req, res) => {
   try {
-    if (!req.user.driverId) {
+    const requestedDriverId = req.body.driverId;
+    const organizationId = await getOrganizationId(req);
+    const driverId = req.user.driverId || requestedDriverId;
+
+    if (!driverId) {
       return res.status(400).json({
         success: false,
-        error: 'Chauffeur non associé'
+        error: 'Chauffeur requis'
+      });
+    }
+
+    if (req.user.driverId && requestedDriverId && requestedDriverId !== req.user.driverId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Un chauffeur ne peut créer une dépense que pour lui-même'
       });
     }
 
     const driver = await prisma.driver.findUnique({
-      where: {
-        id: req.user.driverId
-      },
+      where: { id: driverId },
       select: {
         id: true,
         organizationId: true,
@@ -812,7 +821,7 @@ router.post('/expenses', authMiddleware, requirePermission('finances.expenses.cr
       }
     });
 
-    if (!driver) {
+    if (!driver || (organizationId && driver.organizationId !== organizationId)) {
       return res.status(404).json({
         success: false,
         error: 'Chauffeur introuvable'

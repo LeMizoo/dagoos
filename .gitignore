@@ -74,3 +74,4 @@ apps/api/reset-super-admin.js
 backend/reset-super-admin.js
 reset-admin.fixed.js
 reset-super-admin.fixed.js
+.env*

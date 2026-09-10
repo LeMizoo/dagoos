@@ -42,9 +42,8 @@ export default function FlotteMessages() {
     setSelected(id);
     const message = messages.find(m => m.id === id);
     if (message && !message.read) {
-      await apiFetch(`/messages/${id}`, {
+      await apiFetch(`/messages/${id}/read`, {
         method: 'PUT',
-        body: JSON.stringify({ read: true })
       });
       load();
     }
@@ -54,9 +53,9 @@ export default function FlotteMessages() {
     if (!selected || !reply.trim()) return;
     setSending(true);
     try {
-      await apiFetch(`/messages/${selected}`, {
+      await apiFetch(`/messages/${selected}/reply`, {
         method: 'PUT',
-        body: JSON.stringify({ reply: reply.trim(), replied: true })
+        body: JSON.stringify({ reply: reply.trim() })
       });
       setReply('');
       load();

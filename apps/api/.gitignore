@@ -1,3 +1,4 @@
 prisma/dagoos-backup.sql
 prisma/dagoos-backup.sql
 prisma/backup.sql.gz
+apps/api/coverage/

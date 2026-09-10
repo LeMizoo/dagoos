@@ -419,21 +419,24 @@ router.post('/:id/reject', authMiddleware, async (req, res) => {
   try {
     const actionId = req.params.id;
 
-    // Vérifier que le chauffeur est authentifié
+    // 1. Vérifier que le chauffeur est authentifié
     if (!req.user.driverId) {
       return res.status(403).json({ error: 'Chauffeur non associé' });
     }
 
     const driver = await prisma.driver.findUnique({
       where: { id: req.user.driverId },
-      select: { id: true, organizationId: true }
+      select: {
+        id: true,
+        organizationId: true
+      }
     });
 
     if (!driver) {
       return res.status(404).json({ error: 'Chauffeur introuvable' });
     }
 
-    // Récupérer l'action
+    // 2. Récupérer l'action
     const action = await prisma.leadAction.findUnique({
       where: { id: actionId }
     });
@@ -442,39 +445,108 @@ router.post('/:id/reject', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Demande introuvable' });
     }
 
-    // Vérifier l'organisation
-    if (action.organizationId !== driver.organizationId) {
-      return res.status(403).json({ error: 'Accès refusé' });
+    // 3. LONG_HAUL public = demande diffusée à plusieurs chauffeurs
+    const isPublicLongHaul =
+      action.type === 'LONG_HAUL' &&
+      !action.organizationId;
+
+    // 4. Vérification d'autorisation
+    if (isPublicLongHaul) {
+      // Le chauffeur doit avoir reçu cette demande.
+      const notificationForDriver = await prisma.notification.findFirst({
+        where: {
+          leadActionId: actionId,
+          userId: req.user.id
+        },
+        select: {
+          id: true,
+          read: true
+        }
+      });
+
+      if (!notificationForDriver) {
+        return res.status(403).json({
+          error: 'Cette demande ne vous a pas été attribuée'
+        });
+      }
+    } else {
+      // Demande privée : elle doit appartenir à l'organisation.
+      if (action.organizationId !== driver.organizationId) {
+        return res.status(403).json({ error: 'Accès refusé' });
+      }
     }
 
-    // Vérifier que l'action est encore NEW
+    // 5. L'action doit encore être NEW
     if (action.statut !== 'NEW') {
-      return res.status(409).json({ error: 'Cette course a déjà été traitée' });
+      return res.status(409).json({
+        error: 'Cette course a déjà été traitée'
+      });
     }
 
-    // Mettre à jour le statut
-    const updated = await prisma.leadAction.update({
-      where: { id: actionId },
-      data: { statut: 'REJECTED' }
+    // ========================================================
+    // LONG_HAUL PUBLIC
+    // ========================================================
+    //
+    // Le refus est individuel.
+    // NE PAS passer LeadAction à REJECTED.
+    // Les autres chauffeurs doivent encore pouvoir accepter.
+    //
+    if (isPublicLongHaul) {
+      await prisma.notification.updateMany({
+        where: {
+          leadActionId: actionId,
+          userId: req.user.id,
+          read: false
+        },
+        data: {
+          read: true
+        }
+      });
+
+      const currentAction = await prisma.leadAction.findUnique({
+        where: { id: actionId }
+      });
+
+      return res.json(currentAction);
+    }
+
+    // ========================================================
+    // DEMANDE PRIVÉE / ORGANISATION
+    // ========================================================
+
+    const updated = await prisma.leadAction.updateMany({
+      where: {
+        id: actionId,
+        statut: 'NEW',
+        organizationId: driver.organizationId
+      },
+      data: {
+        statut: 'REJECTED'
+      }
     });
 
-    // Marquer les notifications liées comme lues
-    const notifications = await prisma.notification.findMany({
+    if (updated.count === 0) {
+      return res.status(409).json({
+        error: 'Cette course a déjà été traitée'
+      });
+    }
+
+    // Marquer les notifications liées à cette action comme lues.
+    await prisma.notification.updateMany({
       where: {
         leadActionId: actionId,
         read: false
       },
-      select: { id: true }
-    }).catch(() => []);
+      data: {
+        read: true
+      }
+    }).catch(() => {});
 
-    for (const notif of notifications) {
-      await prisma.notification.update({
-        where: { id: notif.id },
-        data: { read: true }
-      }).catch(() => {});
-    }
+    const rejectedAction = await prisma.leadAction.findUnique({
+      where: { id: actionId }
+    });
 
-    res.json(updated);
+    res.json(rejectedAction);
   } catch (error) {
     console.error('POST /actions/:id/reject:', error);
     res.status(500).json({ error: error.message });

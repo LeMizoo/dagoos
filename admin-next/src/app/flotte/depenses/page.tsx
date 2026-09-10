@@ -14,24 +14,29 @@ export default function FlotteDepenses() {
     category: 'carburant',
     amount: '',
     description: '',
-    vehicleId: ''
+    vehicleId: '',
+    driverId: ''
   });
   const [vehicles, setVehicles] = useState<any[]>([]);
+  const [drivers, setDrivers] = useState<any[]>([]);
 
   const load = useCallback(async () => {
     if (!organization?.id) return;
     
     try {
-      const [expRes, vehRes] = await Promise.all([
+      const [expRes, vehRes, driversRes] = await Promise.all([
         apiFetch('/finances/expenses').then(r => r.ok ? r.json() : []),
-        apiFetch('/vehicles?page=1&limit=100').then(r => r.ok ? r.json() : [])
+        apiFetch('/vehicles?page=1&limit=100').then(r => r.ok ? r.json() : []),
+        apiFetch('/drivers?page=1&limit=100').then(r => r.ok ? r.json() : [])
       ]);
       
       const allExpenses = Array.isArray(expRes) ? expRes : [];
       const allVehicles = Array.isArray(vehRes?.data) ? vehRes.data : (Array.isArray(vehRes) ? vehRes : []);
+      const allDrivers = Array.isArray(driversRes?.data) ? driversRes.data : (Array.isArray(driversRes) ? driversRes : []);
       
       setExpenses(allExpenses.filter((e: any) => e.organizationId === organization.id));
       setVehicles(allVehicles.filter((v: any) => v.organizationId === organization.id));
+      setDrivers(allDrivers.filter((d: any) => d.organizationId === organization.id));
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -59,7 +64,7 @@ export default function FlotteDepenses() {
       });
       
       if (res.ok) {
-        setForm({ category: 'carburant', amount: '', description: '', vehicleId: '' });
+        setForm({ category: 'carburant', amount: '', description: '', vehicleId: '', driverId: '' });
         load();
       } else {
         const data = await res.json();
@@ -101,14 +106,24 @@ export default function FlotteDepenses() {
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <select
+              value={form.driverId}
+              onChange={e => setForm({...form, driverId: e.target.value})}
+              className="w-full px-3 py-2 border rounded-lg text-sm"
+              required
+            >
+              <option value="">Sélectionner un chauffeur</option>
+              {drivers.map(d => (
+                <option key={d.id} value={d.id}>{d.user?.name || d.driverCode}</option>
+              ))}
+            </select>
+            <select
               value={form.category}
               onChange={e => setForm({...form, category: e.target.value})}
               className="w-full px-3 py-2 border rounded-lg text-sm"
             >
               <option value="carburant">⛽ Carburant</option>
               <option value="maintenance">🔧 Maintenance</option>
-              <option value="assurance">🛡️ Assurance</option>
-              <option value="vignette">📋 Vignette</option>
+              <option value="pneu">🛞 Pneus</option>
               <option value="autre">📦 Autre</option>
             </select>
             <select

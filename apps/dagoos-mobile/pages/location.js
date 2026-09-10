@@ -74,6 +74,13 @@ function init_location() {
           <textarea id="locDescription" placeholder="Décrivez votre marchandise (nature, quantité, poids approximatif, particularités...)" rows="3" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;resize:vertical;font-family:inherit;font-size:13px;"></textarea>
         </div>
 
+        <div id="photosContainer" style="display:none;margin-bottom:12px;">
+          <label style="font-size:10px;color:#94A3B8;display:block;margin-bottom:4px;">📸 Photos (optionnel, max 5)</label>
+          <input id="locPhotos" type="file" accept="image/*" multiple style="width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;font-size:11px;">
+          <div id="photosPreview" style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;"></div>
+          <p id="photosStatus" style="font-size:10px;color:#94A3B8;margin-top:6px;"></p>
+        </div>
+
         <div id="passagersContainer" style="display:none;margin-bottom:12px;">
           <input id="locNbPassagers" type="number" placeholder="Nombre de passagers" min="1" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;">
         </div>
@@ -86,6 +93,9 @@ function init_location() {
   `;
 
   chargerOrganisations();
+
+  // Init photos listeners (Etape 2)
+  setTimeout(initPhotosListeners, 100);
 }
 
 function setModeLocation(nouveauMode) {
@@ -208,6 +218,21 @@ function updateVehiculeOptions() {
   var servicesAvecDescription = ['marchandises', 'demenagement', 'depannage', 'fret'];
   if (descriptionContainer) {
     descriptionContainer.style.display = servicesAvecDescription.includes(service) ? 'block' : 'none';
+  }
+
+  // Photos pour les mêmes services
+  var photosContainer = document.getElementById('photosContainer');
+  if (photosContainer) {
+    photosContainer.style.display = servicesAvecDescription.includes(service) ? 'block' : 'none';
+  }
+
+  // Réinitialiser les photos si on change de service
+  if (photosContainer && photosContainer.style.display === 'none') {
+    var photoInput = document.getElementById('locPhotos');
+    var preview = document.getElementById('photosPreview');
+    if (photoInput) photoInput.value = '';
+    if (preview) preview.innerHTML = '';
+    window._photosSelectionnees = [];
   }
 
   if (!vehiculeContainer) return;
@@ -341,6 +366,252 @@ async function estimerLocationMobile() {
   }
 }
 
+// ============================================================
+// UTILITAIRES PHOTOS - Étape 2 (Cloudinary)
+// ============================================================
+
+var MAX_PHOTOS = 5;
+var MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+var COMPRESSION_MAX_WIDTH = 1920;
+var COMPRESSION_QUALITY = 0.8;
+
+var servicesAvecPhotos = ['marchandises', 'demenagement', 'depannage', 'fret'];
+
+window._photosSelectionnees = [];
+
+// ------------------------------------------------------------
+// Compresse une image via Canvas
+// ------------------------------------------------------------
+function compresserImage(file) {
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+
+    reader.onload = function(e) {
+      var img = new Image();
+
+      img.onload = function() {
+        var canvas = document.createElement('canvas');
+        var width = img.width;
+        var height = img.height;
+
+        // Redimensionner si trop large
+        if (width > COMPRESSION_MAX_WIDTH) {
+          height = Math.round((height * COMPRESSION_MAX_WIDTH) / width);
+          width = COMPRESSION_MAX_WIDTH;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convertir en JPEG compressé
+        var dataUri = canvas.toDataURL('image/jpeg', COMPRESSION_QUALITY);
+
+        console.log('[PHOTO] Compression:',
+          Math.round(file.size / 1024) + ' KB → ' +
+          Math.round(dataUri.length * 0.75 / 1024) + ' KB (estimé)');
+
+        resolve(dataUri);
+      };
+
+      img.onerror = function() {
+        reject(new Error('Impossible de charger l\'image'));
+      };
+
+      img.src = e.target.result;
+    };
+
+    reader.onerror = function() {
+      reject(new Error('Impossible de lire le fichier'));
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+// ------------------------------------------------------------
+// Upload une photo vers Cloudinary
+// ------------------------------------------------------------
+async function uploadPhoto(file, typeService) {
+  try {
+    // 1. Vérifier la taille
+    if (file.size > MAX_FILE_SIZE) {
+      throw new Error('Photo trop volumineuse (max 5 MB)');
+    }
+
+    // 2. Vérifier le format
+    var type = file.type.toLowerCase();
+    var formatsOk = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
+    if (!formatsOk.includes(type)) {
+      throw new Error('Format non supporté: ' + type);
+    }
+
+    // 3. Compresser
+    var dataUri = await compresserImage(file);
+
+    // 4. Upload vers Cloudinary
+    var result = await apiPost('/public/upload-photo', {
+      image: dataUri,
+      typeService: typeService
+    });
+
+    if (result && result.success && result.url) {
+      console.log('[PHOTO] ✅ Uploadée:', result.url);
+      return result.url;
+    }
+
+    throw new Error(result.error || 'Upload échoué');
+
+  } catch(e) {
+    console.error('[PHOTO] ❌ Erreur:', e.message);
+    throw e;
+  }
+}
+
+// ------------------------------------------------------------
+// Affiche les miniatures des photos sélectionnées
+// ------------------------------------------------------------
+function afficherPhotosPreview(files) {
+  var preview = document.getElementById('photosPreview');
+  var status = document.getElementById('photosStatus');
+
+  if (!preview) return;
+
+  preview.innerHTML = '';
+
+  if (!files || files.length === 0) {
+    if (status) status.textContent = '';
+    return;
+  }
+
+  var count = Math.min(files.length, MAX_PHOTOS);
+
+  for (var i = 0; i < count; i++) {
+    var file = files[i];
+
+    (function(index, f) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var container = document.createElement('div');
+        container.style.cssText = 'position:relative;width:60px;height:60px;border-radius:6px;overflow:hidden;border:1px solid #444;';
+
+        var img = document.createElement('img');
+        img.src = e.target.result;
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+
+        var btn = document.createElement('button');
+        btn.innerHTML = '×';
+        btn.style.cssText = 'position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:#EF4444;color:#fff;border:none;font-size:14px;line-height:1;cursor:pointer;padding:0;';
+        btn.onclick = function() { supprimerPhoto(index); };
+
+        container.appendChild(img);
+        container.appendChild(btn);
+        preview.appendChild(container);
+      };
+      reader.readAsDataURL(f);
+    })(i, file);
+  }
+
+  if (status) {
+    status.textContent = count + ' photo' + (count > 1 ? 's' : '') + ' sélectionnée' + (count > 1 ? 's' : '');
+  }
+}
+
+// ------------------------------------------------------------
+// Supprime une photo de la sélection
+// ------------------------------------------------------------
+function supprimerPhoto(index) {
+  var input = document.getElementById('locPhotos');
+  if (!input || !input.files) return;
+
+  // Créer un nouveau FileList sans la photo index
+  var dt = new DataTransfer();
+  var files = input.files;
+
+  for (var i = 0; i < files.length; i++) {
+    if (i !== index) {
+      dt.items.add(files[i]);
+    }
+  }
+
+  input.files = dt.files;
+  afficherPhotosPreview(dt.files);
+}
+
+// ------------------------------------------------------------
+// Gère la sélection de photos par l'utilisateur
+// ------------------------------------------------------------
+function onPhotosSelected(event) {
+  var files = event.target.files;
+
+  if (files.length > MAX_PHOTOS) {
+    alert('Maximum ' + MAX_PHOTOS + ' photos. Seules les ' + MAX_PHOTOS + ' premières seront prises.');
+
+    // Tronquer à MAX_PHOTOS
+    var dt = new DataTransfer();
+    for (var i = 0; i < MAX_PHOTOS; i++) {
+      dt.items.add(files[i]);
+    }
+    event.target.files = dt.files;
+    files = dt.files;
+  }
+
+  afficherPhotosPreview(files);
+}
+
+// ------------------------------------------------------------
+// Upload toutes les photos sélectionnées
+// ------------------------------------------------------------
+async function uploaderToutesLesPhotos(typeService) {
+  var input = document.getElementById('locPhotos');
+
+  if (!input || !input.files || input.files.length === 0) {
+    return [];
+  }
+
+  if (!servicesAvecPhotos.includes(typeService)) {
+    return [];
+  }
+
+  var status = document.getElementById('photosStatus');
+  var files = Array.from(input.files).slice(0, MAX_PHOTOS);
+  var urls = [];
+
+  for (var i = 0; i < files.length; i++) {
+    if (status) {
+      status.textContent = 'Upload photo ' + (i + 1) + '/' + files.length + '...';
+    }
+
+    try {
+      var url = await uploadPhoto(files[i], typeService);
+      urls.push(url);
+    } catch(e) {
+      alert('Erreur upload photo ' + (i + 1) + ': ' + e.message);
+      throw e;
+    }
+  }
+
+  if (status) {
+    status.textContent = '✅ ' + urls.length + ' photo' + (urls.length > 1 ? 's' : '') + ' uploadée' + (urls.length > 1 ? 's' : '');
+  }
+
+  return urls;
+}
+
+// ------------------------------------------------------------
+// Initialise les événements photos (appelé après render)
+// ------------------------------------------------------------
+function initPhotosListeners() {
+  var input = document.getElementById('locPhotos');
+  if (input && !input._photosInit) {
+    input.addEventListener('change', onPhotosSelected);
+    input._photosInit = true;
+    console.log('[PHOTO] Listeners initialisés');
+  }
+}
+
 async function demanderLocationMobile() {
   var nom = document.getElementById('locNom').value.trim();
   var tel = document.getElementById('locTel').value.trim();
@@ -364,6 +635,17 @@ async function demanderLocationMobile() {
 
   setPassengerInfo({ name: nom, phone: tel });
 
+  // Upload des photos avant l'envoi (Etape 2)
+  var photosUrls = [];
+  if (typeService && servicesAvecPhotos && servicesAvecPhotos.includes(typeService)) {
+    try {
+      photosUrls = await uploaderToutesLesPhotos(typeService);
+    } catch(e) {
+      alert('Erreur lors de l\'upload des photos: ' + e.message);
+      return;
+    }
+  }
+
   try {
     var result = await apiPost('/public/actions', {
       organizationSlug: flotte,
@@ -382,6 +664,7 @@ async function demanderLocationMobile() {
         carburant: carburant,
         nbPassagers: typeService === 'passagers' ? (Number(nbPassagers) || 1) : undefined,
         description: description || undefined,
+        photos: photosUrls.length > 0 ? photosUrls : undefined,
         ...(typeService && { typeService })
       }
     });
@@ -400,6 +683,10 @@ async function demanderLocationMobile() {
 }
 
 window.init_location = init_location;
+window.compresserImage = compresserImage;
+window.uploadPhoto = uploadPhoto;
+window.supprimerPhoto = supprimerPhoto;
+window.initPhotosListeners = initPhotosListeners;
 window.setModeLocation = setModeLocation;
 window.estimerLocationMobile = estimerLocationMobile;
 window.demanderLocationMobile = demanderLocationMobile;

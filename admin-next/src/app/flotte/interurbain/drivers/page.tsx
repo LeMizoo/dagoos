@@ -42,7 +42,10 @@ export default function InterurbainDriversPage() {
       const today = new Date().toISOString().split('T')[0];
       try {
         const pRes = await apiFetch(`/drivers/pointages?organizationId=${resolvedOrgId || ''}&date=${today}`);
-        const allPointages = pRes.ok ? await pRes.json() : [];
+        const pointagesData = pRes.ok ? await pRes.json() : null;
+        const allPointages = Array.isArray(pointagesData?.pointages)
+          ? pointagesData.pointages
+          : [];
         const pMap: Record<string, string> = {};
         (Array.isArray(allPointages) ? allPointages : []).forEach((p: any) => {
           if (p.driverId) {
@@ -210,7 +213,7 @@ export default function InterurbainDriversPage() {
 
   const filtered = drivers.filter(d => {
     const matchesSearch = ((d.user?.name || '') + ' ' + (d.driverCode || '')).toLowerCase().includes(search.toLowerCase());
-    const effectiveStatus = pointages[d.id] || d.status;
+    const effectiveStatus = pointages[d.id] || (d.accountStatus === 'active' ? 'PRESENT' : d.status);
     const matchesStatus = statusFilter === 'all' || effectiveStatus === statusFilter;
     const matchesVehicle = vehicleFilter === 'all' ||
       (vehicleFilter === 'assigned' && d.vehicleId) ||
@@ -221,7 +224,7 @@ export default function InterurbainDriversPage() {
 
   const stats = {
     total: drivers.length,
-    active: drivers.filter(d => pointages[d.id] === 'PRESENT' || (!pointages[d.id] && d.status === 'active')).length,
+    active: drivers.filter(d => pointages[d.id] === 'PRESENT' || (!pointages[d.id] && d.accountStatus === 'active')).length,
     assigned: drivers.filter(d => d.vehicleId).length,
     unassigned: drivers.filter(d => !d.vehicleId).length,
   };
@@ -370,7 +373,7 @@ export default function InterurbainDriversPage() {
                       </td>
                       <td className="px-4 py-3">
                         {(() => {
-                          const pt = pointages[d.id] || d.status;
+                          const pt = pointages[d.id] || (d.accountStatus === 'active' ? 'PRESENT' : d.status);
                           const label = pt === 'PRESENT' ? 'En service' : pt === 'PAUSE' ? 'En pause' : pt === 'PARTI' ? 'Absent' : pt === 'NON_DEBUTE' ? 'Non débuté' : d.status;
                           const color = pt === 'PRESENT' ? 'bg-green-100 text-green-700' : pt === 'PAUSE' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700';
                           return <span className={`text-xs px-2 py-0.5 rounded-full ${color}`}>{label}</span>;

@@ -20,7 +20,7 @@ export default function FlotteCodes() {
     try {
       const r = await apiFetch('/drivers?page=1&limit=100');
       const d = await r.json();
-      const allDrivers = Array.isArray(d) ? d : [];
+      const allDrivers = Array.isArray(d?.data) ? d.data : (Array.isArray(d) ? d : []);
       setDrivers(allDrivers.filter((drv: any) => drv.organizationId === organization.id));
     } catch (e) {
       console.error(e);
@@ -150,9 +150,9 @@ export default function FlotteCodes() {
                     </td>
                     <td className="px-4 py-3">
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        (d.status === 'active' || d.status === 'AVAILABLE') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                        (d.accountStatus === 'active' || d.status === 'AVAILABLE') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                       }`}>
-                        {d.status || 'inactif'}
+                        {d.accountStatus === 'active' ? 'Actif' : d.status || 'Inactif'}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
