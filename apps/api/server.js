@@ -23,7 +23,7 @@ app.use(cors({
   maxAge: 86400,
 }));
 app.use(express.json({ 
-  limit: "100kb",
+  limit: "10mb",
   type: ['application/json', 'application/json; charset=utf-8']
 }));
 
@@ -32,7 +32,7 @@ app.use((req, res, next) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   next();
 });
-app.use(express.urlencoded({ extended: true, limit: "100kb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // =========================================================
 // ROUTES API
@@ -61,6 +61,7 @@ app.use('/api/departs', require('./modules/departs/departs.routes'));
 app.use('/api/reservations', require('./modules/reservations/reservations.routes'));
 app.use('/api/actions', require('./modules/actions/actions.routes'));
 app.use('/api/public', require('./modules/public/public.routes'));
+app.use('/api/public', require('./modules/public/upload.routes'));
 app.use('/api/sessions', require('./modules/sessions/sessions.routes'));
 
 // =========================================================
