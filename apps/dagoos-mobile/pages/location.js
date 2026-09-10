@@ -69,8 +69,9 @@ function init_location() {
           <option value="SANS">Sans carburant</option>
         </select>
 
-        <div id="volumeContainer" style="display:none;margin-bottom:12px;">
-          <input id="locVolume" type="number" placeholder="Volume (m³)" min="1" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;">
+        <div id="descriptionContainer" style="display:none;margin-bottom:12px;">
+          <label style="font-size:10px;color:#94A3B8;display:block;margin-bottom:4px;">📦 Description de la marchandise</label>
+          <textarea id="locDescription" placeholder="Décrivez votre marchandise (nature, quantité, poids approximatif, particularités...)" rows="3" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;resize:vertical;font-family:inherit;font-size:13px;"></textarea>
         </div>
 
         <div id="passagersContainer" style="display:none;margin-bottom:12px;">
@@ -194,7 +195,7 @@ function updateUI() {
 function updateVehiculeOptions() {
   var vehiculeContainer = document.getElementById('vehiculeContainer');
   var passagersContainer = document.getElementById('passagersContainer');
-  var volumeContainer = document.getElementById('volumeContainer');
+  var descriptionContainer = document.getElementById('descriptionContainer');
 
   var service = document.getElementById('locTypeService') ? document.getElementById('locTypeService').value : 'passagers';
 
@@ -202,8 +203,11 @@ function updateVehiculeOptions() {
   if (passagersContainer) {
     passagersContainer.style.display = service === 'passagers' ? 'block' : 'none';
   }
-  if (volumeContainer) {
-    volumeContainer.style.display = service === 'marchandises' ? 'block' : 'none';
+
+  // Description pour marchandises, déménagement, dépannage, fret
+  var servicesAvecDescription = ['marchandises', 'demenagement', 'depannage', 'fret'];
+  if (descriptionContainer) {
+    descriptionContainer.style.display = servicesAvecDescription.includes(service) ? 'block' : 'none';
   }
 
   if (!vehiculeContainer) return;
@@ -267,8 +271,8 @@ async function estimerLocationMobile() {
       ? document.getElementById('locNbPassagers').value
       : null;
 
-    var volume = document.getElementById('locVolume')
-      ? document.getElementById('locVolume').value
+    var description = document.getElementById('locDescription')
+      ? document.getElementById('locDescription').value.trim()
       : null;
 
     var result = await apiPost('/public/estimate-location', {
@@ -280,9 +284,7 @@ async function estimerLocationMobile() {
       nbPassagers: typeService === 'passagers'
         ? (Number(nbPassagers) || 1)
         : undefined,
-      volume: typeService === 'marchandises'
-        ? (Number(volume) || 1)
-        : undefined,
+      description: description || undefined,
       depart: depart,
       arrivee: arrivee,
       dateAller: dateAller || null,
@@ -352,6 +354,7 @@ async function demanderLocationMobile() {
   var heureRetour = document.getElementById('locHeureRetour').value;
   var carburant = document.getElementById('locCarburant').value;
   var nbPassagers = document.getElementById('locNbPassagers').value;
+  var description = document.getElementById('locDescription') ? document.getElementById('locDescription').value.trim() : null;
   var flotte = document.getElementById('locFlotte').value;
   var typeService = document.getElementById('locTypeService') ? document.getElementById('locTypeService').value : null;
 
@@ -378,7 +381,7 @@ async function demanderLocationMobile() {
         heureRetour: heureRetour || null,
         carburant: carburant,
         nbPassagers: typeService === 'passagers' ? (Number(nbPassagers) || 1) : undefined,
-        volume: typeService === 'marchandises' ? (Number(document.getElementById('locVolume').value) || 1) : undefined,
+        description: description || undefined,
         ...(typeService && { typeService })
       }
     });
