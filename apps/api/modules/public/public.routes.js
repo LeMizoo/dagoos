@@ -596,17 +596,36 @@ router.get('/suivi/:code', async (req, res) => {
       return res.status(404).json({ error: 'Demande introuvable' });
     }
 
+    // V2 : exposer les nouveaux champs tarifaires
+    const details = action.details || {};
+    const pricingModel = details.pricingModel || null;
+    const status = details.status || (details.prixEstime ? 'ESTIMATED' : null);
+    const price = details.price !== undefined 
+      ? details.price 
+      : (details.prixEstime || null);
+
     res.json({
       codeSuivi: code,
       statut: action.statut,
       clientNom: action.clientNom,
       type: action.type,
-      depart: action.details?.depart || '',
-      arrivee: action.details?.arrivee || '',
-      prixEstime: action.details?.prixEstime || 0,
-      offreClient: action.details?.offreClient || null,
-      contreOffreChauffeur: action.details?.contreOffreChauffeur || null,
-      statutNegociation: action.details?.statutNegociation || null,
+      typeService: details.typeService || null,
+      typeVehicule: details.typeVehicule || null,
+      depart: details.depart || '',
+      arrivee: details.arrivee || '',
+      // V2 champs
+      pricingModel,
+      status,
+      price,
+      estimated: details.estimated !== undefined 
+        ? details.estimated 
+        : (details.prixEstime ? true : false),
+      negotiation: details.negotiation || null,
+      // Legacy (compatibilité)
+      prixEstime: details.prixEstime || null,
+      offreClient: details.offreClient || null,
+      contreOffreChauffeur: details.contreOffreChauffeur || null,
+      statutNegociation: details.statutNegociation || null,
       createdAt: action.createdAt,
       updatedAt: action.updatedAt
     });

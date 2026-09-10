@@ -80,8 +80,21 @@ async function suivre() {
             <div style="font-size:11px;color:#94A3B8;">Trajet</div>
             <div style="font-weight:600;margin-bottom:8px;">${result.depart || '-'} → ${result.arrivee || '-'}</div>
 
-            <div style="font-size:11px;color:#94A3B8;">Prix estimé</div>
-            <div style="font-weight:600;margin-bottom:8px;color:#F59E0B;">${Number(result.prixEstime || 0).toLocaleString('fr-FR')} Ar</div>
+            ${result.status === 'NEGOTIATION_REQUIRED' ? `
+              <div style="font-size:11px;color:#94A3B8;">Prix</div>
+              <div style="background:rgba(59,130,246,0.15);border:1px solid #3B82F6;border-radius:8px;padding:10px;margin-bottom:8px;">
+                <div style="font-weight:700;color:#3B82F6;font-size:13px;">💬 À négocier avec le transporteur</div>
+                <div style="font-size:11px;color:#94A3B8;margin-top:4px;line-height:1.4;">
+                  Le transporteur va vous proposer un prix personnalisé pour ce service.
+                </div>
+              </div>
+            ` : (result.price || result.prixEstime) ? `
+              <div style="font-size:11px;color:#94A3B8;">Prix estimé</div>
+              <div style="font-weight:600;margin-bottom:8px;color:#F59E0B;">${Number(result.price || result.prixEstime).toLocaleString('fr-FR')} Ar</div>
+            ` : `
+              <div style="font-size:11px;color:#94A3B8;">Prix</div>
+              <div style="font-weight:600;margin-bottom:8px;color:#94A3B8;">En cours de calcul</div>
+            `}
 
             ${result.offreClient ? `
               <div style="font-size:11px;color:#94A3B8;">Votre offre</div>
