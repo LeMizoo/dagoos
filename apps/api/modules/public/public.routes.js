@@ -1413,6 +1413,7 @@ router.post('/estimate-location', async (req, res) => {
         where: {
           serviceId: service.id,
           vehicleCategoryId: category.id,
+          pricingModel: mapping.pricingModel,
           active: true
         },
         select: {
@@ -1611,8 +1612,19 @@ router.post('/actions', publicLeadLimiter, async (req, res) => {
     let organizationsToNotify = [];
 
     if (type === 'LONG_HAUL' && !org) {
-      const typeService = details?.typeService || 'passagers';
-      const typeVehicule = details?.typeVehicule || 'bus';
+      if (
+        typeof details?.typeService !== 'string' ||
+        !details.typeService.trim() ||
+        typeof details?.typeVehicule !== 'string' ||
+        !details.typeVehicule.trim()
+      ) {
+        return res.status(400).json({
+          error: 'typeService et typeVehicule sont obligatoires pour LONG_HAUL'
+        });
+      }
+
+      const typeService = details.typeService;
+      const typeVehicule = details.typeVehicule;
 
       const mapping = LONG_HAUL_MAPPING[typeService];
       
@@ -1636,6 +1648,7 @@ router.post('/actions', publicLeadLimiter, async (req, res) => {
                       tariffs: {
                         some: {
                           active: true,
+                          pricingModel: mapping.pricingModel,
                           vehicleCategory: {
                             code: vehicleCategoryCode
                           }
@@ -1660,17 +1673,19 @@ router.post('/actions', publicLeadLimiter, async (req, res) => {
             return [];
           });
 
-          console.log('[LONG_HAUL MATCHING] Résultat:', {
-            typeService,
-            typeVehicule,
-            vehicleCategoryCode,
-            serviceCode: mapping.serviceCode,
-            organizations: orgsCompatibles.map(o => ({
-              id: o.id,
-              name: o.name,
-              slug: o.slug
-            }))
-          });
+          if (process.env.NODE_ENV !== 'production') {
+  console.log('[LONG_HAUL MATCHING] Résultat:', {
+              typeService,
+              typeVehicule,
+              vehicleCategoryCode,
+              serviceCode: mapping.serviceCode,
+              organizations: orgsCompatibles.map(o => ({
+                id: o.id,
+                name: o.name,
+                slug: o.slug
+              }))
+            });
+}
 
           organizationsToNotify = orgsCompatibles;
           // NE PAS affecter org ici - attendre l'acceptation d'un chauffeur
@@ -1872,8 +1887,8 @@ router.post('/actions', publicLeadLimiter, async (req, res) => {
       // LONG_HAUL : moteur V2 (ServiceTariff + pricingEngine)
       // ======================================================
 
-      const typeVehicule = details?.typeVehicule || 'bus';
-      const typeService = details?.typeService || 'passagers';
+      const typeVehicule = details.typeVehicule;
+      const typeService = details.typeService;
       const depart = details?.depart || '';
       const arrivee = details?.arrivee || '';
       const distanceKmLong = await calculerDistance(depart, arrivee);
@@ -1974,7 +1989,8 @@ router.post('/actions', publicLeadLimiter, async (req, res) => {
         where: {
           serviceId: service.id,
           vehicleCategoryId: category.id,
-          active: true
+pricingModel: mapping.pricingModel,
+                    active: true
         },
         select: {
           id: true,
