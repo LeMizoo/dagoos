@@ -327,9 +327,9 @@ function renderDepartAction(depart) {
 
     if (depart.statut === 'EMBARQUEMENT') {
         return (
-            '<button onclick="terminerDepartCoop(\'' +
+            '<button data-action="terminer-depart-coop" data-depart-id="' +
                 escapeAttribute(depart.id) +
-            '\')" id="btnTerminerDepart" style="width:100%;padding:13px;background:#F59E0B;color:#0A1F18;border:none;border-radius:9px;font-weight:800;cursor:pointer;">' +
+            '" id="btnTerminerDepart" style="width:100%;padding:13px;background:#F59E0B;color:#0A1F18;border:none;border-radius:9px;font-weight:800;cursor:pointer;">' +
                 'Terminer le départ' +
             '</button>'
         );
@@ -503,15 +503,20 @@ if (!window.__p7e2bFix3CoopDelegation) {
 
     document.addEventListener('click', function (event) {
         var button = event.target.closest(
-            'button[data-action="demarrer-embarquement-coop"]'
+            'button[data-action="demarrer-embarquement-coop"], button[data-action="terminer-depart-coop"]'
         );
 
         if (!button) return;
 
+        var action = button.getAttribute('data-action');
         var departId = button.getAttribute('data-depart-id');
 
-        if (departId) {
+        if (!departId) return;
+
+        if (action === 'demarrer-embarquement-coop') {
             window.demarrerEmbarquementCoop(departId);
+        } else if (action === 'terminer-depart-coop') {
+            window.terminerDepartCoop(departId);
         }
     });
 }

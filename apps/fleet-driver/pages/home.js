@@ -1002,11 +1002,11 @@ async function loadCourseNotifications() {
                             'Accepter' +
                         '</button>' +
 
-                        '<button onclick="refuserCourse(\'' +
-                            escapeHtml(notification.leadActionId || notification.id) +
-                            '\', \'' +
-                            escapeHtml(notification.id) +
-                            '\')" style="flex:1;background:#EF4444;color:white;border:none;padding:8px 12px;border-radius:6px;font-weight:bold;">' +
+                        '<button data-action="refuser-course" data-action-id="' +
+                            escapeAttribute(notification.leadActionId || notification.id) +
+                            '" data-notification-id="' +
+                            escapeAttribute(notification.id) +
+                            '" style="flex:1;background:#EF4444;color:white;border:none;padding:8px 12px;border-radius:6px;font-weight:bold;">' +
                             'Refuser' +
                         '</button>' +
 
@@ -1703,9 +1703,9 @@ function afficherCourseActive() {
         courseActive.statut === 'EN_COURS'
     ) {
         bouton =
-            '<button onclick="terminerCourse(\'' +
-            courseActive.id +
-            '\')" ' +
+            '<button data-action="terminer-course-home" data-course-id="' +
+            escapeAttribute(courseActive.id) +
+            '" ' +
             'style="width:100%;background:#F1C40F;color:#1A1A2E;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">' +
             'Terminer' +
             '</button>';
@@ -2625,28 +2625,41 @@ if (!window.__p7e2bFix3FleetHomeDelegation) {
 
     document.addEventListener('click', function (event) {
         var button = event.target.closest(
-            'button[data-action="accepter-course"], button[data-action="demarrer-course-home"]'
+            'button[data-action="accepter-course"], ' +
+            'button[data-action="refuser-course"], ' +
+            'button[data-action="demarrer-course-home"], ' +
+            'button[data-action="terminer-course-home"]'
         );
 
         if (!button) return;
 
         var action = button.getAttribute('data-action');
 
-        if (action === 'demarrer-course-home') {
-            var courseId = button.getAttribute('data-course-id');
+        // Actions notifications : accepter / refuser
+        if (action === 'accepter-course' || action === 'refuser-course') {
+            var actionId = button.getAttribute('data-action-id');
+            var notificationId = button.getAttribute('data-notification-id');
 
-            if (courseId) {
-                window.demarrerCourse(courseId);
+            if (!actionId || !notificationId) return;
+
+            if (action === 'accepter-course') {
+                window.accepterCourse(actionId, notificationId);
+            } else {
+                window.refuserCourse(actionId, notificationId);
             }
 
             return;
         }
 
-        var actionId = button.getAttribute('data-action-id');
-        var notificationId = button.getAttribute('data-notification-id');
+        // Actions course active : demarrer / terminer
+        var courseId = button.getAttribute('data-course-id');
 
-        if (actionId && notificationId) {
-            window.accepterCourse(actionId, notificationId);
+        if (!courseId) return;
+
+        if (action === 'demarrer-course-home') {
+            window.demarrerCourse(courseId);
+        } else if (action === 'terminer-course-home') {
+            window.terminerCourse(courseId);
         }
     });
 }
