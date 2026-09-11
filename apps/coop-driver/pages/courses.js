@@ -317,9 +317,9 @@ function renderDepartAction(depart) {
 
     if (depart.statut === 'PUBLISHED') {
         return (
-            '<button onclick="demarrerEmbarquementCoop(\'' +
+            '<button data-action="demarrer-embarquement-coop" data-depart-id="' +
                 escapeAttribute(depart.id) +
-            '\')" id="btnStartEmbarquement" style="width:100%;padding:13px;background:#10B981;color:#0A1F18;border:none;border-radius:9px;font-weight:800;cursor:pointer;">' +
+            '" id="btnStartEmbarquement" style="width:100%;padding:13px;background:#10B981;color:#0A1F18;border:none;border-radius:9px;font-weight:800;cursor:pointer;">' +
                 'Commencer l’embarquement' +
             '</button>'
         );
@@ -327,9 +327,9 @@ function renderDepartAction(depart) {
 
     if (depart.statut === 'EMBARQUEMENT') {
         return (
-            '<button onclick="terminerDepartCoop(\'' +
+            '<button data-action="terminer-depart-coop" data-depart-id="' +
                 escapeAttribute(depart.id) +
-            '\')" id="btnTerminerDepart" style="width:100%;padding:13px;background:#F59E0B;color:#0A1F18;border:none;border-radius:9px;font-weight:800;cursor:pointer;">' +
+            '" id="btnTerminerDepart" style="width:100%;padding:13px;background:#F59E0B;color:#0A1F18;border:none;border-radius:9px;font-weight:800;cursor:pointer;">' +
                 'Terminer le départ' +
             '</button>'
         );
@@ -497,5 +497,29 @@ function escapeAttribute(value) {
  * Exposition globale pour le routeur PWA.
  */
 window.init_courses = init_courses;
+// P7-E2-B-FIX-3 : délégation sécurisée des actions dynamiques.
+if (!window.__p7e2bFix3CoopDelegation) {
+    window.__p7e2bFix3CoopDelegation = true;
+
+    document.addEventListener('click', function (event) {
+        var button = event.target.closest(
+            'button[data-action="demarrer-embarquement-coop"], button[data-action="terminer-depart-coop"]'
+        );
+
+        if (!button) return;
+
+        var action = button.getAttribute('data-action');
+        var departId = button.getAttribute('data-depart-id');
+
+        if (!departId) return;
+
+        if (action === 'demarrer-embarquement-coop') {
+            window.demarrerEmbarquementCoop(departId);
+        } else if (action === 'terminer-depart-coop') {
+            window.terminerDepartCoop(departId);
+        }
+    });
+}
+
 window.demarrerEmbarquementCoop = demarrerEmbarquementCoop;
 window.terminerDepartCoop = terminerDepartCoop;

@@ -260,27 +260,27 @@ function renderCourseActions(course) {
 
     if (status === 'EN_ATTENTE') {
         html +=
-            '<button onclick="demarrerCourse(\'' +
+            '<button data-action="demarrer-course" data-course-id="' +
             escapeHtml(courseId) +
-            '\')" style="width:100%;background:#3B82F6;color:#fff;border:none;padding:9px;border-radius:7px;font-weight:700;font-size:11px;cursor:pointer;">' +
+            '" style="width:100%;background:#3B82F6;color:#fff;border:none;padding:9px;border-radius:7px;font-weight:700;font-size:11px;cursor:pointer;">' +
                 'Démarrer' +
             '</button>';
     }
 
     if (status === 'EN_ROUTE') {
         html +=
-            '<button onclick="prendreEnCharge(\'' +
+            '<button data-action="prendre-en-charge" data-course-id="' +
             escapeHtml(courseId) +
-            '\')" style="width:100%;background:#8B5CF6;color:#fff;border:none;padding:9px;border-radius:7px;font-weight:700;font-size:11px;cursor:pointer;">' +
+            '" style="width:100%;background:#8B5CF6;color:#fff;border:none;padding:9px;border-radius:7px;font-weight:700;font-size:11px;cursor:pointer;">' +
                 'Client pris en charge' +
             '</button>';
     }
 
     if (status === 'EN_ROUTE' || status === 'EN_COURS') {
         html +=
-            '<button onclick="terminerCourse(\'' +
+            '<button data-action="terminer-course" data-course-id="' +
             escapeHtml(courseId) +
-            '\')" style="width:100%;background:#10B981;color:#fff;border:none;padding:9px;border-radius:7px;font-weight:700;font-size:11px;cursor:pointer;">' +
+            '" style="width:100%;background:#10B981;color:#fff;border:none;padding:9px;border-radius:7px;font-weight:700;font-size:11px;cursor:pointer;">' +
                 'Terminer' +
             '</button>';
     }
@@ -727,6 +727,34 @@ function escapeHtml(value) {
 window.init_courses = init_courses;
 window.loadCourses = loadCourses;
 window.filterCourses = filterCourses;
+// P7-E2-B-FIX-3 : délégation sécurisée des actions dynamiques.
+if (!window.__p7e2bFix3FleetCoursesDelegation) {
+    window.__p7e2bFix3FleetCoursesDelegation = true;
+
+    document.addEventListener('click', function (event) {
+        var button = event.target.closest(
+            'button[data-action="demarrer-course"], ' +
+            'button[data-action="prendre-en-charge"], ' +
+            'button[data-action="terminer-course"]'
+        );
+
+        if (!button) return;
+
+        var action = button.getAttribute('data-action');
+        var courseId = button.getAttribute('data-course-id');
+
+        if (!courseId) return;
+
+        if (action === 'demarrer-course') {
+            window.demarrerCourse(courseId);
+        } else if (action === 'prendre-en-charge') {
+            window.prendreEnCharge(courseId);
+        } else if (action === 'terminer-course') {
+            window.terminerCourse(courseId);
+        }
+    });
+}
+
 window.demarrerCourse = demarrerCourse;
 window.prendreEnCharge = prendreEnCharge;
 window.terminerCourse = terminerCourse;
