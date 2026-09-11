@@ -260,9 +260,9 @@ function renderCourseActions(course) {
 
     if (status === 'EN_ATTENTE') {
         html +=
-            '<button onclick="demarrerCourse(\'' +
+            '<button data-action="demarrer-course" data-course-id="' +
             escapeHtml(courseId) +
-            '\')" style="width:100%;background:#3B82F6;color:#fff;border:none;padding:9px;border-radius:7px;font-weight:700;font-size:11px;cursor:pointer;">' +
+            '" style="width:100%;background:#3B82F6;color:#fff;border:none;padding:9px;border-radius:7px;font-weight:700;font-size:11px;cursor:pointer;">' +
                 'Démarrer' +
             '</button>';
     }
@@ -727,6 +727,25 @@ function escapeHtml(value) {
 window.init_courses = init_courses;
 window.loadCourses = loadCourses;
 window.filterCourses = filterCourses;
+// P7-E2-B-FIX-3 : délégation sécurisée des actions dynamiques.
+if (!window.__p7e2bFix3FleetCoursesDelegation) {
+    window.__p7e2bFix3FleetCoursesDelegation = true;
+
+    document.addEventListener('click', function (event) {
+        var button = event.target.closest(
+            'button[data-action="demarrer-course"]'
+        );
+
+        if (!button) return;
+
+        var courseId = button.getAttribute('data-course-id');
+
+        if (courseId) {
+            window.demarrerCourse(courseId);
+        }
+    });
+}
+
 window.demarrerCourse = demarrerCourse;
 window.prendreEnCharge = prendreEnCharge;
 window.terminerCourse = terminerCourse;

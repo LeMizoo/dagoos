@@ -317,9 +317,9 @@ function renderDepartAction(depart) {
 
     if (depart.statut === 'PUBLISHED') {
         return (
-            '<button onclick="demarrerEmbarquementCoop(\'' +
+            '<button data-action="demarrer-embarquement-coop" data-depart-id="' +
                 escapeAttribute(depart.id) +
-            '\')" id="btnStartEmbarquement" style="width:100%;padding:13px;background:#10B981;color:#0A1F18;border:none;border-radius:9px;font-weight:800;cursor:pointer;">' +
+            '" id="btnStartEmbarquement" style="width:100%;padding:13px;background:#10B981;color:#0A1F18;border:none;border-radius:9px;font-weight:800;cursor:pointer;">' +
                 'Commencer l’embarquement' +
             '</button>'
         );
@@ -497,5 +497,24 @@ function escapeAttribute(value) {
  * Exposition globale pour le routeur PWA.
  */
 window.init_courses = init_courses;
+// P7-E2-B-FIX-3 : délégation sécurisée des actions dynamiques.
+if (!window.__p7e2bFix3CoopDelegation) {
+    window.__p7e2bFix3CoopDelegation = true;
+
+    document.addEventListener('click', function (event) {
+        var button = event.target.closest(
+            'button[data-action="demarrer-embarquement-coop"]'
+        );
+
+        if (!button) return;
+
+        var departId = button.getAttribute('data-depart-id');
+
+        if (departId) {
+            window.demarrerEmbarquementCoop(departId);
+        }
+    });
+}
+
 window.demarrerEmbarquementCoop = demarrerEmbarquementCoop;
 window.terminerDepartCoop = terminerDepartCoop;
