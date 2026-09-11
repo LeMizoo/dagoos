@@ -75,3 +75,8 @@ backend/reset-super-admin.js
 reset-admin.fixed.js
 reset-super-admin.fixed.js
 .env*
+
+# Coverage (généré par les tests)
+coverage/
+**/coverage/
+.nyc_output/
