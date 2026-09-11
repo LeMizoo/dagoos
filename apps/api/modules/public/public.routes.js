@@ -12,6 +12,78 @@ const {
   isVehicleCompatibleWithService
 } = require('./long-haul-matrix');
 
+// P7-C — Rate limiting sur les endpoints publics sensibles
+const { publicLeadLimiter } = require('../../middleware/rate-limit');
+
+// ============================================================
+// P7-C — VALIDATEURS D'ENTRÉE PUBLIQUE
+// ============================================================
+
+const CLIENT_NOM_MIN = 2;
+const CLIENT_NOM_MAX = 100;
+
+const TEL_REGEX = /^(?:\+261|0)[0-9]{8,11}$/;
+
+function validateClientNom(nom) {
+  if (typeof nom !== 'string') return null;
+  const trimmed = String(nom).normalize('NFC').trim();
+  if (trimmed.length < CLIENT_NOM_MIN || trimmed.length > CLIENT_NOM_MAX) {
+    return null;
+  }
+  return trimmed;
+}
+
+function validateClientTel(tel) {
+  if (typeof tel !== 'string') return null;
+  const trimmed = String(tel).normalize('NFC').trim().replace(/\s/g, '');
+  if (!TEL_REGEX.test(trimmed)) return null;
+  return trimmed;
+}
+
+const ALLOWED_DETAILS_KEYS = new Set([
+  'typeService', 'typeVehicule', 'depart', 'arrivee',
+  'nbPassagers', 'volume', 'dateAller', 'dateRetour',
+  'carburant', 'typeTrajet', 'offreClient',
+  'type', 'mode', 'position',
+  'date', 'heure', 'priseEnCharge', 'destination',
+  'message', 'description'
+]);
+
+function sanitizeDetails(details) {
+  if (!details || typeof details !== 'object' || Array.isArray(details)) {
+    return {};
+  }
+  const out = {};
+  for (const key of Object.keys(details)) {
+    if (ALLOWED_DETAILS_KEYS.has(key)) {
+      out[key] = details[key];
+    }
+  }
+  return out;
+}
+
+const TYPES_REQUIRING_DETAILS = new Set([
+  'LONG_HAUL',
+  'COURSE_REQUEST',
+  'TAXI_RESERVATION',
+  'CAR_RENTAL',
+  'DELIVERY_REQUEST'
+]);
+
+const NB_PASSAGERS_MIN = 1;
+const NB_PASSAGERS_MAX = 50;
+const VOLUME_MIN = 0.1;
+const VOLUME_MAX = 100;
+
+function clampNumber(value, min, max, fallback) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  if (n < min) return min;
+  if (n > max) return max;
+  return n;
+}
+
+
 const NEGOTIATION_TTL_HOURS = 48;
 
 // =========================================================
@@ -1455,20 +1527,38 @@ router.post('/estimate-location', async (req, res) => {
 });
 
 // POST /api/public/actions - Créer une action depuis la landing
-router.post('/actions', async (req, res) => {
+router.post('/actions', publicLeadLimiter, async (req, res) => {
   try {
     const { organizationSlug, type, clientNom, clientTel, details } = req.body;
 
-    // Normaliser les chaînes Unicode pour éviter les caractères mal encodés
-    const normalize = (str) => {
-      if (!str) return str;
-      return String(str).normalize('NFC').trim();
-    };
-    const clientNomNormalized = normalize(clientNom);
-    const clientTelNormalized = normalize(clientTel);
-    
-    if (!type || !clientNom || !clientTel) {
-      return res.status(400).json({ error: 'Tous les champs sont requis' });
+    // ----------------------------------------------------------
+    // P7-C — Validation stricte de l'entrée
+    // ----------------------------------------------------------
+
+    if (typeof type !== 'string' || !type.trim()) {
+      return res.status(400).json({ error: 'Champ type requis' });
+    }
+
+    const clientNomNormalized = validateClientNom(clientNom);
+    if (!clientNomNormalized) {
+      return res.status(400).json({
+        error: `clientNom invalide (2-${CLIENT_NOM_MAX} caractères attendus)`
+      });
+    }
+
+    const clientTelNormalized = validateClientTel(clientTel);
+    if (!clientTelNormalized) {
+      return res.status(400).json({
+        error: 'clientTel invalide (format attendu : 03XXXXXXXX ou +261XXXXXXXXX)'
+      });
+    }
+
+    if (details !== undefined && details !== null) {
+      if (typeof details !== 'object' || Array.isArray(details)) {
+        return res.status(400).json({
+          error: 'details doit être un objet JSON'
+        });
+      }
     }
     
     let org = null;
@@ -1499,6 +1589,19 @@ router.post('/actions', async (req, res) => {
     
     if (!VALID_TYPES.includes(type)) {
       return res.status(400).json({ error: 'Type invalide' });
+    }
+
+    if (TYPES_REQUIRING_DETAILS.has(type)) {
+      if (!details || typeof details !== 'object' || Array.isArray(details)) {
+        return res.status(400).json({
+          error: `details est obligatoire pour le type ${type}`
+        });
+      }
+      if (Object.keys(details).length === 0) {
+        return res.status(400).json({
+          error: `details ne peut pas être vide pour le type ${type}`
+        });
+      }
     }
     
     // ========================================
@@ -1895,8 +1998,12 @@ router.post('/actions', async (req, res) => {
         tariff,
         distanceKmLong,
         {
-          nbPassagers: typeService === 'passagers' ? (Number(details?.nbPassagers) || 1) : undefined,
-          tonnage: typeService === 'marchandises' ? (Number(details?.volume) || 1) : undefined
+          nbPassagers: typeService === 'passagers'
+            ? clampNumber(details?.nbPassagers, NB_PASSAGERS_MIN, NB_PASSAGERS_MAX, 1)
+            : undefined,
+          tonnage: typeService === 'marchandises'
+            ? clampNumber(details?.volume, VOLUME_MIN, VOLUME_MAX, 1)
+            : undefined
         }
       );
 
@@ -1925,7 +2032,7 @@ router.post('/actions', async (req, res) => {
         clientNom: clientNomNormalized,
         clientTel: clientTelNormalized,
         details: {
-          ...(details || {}),
+          ...sanitizeDetails(details),
           distanceKm,
           prixEstime,
           modePrestation,
