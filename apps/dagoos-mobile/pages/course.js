@@ -2,6 +2,18 @@
 // COURSE.JS — Miroir exact de la landing
 // ============================================
 
+// P7-E2-FIX : helper local (fallback si escape.js pas chargé).
+function escapeHtmlLocal(value) {
+  if (window.escapeHtml) return window.escapeHtml(value);
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 var positionGPS = null;
 var adresseGPS = '';
 var mode = 'choisir';
@@ -44,10 +56,10 @@ function init_course() {
       </div>
 
       <div style="background:#252540;border-radius:14px;padding:16px;">
-        <input id="clientNom" placeholder="Votre nom" value="${info.name || ''}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
-        <input id="clientTel" placeholder="Votre téléphone" value="${info.phone || ''}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
-        <input id="depart" placeholder="Adresse de départ" value="${depart}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
-        <input id="arrivee" placeholder="Adresse d'arrivée" value="${arrivee}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
+        <input id="clientNom" placeholder="Votre nom" value="${escapeHtmlLocal(info.name)}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
+        <input id="clientTel" placeholder="Votre téléphone" value="${escapeHtmlLocal(info.phone)}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
+        <input id="depart" placeholder="Adresse de départ" value="${escapeHtmlLocal(depart)}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
+        <input id="arrivee" placeholder="Adresse d'arrivée" value="${escapeHtmlLocal(arrivee)}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
 
         <select id="typeVehicule" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
           <option value="moto"><i data-lucide="bike" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Taxi moto</option>
@@ -99,7 +111,7 @@ function updateUI() {
     if (mode === 'choisir') {
       var optionsHtml = '<option value="">-- Choisir une flotte --</option>';
       flottesDisponibles.forEach(function(f) {
-        optionsHtml += '<option value="' + f.slug + '">' + f.name + '</option>';
+        optionsHtml += '<option value="' + escapeHtmlLocal(f.slug) + '">' + escapeHtmlLocal(f.name) + '</option>';
       });
       flotteContainer.innerHTML = `
         <select id="flotte" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;" onchange="localStorage.setItem('dagoos_selected_fleet_slug', this.value); chargerBrandingOrganisation(this.value); estimerPrix()">

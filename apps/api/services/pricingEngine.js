@@ -166,7 +166,7 @@ function isPriceAccepted(details) {
   const negotiation = details.negotiation;
   if (!negotiation) return false;
 
-  return negotiation.status === 'ACCEPTEE_PAR_CLIENT' &&
+  return negotiation.status === 'ACCEPTEE' &&
          negotiation.proposedPrice != null &&
          negotiation.proposedPrice > 0;
 }

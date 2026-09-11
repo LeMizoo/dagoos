@@ -24,6 +24,8 @@ const VALID_TYPES = [
 
 const VALID_STATUTS = ['NEW', 'IN_PROGRESS', 'ACCEPTED', 'REJECTED', 'COMPLETED', 'CANCELLED'];
 
+const NEGOTIATION_TTL_HOURS = 48;
+
 async function getUserOrganizationId(req) {
   if (req.user.organizationId) return req.user.organizationId;
   
@@ -262,6 +264,22 @@ router.post('/:id/accept', authMiddleware, async (req, res) => {
       return res.status(409).json({ error: 'Cette course a déjà été traitée' });
     }
 
+    // 4bis. GARDE-FOU NEGOTIATED
+    // Une demande NEGOTIATED non encore acceptée par le client
+    // ne peut PAS être acceptée directement par un chauffeur.
+    // Elle doit passer par POST /:id/propose puis POST /public/actions/:id/respond.
+    const _acceptPricingModel = action.details?.pricingModel;
+    const _acceptNegotiationStatus = action.details?.negotiation?.status;
+
+    if (
+      _acceptPricingModel === 'NEGOTIATED' &&
+      _acceptNegotiationStatus !== 'ACCEPTEE'
+    ) {
+      return res.status(409).json({
+        error: 'Cette demande nécessite une négociation. Utilisez /propose.'
+      });
+    }
+
     // 5. Vérifier que le chauffeur a un véhicule
     const finalVehicleId = driver.vehicleId;
     if (!finalVehicleId) {
@@ -414,6 +432,155 @@ router.post('/:id/accept', authMiddleware, async (req, res) => {
   }
 });
 
+// POST /api/actions/:id/propose - Proposer un prix (driver, LONG_HAUL NEGOTIATED)
+router.post('/:id/propose', authMiddleware, async (req, res) => {
+  try {
+    const actionId = req.params.id;
+    const { price } = req.body;
+
+    // 1. Vérifier l'authentification chauffeur
+    if (!req.user.driverId) {
+      return res.status(403).json({ error: 'Chauffeur non associé' });
+    }
+
+    // 2. Valider le prix proposé (source de vérité = serveur)
+    const proposedPrice = Number(price);
+    if (!Number.isFinite(proposedPrice) || proposedPrice <= 0) {
+      return res.status(400).json({ error: 'Prix invalide' });
+    }
+
+    // 3. Charger le driver
+    const driver = await prisma.driver.findUnique({
+      where: { id: req.user.driverId },
+      select: { id: true, userId: true, organizationId: true, vehicleId: true }
+    });
+
+    if (!driver) {
+      return res.status(404).json({ error: 'Chauffeur introuvable' });
+    }
+
+    // 4. Charger la LeadAction
+    const action = await prisma.leadAction.findUnique({
+      where: { id: actionId }
+    });
+
+    if (!action) {
+      return res.status(404).json({ error: 'Demande introuvable' });
+    }
+
+    // 5. Vérifier le type + le modèle de pricing
+    if (action.type !== 'LONG_HAUL') {
+      return res.status(400).json({
+        error: 'Cette demande ne concerne pas une prestation long-courrier'
+      });
+    }
+
+    const pricingModel = action.details?.pricingModel;
+    if (pricingModel !== 'NEGOTIATED') {
+      return res.status(400).json({
+        error: 'Cette demande ne nécessite pas de négociation'
+      });
+    }
+
+    // 6. Vérifier le statut global
+    if (action.statut !== 'NEW') {
+      return res.status(409).json({
+        error: 'Cette demande a déjà été traitée'
+      });
+    }
+
+    // 7. Vérifier que le chauffeur est autorisé sur cette demande
+    const isPublicLongHaul =
+      action.type === 'LONG_HAUL' && !action.organizationId;
+
+    if (!isPublicLongHaul && action.organizationId !== driver.organizationId) {
+      return res.status(403).json({ error: 'Accès refusé' });
+    }
+
+    // 8. Pour les demandes publiques, exiger la notification
+    if (isPublicLongHaul) {
+      const notificationForDriver = await prisma.notification.findFirst({
+        where: {
+          leadActionId: actionId,
+          userId: driver.userId
+        },
+        select: { id: true }
+      });
+
+      if (!notificationForDriver) {
+        return res.status(403).json({
+          error: 'Cette demande ne vous a pas été attribuée'
+        });
+      }
+    }
+
+    // 9. Vérifier l'état de négociation
+    const negotiation = action.details?.negotiation;
+    if (!negotiation || negotiation.status !== 'EN_ATTENTE_TRANSPORTEUR') {
+      return res.status(409).json({
+        error: 'Une proposition a déjà été faite ou la négociation est close'
+      });
+    }
+
+    // 10. Transaction atomique — verrou optimiste sur updatedAt
+    const updated = await prisma.leadAction.updateMany({
+      where: {
+        id: actionId,
+        statut: 'NEW',
+        updatedAt: action.updatedAt
+      },
+      data: {
+        details: {
+          ...action.details,
+          negotiation: {
+            ...negotiation,
+            status: 'PROPOSITION_EN_ATTENTE_CLIENT',
+            proposedPrice,
+            proposedAt: new Date().toISOString(),
+            expiresAt: new Date(
+              Date.now() + NEGOTIATION_TTL_HOURS * 3600 * 1000
+            ).toISOString(),
+            respondedAt: null,
+            respondedBy: null,
+            responseChannel: null,
+            // Identité du proposant — nécessaire pour /respond
+            driverId: driver.id,
+            vehicleId: driver.vehicleId
+          }
+        }
+      }
+    });
+
+    if (updated.count !== 1) {
+      return res.status(409).json({
+        error: 'Proposition concurrente détectée, réessayez'
+      });
+    }
+
+    // 11. Notification interne (traçabilité managers)
+    await prisma.notification.create({
+      data: {
+        organizationId: driver.organizationId,
+        leadActionId: actionId,
+        type: 'negotiation_proposal',
+        title: 'Proposition de prix envoyée',
+        message: `${action.clientNom} - ${proposedPrice} MGA`,
+        read: false
+      }
+    }).catch(() => {});
+
+    return res.status(200).json({
+      ok: true,
+      status: 'PROPOSITION_EN_ATTENTE_CLIENT',
+      proposedPrice
+    });
+
+  } catch (error) {
+    console.error('POST /actions/:id/propose:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // POST /api/actions/:id/reject - Refuser une demande de course (driver)
 router.post('/:id/reject', authMiddleware, async (req, res) => {
   try {
@@ -553,38 +720,17 @@ router.post('/:id/reject', authMiddleware, async (req, res) => {
   }
 });
 
-// PATCH /api/actions/:id - Mettre à jour le statut
+// PATCH /api/actions/:id
+//
+// IMPORTANT : le statut d'une LeadAction est piloté exclusivement
+// par les routes métier du workflow (/accept, /propose, /reject, /respond).
+// Cette route est volontairement désactivée afin d'empêcher tout
+// contournement de la machine d'état, notamment pour LONG_HAUL NEGOTIATED.
 router.patch('/:id', authMiddleware, async (req, res) => {
-  try {
-    const { statut } = req.body;
-    
-    if (!statut || !VALID_STATUTS.includes(statut)) {
-      return res.status(400).json({ error: 'Statut invalide' });
-    }
-    
-    const action = await prisma.leadAction.findUnique({
-      where: { id: req.params.id },
-    });
-    
-    if (!action) return res.status(404).json({ error: 'Action introuvable' });
-    
-    if (!GLOBAL_ROLES.includes(req.user.role)) {
-      const orgId = await getUserOrganizationId(req);
-      if (action.organizationId !== orgId) {
-        return res.status(403).json({ error: 'Accès refusé' });
-      }
-    }
-    
-    const updated = await prisma.leadAction.update({
-      where: { id: req.params.id },
-      data: { statut },
-    });
-    
-    res.json(updated);
-  } catch (error) {
-    console.error('PATCH /actions/:id:', error);
-    res.status(500).json({ error: 'Erreur modification action' });
-  }
+  return res.status(405).json({
+    error: 'Modification directe du statut interdite',
+    code: 'LEAD_ACTION_STATUS_MANAGED_BY_WORKFLOW'
+  });
 });
 
 module.exports = router;

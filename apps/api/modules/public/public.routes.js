@@ -7,9 +7,84 @@ const router = express.Router();
 
 // Matrice LONG_HAUL - Source de vérité unique
 const {
+  LONG_HAUL_MAPPING,
   VALID_LONG_HAUL_SERVICES,
   isVehicleCompatibleWithService
 } = require('./long-haul-matrix');
+
+// P7-C — Rate limiting sur les endpoints publics sensibles
+const { publicLeadLimiter } = require('../../middleware/rate-limit');
+
+// ============================================================
+// P7-C — VALIDATEURS D'ENTRÉE PUBLIQUE
+// ============================================================
+
+const CLIENT_NOM_MIN = 2;
+const CLIENT_NOM_MAX = 100;
+
+const TEL_REGEX = /^(?:\+261|0)[0-9]{8,11}$/;
+
+function validateClientNom(nom) {
+  if (typeof nom !== 'string') return null;
+  const trimmed = String(nom).normalize('NFC').trim();
+  if (trimmed.length < CLIENT_NOM_MIN || trimmed.length > CLIENT_NOM_MAX) {
+    return null;
+  }
+  return trimmed;
+}
+
+function validateClientTel(tel) {
+  if (typeof tel !== 'string') return null;
+  const trimmed = String(tel).normalize('NFC').trim().replace(/\s/g, '');
+  if (!TEL_REGEX.test(trimmed)) return null;
+  return trimmed;
+}
+
+const ALLOWED_DETAILS_KEYS = new Set([
+  'typeService', 'typeVehicule', 'depart', 'arrivee',
+  'nbPassagers', 'volume', 'dateAller', 'dateRetour',
+  'carburant', 'typeTrajet', 'offreClient',
+  'type', 'mode', 'position',
+  'date', 'heure', 'priseEnCharge', 'destination',
+  'message', 'description'
+]);
+
+function sanitizeDetails(details) {
+  if (!details || typeof details !== 'object' || Array.isArray(details)) {
+    return {};
+  }
+  const out = {};
+  for (const key of Object.keys(details)) {
+    if (ALLOWED_DETAILS_KEYS.has(key)) {
+      out[key] = details[key];
+    }
+  }
+  return out;
+}
+
+const TYPES_REQUIRING_DETAILS = new Set([
+  'LONG_HAUL',
+  'COURSE_REQUEST',
+  'TAXI_RESERVATION',
+  'CAR_RENTAL',
+  'DELIVERY_REQUEST'
+]);
+
+const NB_PASSAGERS_MIN = 1;
+const NB_PASSAGERS_MAX = 50;
+const VOLUME_MIN = 0.1;
+const VOLUME_MAX = 100;
+
+function clampNumber(value, min, max, fallback) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  if (n < min) return min;
+  if (n > max) return max;
+  return n;
+}
+
+
+const NEGOTIATION_TTL_HOURS = 48;
 
 // =========================================================
 // ORGANISATION PUBLIQUE
@@ -635,6 +710,577 @@ router.get('/suivi/:code', async (req, res) => {
   }
 });
 
+
+// =========================================================
+// RÉPONSE CLIENT — NÉGOCIATION LONG_HAUL
+// POST /api/public/actions/respond
+//
+// Authentification publique :
+//   codeSuivi + clientTel
+//
+// Le client ne fournit JAMAIS le prix.
+// Le prix de référence est negotiation.proposedPrice.
+// =========================================================
+
+router.post('/actions/respond', async (req, res) => {
+  try {
+    const { codeSuivi, clientTel, decision } = req.body || {};
+
+    // -------------------------------------------------------
+    // 1. Validation du body
+    // -------------------------------------------------------
+
+    if (
+      typeof codeSuivi !== 'string' ||
+      !codeSuivi.trim() ||
+      typeof clientTel !== 'string' ||
+      !clientTel.trim() ||
+      typeof decision !== 'string'
+    ) {
+      return res.status(400).json({
+        error: 'codeSuivi, clientTel et decision sont obligatoires'
+      });
+    }
+
+    const normalizedCodeSuivi = codeSuivi.trim();
+    const normalizedClientTel = clientTel.trim();
+    const normalizedDecision = decision.trim().toUpperCase();
+
+    if (!['ACCEPTEE', 'REFUSEE'].includes(normalizedDecision)) {
+      return res.status(400).json({
+        error: 'decision doit être ACCEPTEE ou REFUSEE'
+      });
+    }
+
+    // -------------------------------------------------------
+    // 2. Retrouver la LeadAction par codeSuivi
+    // -------------------------------------------------------
+
+    const candidates = await prisma.leadAction.findMany({
+      where: {
+        type: 'LONG_HAUL'
+      },
+      select: {
+        id: true,
+        organizationId: true,
+        type: true,
+        clientNom: true,
+        clientTel: true,
+        details: true,
+        statut: true,
+        updatedAt: true
+      }
+    });
+
+    const action = candidates.find((item) => {
+      return item.details?.codeSuivi === normalizedCodeSuivi;
+    });
+
+    if (!action) {
+      return res.status(404).json({
+        error: 'Demande introuvable'
+      });
+    }
+
+    // -------------------------------------------------------
+    // 3. Second facteur : clientTel exact
+    // -------------------------------------------------------
+
+    if (action.clientTel !== normalizedClientTel) {
+      return res.status(403).json({
+        error: 'Accès refusé'
+      });
+    }
+
+    // -------------------------------------------------------
+    // 4. Vérifier LONG_HAUL + NEGOTIATED
+    // -------------------------------------------------------
+
+    const details = action.details || {};
+    const pricingModel = details.pricingModel;
+
+    if (action.type !== 'LONG_HAUL') {
+      return res.status(400).json({
+        error: 'Cette demande ne concerne pas une prestation long-courrier'
+      });
+    }
+
+    if (pricingModel !== 'NEGOTIATED') {
+      return res.status(400).json({
+        error: 'Cette demande ne nécessite pas de négociation'
+      });
+    }
+
+    // -------------------------------------------------------
+    // 5. Vérifier l'état de négociation
+    // -------------------------------------------------------
+
+    const negotiation = details.negotiation;
+
+    if (
+      !negotiation ||
+      negotiation.status !== 'PROPOSITION_EN_ATTENTE_CLIENT'
+    ) {
+      return res.status(409).json({
+        error: 'Cette proposition n’est plus en attente de réponse'
+      });
+    }
+
+    // -------------------------------------------------------
+    // 6. Vérifier les données enregistrées par /propose
+    // -------------------------------------------------------
+
+    const proposerDriverId = negotiation.driverId;
+    const proposerVehicleId = negotiation.vehicleId;
+    const proposedPrice = Number(negotiation.proposedPrice);
+
+    if (
+      typeof proposerDriverId !== 'string' ||
+      !proposerDriverId ||
+      typeof proposerVehicleId !== 'string' ||
+      !proposerVehicleId ||
+      !Number.isFinite(proposedPrice) ||
+      proposedPrice <= 0
+    ) {
+      return res.status(409).json({
+        error: 'Proposition de négociation invalide ou incomplète'
+      });
+    }
+
+    // -------------------------------------------------------
+    // 7. Revalidation chauffeur -> organisation -> véhicule
+    // -------------------------------------------------------
+
+    const driver = await prisma.driver.findUnique({
+      where: { id: proposerDriverId },
+      select: {
+        id: true,
+        userId: true,
+        organizationId: true,
+        vehicleId: true,
+        accountStatus: true,
+        vehicle: {
+          select: {
+            id: true,
+            organizationId: true,
+            type: true,
+            vehicleCategory: {
+              select: {
+                code: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!driver) {
+      return res.status(403).json({
+        error: 'Le chauffeur ayant proposé le prix est introuvable'
+      });
+    }
+
+    // Le chauffeur doit toujours être rattaché à la même organisation.
+    if (
+      action.organizationId &&
+      action.organizationId !== driver.organizationId
+    ) {
+      return res.status(403).json({
+        error: 'Organisation du chauffeur invalide'
+      });
+    }
+
+    // Le compte chauffeur doit toujours être actif.
+    if (
+      driver.accountStatus &&
+      String(driver.accountStatus).toLowerCase() !== 'active'
+    ) {
+      return res.status(403).json({
+        error: 'Le chauffeur n’est plus actif'
+      });
+    }
+
+    // Le véhicule utilisé pour la proposition doit toujours être
+    // le véhicule actuellement affecté au chauffeur.
+    if (driver.vehicleId !== proposerVehicleId) {
+      return res.status(409).json({
+        error: 'Le véhicule utilisé pour la proposition a changé'
+      });
+    }
+
+    const vehicle = driver.vehicle;
+
+    if (!vehicle || vehicle.id !== proposerVehicleId) {
+      return res.status(403).json({
+        error: 'Véhicule du chauffeur introuvable'
+      });
+    }
+
+    if (
+      vehicle.organizationId &&
+      vehicle.organizationId !== driver.organizationId
+    ) {
+      return res.status(403).json({
+        error: 'Le véhicule n’appartient plus à l’organisation du chauffeur'
+      });
+    }
+
+    // -------------------------------------------------------
+    // 8. Revalidation compatibilité LONG_HAUL V2
+    // -------------------------------------------------------
+
+    const typeService = details.typeService;
+    const typeVehicule = details.typeVehicule;
+
+    if (!VALID_LONG_HAUL_SERVICES.includes(typeService)) {
+      return res.status(400).json({
+        error: 'Type de service LONG_HAUL invalide'
+      });
+    }
+
+    if (!isVehicleCompatibleWithService(typeService, typeVehicule)) {
+      return res.status(400).json({
+        error: 'Véhicule incompatible avec le service demandé'
+      });
+    }
+
+    const vehicleType = vehicle.type
+      ? String(vehicle.type).toLowerCase()
+      : null;
+
+    if (vehicleType !== typeVehicule) {
+      return res.status(400).json({
+        error: 'Le type du véhicule ne correspond plus à la demande'
+      });
+    }
+
+    const vehicleCategoryCode = typeVehicule
+      ? String(typeVehicule).toUpperCase().replace(/-/g, '_')
+      : null;
+
+    const serviceCode = {
+      passagers: 'LOCATION_INTERURBAINE',
+      marchandises: 'MARCHANDISES',
+      demenagement: 'MARCHANDISES',
+      depannage: 'DEPANNAGE',
+      fret: 'FRET'
+    }[typeService];
+
+    if (!serviceCode) {
+      return res.status(400).json({
+        error: 'Service LONG_HAUL non reconnu'
+      });
+    }
+
+    const compatibleOrg = await prisma.businessActivity.findFirst({
+      where: {
+        organizationId: driver.organizationId,
+        type: 'INTERURBAN',
+        active: true,
+        services: {
+          some: {
+            code: serviceCode,
+            active: true,
+            tariffs: {
+              some: {
+                active: true,
+                vehicleCategory: {
+                  code: vehicleCategoryCode
+                }
+              }
+            }
+          }
+        }
+      },
+      select: {
+        id: true
+      }
+    }).catch(() => null);
+
+    if (!compatibleOrg) {
+      return res.status(403).json({
+        error: 'Organisation non compatible avec cette prestation'
+      });
+    }
+
+    // -------------------------------------------------------
+    // 9. Calcul serveur des montants
+    // -------------------------------------------------------
+
+    const commissionPct = Number(details.commissionPct ?? 20);
+
+    if (
+      !Number.isFinite(commissionPct) ||
+      commissionPct < 0 ||
+      commissionPct > 100
+    ) {
+      return res.status(409).json({
+        error: 'Commission de la demande invalide'
+      });
+    }
+
+    const partChauffeur = Math.round(
+      proposedPrice * commissionPct / 100
+    );
+
+    const partOrganisation = proposedPrice - partChauffeur;
+
+    const distanceKm = Number(details.distanceKm || 0);
+    const modePrestation = details.modePrestation || 'NORMALE';
+
+    // -------------------------------------------------------
+    // 10. Transaction atomique
+    // -------------------------------------------------------
+
+    let courseCree = null;
+
+    try {
+      const txResult = await prisma.$transaction(async (tx) => {
+        const freshAction = await tx.leadAction.findUnique({
+          where: { id: action.id }
+        });
+
+        if (!freshAction) {
+          throw new Error('Demande introuvable');
+        }
+
+        const freshDetails = freshAction.details || {};
+        const freshNegotiation = freshDetails.negotiation;
+
+        // Revalidation dans la transaction pour empêcher
+        // une double réponse acceptation/refus.
+        if (
+          freshAction.statut !== 'NEW' ||
+          !freshNegotiation ||
+          freshNegotiation.status !== 'PROPOSITION_EN_ATTENTE_CLIENT'
+        ) {
+          throw new Error('NEGOTIATION_ALREADY_PROCESSED');
+        }
+
+        if (
+          freshNegotiation.driverId !== proposerDriverId ||
+          freshNegotiation.vehicleId !== proposerVehicleId ||
+          Number(freshNegotiation.proposedPrice) !== proposedPrice
+        ) {
+          throw new Error('NEGOTIATION_CHANGED');
+        }
+
+        // ---------------------------------------------------
+        // EXPIRATION (lazy) — 48h après la proposition
+        // ---------------------------------------------------
+        if (
+          freshNegotiation.expiresAt &&
+          new Date(freshNegotiation.expiresAt) <= new Date()
+        ) {
+          const expiredNegotiation = {
+            ...freshNegotiation,
+            status: 'EXPIREE',
+            expiredAt: new Date().toISOString()
+          };
+
+          const expiredUpdate = await tx.leadAction.updateMany({
+            where: {
+              id: action.id,
+              statut: 'NEW',
+              updatedAt: freshAction.updatedAt
+            },
+            data: {
+              statut: 'REJECTED',
+              details: {
+                ...freshDetails,
+                negotiation: expiredNegotiation
+              }
+            }
+          });
+
+          if (expiredUpdate.count !== 1) {
+            throw new Error('NEGOTIATION_CONCURRENT_UPDATE');
+          }
+
+          return { expired: true };
+        }
+
+        const now = new Date().toISOString();
+
+        const nextNegotiation = {
+          ...freshNegotiation,
+          status:
+            normalizedDecision === 'ACCEPTEE'
+              ? 'ACCEPTEE'
+              : 'REFUSEE',
+          respondedAt: now,
+          respondedBy: 'CLIENT',
+          responseChannel: 'PUBLIC_CODE'
+        };
+
+        const nextDetails = {
+          ...freshDetails,
+          negotiation: nextNegotiation
+        };
+
+        // ---------------------------------------------------
+        // REFUS
+        // ---------------------------------------------------
+
+        if (normalizedDecision === 'REFUSEE') {
+          const updated = await tx.leadAction.updateMany({
+            where: {
+              id: action.id,
+              statut: 'NEW',
+              updatedAt: freshAction.updatedAt
+            },
+            data: {
+              statut: 'REJECTED',
+              details: nextDetails
+            }
+          });
+
+          if (updated.count !== 1) {
+            throw new Error('NEGOTIATION_CONCURRENT_UPDATE');
+          }
+
+          return;
+        }
+
+        // ---------------------------------------------------
+        // ACCEPTATION
+        // ---------------------------------------------------
+
+        const updated = await tx.leadAction.updateMany({
+          where: {
+            id: action.id,
+            statut: 'NEW',
+            updatedAt: freshAction.updatedAt
+          },
+          data: {
+            statut: 'ACCEPTED',
+            organizationId: driver.organizationId,
+            details: nextDetails
+          }
+        });
+
+        if (updated.count !== 1) {
+          throw new Error('NEGOTIATION_CONCURRENT_UPDATE');
+        }
+
+        // Le prix vient exclusivement de negotiation.proposedPrice.
+        courseCree = await tx.course.create({
+          data: {
+            driverId: driver.id,
+            vehicleId: vehicle.id,
+            leadActionId: action.id,
+            type: modePrestation,
+            statut: 'EN_ATTENTE',
+            clientNom: freshAction.clientNom,
+            clientTel: freshAction.clientTel,
+            adresseDepart: freshDetails.depart || null,
+            adresseArrivee: freshDetails.arrivee || null,
+            distanceEstimeeKm: distanceKm,
+            distanceKm,
+            price: proposedPrice,
+            commissionPct,
+            montantChauffeur: partChauffeur,
+            montantOrganisation: partOrganisation,
+            commission: partOrganisation,
+            acceptedAt: new Date()
+          }
+        });
+
+        return { expired: false };
+      });
+
+      if (txResult?.expired) {
+        return res.status(409).json({
+          error: 'Cette proposition a expiré',
+          code: 'NEGOTIATION_EXPIRED'
+        });
+      }
+    } catch (txError) {
+      if (txError.message === 'NEGOTIATION_ALREADY_PROCESSED') {
+        return res.status(409).json({
+          error: 'Cette négociation a déjà reçu une réponse'
+        });
+      }
+
+      if (txError.message === 'NEGOTIATION_CHANGED') {
+        return res.status(409).json({
+          error: 'La proposition a changé, veuillez actualiser le suivi'
+        });
+      }
+
+      if (txError.message === 'NEGOTIATION_CONCURRENT_UPDATE') {
+        return res.status(409).json({
+          error: 'Réponse concurrente détectée, veuillez actualiser le suivi'
+        });
+      }
+
+      throw txError;
+    }
+
+    // -------------------------------------------------------
+    // 11. Notification du chauffeur
+    // -------------------------------------------------------
+
+    const notificationMessage =
+      normalizedDecision === 'ACCEPTEE'
+        ? `${action.clientNom} a accepté votre proposition de ${proposedPrice} MGA.`
+        : `${action.clientNom} a refusé votre proposition de ${proposedPrice} MGA.`;
+
+    await prisma.notification.create({
+      data: {
+        userId: driver.userId,
+        organizationId: driver.organizationId,
+        leadActionId: action.id,
+        type: 'negotiation_response',
+        title:
+          normalizedDecision === 'ACCEPTEE'
+            ? 'Proposition acceptée par le client'
+            : 'Proposition refusée par le client',
+        message: notificationMessage,
+        read: false
+      }
+    }).catch(() => {});
+
+    // -------------------------------------------------------
+    // 12. Fermer les notifications liées à la demande
+    // -------------------------------------------------------
+
+    await prisma.notification.updateMany({
+      where: {
+        leadActionId: action.id,
+        read: false
+      },
+      data: {
+        read: true
+      }
+    }).catch(() => {});
+
+    // -------------------------------------------------------
+    // 13. Réponse API
+    // -------------------------------------------------------
+
+    if (normalizedDecision === 'ACCEPTEE') {
+      return res.status(200).json({
+        ok: true,
+        status: 'ACCEPTEE',
+        courseId: courseCree?.id || null
+      });
+    }
+
+    return res.status(200).json({
+      ok: true,
+      status: 'REFUSEE'
+    });
+  } catch (error) {
+    console.error('POST /public/actions/respond:', error);
+
+    return res.status(500).json({
+      error: error.message
+    });
+  }
+});
+
+
 router.post('/estimate-location', async (req, res) => {
   try {
     const {
@@ -703,35 +1349,6 @@ router.post('/estimate-location', async (req, res) => {
         });
       }
 
-      // Mapping V1 → V2
-      const LONG_HAUL_MAPPING = {
-        passagers: {
-          serviceCode: 'LOCATION_INTERURBAINE',
-          vehicleCategories: ['BUS', 'MINIVAN'],
-          pricingModel: 'PER_KM'
-        },
-        marchandises: {
-          serviceCode: 'MARCHANDISES',
-          vehicleCategories: ['CAMION'],
-          pricingModel: 'NEGOTIATED'
-        },
-        demenagement: {
-          serviceCode: 'MARCHANDISES',
-          vehicleCategories: ['FOURGON', 'CAMION'],
-          pricingModel: 'NEGOTIATED'
-        },
-        depannage: {
-          serviceCode: 'DEPANNAGE',
-          vehicleCategories: ['DEPANNEUSE'],
-          pricingModel: 'NEGOTIATED'
-        },
-        fret: {
-          serviceCode: 'FRET',
-          vehicleCategories: ['CAMION', 'SEMI_REMORQUE'],
-          pricingModel: 'NEGOTIATED'
-        }
-      };
-
       const mapping = LONG_HAUL_MAPPING[typeService];
       if (!mapping) {
         return res.status(400).json({
@@ -796,6 +1413,7 @@ router.post('/estimate-location', async (req, res) => {
         where: {
           serviceId: service.id,
           vehicleCategoryId: category.id,
+          pricingModel: mapping.pricingModel,
           active: true
         },
         select: {
@@ -910,20 +1528,38 @@ router.post('/estimate-location', async (req, res) => {
 });
 
 // POST /api/public/actions - Créer une action depuis la landing
-router.post('/actions', async (req, res) => {
+router.post('/actions', publicLeadLimiter, async (req, res) => {
   try {
     const { organizationSlug, type, clientNom, clientTel, details } = req.body;
 
-    // Normaliser les chaînes Unicode pour éviter les caractères mal encodés
-    const normalize = (str) => {
-      if (!str) return str;
-      return String(str).normalize('NFC').trim();
-    };
-    const clientNomNormalized = normalize(clientNom);
-    const clientTelNormalized = normalize(clientTel);
-    
-    if (!type || !clientNom || !clientTel) {
-      return res.status(400).json({ error: 'Tous les champs sont requis' });
+    // ----------------------------------------------------------
+    // P7-C — Validation stricte de l'entrée
+    // ----------------------------------------------------------
+
+    if (typeof type !== 'string' || !type.trim()) {
+      return res.status(400).json({ error: 'Champ type requis' });
+    }
+
+    const clientNomNormalized = validateClientNom(clientNom);
+    if (!clientNomNormalized) {
+      return res.status(400).json({
+        error: `clientNom invalide (2-${CLIENT_NOM_MAX} caractères attendus)`
+      });
+    }
+
+    const clientTelNormalized = validateClientTel(clientTel);
+    if (!clientTelNormalized) {
+      return res.status(400).json({
+        error: 'clientTel invalide (format attendu : 03XXXXXXXX ou +261XXXXXXXXX)'
+      });
+    }
+
+    if (details !== undefined && details !== null) {
+      if (typeof details !== 'object' || Array.isArray(details)) {
+        return res.status(400).json({
+          error: 'details doit être un objet JSON'
+        });
+      }
     }
     
     let org = null;
@@ -955,6 +1591,19 @@ router.post('/actions', async (req, res) => {
     if (!VALID_TYPES.includes(type)) {
       return res.status(400).json({ error: 'Type invalide' });
     }
+
+    if (TYPES_REQUIRING_DETAILS.has(type)) {
+      if (!details || typeof details !== 'object' || Array.isArray(details)) {
+        return res.status(400).json({
+          error: `details est obligatoire pour le type ${type}`
+        });
+      }
+      if (Object.keys(details).length === 0) {
+        return res.status(400).json({
+          error: `details ne peut pas être vide pour le type ${type}`
+        });
+      }
+    }
     
     // ========================================
     // MATCHING AUTOMATIQUE LONG_HAUL (sans organisation)
@@ -963,32 +1612,19 @@ router.post('/actions', async (req, res) => {
     let organizationsToNotify = [];
 
     if (type === 'LONG_HAUL' && !org) {
-      const typeService = details?.typeService || 'passagers';
-      const typeVehicule = details?.typeVehicule || 'bus';
+      if (
+        typeof details?.typeService !== 'string' ||
+        !details.typeService.trim() ||
+        typeof details?.typeVehicule !== 'string' ||
+        !details.typeVehicule.trim()
+      ) {
+        return res.status(400).json({
+          error: 'typeService et typeVehicule sont obligatoires pour LONG_HAUL'
+        });
+      }
 
-      // Mapping V2 pour trouver les organisations compatibles
-      const LONG_HAUL_MAPPING = {
-        passagers: {
-          serviceCode: 'LOCATION_INTERURBAINE',
-          vehicleCategories: ['BUS', 'MINIVAN']
-        },
-        marchandises: {
-          serviceCode: 'MARCHANDISES',
-          vehicleCategories: ['CAMION']
-        },
-        demenagement: {
-          serviceCode: 'MARCHANDISES',
-          vehicleCategories: ['FOURGON', 'CAMION']
-        },
-        depannage: {
-          serviceCode: 'DEPANNAGE',
-          vehicleCategories: ['DEPANNEUSE']
-        },
-        fret: {
-          serviceCode: 'FRET',
-          vehicleCategories: ['CAMION', 'SEMI_REMORQUE']
-        }
-      };
+      const typeService = details.typeService;
+      const typeVehicule = details.typeVehicule;
 
       const mapping = LONG_HAUL_MAPPING[typeService];
       
@@ -1012,6 +1648,7 @@ router.post('/actions', async (req, res) => {
                       tariffs: {
                         some: {
                           active: true,
+                          pricingModel: mapping.pricingModel,
                           vehicleCategory: {
                             code: vehicleCategoryCode
                           }
@@ -1036,17 +1673,19 @@ router.post('/actions', async (req, res) => {
             return [];
           });
 
-          console.log('[LONG_HAUL MATCHING] Résultat:', {
-            typeService,
-            typeVehicule,
-            vehicleCategoryCode,
-            serviceCode: mapping.serviceCode,
-            organizations: orgsCompatibles.map(o => ({
-              id: o.id,
-              name: o.name,
-              slug: o.slug
-            }))
-          });
+          if (process.env.NODE_ENV !== 'production') {
+  console.log('[LONG_HAUL MATCHING] Résultat:', {
+              typeService,
+              typeVehicule,
+              vehicleCategoryCode,
+              serviceCode: mapping.serviceCode,
+              organizations: orgsCompatibles.map(o => ({
+                id: o.id,
+                name: o.name,
+                slug: o.slug
+              }))
+            });
+}
 
           organizationsToNotify = orgsCompatibles;
           // NE PAS affecter org ici - attendre l'acceptation d'un chauffeur
@@ -1248,8 +1887,8 @@ router.post('/actions', async (req, res) => {
       // LONG_HAUL : moteur V2 (ServiceTariff + pricingEngine)
       // ======================================================
 
-      const typeVehicule = details?.typeVehicule || 'bus';
-      const typeService = details?.typeService || 'passagers';
+      const typeVehicule = details.typeVehicule;
+      const typeService = details.typeService;
       const depart = details?.depart || '';
       const arrivee = details?.arrivee || '';
       const distanceKmLong = await calculerDistance(depart, arrivee);
@@ -1265,35 +1904,6 @@ router.post('/actions', async (req, res) => {
           error: `Véhicule ${typeVehicule} incompatible avec le service ${typeService}`
         });
       }
-
-      // Mapping V1 → V2 (identique à /estimate-location)
-      const LONG_HAUL_MAPPING = {
-        passagers: {
-          serviceCode: 'LOCATION_INTERURBAINE',
-          vehicleCategories: ['BUS', 'MINIVAN'],
-          pricingModel: 'PER_KM'
-        },
-        marchandises: {
-          serviceCode: 'MARCHANDISES',
-          vehicleCategories: ['CAMION'],
-          pricingModel: 'NEGOTIATED'
-        },
-        demenagement: {
-          serviceCode: 'MARCHANDISES',
-          vehicleCategories: ['FOURGON', 'CAMION'],
-          pricingModel: 'NEGOTIATED'
-        },
-        depannage: {
-          serviceCode: 'DEPANNAGE',
-          vehicleCategories: ['DEPANNEUSE'],
-          pricingModel: 'NEGOTIATED'
-        },
-        fret: {
-          serviceCode: 'FRET',
-          vehicleCategories: ['CAMION', 'SEMI_REMORQUE'],
-          pricingModel: 'NEGOTIATED'
-        }
-      };
 
       const mapping = LONG_HAUL_MAPPING[typeService];
       if (!mapping) {
@@ -1379,7 +1989,8 @@ router.post('/actions', async (req, res) => {
         where: {
           serviceId: service.id,
           vehicleCategoryId: category.id,
-          active: true
+pricingModel: mapping.pricingModel,
+                    active: true
         },
         select: {
           id: true,
@@ -1403,8 +2014,12 @@ router.post('/actions', async (req, res) => {
         tariff,
         distanceKmLong,
         {
-          nbPassagers: typeService === 'passagers' ? (Number(details?.nbPassagers) || 1) : undefined,
-          tonnage: typeService === 'marchandises' ? (Number(details?.volume) || 1) : undefined
+          nbPassagers: typeService === 'passagers'
+            ? clampNumber(details?.nbPassagers, NB_PASSAGERS_MIN, NB_PASSAGERS_MAX, 1)
+            : undefined,
+          tonnage: typeService === 'marchandises'
+            ? clampNumber(details?.volume, VOLUME_MIN, VOLUME_MAX, 1)
+            : undefined
         }
       );
 
@@ -1433,7 +2048,7 @@ router.post('/actions', async (req, res) => {
         clientNom: clientNomNormalized,
         clientTel: clientTelNormalized,
         details: {
-          ...(details || {}),
+          ...sanitizeDetails(details),
           distanceKm,
           prixEstime,
           modePrestation,

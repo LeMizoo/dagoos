@@ -2,6 +2,18 @@
 // SUIVI.JS — Aligné sur la landing
 // ============================================
 
+// P7-E2-FIX : helper local (fallback si escape.js pas chargé).
+function escapeHtmlLocal(value) {
+  if (window.escapeHtml) return window.escapeHtml(value);
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function init_suivi() {
   var lastCode = localStorage.getItem('dagoos_mobile_last_code') || '';
 
@@ -62,7 +74,7 @@ async function suivre() {
       };
 
       var statutColor = result.statut === 'ACCEPTED' ? '#22C55E' : result.statut === 'REJECTED' ? '#EF4444' : '#F59E0B';
-      var statutLabel = statutLabels[result.statut] || result.statut;
+      var statutLabel = statutLabels[result.statut] || escapeHtmlLocal(result.statut);
       var statutMessage = statutMessages[result.statut] || '';
 
       container.innerHTML = `
@@ -75,10 +87,10 @@ async function suivre() {
 
           <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:12px;">
             <div style="font-size:11px;color:#94A3B8;">Client</div>
-            <div style="font-weight:600;margin-bottom:8px;">${result.clientNom || '-'}</div>
+            <div style="font-weight:600;margin-bottom:8px;">${escapeHtmlLocal(result.clientNom) || '-'}</div>
 
             <div style="font-size:11px;color:#94A3B8;">Trajet</div>
-            <div style="font-weight:600;margin-bottom:8px;">${result.depart || '-'} → ${result.arrivee || '-'}</div>
+            <div style="font-weight:600;margin-bottom:8px;">${escapeHtmlLocal(result.depart) || '-'} → ${escapeHtmlLocal(result.arrivee) || '-'}</div>
 
             ${result.status === 'NEGOTIATION_REQUIRED' ? `
               <div style="font-size:11px;color:#94A3B8;">Prix</div>
@@ -108,7 +120,7 @@ async function suivre() {
 
             ${result.statutNegociation ? `
               <div style="font-size:11px;color:#94A3B8;">Négociation</div>
-              <div style="font-weight:600;margin-bottom:8px;">${statutNegociationLabels[result.statutNegociation] || result.statutNegociation}</div>
+              <div style="font-weight:600;margin-bottom:8px;">${statutNegociationLabels[result.statutNegociation] || escapeHtmlLocal(result.statutNegociation)}</div>
             ` : ''}
           </div>
         </div>

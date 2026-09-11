@@ -1,6 +1,19 @@
 // ========================================
 // DRIVER - PROFIL
 // ========================================
+
+// P7-E2-B-FIX : helper local (délègue à window.escapeHtml défini dans router.js).
+function escapeHtmlLocal(value) {
+  if (window.escapeHtml) return window.escapeHtml(value);
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function init_profil() {
     var main = document.getElementById('mainContent');
     var user = JSON.parse(localStorage.getItem("dagoo_driver_user") || "{}");
@@ -12,10 +25,10 @@ function init_profil() {
             '<div class="card" style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:20px;margin-bottom:12px;">' +
                 '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';margin-bottom:16px;">👤 Profil Chauffeur</h3>' +
                 '<div style="display:flex;flex-direction:column;gap:12px;">' +
-                    '<div><span style="color:#94A3B8;font-size:11px;">Nom</span><div style="font-weight:600;color:#fff;">' + (user.name || 'Chauffeur') + '</div></div>' +
-                    '<div><span style="color:#94A3B8;font-size:11px;">Code</span><div style="font-weight:600;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';font-family:monospace;">' + (user.driverCode || '-') + '</div></div>' +
-                    '<div><span style="color:#94A3B8;font-size:11px;">Organisation</span><div style="font-weight:600;color:#fff;">' + (user.organization || '-') + '</div></div>' +
-                    '<div><span style="color:#94A3B8;font-size:11px;">Email</span><div style="font-weight:600;color:#fff;font-size:12px;">' + (user.email || '-') + '</div></div>' +
+                    '<div><span style="color:#94A3B8;font-size:11px;">Nom</span><div style="font-weight:600;color:#fff;">' + escapeHtmlLocal(user.name || 'Chauffeur') + '</div></div>' +
+                    '<div><span style="color:#94A3B8;font-size:11px;">Code</span><div style="font-weight:600;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';font-family:monospace;">' + escapeHtmlLocal(user.driverCode || '-') + '</div></div>' +
+                    '<div><span style="color:#94A3B8;font-size:11px;">Organisation</span><div style="font-weight:600;color:#fff;">' + escapeHtmlLocal(user.organization || '-') + '</div></div>' +
+                    '<div><span style="color:#94A3B8;font-size:11px;">Email</span><div style="font-weight:600;color:#fff;font-size:12px;">' + escapeHtmlLocal(user.email || '-') + '</div></div>' +
                 '</div>' +
             '</div>' +
 
@@ -75,7 +88,7 @@ async function changePin() {
             document.getElementById('newPin').value = '';
             document.getElementById('confirmPin').value = '';
         } else {
-            msg.innerHTML = '<span style="color:#F87171;">❌ ' + ((result && result.error) || 'Erreur') + '</span>';
+            msg.innerHTML = '<span style="color:#F87171;">❌ ' + escapeHtmlLocal((result && result.error) || 'Erreur') + '</span>';
         }
     } catch(e) {
         msg.innerHTML = '<span style="color:#F87171;">❌ Erreur réseau</span>';

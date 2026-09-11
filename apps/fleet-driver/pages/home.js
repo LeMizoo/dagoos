@@ -2,6 +2,19 @@
 // DAGOOS FLEET DRIVER - DASHBOARD HOME
 // ========================================
 
+
+// P7-E2-B-FIX : helper local (délègue à window.escapeHtml défini dans router.js).
+function escapeHtmlLocal(value) {
+  if (window.escapeHtml) return window.escapeHtml(value);
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 var currentDriver = null;
 var currentVehicle = null;
 var currentOrg = null;
@@ -2479,7 +2492,7 @@ async function demanderVehicule() {
 
         if (msg) {
             msg.innerHTML = '<span style="color:#F87171;">❌ ' +
-                (e.message || 'Erreur réseau') +
+                escapeHtmlLocal(e.message || 'Erreur réseau') +
                 '</span>';
         }
 

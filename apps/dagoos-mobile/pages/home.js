@@ -363,25 +363,20 @@ async function chargerPartenaires() {
 // Positions : -2, -1, 0, +1, +2
 // ============================================================
 
+// P7-E2-FIX : afficherPartenaires3D refondu en DOM.
+// Plus aucun innerHTML avec interpolation, plus de onclick inline.
 function afficherPartenaires3D() {
   var scene = document.getElementById('partenaires3D');
-
-  if (!scene || !partenairesData.length) {
-    return;
-  }
+  if (!scene || !partenairesData.length) return;
 
   var positions = [-2, -1, 0, 1, 2];
-  var html = '';
+
+  scene.innerHTML = '';
 
   positions.forEach(function(position) {
-
-    var index =
-      (partenaireIndex + position + partenairesData.length) %
-      partenairesData.length;
-
+    var index = (partenaireIndex + position + partenairesData.length) % partenairesData.length;
     var org = partenairesData[index];
 
-    // Même logique que TrustSection.tsx
     var angle = position * 25;
     var translateX = position * 105;
     var translateZ = -Math.abs(position) * 150;
@@ -389,176 +384,110 @@ function afficherPartenaires3D() {
     var opacity = position === 0 ? 1 : 0.5;
     var zIndex = 5 - Math.abs(position);
 
-    var typeLabel =
-      org.type === 'FLEET_MANAGER'
-        ? 'URBAIN'
-        : 'INTERURBAIN';
+    var typeLabel = org.type === 'FLEET_MANAGER' ? 'URBAIN' : 'INTERURBAIN';
 
-    // Récupérer les labels des services
     var serviceLabels = (org.organizationServices || []).map(function(s) {
       return s.service;
     }).join(' · ');
 
-    var planLabel =
-      (org.plan || 'Freemium').toUpperCase();
+    var planLabel = (org.plan || 'Freemium').toUpperCase();
 
     var badgeStyle;
-
     if (org.plan === 'Premium') {
-      badgeStyle =
-        'background:#F59E0B;color:#1A1A2E;';
+      badgeStyle = 'background:#F59E0B;color:#1A1A2E;';
     } else if (org.plan === 'Standard') {
-      badgeStyle =
-        'background:#3B82F6;color:#fff;';
+      badgeStyle = 'background:#3B82F6;color:#fff;';
     } else {
-      badgeStyle =
-        'background:#252540;color:#94A3B8;';
+      badgeStyle = 'background:#252540;color:#94A3B8;';
     }
 
-    var logoHtml;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.dataset.partenaireIndex = String(index);
+    btn.setAttribute('aria-label', 'Voir ' + org.name);
+    btn.style.cssText =
+      'position:absolute;left:50%;top:50%;width:180px;min-height:190px;' +
+      'margin-left:-90px;margin-top:-95px;padding:18px 14px;border-radius:20px;' +
+      'border:1px solid rgba(255,255,255,.08);background:#252540;color:#fff;' +
+      'cursor:pointer;text-align:center;' +
+      'transform:translateX(' + translateX + 'px) ' +
+      'translateZ(' + translateZ + 'px) ' +
+      'rotateY(' + (-angle) + 'deg) scale(' + scale + ');' +
+      'transform-style:preserve-3d;' +
+      'z-index:' + zIndex + ';' +
+      'opacity:' + opacity + ';' +
+      'filter:' + (position === 0 ? 'blur(0px)' : 'blur(1px)') + ';' +
+      'transition:transform .7s ease,opacity .7s ease,filter .7s ease;' +
+      'box-shadow:' + (position === 0
+        ? '0 12px 30px rgba(0,0,0,.28)'
+        : '0 6px 18px rgba(0,0,0,.15)') + ';';
 
-    if (org.logo) {
-      logoHtml =
-        '<img' +
-        ' src="' + org.logo + '"' +
-        ' alt=""' +
-        ' style="' +
-          'width:64px;' +
-          'height:64px;' +
-          'border-radius:16px;' +
-          'object-fit:contain;' +
-          'background:#fff;' +
-          'padding:6px;' +
-          'margin:0 auto 12px;' +
-          'display:block;' +
-        '"' +
-        '>';
+    btn.addEventListener('click', function() {
+      ouvrirPartenaire(org.slug);
+    });
+
+    // Logo
+    if (org.logo && window.isValidImageUrl && window.isValidImageUrl(org.logo)) {
+      var img = document.createElement('img');
+      img.src = org.logo;
+      img.alt = '';
+      img.style.cssText =
+        'width:64px;height:64px;border-radius:16px;object-fit:contain;' +
+        'background:#fff;padding:6px;margin:0 auto 12px;display:block;';
+      btn.appendChild(img);
     } else {
-      logoHtml =
-        '<div style="' +
-          'width:64px;' +
-          'height:64px;' +
-          'border-radius:16px;' +
-          'background:#1E293B;' +
-          'display:flex;' +
-          'align-items:center;' +
-          'justify-content:center;' +
-          'font-size:30px;' +
-          'margin:0 auto 12px;' +
-        '">' +
-        (
-          org.type === 'FLEET_MANAGER'
-            ? '🚕'
-            : '🚌'
-        ) +
-        '</div>';
+      var fallback = document.createElement('div');
+      fallback.style.cssText =
+        'width:64px;height:64px;border-radius:16px;background:#1E293B;' +
+        'display:flex;align-items:center;justify-content:center;' +
+        'font-size:30px;margin:0 auto 12px;';
+      fallback.textContent = org.type === 'FLEET_MANAGER' ? '🚕' : '🚌';
+      btn.appendChild(fallback);
     }
 
-    html += `
-      <button
-        type="button"
-        data-partenaire-index="${index}"
-        onclick="ouvrirPartenaire('${org.slug}')"
-        aria-label="Voir ${org.name}"
-        style="
-          position:absolute;
-          left:50%;
-          top:50%;
-          width:180px;
-          min-height:190px;
-          margin-left:-90px;
-          margin-top:-95px;
-          padding:18px 14px;
-          border-radius:20px;
-          border:1px solid rgba(255,255,255,.08);
-          background:#252540;
-          color:#fff;
-          cursor:pointer;
-          text-align:center;
+    // Nom
+    var nameDiv = document.createElement('div');
+    nameDiv.style.cssText =
+      'font-size:14px;font-weight:700;margin-bottom:7px;' +
+      'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+    nameDiv.textContent = org.name;
+    btn.appendChild(nameDiv);
 
-          transform:
-            translateX(${translateX}px)
-            translateZ(${translateZ}px)
-            rotateY(${-angle}deg)
-            scale(${scale});
+    // Badges (plan + type)
+    var badgesDiv = document.createElement('div');
+    badgesDiv.style.cssText =
+      'display:flex;gap:5px;justify-content:center;flex-wrap:wrap;';
 
-          transform-style:preserve-3d;
+    var planSpan = document.createElement('span');
+    planSpan.style.cssText =
+      badgeStyle + 'padding:3px 9px;border-radius:20px;font-size:8px;font-weight:700;';
+    planSpan.textContent = planLabel;
+    badgesDiv.appendChild(planSpan);
 
-          z-index:${zIndex};
-          opacity:${opacity};
-          filter:${position === 0 ? 'blur(0px)' : 'blur(1px)'};
+    var typeSpan = document.createElement('span');
+    typeSpan.style.cssText =
+      'background:#1E293B;color:#94A3B8;padding:3px 9px;border-radius:20px;' +
+      'font-size:8px;font-weight:600;';
+    typeSpan.textContent = typeLabel;
+    badgesDiv.appendChild(typeSpan);
 
-          transition:
-            transform .7s ease,
-            opacity .7s ease,
-            filter .7s ease;
+    btn.appendChild(badgesDiv);
 
-          box-shadow:
-            ${position === 0
-              ? '0 12px 30px rgba(0,0,0,.28)'
-              : '0 6px 18px rgba(0,0,0,.15)'};
-        "
-      >
-        ${logoHtml}
+    // Services (optionnel)
+    if (serviceLabels) {
+      var servicesDiv = document.createElement('div');
+      servicesDiv.style.cssText =
+        'margin-top:8px;padding-top:8px;' +
+        'border-top:1px solid rgba(255,255,255,.06);font-size:8px;' +
+        'color:#94A3B8;line-height:1.4;text-align:center;';
+      servicesDiv.textContent = serviceLabels;
+      btn.appendChild(servicesDiv);
+    }
 
-        <div style="
-          font-size:14px;
-          font-weight:700;
-          margin-bottom:7px;
-          white-space:nowrap;
-          overflow:hidden;
-          text-overflow:ellipsis;
-        ">
-          ${org.name}
-        </div>
-
-        <div style="
-          display:flex;
-          gap:5px;
-          justify-content:center;
-          flex-wrap:wrap;
-        ">
-          <span style="
-            ${badgeStyle}
-            padding:3px 9px;
-            border-radius:20px;
-            font-size:8px;
-            font-weight:700;
-          ">
-            ${planLabel}
-          </span>
-
-          <span style="
-            background:#1E293B;
-            color:#94A3B8;
-            padding:3px 9px;
-            border-radius:20px;
-            font-size:8px;
-            font-weight:600;
-          ">
-            ${typeLabel}
-          </span>
-        </div>
-
-        ${serviceLabels ? `
-          <div style="
-            margin-top:8px;
-            padding-top:8px;
-            border-top:1px solid rgba(255,255,255,.06);
-            font-size:8px;
-            color:#94A3B8;
-            line-height:1.4;
-            text-align:center;
-          ">
-            ${serviceLabels}
-          </div>
-        ` : ''}
-      </button>
-    `;
+    scene.appendChild(btn);
   });
-
-  scene.innerHTML = html;
 }
+
 
 
 // ============================================================

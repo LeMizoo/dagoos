@@ -2,6 +2,18 @@
 // RESERVATIONS.JS — Miroir exact de la landing
 // ============================================
 
+// P7-E2-FIX : helper local (fallback si escape.js pas chargé).
+function escapeHtmlLocal(value) {
+  if (window.escapeHtml) return window.escapeHtml(value);
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 var selectedDepart = null;
 var selectedPlaces = [];
 var passagers = {};
@@ -59,31 +71,72 @@ async function chargerDeparts() {
       return;
     }
 
-    var html = '';
+    container.innerHTML = '';
+
     departs.forEach(function(depart) {
       var placesReservees = depart.reservations.map(function(r) { return r.place; });
       var placesDisponibles = depart.placesTotal - placesReservees.length;
 
-      html += `
-        <div style="background:#252540;border-radius:12px;padding:16px;margin-bottom:10px;border:1px solid rgba(245,158,11,0.2);">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-            <div style="font-size:15px;font-weight:700;color:#fff;">${depart.pointDepart} → ${depart.destination}</div>
-            <span style="background:rgba(245,158,11,0.15);color:#F59E0B;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;">${depart.organization || ''}</span>
-          </div>
-          <div style="display:flex;gap:16px;font-size:11px;color:#94A3B8;margin-bottom:8px;">
-            <span><i data-lucide="calendar" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> ${new Date(depart.date).toLocaleDateString('fr-FR')}</span>
-            <span><i data-lucide="clock" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> ${depart.heure || '--:--'}</span>
-            <span><i data-lucide="armchair" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> ${placesDisponibles} / ${depart.placesTotal} places</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div style="font-size:18px;font-weight:800;color:#F59E0B;">${Number(depart.prix || 0).toLocaleString('fr-FR')} Ar</div>
-            <button onclick="selectionnerDepart('${depart.id}')" style="padding:10px 16px;background:#F59E0B;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;">Réserver</button>
-          </div>
-        </div>
-      `;
-    });
+      var card = document.createElement('div');
+      card.style.cssText = 'background:#252540;border-radius:12px;padding:16px;' +
+        'margin-bottom:10px;border:1px solid rgba(245,158,11,0.2);';
 
-    container.innerHTML = html;
+      var row1 = document.createElement('div');
+      row1.style.cssText = 'display:flex;justify-content:space-between;' +
+        'align-items:center;margin-bottom:8px;';
+
+      var trajet = document.createElement('div');
+      trajet.style.cssText = 'font-size:15px;font-weight:700;color:#fff;';
+      trajet.textContent = depart.pointDepart + ' \u2192 ' + depart.destination;
+
+      var orgBadge = document.createElement('span');
+      orgBadge.style.cssText = 'background:rgba(245,158,11,0.15);color:#F59E0B;' +
+        'padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;';
+      orgBadge.textContent = depart.organization || '';
+
+      row1.appendChild(trajet);
+      row1.appendChild(orgBadge);
+      card.appendChild(row1);
+
+      var row2 = document.createElement('div');
+      row2.style.cssText = 'display:flex;gap:16px;font-size:11px;' +
+        'color:#94A3B8;margin-bottom:8px;';
+
+      var dateSpan = document.createElement('span');
+      dateSpan.textContent = new Date(depart.date).toLocaleDateString('fr-FR');
+
+      var heureSpan = document.createElement('span');
+      heureSpan.textContent = depart.heure || '--:--';
+
+      var placesSpan = document.createElement('span');
+      placesSpan.textContent = placesDisponibles + ' / ' + depart.placesTotal + ' places';
+
+      row2.appendChild(dateSpan);
+      row2.appendChild(heureSpan);
+      row2.appendChild(placesSpan);
+      card.appendChild(row2);
+
+      var row3 = document.createElement('div');
+      row3.style.cssText = 'display:flex;justify-content:space-between;align-items:center;';
+
+      var prix = document.createElement('div');
+      prix.style.cssText = 'font-size:18px;font-weight:800;color:#F59E0B;';
+      prix.textContent = Number(depart.prix || 0).toLocaleString('fr-FR') + ' Ar';
+
+      var btnReserver = document.createElement('button');
+      btnReserver.textContent = 'R\u00e9server';
+      btnReserver.style.cssText = 'padding:10px 16px;background:#F59E0B;' +
+        'color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;';
+      btnReserver.addEventListener('click', function() {
+        selectionnerDepart(depart.id);
+      });
+
+      row3.appendChild(prix);
+      row3.appendChild(btnReserver);
+      card.appendChild(row3);
+
+      container.appendChild(card);
+    });
   } catch(e) {
     container.innerHTML = '<div style="text-align:center;padding:30px;color:#E74C3C;">Erreur de chargement</div>';
   }
@@ -139,7 +192,7 @@ function afficherFormulaireReservation(depart) {
     var color = estReservee ? '#fff' : estSelectionnee ? '#fff' : '#fff';
     var cursor = estReservee ? 'not-allowed' : 'pointer';
     return `
-      <button onclick="${estReservee ? '' : "togglePlace('" + label + "')"}" style="width:44px;height:44px;border-radius:8px;border:1px solid #333;background:${bg};color:${color};font-size:11px;font-weight:700;cursor:${cursor};">${label}</button>
+      <button data-place="${label}" style="width:44px;height:44px;border-radius:8px;border:1px solid #333;background:${bg};color:${color};font-size:11px;font-weight:700;cursor:${cursor};">${label}</button>
     `;
   }
 
@@ -228,7 +281,7 @@ function afficherFormulaireReservation(depart) {
           return `
             <div style="margin-bottom:8px;">
               <label style="font-size:11px;color:#94A3B8;display:block;margin-bottom:4px;">Place ${place} — Nom du passager</label>
-              <input id="passager_${place}" placeholder="Nom du passager place ${place}" value="${passagers[place] || ''}" onchange="passagers['${place}'] = this.value" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;">
+              <input id="passager_${place}" data-place="${place}" placeholder="Nom du passager place ${place}" value="${escapeHtmlLocal(passagers[place])}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;">
             </div>
           `;
         }).join('')}
@@ -236,7 +289,7 @@ function afficherFormulaireReservation(depart) {
 
       <div style="margin-bottom:8px;">
         <label style="font-size:11px;color:#94A3B8;display:block;margin-bottom:4px;">Votre téléphone</label>
-        <input id="resTel" type="tel" placeholder="Téléphone" value="${getPassengerInfo().phone || ''}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;">
+        <input id="resTel" type="tel" placeholder="Téléphone" value="${escapeHtmlLocal(getPassengerInfo().phone)}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;">
       </div>
 
       <div style="margin-bottom:12px;">
@@ -247,6 +300,26 @@ function afficherFormulaireReservation(depart) {
       <button onclick="confirmerReservation()" style="width:100%;padding:14px;background:#F59E0B;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;"><i data-lucide="save" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Enregistrer la réservation (${selectedPlaces.length} place(s))</button>
     </div>
   `;
+
+  // P7-E2-FIX : rattachement des clics sur les boutons de place
+  // (délégation d'événements — les boutons sont générés dynamiquement)
+  var placeButtons = container.querySelectorAll('button[data-place]');
+  placeButtons.forEach(function(btn) {
+    // Ignorer les places déjà réservées (cursor: not-allowed, pas d'action)
+    if (btn.style.cursor === 'not-allowed') return;
+
+    btn.addEventListener('click', function() {
+      togglePlace(btn.dataset.place);
+    });
+  });
+
+  // P7-E2-FIX : rattachement des inputs passagers
+  var passagerInputs = container.querySelectorAll('input[data-place]');
+  passagerInputs.forEach(function(input) {
+    input.addEventListener('change', function() {
+      passagers[input.dataset.place] = input.value;
+    });
+  });
 }
 
 function togglePlace(place) {
@@ -381,7 +454,11 @@ async function gererReservation() {
       });
       resultContainer.innerHTML = html;
     } else if (result && result.error) {
-      resultContainer.innerHTML = '<p style="text-align:center;color:#EF4444;font-size:12px;">' + result.error + '</p>';
+      resultContainer.innerHTML = '';
+      var errP = document.createElement('p');
+      errP.style.cssText = 'text-align:center;color:#EF4444;font-size:12px;';
+      errP.textContent = result.error || 'Erreur';
+      resultContainer.appendChild(errP);
     } else {
       resultContainer.innerHTML = '<p style="text-align:center;color:#94A3B8;font-size:12px;">Aucune réservation trouvée</p>';
     }
