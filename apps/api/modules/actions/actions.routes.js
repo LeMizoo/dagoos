@@ -24,6 +24,8 @@ const VALID_TYPES = [
 
 const VALID_STATUTS = ['NEW', 'IN_PROGRESS', 'ACCEPTED', 'REJECTED', 'COMPLETED', 'CANCELLED'];
 
+const NEGOTIATION_TTL_HOURS = 48;
+
 async function getUserOrganizationId(req) {
   if (req.user.organizationId) return req.user.organizationId;
   
@@ -535,6 +537,9 @@ router.post('/:id/propose', authMiddleware, async (req, res) => {
             status: 'PROPOSITION_EN_ATTENTE_CLIENT',
             proposedPrice,
             proposedAt: new Date().toISOString(),
+            expiresAt: new Date(
+              Date.now() + NEGOTIATION_TTL_HOURS * 3600 * 1000
+            ).toISOString(),
             respondedAt: null,
             respondedBy: null,
             responseChannel: null,

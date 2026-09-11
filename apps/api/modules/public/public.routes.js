@@ -12,6 +12,8 @@ const {
   isVehicleCompatibleWithService
 } = require('./long-haul-matrix');
 
+const NEGOTIATION_TTL_HOURS = 48;
+
 // =========================================================
 // ORGANISATION PUBLIQUE
 // =========================================================
@@ -961,7 +963,7 @@ router.post('/actions/respond', async (req, res) => {
     let courseCree = null;
 
     try {
-      await prisma.$transaction(async (tx) => {
+      const txResult = await prisma.$transaction(async (tx) => {
         const freshAction = await tx.leadAction.findUnique({
           where: { id: action.id }
         });
@@ -989,6 +991,41 @@ router.post('/actions/respond', async (req, res) => {
           Number(freshNegotiation.proposedPrice) !== proposedPrice
         ) {
           throw new Error('NEGOTIATION_CHANGED');
+        }
+
+        // ---------------------------------------------------
+        // EXPIRATION (lazy) — 48h après la proposition
+        // ---------------------------------------------------
+        if (
+          freshNegotiation.expiresAt &&
+          new Date(freshNegotiation.expiresAt) <= new Date()
+        ) {
+          const expiredNegotiation = {
+            ...freshNegotiation,
+            status: 'EXPIREE',
+            expiredAt: new Date().toISOString()
+          };
+
+          const expiredUpdate = await tx.leadAction.updateMany({
+            where: {
+              id: action.id,
+              statut: 'NEW',
+              updatedAt: freshAction.updatedAt
+            },
+            data: {
+              statut: 'REJECTED',
+              details: {
+                ...freshDetails,
+                negotiation: expiredNegotiation
+              }
+            }
+          });
+
+          if (expiredUpdate.count !== 1) {
+            throw new Error('NEGOTIATION_CONCURRENT_UPDATE');
+          }
+
+          return { expired: true };
         }
 
         const now = new Date().toISOString();
@@ -1076,7 +1113,16 @@ router.post('/actions/respond', async (req, res) => {
             acceptedAt: new Date()
           }
         });
+
+        return { expired: false };
       });
+
+      if (txResult?.expired) {
+        return res.status(409).json({
+          error: 'Cette proposition a expiré',
+          code: 'NEGOTIATION_EXPIRED'
+        });
+      }
     } catch (txError) {
       if (txError.message === 'NEGOTIATION_ALREADY_PROCESSED') {
         return res.status(409).json({
