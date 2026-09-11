@@ -2,6 +2,19 @@
 // DRIVER - FINANCES (Versements + Dépenses)
 // ========================================
 
+
+// P7-E2-B-FIX : helper local (délègue à window.escapeHtml défini dans router.js).
+function escapeHtmlLocal(value) {
+  if (window.escapeHtml) return window.escapeHtml(value);
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 async function init_finances() {
     var container =
         document.getElementById('mainContent') ||
@@ -30,7 +43,7 @@ async function init_finances() {
             versementsHtml = versements.map(function(v) {
                 return '<div style="background:#064E3B;border-radius:8px;padding:10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">' +
                     '<div><span style="color:#fff;font-weight:600;font-size:12px;">' + (v.montant || v.amount || 0).toLocaleString() + ' Ar</span>' +
-                    '<br><span style="color:#94A3B8;font-size:10px;">' + (v.statut || v.status || '') + '</span></div>' +
+                    '<br><span style="color:#94A3B8;font-size:10px;">' + escapeHtmlLocal(v.statut || v.status || '') + '</span></div>' +
                     '<span style="color:#10B981;font-weight:700;">📤</span></div>';
             }).join('');
         } else {
@@ -41,8 +54,8 @@ async function init_finances() {
         if (Array.isArray(expenses) && expenses.length > 0) {
             expensesHtml = expenses.map(function(e) {
                 return '<div style="background:#064E3B;border-radius:8px;padding:10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">' +
-                    '<div><span style="color:#fff;font-weight:600;font-size:12px;">' + (e.category || '') + '</span>' +
-                    '<br><span style="color:#94A3B8;font-size:10px;">' + (e.description || '') + '</span></div>' +
+                    '<div><span style="color:#fff;font-weight:600;font-size:12px;">' + escapeHtmlLocal(e.category || '') + '</span>' +
+                    '<br><span style="color:#94A3B8;font-size:10px;">' + escapeHtmlLocal(e.description || '') + '</span></div>' +
                     '<span style="color:#EF4444;font-weight:700;">-' + (e.amount || 0).toLocaleString() + ' Ar</span></div>';
             }).join('');
         } else {
@@ -62,7 +75,7 @@ async function init_finances() {
             '</div>';
     } catch (e) {
         var contentEl = document.getElementById('financesContent');
-        if (contentEl) contentEl.innerHTML = '<p style="color:#EF4444;">Erreur : ' + e.message + '</p>';
+        if (contentEl) contentEl.innerHTML = '<p style="color:#EF4444;">Erreur : ' + escapeHtmlLocal(e.message) + '</p>';
     }
 }
 

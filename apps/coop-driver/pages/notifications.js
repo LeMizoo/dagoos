@@ -2,6 +2,19 @@
 // DRIVER - NOTIFICATIONS
 // ========================================
 
+
+// P7-E2-B-FIX : helper local (délègue à window.escapeHtml défini dans router.js).
+function escapeHtmlLocal(value) {
+  if (window.escapeHtml) return window.escapeHtml(value);
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 async function init_notifications() {
     var container =
         document.getElementById('mainContent') ||
@@ -36,17 +49,25 @@ async function init_notifications() {
             return '<div style="background:#064E3B;border-radius:8px;padding:12px;margin-bottom:8px;">' +
                 '<div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">' +
                     '<div style="flex:1;">' +
-                        '<div style="color:#fff;font-weight:600;font-size:13px;">' + title + '</div>' +
-                        '<div style="color:#94A3B8;font-size:11px;margin-top:4px;">' + message + '</div>' +
-                        '<div style="color:#64748B;font-size:10px;margin-top:4px;">' + dateStr + '</div>' +
+                        '<div style="color:#fff;font-weight:600;font-size:13px;">' + escapeHtmlLocal(title) + '</div>' +
+                        '<div style="color:#94A3B8;font-size:11px;margin-top:4px;">' + escapeHtmlLocal(message) + '</div>' +
+                        '<div style="color:#64748B;font-size:10px;margin-top:4px;">' + escapeHtmlLocal(dateStr) + '</div>' +
                     '</div>' +
-                    '<button onclick="marquerLueNotification(\'' + n.id + '\')" style="background:rgba(255,255,255,0.1);border:none;padding:4px 8px;border-radius:6px;color:#10B981;cursor:pointer;font-size:10px;white-space:nowrap;">Marquer lue</button>' +
+                    '<button data-action="marquerLueNotification" data-id="' + escapeHtmlLocal(n.id) + '" style="background:rgba(255,255,255,0.1);border:none;padding:4px 8px;border-radius:6px;color:#10B981;cursor:pointer;font-size:10px;white-space:nowrap;">Marquer lue</button>' +
                 '</div>' +
             '</div>';
         }).join('');
+
+        // P7-E2-B-FIX : délégation pour les boutons 'Marquer lue'
+        var notifBtns = listEl.querySelectorAll('button[data-action="marquerLueNotification"]');
+        notifBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                marquerLueNotification(btn.dataset.id);
+            });
+        });
     } catch(e) {
         var listEl = document.getElementById('notificationsList');
-        if (listEl) listEl.innerHTML = '<p style="color:#EF4444;">Erreur : ' + e.message + '</p>';
+        if (listEl) listEl.innerHTML = '<p style="color:#EF4444;">Erreur : ' + escapeHtmlLocal(e.message) + '</p>';
     }
 }
 

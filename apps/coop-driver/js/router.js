@@ -24,6 +24,18 @@ function getApiUrl() {
     : '';
 }
 
+// P7-E2-B-FIX : helper d'échappement HTML partagé.
+// Chargé avant toutes les pages (via loadPage), aucune dépendance externe.
+window.escapeHtml = window.escapeHtml || function(value) {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
 async function apiFetch(endpoint, options) {
   options = options || {};
   var url = DAGOOS_CONFIG.apiUrl + endpoint;

@@ -2,6 +2,19 @@
 // DRIVER - DÉPENSES
 // ========================================
 
+
+// P7-E2-B-FIX : helper local (délègue à window.escapeHtml défini dans router.js).
+function escapeHtmlLocal(value) {
+  if (window.escapeHtml) return window.escapeHtml(value);
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 var driverExpenses = [];
 
 async function init_expenses() {
@@ -155,7 +168,7 @@ function renderDriverExpenses() {
               '</div>' +
 
               '<div style="color:#94A3B8;font-size:10px;margin-top:3px;">' +
-                (expense.description || expense.desc || '') +
+                escapeHtmlLocal(expense.description || expense.desc || '') +
               '</div>' +
 
               (dateLabel
@@ -264,7 +277,7 @@ async function saveDriverExpense() {
     if (message) {
       message.innerHTML =
         '<span style="color:#F87171;">' +
-        (err.message || 'Erreur lors de l’enregistrement') +
+        escapeHtmlLocal(err.message || 'Erreur lors de l’enregistrement') +
         '</span>';
     }
 

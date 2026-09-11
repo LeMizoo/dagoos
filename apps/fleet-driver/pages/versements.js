@@ -1,6 +1,19 @@
 // ========================================
 // DRIVER - VERSEMENTS
 // ========================================
+
+// P7-E2-B-FIX : helper local (délègue à window.escapeHtml défini dans router.js).
+function escapeHtmlLocal(value) {
+  if (window.escapeHtml) return window.escapeHtml(value);
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 async function init_versements() {
     var main = document.getElementById('mainContent');
     var user = JSON.parse(localStorage.getItem("dagoo_driver_user") || "{}");
@@ -80,7 +93,7 @@ async function demanderVersement() {
             msg.innerHTML = '<span style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';">✅ Demande de versement envoyée !</span>';
         } else {
             var data = await r.json();
-            msg.innerHTML = '<span style="color:#F87171;">❌ ' + (data.error || 'Erreur') + '</span>';
+            msg.innerHTML = '<span style="color:#F87171;">❌ ' + escapeHtmlLocal(data.error || 'Erreur') + '</span>';
         }
     } catch(e) {
         msg.innerHTML = '<span style="color:#F87171;">❌ Erreur réseau</span>';

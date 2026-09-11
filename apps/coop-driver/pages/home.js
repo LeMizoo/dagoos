@@ -1,6 +1,19 @@
 // ========================================
 // DRIVER - DASHBOARD HOME ENRICHI
 // ========================================
+
+// P7-E2-B-FIX : helper local (délègue à window.escapeHtml défini dans router.js).
+function escapeHtmlLocal(value) {
+  if (window.escapeHtml) return window.escapeHtml(value);
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 var currentDriver = null;
 var currentVehicle = null;
 var currentOrg = null;
@@ -144,12 +157,12 @@ async function init_home() {
             '<div style="display:flex;align-items:center;gap:8px;">' +
                 '<img src="' + logo + '" style="width:36px;height:36px;object-fit:contain;border-radius:8px;">' +
                 '<div>' +
-                    '<div style="font-size:14px;font-weight:700;color:#10B981;">' + (user.name || 'Chauffeur') + '</div>' +
+                    '<div style="font-size:14px;font-weight:700;color:#10B981;">' + escapeHtmlLocal(user.name || 'Chauffeur') + '</div>' +
                     '<div style="font-size:10px;color:#94A3B8;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">' +
                         '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#22C55E;">🏢 Coopérative</span>' +
                         '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:' + statusColor + ';color:#fff;">' + statusLabel + '</span>' +
-                        (plate ? '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#10B981;">🏍️ ' + plate + '</span>' : '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#E74C3C;color:#fff;">⚠️ Sans véhicule</span>') +
-                        '<span style="color:#94A3B8;">' + (user.driverCode || '') + '</span>' +
+                        (plate ? '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:#10B981;">🏍️ ' + escapeHtmlLocal(plate) + '</span>' : '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#E74C3C;color:#fff;">⚠️ Sans véhicule</span>') +
+                        '<span style="color:#94A3B8;">' + escapeHtmlLocal(user.driverCode || '') + '</span>' +
                     '</div>' +
                 '</div>' +
             '</div>' +
@@ -203,9 +216,9 @@ async function init_home() {
                 '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #10B981;">' +
                     '<h3 style="color:#10B981;margin-bottom:10px;font-size:13px;">📍 DÉPART DU JOUR</h3>' +
                     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">' +
-                        '<div><span style="color:#94A3B8;">Départ</span><br><span style="color:#fff;font-weight:600;">' + (window.currentDepart.pointDepart || '') + '</span></div>' +
-                        '<div><span style="color:#94A3B8;">Destination</span><br><span style="color:#fff;font-weight:600;">' + (window.currentDepart.destination || '') + '</span></div>' +
-                        '<div><span style="color:#94A3B8;">Heure</span><br><span style="color:#fff;font-weight:600;">' + (window.currentDepart.heure || '') + '</span></div>' +
+                        '<div><span style="color:#94A3B8;">Départ</span><br><span style="color:#fff;font-weight:600;">' + (escapeHtmlLocal(window.currentDepart.pointDepart || '')) + '</span></div>' +
+                        '<div><span style="color:#94A3B8;">Destination</span><br><span style="color:#fff;font-weight:600;">' + (escapeHtmlLocal(window.currentDepart.destination || '')) + '</span></div>' +
+                        '<div><span style="color:#94A3B8;">Heure</span><br><span style="color:#fff;font-weight:600;">' + (escapeHtmlLocal(window.currentDepart.heure || '')) + '</span></div>' +
                         '<div><span style="color:#94A3B8;">Véhicule</span><br><span style="color:#fff;font-weight:600;">' + (window.currentVehicle?.plate || 'N/A') + '</span></div>' +
                         '<div><span style="color:#94A3B8;">Tarif fixe</span><br><span style="color:#10B981;font-weight:700;">' + (window.currentDepart.prix || 0) + ' Ar</span></div>' +
                         '<div><span style="color:#94A3B8;">Occupation</span><br><span style="color:#fff;font-weight:600;">' + (window.currentFinance?.passagersTotal || 0) + '/' + (window.currentDepart.placesTotal || 0) + ' places</span></div>' +
@@ -237,12 +250,12 @@ async function init_home() {
                         var statutLabel = p.statut === 'CONFIRMED' ? 'PAYÉ' : p.statut === 'PENDING' ? 'EN ATTENTE' : 'NON PAYÉ';
                         var actionBtn = '';
                         if (p.statut === 'PENDING') {
-                            actionBtn = '<button onclick="marquerPaye(\'' + p.id + '\')" style="margin-left:6px;padding:4px 8px;background:#10B981;color:#0A1F18;border:none;border-radius:6px;cursor:pointer;font-size:10px;font-weight:700;">💰 Marquer payé</button>';
+                            actionBtn = '<button data-action="marquerPaye" data-id="' + escapeHtmlLocal(p.id) + '" style="margin-left:6px;padding:4px 8px;background:#10B981;color:#0A1F18;border:none;border-radius:6px;cursor:pointer;font-size:10px;font-weight:700;">💰 Marquer payé</button>';
                         }
                         return '<div style="background:#0A1F18;border-radius:8px;padding:10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">' +
                             '<div>' +
-                                '<div style="color:#fff;font-weight:600;font-size:12px;">' + p.passagerNom + '</div>' +
-                                '<div style="color:#94A3B8;font-size:10px;">Place ' + p.place + ' · ' + (p.telephone || '') + '</div>' +
+                                '<div style="color:#fff;font-weight:600;font-size:12px;">' + escapeHtmlLocal(p.passagerNom) + '</div>' +
+                                '<div style="color:#94A3B8;font-size:10px;">Place ' + escapeHtmlLocal(p.place) + ' · ' + escapeHtmlLocal(p.telephone || '') + '</div>' +
                             '</div>' +
                             '<div style="display:flex;align-items:center;">' +
                                 '<span style="padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;background:' + statutColor + ';color:#0A1F18;">' + statutLabel + '</span>' +
@@ -281,8 +294,8 @@ async function init_home() {
             '<div class="card" style="background:#064E3B;border-radius:12px;padding:14px;margin-bottom:10px;">' +
                 '<h3 style="color:#10B981;margin-bottom:8px;font-size:13px;">🔗 Assignation</h3>' +
                 '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">' +
-                    '<div><span style="color:#94A3B8;">Véhicule</span><br><span style="font-weight:600;color:#fff;" id="assignedVehicle">' + (plate || 'Aucun') + '</span></div>' +
-                    '<div><span style="color:#94A3B8;">Organisation</span><br><span style="font-weight:600;color:#fff;">' + orgName + '</span></div>' +
+                    '<div><span style="color:#94A3B8;">Véhicule</span><br><span style="font-weight:600;color:#fff;" id="assignedVehicle">' + escapeHtmlLocal(plate || 'Aucun') + '</span></div>' +
+                    '<div><span style="color:#94A3B8;">Organisation</span><br><span style="font-weight:600;color:#fff;">' + escapeHtmlLocal(orgName) + '</span></div>' +
                 '</div>' +
                 '<div id="vehicleAssignmentRequestArea" style="margin-top:10px;">' +
                     (!plate
@@ -466,8 +479,8 @@ function renderExpenses() {
     for (var i = 0; i < recent.length; i++) {
         var e = recent[i];
         html += '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #333;">' +
-            '<span style="color:#94A3B8;font-size:11px;">' + (labels[e.type] || '') + ' ' + e.desc + '</span>' +
-            '<span style="color:#F87171;font-weight:600;">' + e.amount.toLocaleString() + ' Ar</span></div>';
+            '<span style="color:#94A3B8;font-size:11px;">' + (labels[e.type] || '') + ' ' + escapeHtmlLocal(e.desc) + '</span>' +
+            '<span style="color:#F87171;font-weight:600;">' + Number(e.amount || 0).toLocaleString() + ' Ar</span></div>';
         sum += e.amount;
     }
     list.innerHTML = html;
@@ -479,6 +492,14 @@ function loadExpenses() {
         var saved = localStorage.getItem('driver_expenses');
         if (saved) { expenses = JSON.parse(saved); renderExpenses(); }
     } catch(e) {}
+
+  // P7-E2-B-FIX : délégation pour les boutons du manifest
+  var manifestBtns = main.querySelectorAll('button[data-action="marquerPaye"]');
+  manifestBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      marquerPaye(btn.dataset.id);
+    });
+  });
 }
 
 window.init_home = init_home;
@@ -559,7 +580,7 @@ async function demanderVehicule() {
 
         if (msg) {
             msg.innerHTML = '<span style="color:#F87171;">❌ ' +
-                (e.message || 'Erreur réseau') +
+                escapeHtmlLocal(e.message || 'Erreur réseau') +
                 '</span>';
         }
 
