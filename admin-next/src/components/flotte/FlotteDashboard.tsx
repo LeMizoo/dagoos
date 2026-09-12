@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { apiFetch } from '@/lib/api';
 import { useOrganization } from '@/lib/organization-context';
 import { useAuth } from '@/lib/auth-context';
@@ -10,7 +10,10 @@ import {
 } from 'lucide-react';
 
 export default function FlotteDashboard() {
-  const { organization, isUrbain, isInterurbain, isLoading } = useOrganization();
+  const { organization, hasActivity, isLoading } = useOrganization();
+
+  const isUrbain = useMemo(() => hasActivity('URBAN'), [hasActivity]);
+  const isInterurbain = useMemo(() => hasActivity('INTERURBAN'), [hasActivity]);
   const { user } = useAuth();
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);

@@ -995,7 +995,7 @@ router.get('/stats/summary', authMiddleware, requirePermission('finances.read'),
         },
         select: {
           price: true,
-          commission: true
+          montantOrganisation: true,
         }
       }),
 
@@ -1008,7 +1008,7 @@ router.get('/stats/summary', authMiddleware, requirePermission('finances.read'),
         },
         select: {
           price: true,
-          commission: true
+          montantOrganisation: true,
         }
       })
     ]);
@@ -1022,7 +1022,7 @@ router.get('/stats/summary', authMiddleware, requirePermission('finances.read'),
       );
 
       const com = courses.reduce(
-        (sum, course) => sum + Number(course.commission || 0),
+        (sum, course) => sum + Number(course.montantOrganisation || 0),
         0
       );
 
