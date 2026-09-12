@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, Plus, Pencil, Trash2, Car, AlertCircle, Check, X } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import { apiFetch } from '@/lib/api';
 
 interface Vehicle {
   id: string;
@@ -37,7 +38,7 @@ export default function FleetVehiclesPage() {
   const fetchVehicles = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/vehicles?page=1&limit=100');
+      const res = await apiFetch('/vehicles?page=1&limit=100');
       if (!res.ok) throw new Error('Erreur ' + res.status);
       const data = await res.json();
       const arr = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
@@ -66,15 +67,14 @@ export default function FleetVehiclesPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const url = editingVehicle
-        ? `/api/proxy/vehicles/${editingVehicle.id}`
-        : '/api/proxy/vehicles';
+      const endpoint = editingVehicle
+        ? `/vehicles/${editingVehicle.id}`
+        : '/vehicles';
       const method = editingVehicle ? 'PUT' : 'POST';
       const body = editingVehicle ? formData : { ...formData, organizationId: id };
 
-      const res = await fetch(url, {
+      const res = await apiFetch(endpoint, {
         method,
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error('Erreur ' + res.status);
@@ -90,7 +90,8 @@ export default function FleetVehiclesPage() {
   const handleDelete = async () => {
     if (!deleteConfirm) return;
     try {
-      await fetch(`/api/proxy/vehicles/${deleteConfirm.id}`, { method: 'DELETE' });
+      const delRes = await apiFetch(`/vehicles/${deleteConfirm.id}`, { method: 'DELETE' });
+      if (!delRes.ok) throw new Error('Erreur ' + delRes.status);
       setDeleteConfirm(null);
       fetchVehicles();
     } catch (err: any) {

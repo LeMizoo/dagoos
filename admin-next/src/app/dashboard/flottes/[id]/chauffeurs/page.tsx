@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, Plus, Pencil, Trash2, Users, AlertCircle } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import { apiFetch } from '@/lib/api';
 
 interface Driver {
   id: string;
@@ -35,7 +36,7 @@ export default function FleetDriversPage() {
   const fetchDrivers = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/drivers?page=1&limit=100');
+      const res = await apiFetch('/drivers?page=1&limit=100');
       if (!res.ok) throw new Error('Erreur ' + res.status);
       const data = await res.json();
       const arr = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
@@ -71,12 +72,14 @@ export default function FleetDriversPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const url = editingDriver ? `/api/proxy/drivers/${editingDriver.id}` : '/api/proxy/drivers';
+      const endpoint = editingDriver
+        ? `/drivers/${editingDriver.id}`
+        : '/drivers';
       const method = editingDriver ? 'PUT' : 'POST';
       const body = editingDriver
         ? { ...formData, driverCode: formData.code }
         : { ...formData, driverCode: formData.code, organizationId: id };
-      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const res = await apiFetch(endpoint, { method, body: JSON.stringify(body) });
       if (!res.ok) throw new Error('Erreur ' + res.status);
       setModalOpen(false);
       fetchDrivers();
@@ -90,7 +93,8 @@ export default function FleetDriversPage() {
   const handleDelete = async () => {
     if (!deleteConfirm) return;
     try {
-      await fetch(`/api/proxy/drivers/${deleteConfirm.id}`, { method: 'DELETE' });
+      const delRes = await apiFetch(`/drivers/${deleteConfirm.id}`, { method: 'DELETE' });
+      if (!delRes.ok) throw new Error('Erreur ' + delRes.status);
       setDeleteConfirm(null);
       fetchDrivers();
     } catch (err: any) { setError(err.message); }

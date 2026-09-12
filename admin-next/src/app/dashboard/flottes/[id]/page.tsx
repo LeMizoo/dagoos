@@ -6,6 +6,7 @@ import {
   ArrowLeft, Truck, Users, Car, ClipboardList, Wrench, 
   AlertCircle, Pencil, ExternalLink, Building2
 } from 'lucide-react';
+import { apiFetch } from '@/lib/api';
 
 interface Organization {
   id: string;
@@ -33,7 +34,7 @@ export default function FleetDetailPage() {
   const fetchOrg = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/proxy/organizations/${id}`);
+      const res = await apiFetch(`/organizations/${id}`);
       if (!res.ok) throw new Error('Erreur ' + res.status);
       const data = await res.json();
       setOrg(data);
