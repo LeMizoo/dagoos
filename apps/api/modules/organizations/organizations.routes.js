@@ -845,7 +845,48 @@ router.put(
     if (phone !== undefined) data.phone = phone;
     if (logo !== undefined) data.logo = logo;
     if (description !== undefined) data.description = description;
-    if (plan !== undefined) data.plan = plan;
+    if (plan !== undefined) {
+      if (typeof plan !== 'string' || !plan.trim()) {
+        return res.status(400).json({
+          error: 'plan doit être une chaîne non vide',
+        });
+      }
+
+      const currentOrg = await prisma.organization.findUnique({
+        where: { id: req.params.id },
+        select: { type: true },
+      });
+
+      if (!currentOrg) {
+        return res.status(404).json({
+          error: 'Organisation introuvable',
+        });
+      }
+
+      if (currentOrg.type === 'ADMIN') {
+        data.plan = plan;
+      } else {
+        const validPlan = await prisma.plan.findFirst({
+          where: {
+            name: plan,
+            type: currentOrg.type,
+            active: true,
+          },
+          select: {
+            id: true,
+            name: true,
+          },
+        });
+
+        if (!validPlan) {
+          return res.status(400).json({
+            error: `Plan "${plan}" invalide pour une organisation de type ${currentOrg.type}`,
+          });
+        }
+
+        data.plan = validPlan.name;
+      }
+    }
     if (status !== undefined) data.status = status;
     if (type !== undefined) data.type = type;
     if (paymentStatus !== undefined) data.paymentStatus = paymentStatus;
