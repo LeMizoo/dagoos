@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Search, AlertCircle, Crown, Zap, Coffee, Star, FileText } from 'lucide-react';
+import { apiFetch } from '@/lib/api';
 
 interface Organization {
   id: string;
@@ -13,26 +14,46 @@ interface Organization {
   createdAt: string;
 }
 
-const planConfig: Record<string, { icon: any; color: string; bg: string; label: string; price: number }> = {
-  premium:  { icon: Crown, color: 'text-yellow-600', bg: 'bg-yellow-50 border-yellow-200', label: 'Premium', price: 75000 },
-  standard: { icon: Zap, color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200', label: 'Standard', price: 35000 },
-  basic:    { icon: Star, color: 'text-teal-600', bg: 'bg-teal-50 border-teal-200', label: 'Basic', price: 15000 },
-  freemium: { icon: Coffee, color: 'text-gray-600', bg: 'bg-gray-50 border-gray-200', label: 'Freemium', price: 0 },
-  surdevis: { icon: FileText, color: 'text-purple-600', bg: 'bg-purple-50 border-purple-200', label: 'Sur devis', price: -1 },
-};
+interface Plan {
+  id: string;
+  type: string;
+  name: string;
+  price: number;
+  vehiclesMax: number;
+  driversMax: number;
+  active: boolean;
+}
 
-const fleetPrices: Record<string, number> = { freemium: 0, basic: 15000, standard: 35000, premium: 75000, surdevis: -1 };
-const coopPrices: Record<string, number> = { freemium: 0, basic: 20000, standard: Number(process.env.NEXT_PUBLIC_PLAN_STANDARD || 45000), premium: 90000, surdevis: -1 };
+const planConfig: Record<string, { icon: any; color: string; bg: string; label: string }> = {
+  premium:  { icon: Crown, color: 'text-yellow-600', bg: 'bg-yellow-50 border-yellow-200', label: 'Premium' },
+  standard: { icon: Zap, color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200', label: 'Standard' },
+  basic:    { icon: Star, color: 'text-teal-600', bg: 'bg-teal-50 border-teal-200', label: 'Basic' },
+  freemium: { icon: Coffee, color: 'text-gray-600', bg: 'bg-gray-50 border-gray-200', label: 'Freemium' },
+  surdevis: { icon: FileText, color: 'text-purple-600', bg: 'bg-purple-50 border-purple-200', label: 'Sur devis' },
+};
 
 export default function AbonnementsPage() {
   const [orgs, setOrgs] = useState<Organization[]>([]);
+  const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [planFilter, setPlanFilter] = useState('all');
   const [upgrading, setUpgrading] = useState<string | null>(null);
 
-  useEffect(() => { fetchOrgs(); }, []);
+  useEffect(() => {
+    fetchOrgs();
+    fetchPlans();
+  }, []);
+
+  const fetchPlans = async () => {
+    try {
+      const data = await apiFetch('/plans');
+      setPlans(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Erreur chargement plans:', err);
+    }
+  };
 
   const fetchOrgs = async () => {
     setLoading(true);
@@ -74,10 +95,17 @@ export default function AbonnementsPage() {
   const tp = orgs.filter(o => norm(o.plan) === 'premium').length;
   const td = orgs.filter(o => norm(o.plan) === 'surdevis').length;
 
+  const getPlanPrice = (org: Organization) => {
+    const planName = org.plan || 'Freemium';
+    const plan = plans.find(
+      p => p.type === org.type && p.name.toLowerCase() === planName.toLowerCase()
+    );
+    return plan?.price ?? 0;
+  };
+
   const totalCA = orgs.reduce((sum, org) => {
-    const plan = norm(org.plan);
-    const prices = org.type === 'FLEET_MANAGER' ? fleetPrices : coopPrices;
-    return sum + (prices[plan] > 0 ? prices[plan] : 0);
+    const price = getPlanPrice(org);
+    return sum + (price > 0 ? price : 0);
   }, 0);
   const payants = tb + ts + tp + td;
 
@@ -125,8 +153,7 @@ export default function AbonnementsPage() {
                const p = norm(org.plan);
                const cfg = planConfig[p] || planConfig.freemium;
                const Icon = cfg.icon;
-               const prices = org.type === 'FLEET_MANAGER' ? fleetPrices : coopPrices;
-               const price = prices[p] || 0;
+               const price = getPlanPrice(org);
                return (
                  <tr key={org.id} className="border-t hover:bg-gray-50">
                    <td className="px-4 py-3 font-medium">{org.name}</td>
