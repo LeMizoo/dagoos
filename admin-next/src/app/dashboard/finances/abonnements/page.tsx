@@ -48,7 +48,9 @@ export default function AbonnementsPage() {
 
   const fetchPlans = async () => {
     try {
-      const data = await apiFetch('/plans');
+      const res = await apiFetch('/plans');
+      if (!res.ok) throw new Error('Erreur ' + res.status);
+      const data = await res.json();
       setPlans(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Erreur chargement plans:', err);
@@ -58,7 +60,7 @@ export default function AbonnementsPage() {
   const fetchOrgs = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/organizations?page=1&limit=100');
+      const res = await apiFetch('/organizations?page=1&limit=100');
       if (!res.ok) throw new Error('Erreur ' + res.status);
       const data = await res.json();
       setOrgs(Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []));
@@ -67,20 +69,25 @@ export default function AbonnementsPage() {
   };
 
   const handleUpgrade = async (orgId: string, newPlan: string) => {
-    setUpgrading(orgId);
-    try {
-      const res = await fetch('/api/organizations/upgrade', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orgId, plan: newPlan }),
-      });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || 'Erreur ' + res.status);
-      }
-      await fetchOrgs();
-    } catch (err: any) { setError(err.message); } finally { setUpgrading(null); }
-  };
+  setUpgrading(orgId);
+  try {
+    const res = await apiFetch('/organizations/upgrade', {
+      method: 'PUT',
+      body: JSON.stringify({ orgId, plan: newPlan }),
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'Erreur ' + res.status);
+    }
+
+    await fetchOrgs();
+  } catch (err: any) {
+    setError(err.message);
+  } finally {
+    setUpgrading(null);
+  }
+};
 
   const filtered = orgs.filter(org => {
     const match = org.name.toLowerCase().includes(search.toLowerCase()) || org.email.toLowerCase().includes(search.toLowerCase());

@@ -6,6 +6,7 @@ import {
   Truck, Building2, CreditCard, Receipt, ArrowRight, AlertCircle,
   Download, Filter
 } from 'lucide-react';
+import { apiFetch } from '@/lib/api';
 
 interface Transaction {
   id: string;
@@ -40,7 +41,7 @@ export default function FinancesPage() {
     setLoading(true);
     try {
       setError('');
-      const res = await fetch('/api/proxy/finances/transactions');
+      const res = await apiFetch('/finances/transactions');
       if (!res.ok) throw new Error(`Erreur ${res.status}`);
       const data = await res.json();
       setTransactions(Array.isArray(data) ? data : []);
