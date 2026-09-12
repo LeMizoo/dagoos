@@ -641,6 +641,104 @@ router.put(
 );
 
 // =========================================================
+// GET /api/organizations/:id/config
+// Configuration V2 complète (BusinessActivity → Services → Tariffs)
+//
+// SUPER_ADMIN    : toutes les organisations
+// FLEET_MANAGER  : sa propre organisation
+// COOP_MANAGER   : sa propre organisation
+// =========================================================
+
+router.get(
+  '/:id/config',
+  authMiddleware,
+  // P8-B : la sécurité est assurée par canAccessOrganization() (SUPER_ADMIN = toutes, managers = la leur).
+  // On n'utilise pas requirePermission('organizations.read') car cette permission est
+  // réservée aux administrateurs plateforme, alors que cette route doit aussi être
+  // accessible aux FLEET_MANAGER / COOP_MANAGER pour leur propre organisation.
+  async (req, res) => {
+    try {
+      const organizationId = req.params.id;
+
+      if (!canAccessOrganization(req, organizationId)) {
+        return res.status(403).json({
+          error: 'Accès interdit à cette organisation',
+        });
+      }
+
+      const organization = await prisma.organization.findUnique({
+        where: { id: organizationId },
+        select: {
+          id: true,
+          name: true,
+          code: true,
+          slug: true,
+          type: true,
+          logo: true,
+          plan: true,
+
+          businessActivities: {
+            where: { active: true },
+            orderBy: { createdAt: 'asc' },
+            select: {
+              id: true,
+              type: true,
+              zone: true,
+
+              services: {
+                where: { active: true },
+                orderBy: { code: 'asc' },
+                select: {
+                  id: true,
+                  code: true,
+                  label: true,
+                  category: true,
+
+                  tariffs: {
+                    where: { active: true },
+                    select: {
+                      id: true,
+                      pricingModel: true,
+                      basePrice: true,
+                      unitPrice: true,
+                      minimumPrice: true,
+                      commissionPct: true,
+                      currency: true,
+                      configuration: true,
+
+                      vehicleCategory: {
+                        select: {
+                          id: true,
+                          code: true,
+                          label: true,
+                          vehicleType: true,
+                          capacity: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!organization) {
+        return res.status(404).json({
+          error: 'Organisation introuvable',
+        });
+      }
+
+      res.json(organization);
+    } catch (error) {
+      console.error('GET /organizations/:id/config:', error);
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
+  }
+);
+
+// =========================================================
 // GET /api/organizations/:id
 // SUPER_ADMIN : toute organisation
 // Autres utilisateurs : uniquement leur organisation
