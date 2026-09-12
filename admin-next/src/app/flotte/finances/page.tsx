@@ -11,7 +11,8 @@ interface Course {
   driver?: { name?: string; driverCode?: string; user?: { name?: string } };
   vehicle?: { plate?: string; model?: string };
   price?: number;
-  commission?: number;
+  montantChauffeur?: number;
+  montantOrganisation?: number;
   distanceKm?: number;
 }
 
@@ -63,8 +64,8 @@ export default function FlotteFinances() {
   const coursesJour = summary?.today?.count || 0;
   const totalVersements = versements.reduce((sum, v) => sum + Number(v.amount || 0), 0);
   const totalCA = courses.reduce((sum, c) => sum + (c.price || 0), 0);
-  const totalCommission = courses.reduce((sum, c) => sum + (c.commission || 0), 0);
-  const totalNet = totalCA - totalCommission;
+  const totalPartOrganisation = courses.reduce((sum, c) => sum + (c.montantOrganisation || 0), 0);
+  const totalPartChauffeurs = courses.reduce((sum, c) => sum + (c.montantChauffeur || 0), 0);
 
   const filteredCourses = courses.filter(c =>
     ((c.driver?.name || c.driver?.user?.name || c.driver?.driverCode || '') + ' ' + (c.vehicle?.plate || ''))
@@ -85,7 +86,7 @@ export default function FlotteFinances() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <KPI icon={DollarSign} label="CA Aujourd'hui" value={`${caJour.toLocaleString()} Ar`} color="blue" />
             <KPI icon={TrendingUp} label="CA 7 jours" value={`${caSemaine.toLocaleString()} Ar`} color="green" />
-            <KPI icon={TrendingDown} label="Commissions totales" value={`${totalCommission.toLocaleString()} Ar`} color="red" />
+            <KPI icon={TrendingDown} label="Part organisation" value={`${totalPartOrganisation.toLocaleString()} Ar`} color="red" />
             <KPI icon={Receipt} label="Total versements" value={`${totalVersements.toLocaleString()} Ar`} color="purple" />
           </div>
 
@@ -93,7 +94,7 @@ export default function FlotteFinances() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <KPI icon={Car} label="Courses aujourd'hui" value={String(coursesJour)} color="yellow" />
             <KPI icon={Wallet} label="CA total (courses)" value={`${totalCA.toLocaleString()} Ar`} color="emerald" />
-            <KPI icon={TrendingUp} label="Net chauffeurs" value={`${totalNet.toLocaleString()} Ar`} color="cyan" />
+            <KPI icon={TrendingUp} label="Part chauffeurs" value={`${totalPartChauffeurs.toLocaleString()} Ar`} color="cyan" />
           </div>
 
           {/* Tableau des transactions */}
@@ -120,8 +121,8 @@ export default function FlotteFinances() {
                     <th className="px-4 py-3">Véhicule</th>
                     <th className="px-4 py-3">Km</th>
                     <th className="px-4 py-3">CA brut</th>
-                    <th className="px-4 py-3">Net organisation</th>
-                    <th className="px-4 py-3">Commission chauffeur</th>
+                    <th className="px-4 py-3">Part organisation</th>
+                    <th className="px-4 py-3">Part chauffeur</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -135,8 +136,8 @@ export default function FlotteFinances() {
                         <td className="px-4 py-3">{c.vehicle?.plate || '-'}</td>
                         <td className="px-4 py-3">{c.distanceKm || 0} km</td>
                         <td className="px-4 py-3 text-green-600 font-medium">{(c.price || 0).toLocaleString()} Ar</td>
-                        <td className="px-4 py-3 font-medium text-emerald-600">{(c.commission || 0).toLocaleString()} Ar</td>
-                        <td className="px-4 py-3 text-red-600">{((c.price || 0) - (c.commission || 0)).toLocaleString()} Ar</td>
+                        <td className="px-4 py-3 font-medium text-emerald-600">{(c.montantOrganisation || 0).toLocaleString()} Ar</td>
+                        <td className="px-4 py-3 text-red-600">{(c.montantChauffeur || 0).toLocaleString()} Ar</td>
                       </tr>
                     ))
                   )}

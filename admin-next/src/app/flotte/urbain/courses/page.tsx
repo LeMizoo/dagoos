@@ -11,7 +11,8 @@ interface Course {
   type: string;
   distanceKm: number;
   price: number;
-  commission: number;
+  montantChauffeur?: number;
+  montantOrganisation?: number;
   driver?: { user?: { name?: string }; driverCode?: string };
   vehicle?: { plate?: string; model?: string };
 }
@@ -54,7 +55,8 @@ export default function UrbainCourses() {
   const stats = {
     total: courses.length,
     caTotal: courses.reduce((sum, c) => sum + (c.price || 0), 0),
-    commissionTotale: courses.reduce((sum, c) => sum + (c.commission || 0), 0),
+    partOrganisationTotale: courses.reduce((sum, c) => sum + (c.montantOrganisation || 0), 0),
+    partChauffeursTotale: courses.reduce((sum, c) => sum + (c.montantChauffeur || 0), 0),
     distanceTotale: courses.reduce((sum, c) => sum + (c.distanceKm || 0), 0),
   };
 
@@ -85,9 +87,9 @@ export default function UrbainCourses() {
             <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
               <TrendingUp size={20} className="text-red-600" />
             </div>
-            <span className="text-sm text-gray-500">Commissions</span>
+            <span className="text-sm text-gray-500">Part chauffeurs</span>
           </div>
-          <div className="text-2xl font-bold text-red-600">{stats.commissionTotale.toLocaleString()} Ar</div>
+          <div className="text-2xl font-bold text-red-600">{stats.partChauffeursTotale.toLocaleString()} Ar</div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border">
           <div className="flex items-center gap-3 mb-2">
@@ -136,8 +138,8 @@ export default function UrbainCourses() {
                 <th className="px-4 py-3">Type</th>
                 <th className="px-4 py-3">Distance</th>
                 <th className="px-4 py-3">Prix</th>
-                <th className="px-4 py-3">Net organisation</th>
-                <th className="px-4 py-3">Commission chauffeur</th>
+                <th className="px-4 py-3">Part organisation</th>
+                <th className="px-4 py-3">Part chauffeur</th>
               </tr>
             </thead>
             <tbody>
@@ -163,9 +165,9 @@ export default function UrbainCourses() {
                     <td className="px-4 py-3">{c.distanceKm || 0} km</td>
                     <td className="px-4 py-3 text-green-600 font-medium">{(c.price || 0).toLocaleString()} Ar</td>
                     <td className="px-4 py-3 font-medium text-emerald-600">
-                      {(c.commission || 0).toLocaleString()} Ar
+                      {(c.montantOrganisation || 0).toLocaleString()} Ar
                     </td>
-                    <td className="px-4 py-3 text-red-600">{((c.price || 0) - (c.commission || 0)).toLocaleString()} Ar</td>
+                    <td className="px-4 py-3 text-red-600">{(c.montantChauffeur || 0).toLocaleString()} Ar</td>
                   </tr>
                 ))
               )}
