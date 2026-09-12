@@ -206,3 +206,62 @@ aucune organisation ne dépasse 20 items. Pas de pagination nécessaire.
 
 **À surveiller** : si une organisation dépasse 100 départs, véhicules
 ou chauffeurs, la pagination devra être ajoutée côté UI.
+
+### Fix sécurité — isolation `GET /drivers/pointages`
+
+**Date** : 2026-09-12 (commit `7d1d74aa`)
+
+**Problème** : la route acceptait n'importe quel `?organizationId=`
+sans vérifier que l'utilisateur y avait accès. Un COOP_MANAGER pouvait
+extraire les pointages d'une autre organisation.
+
+**Fix** : validation systématique via `PRIVILEGED_ROLES` :
+
+- SUPER_ADMIN / ADMIN : peuvent filtrer par `organizationId`
+- Autres rôles : limités à leur propre organisation, retour 403 sinon
+
+**Tests** : https://dago-mobility.vercel.app/flotte/interurbain/drivers
+- Organisation propre : 200
+- Organisation étrangère : 403
+
+### Audit isolation `organizationId` — 2026-09-12
+
+Audit systématique des routes backend utilisant `req.query.organizationId` :
+5 routes identifiées, toutes analysées.
+
+**Verdict** : aucune faille résiduelle.
+
+Toutes les routes suivent le même pattern d'isolation :
+
+    if (!GLOBAL_ROLES.includes(req.user.role)) {
+      const orgId = await getUserOrganizationId(req);
+      where.organizationId = orgId;
+    } else if (req.query.organizationId) {
+      where.organizationId = req.query.organizationId;
+    }
+
+Le `else if` ne s'exécute **que** pour SUPER_ADMIN / ADMIN.
+
+#### Routes auditées
+
+| Route | Statut |
+|-------|--------|
+| `GET /actions` | ✅ Pattern sûr |
+| `POST /actions` | ✅ Pattern sûr |
+| `GET /departs` | ✅ Pattern sûr |
+| `GET /finances/expenses` | ✅ Protégé par `isAdmin(req)` |
+| `GET /messages` | ✅ Pattern sûr |
+| `GET /reservations` | ✅ Filtre via departId |
+| `GET /vehicles` | ✅ Pas de query, org forcée |
+| `GET /livraisons` | ✅ Pas de query, org forcée |
+| `GET /societes` | ✅ Pas de query, org forcée |
+| `GET /drivers` | ✅ Pas de query, org forcée |
+
+#### Correctif appliqué
+
+`GET /drivers/pointages` était la seule route vulnérable (pas de check
+de rôle sur `organizationId`). Corrigé dans le commit `7d1d74aa` du
+2026-09-12.
+
+Test en production : organisation étrangère → HTTP 403
+`{ error: 'Accès interdit à cette organisation' }`.
