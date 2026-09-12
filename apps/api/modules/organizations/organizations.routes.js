@@ -660,6 +660,12 @@ router.get(
     try {
       const organizationId = req.params.id;
 
+      if (!['SUPER_ADMIN', 'FLEET_MANAGER', 'COOP_MANAGER'].includes(req.user?.role)) {
+        return res.status(403).json({
+          error: 'Accès réservé aux responsables d’organisation',
+        });
+      }
+
       if (!canAccessOrganization(req, organizationId)) {
         return res.status(403).json({
           error: 'Accès interdit à cette organisation',
