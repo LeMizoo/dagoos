@@ -137,3 +137,32 @@ Une organisation de type `ADMIN` existe en base avec `plan = "Premium"`.
 La table `Plan` ne contient que des plans `FLEET_MANAGER` et `COOPERATIVE`.
 La route `PUT /organizations/:id` autorise cette organisation à conserver
 son plan sans validation (cas particulier documenté dans le code).
+
+### Fallback `dagoos_org_token` obsolète
+
+Dans `admin-next/src/app/api/dashboard/stats/route.ts`, la ligne :
+
+    cookieStore.get('dagoos_org_token')?.value
+
+référence un cookie qui n'est plus jamais posé. Fallback mort.
+
+### Routes Next vestiges
+
+- `api/drivers/route.ts`
+- `api/vehicles/route.ts`
+- `api/organizations/route.ts`
+
+Jamais consommées directement (vérifié par grep). À supprimer.
+
+### Coexistence des 3 cookies d'auth
+
+Les cookies `dagoos_admin_token`, `dagoos_urbain_token`,
+`dagoos_interurbain_token` peuvent coexister. Les routes distinguent
+le bon via `x-auth-space` ou par nom exact. Fragile à terme :
+envisager un cookie unique avec claim `space` dans le JWT.
+
+### Dashboard admin : dépendance pagination backend
+
+`/api/dashboard/stats` utilise `?limit=100` (limite backend).
+Si la base dépasse 100 orgs / 100 drivers, les compteurs seront faux.
+Solution future : boucler sur toutes les pages ou agréger côté backend.
