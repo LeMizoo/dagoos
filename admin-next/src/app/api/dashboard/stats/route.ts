@@ -56,39 +56,33 @@ export async function GET(_req: NextRequest) {
       }),
     ]);
 
-    const orgs = orgsRes.ok ? await orgsRes.json() : [];
-    const drivers = driversRes.ok ? await driversRes.json() : [];
-    const vehicles = vehiclesRes.ok ? await vehiclesRes.json() : [];
-    const messages = messagesRes.ok ? await messagesRes.json() : [];
+    // Le backend peut renvoyer soit un tableau direct,
+    // soit un objet paginé { data: [...], pagination: {...} }.
+    // On gère les deux cas pour être robuste.
+    function extractArray(payload: unknown): any[] {
+      if (Array.isArray(payload)) return payload;
+      if (
+        payload &&
+        typeof payload === 'object' &&
+        Array.isArray((payload as any).data)
+      ) {
+        return (payload as any).data;
+      }
+      return [];
+    }
+
+    const orgs = extractArray(orgsRes.ok ? await orgsRes.json() : null);
+    const drivers = extractArray(driversRes.ok ? await driversRes.json() : null);
+    const vehicles = extractArray(vehiclesRes.ok ? await vehiclesRes.json() : null);
+    const messages = extractArray(messagesRes.ok ? await messagesRes.json() : null);
 
     return NextResponse.json({
-      fleets: Array.isArray(orgs)
-        ? orgs.filter(
-            (o: any) => o.type === 'FLEET_MANAGER'
-          ).length
-        : 0,
-
-      cooperatives: Array.isArray(orgs)
-        ? orgs.filter(
-            (o: any) => o.type === 'COOPERATIVE'
-          ).length
-        : 0,
-
-      drivers: Array.isArray(drivers)
-        ? drivers.length
-        : 0,
-
-      vehicles: Array.isArray(vehicles)
-        ? vehicles.length
-        : 0,
-
-      messages: Array.isArray(messages)
-        ? messages.filter((m: any) => !m.read).length
-        : 0,
-
-      recentOrgs: Array.isArray(orgs)
-        ? orgs.slice(0, 5)
-        : [],
+      fleets: orgs.filter((o: any) => o.type === 'FLEET_MANAGER').length,
+      cooperatives: orgs.filter((o: any) => o.type === 'COOPERATIVE').length,
+      drivers: drivers.length,
+      vehicles: vehicles.length,
+      messages: messages.filter((m: any) => !m.read).length,
+      recentOrgs: orgs.slice(0, 5),
     });
   } catch (error: any) {
     return NextResponse.json(
