@@ -281,3 +281,21 @@ utilisaient fetch() direct sans le header `x-auth-space`, causant des
 
 **Dette éliminée** : plus de dépendance à /api/drivers et /api/vehicles
 (routes Next vestiges, candidates à suppression).
+
+
+### Fix P10 — dashboard/flottes/[id] migration apiFetch
+
+**Date** : 2026-09-12 (commit 4bd17eca)
+
+**Problème** : les pages `[id]/page.tsx`, `[id]/chauffeurs`,
+`[id]/vehicules` de `dashboard/flottes` utilisaient `fetch()` direct
+sans le header `x-auth-space`. Symétrie avec P9 sur `dashboard/cooperatives`.
+
+**Fix** : migration complète vers `apiFetch` :
+
+- GET / POST / PUT / DELETE
+- Vérification `res.ok` systématique sur DELETE
+- Uniformisation avec le reste du code
+
+**Dette éliminée** : plus de dépendance à `/api/drivers` et `/api/vehicles`
+(routes Next vestiges, candidates à suppression).
