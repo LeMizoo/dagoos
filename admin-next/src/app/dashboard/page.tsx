@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Building2, Users, Car, MessageSquare, Truck, DollarSign, ArrowRight, TrendingUp, TrendingDown, Activity, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Building2, Users, Car, MessageSquare, Truck, DollarSign, ArrowRight, TrendingUp, CheckCircle } from 'lucide-react';
 import StatCard from '@/components/dashboard/StatCard';
 import Greeting from '@/components/dashboard/Greeting';
 
@@ -12,9 +12,6 @@ interface Stats {
   vehicles: number;
   messages: number;
   recentOrgs: any[];
-  totalCA?: number;
-  activeDrivers?: number;
-  maintenanceVehicles?: number;
 }
 
 export default function DashboardPage() {
@@ -27,12 +24,7 @@ export default function DashboardPage() {
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (data) {
-          setStats({
-            ...data,
-            totalCA: 1580000,
-            activeDrivers: Math.round(data.drivers * 0.7),
-            maintenanceVehicles: Math.round(data.vehicles * 0.15),
-          });
+          setStats(data);
         }
       })
       .catch(err => setError(err.message))
@@ -66,39 +58,15 @@ export default function DashboardPage() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
         <MiniKPI icon={Truck} label="Flottes" value={loading ? '-' : stats?.fleets || 0} color="blue" />
         <MiniKPI icon={Building2} label="Coopératives" value={loading ? '-' : stats?.cooperatives || 0} color="emerald" />
         <MiniKPI icon={Users} label="Chauffeurs" value={loading ? '-' : stats?.drivers || 0} color="green" />
         <MiniKPI icon={Car} label="Véhicules" value={loading ? '-' : stats?.vehicles || 0} color="yellow" />
-        <MiniKPI icon={Activity} label="Actifs" value={loading ? '-' : stats?.activeDrivers || 0} color="purple" />
-        <MiniKPI icon={AlertTriangle} label="En maintenance" value={loading ? '-' : stats?.maintenanceVehicles || 0} color="red" />
       </div>
 
-      {/* Graphique + Activité */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-          <h3 className="font-semibold text-gray-800 dark:text-white mb-4">📊 Chiffre d'affaires global - 7 jours</h3>
-          <div className="flex items-end gap-3 h-40">
-            {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((day, i) => {
-              const values = [850, 920, 780, 1100, 1580, 1250, 600];
-              const height = values[i];
-              const max = 1580;
-              return (
-                <div key={day} className="flex-1 flex flex-col items-center gap-2">
-                  <span className="text-xs font-medium text-gray-600 dark:text-gray-400">{height}K</span>
-                  <div className="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg hover:from-blue-600 hover:to-blue-500 transition-all" style={{ height: `${(height / max) * 100}%` }} />
-                  <span className="text-xs text-gray-500">{day}</span>
-                </div>
-              );
-            })}
-          </div>
-          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-between text-sm">
-            <span className="text-gray-500">Total cette semaine</span>
-            <span className="font-bold text-gray-800 dark:text-white">{loading ? '...' : `${(stats?.totalCA || 0).toLocaleString()} Ar`}</span>
-          </div>
-        </div>
-
+      {/* Dernières inscriptions */}
+      <div className="mb-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
           <h3 className="font-semibold text-gray-800 dark:text-white mb-4">📋 Dernières inscriptions</h3>
           {stats?.recentOrgs && stats.recentOrgs.length > 0 ? (

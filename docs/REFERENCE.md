@@ -122,3 +122,18 @@ création de Course.
 ---
 
 *Dernière mise à jour : P8-B — sémantique V2 montants et flags d'activité.*
+
+### Divergences de prix entre table Plan et frontend
+
+- **FLEET_MANAGER / Basic** : table = 16000, frontend = 15000
+- **COOP_MANAGER / Standard** : table = 45000, frontend = env ou 45000
+
+Depuis P8-B, la table `Plan` est la source de vérité. Le frontend
+`abonnements/page.tsx` sera migré pour utiliser `/plans`.
+
+### Organisation de type ADMIN
+
+Une organisation de type `ADMIN` existe en base avec `plan = "Premium"`.
+La table `Plan` ne contient que des plans `FLEET_MANAGER` et `COOPERATIVE`.
+La route `PUT /organizations/:id` autorise cette organisation à conserver
+son plan sans validation (cas particulier documenté dans le code).
