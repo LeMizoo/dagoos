@@ -1,7 +1,7 @@
 'use client';
 export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
-import { Settings, User, Shield, Palette, Bell, Globe, Smartphone, Save, Crown, Coffee, Star, Zap, FileText } from 'lucide-react';
+import { Settings, User, Shield, Palette, Bell, Globe, Smartphone, Crown, Coffee, Star, Zap, FileText } from 'lucide-react';
 import PasswordInput from '@/components/ui/PasswordInput';
 import { apiFetch } from '@/lib/api';
 import { useTheme } from '@/lib/theme-context';
@@ -36,7 +36,6 @@ const defaultCoopPlans: Record<PlanKey, Plan> = {
 
 export default function SettingsPage() {
   const [tab, setTab] = useState('general');
-  const [saved, setSaved] = useState(false);
   const [entityTab, setEntityTab] = useState<EntityType>('fleet');
   const [fleetPlans, setFleetPlans] = useState(defaultFleetPlans);
   const [coopPlans, setCoopPlans] = useState(defaultCoopPlans);
@@ -90,13 +89,6 @@ export default function SettingsPage() {
     { id: 'api', icon: Globe, label: 'API' },
     { id: 'mobile-money', icon: Smartphone, label: 'Mobile Money' },
   ];
-
-  function handleSave() {
-    setSaved(true);
-    localStorage.setItem('dagoos_fleet_plans', JSON.stringify(fleetPlans));
-    localStorage.setItem('dagoos_coop_plans', JSON.stringify(coopPlans));
-    setTimeout(() => setSaved(false), 2000);
-  }
 
   const planIcons: Record<PlanKey, any> = { freemium: Coffee, basic: Star, standard: Zap, premium: Crown, surdevis: FileText };
   const planColors: Record<PlanKey, string> = { 
@@ -301,10 +293,10 @@ export default function SettingsPage() {
           )}
 
           {tab !== 'plans' && (
-            <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center gap-3">
-              <button onClick={handleSave} className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition text-sm">
-                <Save size={14} /> {saved ? '✓ Sauvegardé !' : 'Sauvegarder'}
-              </button>
+            <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                La persistance de cet onglet sera disponible dans une prochaine version.
+              </p>
             </div>
           )}
         </div>
