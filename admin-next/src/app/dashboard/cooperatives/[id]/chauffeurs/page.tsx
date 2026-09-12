@@ -60,8 +60,11 @@ export default function CoopDriversPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true);
     try {
-      const url = editingDriver ? `/api/proxy/drivers/${editingDriver.id}` : '/api/proxy/drivers';
-      const res = await fetch(url, {
+      const endpoint = editingDriver
+        ? `/drivers/${editingDriver.id}`
+        : '/drivers';
+
+      const res = await apiFetch(endpoint, {
         method: editingDriver ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editingDriver
@@ -75,7 +78,18 @@ export default function CoopDriversPage() {
 
   const handleDelete = async () => {
     if (!deleteConfirm) return;
-    try { await fetch(`/api/proxy/drivers/${deleteConfirm.id}`, { method: 'DELETE' }); setDeleteConfirm(null); fetchDrivers(); } catch (err: any) { setError(err.message); }
+    try {
+      const res = await apiFetch(`/drivers/${deleteConfirm.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) throw new Error('Erreur ' + res.status);
+
+      setDeleteConfirm(null);
+      fetchDrivers();
+    } catch (err: any) {
+      setError(err.message);
+    }
   };
 
   return (

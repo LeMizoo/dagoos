@@ -46,8 +46,11 @@ export default function CoopVehiclesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true);
     try {
-      const url = editingVehicle ? `/api/proxy/vehicles/${editingVehicle.id}` : '/api/proxy/vehicles';
-      const res = await fetch(url, {
+      const endpoint = editingVehicle
+        ? `/vehicles/${editingVehicle.id}`
+        : '/vehicles';
+
+      const res = await apiFetch(endpoint, {
         method: editingVehicle ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editingVehicle ? formData : { ...formData, organizationId: id }),
@@ -59,7 +62,18 @@ export default function CoopVehiclesPage() {
 
   const handleDelete = async () => {
     if (!deleteConfirm) return;
-    try { await fetch(`/api/proxy/vehicles/${deleteConfirm.id}`, { method: 'DELETE' }); setDeleteConfirm(null); fetchVehicles(); } catch (err: any) { setError(err.message); }
+    try {
+      const res = await apiFetch(`/vehicles/${deleteConfirm.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) throw new Error('Erreur ' + res.status);
+
+      setDeleteConfirm(null);
+      fetchVehicles();
+    } catch (err: any) {
+      setError(err.message);
+    }
   };
 
   return (
