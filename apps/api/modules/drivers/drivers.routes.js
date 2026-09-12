@@ -890,8 +890,45 @@ router.get('/pointages', authMiddleware, requirePermission('drivers.read'), asyn
 
     const where = {};
 
-    if (organizationId) {
-      where.driver = { organizationId };
+    // Isolation multi-tenant :
+    // les rôles privilégiés peuvent filtrer par organizationId ;
+    // les autres utilisateurs sont toujours limités à leur organisation.
+    if (PRIVILEGED_ROLES.includes(req.user.role)) {
+      if (organizationId) {
+        where.driver = { organizationId };
+      }
+    } else {
+      const userOrganizationId = await getUserOrganizationId(req);
+
+      if (!userOrganizationId) {
+        return res.status(403).json({
+          error: 'Organisation introuvable pour cet utilisateur'
+        });
+      }
+
+      if (organizationId && organizationId !== userOrganizationId) {
+        return res.status(403).json({
+          error: 'Accès interdit à cette organisation'
+        });
+      }
+
+      where.driver = { organizationId: userOrganizationId };
+
+      if (driverId) {
+        const driver = await prisma.driver.findFirst({
+          where: {
+            id: driverId,
+            organizationId: userOrganizationId,
+          },
+          select: { id: true },
+        });
+
+        if (!driver) {
+          return res.status(403).json({
+            error: 'Accès interdit à ce chauffeur'
+          });
+        }
+      }
     }
 
     if (driverId) {

@@ -166,3 +166,43 @@ envisager un cookie unique avec claim `space` dans le JWT.
 `/api/dashboard/stats` utilise `?limit=100` (limite backend).
 Si la base dépasse 100 orgs / 100 drivers, les compteurs seront faux.
 Solution future : boucler sur toutes les pages ou agréger côté backend.
+
+### Pages `flotte/interurbain/*` — audit 2026-09-12
+
+Zone auditée : 18 fichiers .tsx, 1545 lignes au total.
+
+**Résultat : zone saine.** Aucun mock, aucun montant hardcodé, aucun
+localStorage, aucun flag V1, aucune sémantique financière legacy.
+
+#### Architecture
+
+- **6 fichiers actifs** : `departs` (476L), `drivers` (490L),
+  `reservations` (289L), `societes` (67L), `livraisons` (61L),
+  `contrats` (59L)
+- **6 stubs** : `depenses`, `finances`, `pointages`, `proprietaires`,
+  `rapports`, `versements` — affichent « En construction »
+- **5 re-exports** : `messages`, `notifications`, `profil`, `vehicles`,
+  `settings` — réutilisent les composants de `flotte/*` via
+  `export { default } from '../../xxx/page'`
+- **1 wrapper** : `page.tsx` — garde `hasActivity('INTERURBAN')`
+
+#### Sécurité
+
+L'isolation repose sur 3 niveaux :
+
+1. `flotte/layout.tsx` → `PortalGuard allowedRoles={['FLEET_MANAGER', 'COOP_MANAGER']}`
+2. `flotte/interurbain/page.tsx` → `hasActivity('INTERURBAN')`
+3. **Backend** → filtrage par organisation vérifié (audit 2026-09-12 :
+   chaque requête `/departs`, `/vehicles`, `/drivers` retourne un seul
+   `organizationId`)
+
+Le filtre client (`d.organizationId === organization.id`) est une
+ceinture-bretelles défensive, pas la protection principale.
+
+#### Pagination
+
+`?limit=100` est utilisé sur toutes les pages. À la date de l'audit,
+aucune organisation ne dépasse 20 items. Pas de pagination nécessaire.
+
+**À surveiller** : si une organisation dépasse 100 départs, véhicules
+ou chauffeurs, la pagination devra être ajoutée côté UI.
