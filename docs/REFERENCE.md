@@ -265,3 +265,19 @@ de rôle sur `organizationId`). Corrigé dans le commit `7d1d74aa` du
 
 Test en production : organisation étrangère → HTTP 403
 `{ error: 'Accès interdit à cette organisation' }`.
+
+### Fix P9 — dashboard/cooperatives/[id] migration apiFetch
+
+**Date** : 2026-09-12 (commits 995b5ba9 + 0e633e2e)
+
+**Problème** : les pages [id]/page.tsx, [id]/chauffeurs, [id]/vehicules
+utilisaient fetch() direct sans le header `x-auth-space`, causant des
+401 sur toutes les opérations (lecture et écriture).
+
+**Fix** : migration complète vers apiFetch :
+- GET / POST / PUT / DELETE
+- Vérification res.ok systématique
+- Uniformisation avec le reste du code
+
+**Dette éliminée** : plus de dépendance à /api/drivers et /api/vehicles
+(routes Next vestiges, candidates à suppression).
