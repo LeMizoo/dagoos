@@ -30,9 +30,8 @@ export default function FlotteVehicules() {
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   
-  const isUrbain = organization?.type === 'FLEET_MANAGER';
   const vehicleTypes = VEHICLE_TYPES[organization?.type || 'FLEET_MANAGER'] || VEHICLE_TYPES.FLEET_MANAGER;
-  const defaultType = isUrbain ? 'VOITURE' : 'VOITURE';
+  const defaultType = 'VOITURE';
   
   const [form, setForm] = useState({
     plate: '',
