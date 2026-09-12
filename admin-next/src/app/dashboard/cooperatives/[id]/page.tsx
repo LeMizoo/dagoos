@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -33,7 +34,7 @@ export default function CoopDetailPage() {
   const fetchOrg = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/proxy/organizations/${id}`);
+      const res = await apiFetch(`/organizations/${id}`);
       if (!res.ok) throw new Error('Erreur ' + res.status);
       const data = await res.json();
       setOrg(data);

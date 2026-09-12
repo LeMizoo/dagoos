@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -31,7 +32,7 @@ export default function CoopVehiclesPage() {
   const fetchVehicles = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/vehicles?page=1&limit=100');
+      const res = await apiFetch('/vehicles?page=1&limit=100');
       if (!res.ok) throw new Error('Erreur ' + res.status);
       const data = await res.json();
       setVehicles(Array.isArray(data) ? data.filter((v: any) => v.organizationId === id) : []);
