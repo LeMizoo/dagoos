@@ -1,5 +1,12 @@
 const express = require('express');
 const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
+});
 const prisma = require('../../lib/prisma');
 const { authMiddleware } = require('../../middleware/auth');
 const { requirePermission } = require('../../security/require-permission');
@@ -380,6 +387,19 @@ router.post(
       if (!canAccessOrganization(req, organizationId)) {
         return res.status(403).json({
           error: 'Accès interdit à cette organisation',
+        });
+      }
+
+      // Vérification de la configuration Cloudinary
+      if (
+        !process.env.CLOUDINARY_CLOUD_NAME ||
+        !process.env.CLOUDINARY_API_KEY ||
+        !process.env.CLOUDINARY_API_SECRET
+      ) {
+        console.error('[UPLOAD-ORG] Cloudinary non configuré');
+
+        return res.status(503).json({
+          error: 'Cloudinary non configuré',
         });
       }
 
