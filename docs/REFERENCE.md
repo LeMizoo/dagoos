@@ -330,3 +330,25 @@ suite à un 500). Les colonnes "Chauffeur" et "Code" affichent `-`.
 À résoudre par l'ajout de la relation Prisma Versement.driver
 (chantier dédié, migration DB requise).
 
+### Dette — FAI bloque le port 5432
+
+**Date** : 2026-09-14
+
+**Problème** : le FAI local bloque le port 5432, empêchant
+`prisma migrate dev` et `prisma migrate deploy` de se connecter à
+Supabase.
+
+**Contournement actuel** :
+1. Générer le fichier `migration.sql` localement
+2. L'appliquer manuellement via Supabase SQL Editor
+3. Vérifier la contrainte en base
+
+**Conséquence** : la table `_prisma_migrations` sur Supabase peut ne
+pas être synchronisée avec l'historique local. Les migrations futures
+devront suivre la même procédure manuelle jusqu'à résolution.
+
+**Actions futures** :
+- Vérifier si un VPN ou une connexion alternative permet le port 5432
+- Ou passer au pooler Supabase (port 6543) si compatible
+- Ou adopter définitivement le workflow SQL Editor
+
