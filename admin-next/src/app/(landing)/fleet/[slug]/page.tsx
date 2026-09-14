@@ -276,8 +276,8 @@ export default function FleetLandingPage({
               alt=""
               className="absolute inset-0 h-full w-full object-cover"
             />
-            <div className="absolute inset-0 bg-slate-950/65" />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/75 to-slate-950/30" />
+            <div className="absolute inset-0 bg-slate-950/10" />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-slate-950/30 to-transparent" />
           </>
         ) : (
           <div
