@@ -352,3 +352,29 @@ devront suivre la même procédure manuelle jusqu'à résolution.
 - Ou passer au pooler Supabase (port 6543) si compatible
 - Ou adopter définitivement le workflow SQL Editor
 
+### Édition du slug public (2026-09-14, commit 48858b04)
+
+Route `PUT /organizations/:id/slug` pour éditer le slug public.
+
+**Rôles autorisés** :
+- `SUPER_ADMIN` : toute organisation
+- `FLEET_MANAGER` / `COOP_MANAGER` : leur propre organisation uniquement
+
+**Sécurité** : `canAccessOrganization()` bloque les tentatives
+cross-tenant. Testé : un FLEET_MANAGER tentant de modifier le slug
+d'une autre org reçoit 403 « Accès interdit à cette organisation ».
+
+**Validations** :
+- Format : `[a-z0-9]` + tirets, pas en début/fin
+- Longueur : 3-48 caractères
+- Slugs réservés : dashboard, flotte, admin, login, register, api,
+  public, fleet, coop, suivi, *-login
+- Unicité : 409 si le slug est déjà pris
+
+**UI** : champ dans `LandingPageSettings` (section « Adresse
+publique »). Aperçu de l'URL complète, nettoyage automatique,
+avertissement sur la casse des liens.
+
+**Dette** : pas de redirection pour les anciens slugs. Un changement
+de slug casse les liens existants. Table `OrganizationSlugHistory`
+à prévoir dans un chantier futur.
