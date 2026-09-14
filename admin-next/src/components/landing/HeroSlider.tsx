@@ -28,7 +28,7 @@ export default function HeroSlider() {
           className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
           style={{
             backgroundImage: `url(${slide})`,
-            opacity: index === current ? 0.25 : 0,
+            opacity: index === current ? 0.90 : 0,
           }}
         />
       ))}
