@@ -299,3 +299,26 @@ sans le header `x-auth-space`. Symétrie avec P9 sur `dashboard/cooperatives`.
 
 **Dette éliminée** : plus de dépendance à `/api/drivers` et `/api/vehicles`
 (routes Next vestiges, candidates à suppression).
+
+### Bug P8-B — include driver sur Versement (500)
+
+**Date** : 2026-09-14
+
+**Problème** : le patch P8-B (commit 1a4cc8bd) a ajouté un
+`include: { driver: ... }` sur `prisma.versement.findMany()` dans
+`GET /finances/versements`. Or le modèle `Versement` n'a **pas de
+relation** `driver` déclarée dans `schema.prisma` — seulement un
+champ `driverId: String`.
+
+**Conséquence** : Prisma rejette l'include → 500 systématique.
+L'app `dago-coop-driver` (page finances) était cassée.
+
+**Détecté** : stack trace Render 2026-09-14T05:35:24Z.
+
+**Fix** : hotfix — retrait de l'include. La route fonctionne à nouveau.
+
+**Dette restante** : les colonnes « Chauffeur » et « Code » dans les
+pages admin affichent `-` au lieu du nom. Pour les réactiver, il faut
+ajouter la relation dans le schéma Prisma (chantier dédié avec
+migration DB).
+
