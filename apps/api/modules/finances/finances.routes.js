@@ -572,19 +572,6 @@ router.get('/versements', authMiddleware, requirePermission('finances.read'), as
 
     const versements = await prisma.versement.findMany({
       where,
-      include: {
-        driver: {
-          select: {
-            id: true,
-            driverCode: true,
-            user: {
-              select: {
-                name: true,
-              },
-            },
-          },
-        },
-      },
       orderBy: {
         createdAt: 'desc'
       },
