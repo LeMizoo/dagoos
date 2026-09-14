@@ -1,9 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Save, Globe, Upload, Eye, AlertCircle, CheckCircle } from 'lucide-react';
+import { Save, Globe, Eye, AlertCircle, CheckCircle } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { useOrganization } from '@/lib/organization-context';
+import ImageUpload from '@/components/settings/ImageUpload';
 
 interface LandingService {
   icon: string;
@@ -447,19 +448,19 @@ export default function LandingPageSettings({
                 placeholder="https://exemple.com/image.jpg"
               />
 
-              <button
-                type="button"
-                disabled
-                title="Upload d'image à implémenter"
-                className="px-3 py-2 border rounded-lg text-sm text-gray-400 flex items-center gap-1 cursor-not-allowed"
-              >
-                <Upload size={14} />
-                Upload
-              </button>
+              {organization?.id && (
+                <ImageUpload
+                  organizationId={organization.id}
+                  currentUrl={data.heroImage}
+                  onChange={(url) =>
+                    setData({ ...data, heroImage: url })
+                  }
+                />
+              )}
             </div>
 
             <p className="text-xs text-gray-400 mt-1">
-              Pour le moment, utilisez une URL publique d'image.
+              Uploadez une image (max 5 MB) ou collez une URL publique.
             </p>
           </div>
 

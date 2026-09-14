@@ -1,9 +1,14 @@
 const express = require('express');
+const cloudinary = require('cloudinary').v2;
 const prisma = require('../../lib/prisma');
 const { authMiddleware } = require('../../middleware/auth');
 const { requirePermission } = require('../../security/require-permission');
 
 const router = express.Router();
+
+// Note : cloudinary.config() est appelé dans
+// apps/api/modules/public/upload.routes.js (monté en premier dans server.js).
+// Le module cloudinary étant un singleton, la configuration est partagée.
 
 // =========================================================
 // ORGANIZATION ACCESS CONTROL
@@ -340,6 +345,136 @@ router.get(
 
       res.status(500).json({
         error: 'Erreur serveur',
+      });
+    }
+  }
+);
+
+// =========================================================
+// POST /api/organizations/:id/upload
+// Upload une image Cloudinary, retourne son URL
+//
+// SUPER_ADMIN    : toute organisation
+// FLEET_MANAGER  : sa propre organisation
+// COOP_MANAGER   : sa propre organisation
+//
+// Note : la config Cloudinary est déjà faite dans
+// modules/public/upload.routes.js (singleton).
+// =========================================================
+
+router.post(
+  '/:id/upload',
+  authMiddleware,
+  requirePermission('landing.manage'),
+  async (req, res) => {
+    try {
+      const organizationId = req.params.id;
+      const { image } = req.body || {};
+
+      // 1. Contrôle rôle
+      if (!['SUPER_ADMIN', 'FLEET_MANAGER', 'COOP_MANAGER'].includes(req.user?.role)) {
+        return res.status(403).json({ error: 'Accès interdit' });
+      }
+
+      // 2. Contrôle accès organisation (isolation multi-tenant)
+      if (!canAccessOrganization(req, organizationId)) {
+        return res.status(403).json({
+          error: 'Accès interdit à cette organisation',
+        });
+      }
+
+      // 3. Validation image
+      if (!image || typeof image !== 'string') {
+        return res.status(400).json({
+          error: 'Image manquante (data URI base64 requis)',
+        });
+      }
+
+      if (!image.startsWith('data:image/')) {
+        return res.status(400).json({
+          error: 'Format invalide : data URI attendu',
+        });
+      }
+
+      const formatMatch = image.match(/^data:image\/([a-zA-Z0-9]+);base64,/);
+      if (!formatMatch) {
+        return res.status(400).json({ error: 'Format data URI malformé' });
+      }
+
+      const ALLOWED_FORMATS = ['jpeg', 'jpg', 'png', 'webp', 'heic', 'heif'];
+      const format = formatMatch[1].toLowerCase();
+      if (!ALLOWED_FORMATS.includes(format)) {
+        return res.status(400).json({
+          error: `Format non supporté : ${format}`,
+        });
+      }
+
+      const base64Data = image.split(',')[1];
+      if (!base64Data) {
+        return res.status(400).json({ error: 'Données base64 manquantes' });
+      }
+
+      const estimatedBytes = Math.ceil((base64Data.length * 3) / 4);
+      const MAX_FILE_SIZE = 5 * 1024 * 1024;
+      if (estimatedBytes > MAX_FILE_SIZE) {
+        return res.status(413).json({
+          error: `Image trop volumineuse (${Math.round(estimatedBytes / 1024)} KB). Max 5 MB`,
+        });
+      }
+
+      // 4. Génération du dossier et publicId
+      const now = new Date();
+      const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const folder = `dagoos/organizations/${organizationId}/hero/${yearMonth}`;
+      const timestamp = Date.now();
+      const random = Math.random().toString(36).substring(2, 8);
+      const publicId = `hero-${timestamp}-${random}`;
+
+      console.log(
+        `[UPLOAD-ORG] ${organizationId} → ${folder}/${publicId} ` +
+        `(${format}, ~${Math.round(estimatedBytes / 1024)} KB)`
+      );
+
+      // 5. Upload Cloudinary
+      const uploadResult = await cloudinary.uploader.upload(image, {
+        folder,
+        public_id: publicId,
+        resource_type: 'image',
+        transformation: [
+          {
+            quality: 'auto:good',
+            fetch_format: 'auto',
+            width: 1920,
+            crop: 'limit',
+          },
+        ],
+        overwrite: false,
+        invalidate: true,
+      });
+
+      console.log(`[UPLOAD-ORG] ✅ ${uploadResult.secure_url}`);
+
+      // 6. Réponse
+      return res.status(201).json({
+        success: true,
+        url: uploadResult.secure_url,
+        publicId: uploadResult.public_id,
+        format: uploadResult.format,
+        width: uploadResult.width,
+        height: uploadResult.height,
+        bytes: uploadResult.bytes,
+      });
+    } catch (error) {
+      console.error('[UPLOAD-ORG] Erreur Cloudinary :', error);
+
+      if (error.http_code) {
+        return res.status(error.http_code).json({
+          error: `Cloudinary : ${error.message}`,
+        });
+      }
+
+      return res.status(500).json({
+        error: "Erreur lors de l'upload",
       });
     }
   }
