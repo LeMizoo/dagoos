@@ -104,6 +104,8 @@ export default function LandingPageSettings({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
+  const [originalSlug, setOriginalSlug] = useState('');
+  const [slugError, setSlugError] = useState('');
 
   const loadLanding = useCallback(async () => {
     if (!organization?.id) {
@@ -133,6 +135,8 @@ export default function LandingPageSettings({
         !Array.isArray(result.landingConfig)
           ? result.landingConfig
           : {};
+
+      setOriginalSlug(result?.slug || '');
 
       setData({
         slug: result?.slug || '',
@@ -270,6 +274,30 @@ export default function LandingPageSettings({
         throw new Error(
           result?.error || 'Erreur lors de la sauvegarde'
         );
+      }
+
+      // 2. Sauvegarde slug (nouveau, si changé)
+      if (data.slug && data.slug !== originalSlug) {
+        const slugRes = await apiFetch(
+          `/organizations/${organization.id}/slug`,
+          {
+            method: 'PUT',
+            body: JSON.stringify({ slug: data.slug }),
+          }
+        );
+
+        if (!slugRes.ok) {
+          const slugErr = await slugRes.json().catch(() => ({}));
+          setSlugError(
+            slugErr.error || 'Erreur lors de la sauvegarde du slug'
+          );
+          throw new Error(
+            slugErr.error || 'Erreur lors de la sauvegarde du slug'
+          );
+        }
+
+        const updatedSlug = await slugRes.json();
+        setOriginalSlug(updatedSlug.slug);
       }
 
       setSaved(true);
@@ -654,6 +682,49 @@ export default function LandingPageSettings({
           className="w-full px-3 py-2 border rounded-lg text-sm h-32"
           placeholder="Décrivez votre organisation..."
         />
+      </div>
+
+      {/* Slug public */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl border p-6">
+        <h3 className="font-semibold text-gray-800 dark:text-white mb-4">
+          🔗 Adresse publique (slug)
+        </h3>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            URL de votre page publique
+          </label>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500 whitespace-nowrap font-mono">
+              {app === 'fleet' ? 'dagoos.mg/fleet/' : 'dagoos.mg/coop/'}
+            </span>
+            <input
+              type="text"
+              value={data.slug}
+              onChange={(e) => {
+                const cleaned = e.target.value
+                  .toLowerCase()
+                  .replace(/[^a-z0-9-]/g, '')
+                  .replace(/^-+|-+$/g, '')
+                  .slice(0, 48);
+                setData({ ...data, slug: cleaned });
+                setSlugError('');
+              }}
+              className="flex-1 px-3 py-2 border rounded-lg text-sm font-mono"
+              placeholder="mon-organisation"
+              minLength={3}
+              maxLength={48}
+            />
+          </div>
+          {slugError && (
+            <p className="text-xs text-red-600 mt-2 flex items-center gap-1">
+              <AlertCircle size={12} /> {slugError}
+            </p>
+          )}
+          <p className="text-xs text-gray-500 mt-2">
+            ⚠️ Modifier cette adresse cassera les liens existants vers votre page publique.
+          </p>
+        </div>
       </div>
 
       {/* Actions */}

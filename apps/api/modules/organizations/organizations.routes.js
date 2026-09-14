@@ -641,6 +641,95 @@ router.put(
 );
 
 // =========================================================
+// =========================================================
+// PUT /api/organizations/:id/slug
+// Modifier uniquement le slug public de l'organisation
+//
+// SUPER_ADMIN    : toute organisation
+// FLEET_MANAGER  : sa propre organisation
+// COOP_MANAGER   : sa propre organisation
+// =========================================================
+
+router.put(
+  '/:id/slug',
+  authMiddleware,
+  requirePermission('landing.manage'),
+  async (req, res) => {
+    try {
+      const organizationId = req.params.id;
+      const { slug } = req.body || {};
+
+      if (!['SUPER_ADMIN', 'FLEET_MANAGER', 'COOP_MANAGER'].includes(req.user?.role)) {
+        return res.status(403).json({
+          error: 'Accès interdit',
+        });
+      }
+
+      if (!canAccessOrganization(req, organizationId)) {
+        return res.status(403).json({
+          error: 'Accès interdit à cette organisation',
+        });
+      }
+
+      if (
+        typeof slug !== 'string' ||
+        !/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(slug)
+      ) {
+        return res.status(400).json({
+          error: 'Slug invalide. Utilisez a-z, 0-9 et tirets (pas en début/fin).',
+        });
+      }
+
+      if (slug.length < 3 || slug.length > 48) {
+        return res.status(400).json({
+          error: 'Le slug doit contenir entre 3 et 48 caractères.',
+        });
+      }
+
+      const RESERVED_SLUGS = [
+        'dashboard', 'flotte', 'admin', 'login', 'register',
+        'api', 'public', 'fleet', 'coop', 'suivi',
+        'urbain-login', 'interurbain-login', 'fleet-login', 'coop-login',
+      ];
+
+      if (RESERVED_SLUGS.includes(slug)) {
+        return res.status(400).json({
+          error: 'Ce slug est réservé par le système.',
+        });
+      }
+
+      const existing = await prisma.organization.findUnique({
+        where: { slug },
+        select: { id: true },
+      });
+
+      if (existing && existing.id !== organizationId) {
+        return res.status(409).json({
+          error: 'Ce slug est déjà utilisé par une autre organisation.',
+        });
+      }
+
+      const updated = await prisma.organization.update({
+        where: { id: organizationId },
+        data: { slug },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          type: true,
+          landingEnabled: true,
+        },
+      });
+
+      res.json(updated);
+    } catch (error) {
+      console.error('PUT /organizations/:id/slug:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+);
+
+// =========================================================
 // GET /api/organizations/:id/config
 // Configuration V2 complète (BusinessActivity → Services → Tariffs)
 //
