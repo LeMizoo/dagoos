@@ -108,6 +108,7 @@ model Driver {
   dossier       DriverDossier?
 
   operations Operation[]
+  versements Versement[]
 }
 
 // ========================================
@@ -425,6 +426,7 @@ model Payment {
 model Versement {
   id            String    @id @default(cuid())
   driverId      String
+  driver        Driver    @relation(fields: [driverId], references: [id])
   amount        Float
   periode       String // format: YYYY-MM
   status        String    @default("en_attente")
