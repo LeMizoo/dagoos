@@ -322,3 +322,11 @@ pages admin affichent `-` au lieu du nom. Pour les réactiver, il faut
 ajouter la relation dans le schéma Prisma (chantier dédié avec
 migration DB).
 
+### Bug P8-B — colonnes Chauffeur/Code vides dans /flotte/versements
+
+Dette introduite par le hotfix 46e74783 (retrait de l'include driver
+suite à un 500). Les colonnes "Chauffeur" et "Code" affichent `-`.
+
+À résoudre par l'ajout de la relation Prisma Versement.driver
+(chantier dédié, migration DB requise).
+
