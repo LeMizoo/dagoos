@@ -5,7 +5,7 @@
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#F59E0B">
+  <meta name="theme-color" content="#D99A00">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -20,8 +20,8 @@
     html { -webkit-text-size-adjust: 100%; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #1A1A2E;
-      color: #FFFFFF;
+      background: #F7F8FA;
+      color: #1E293B;
       min-height: 100vh;
       min-height: 100dvh;
       -webkit-font-smoothing: antialiased;
@@ -38,19 +38,19 @@
     }
     .nav-bottom {
       position: fixed; bottom: 0; left: 0; right: 0;
-      background: #252540; border-top: 1px solid rgba(245,158,11,0.2);
+      background: #FFFFFF; border-top: 1px solid rgba(245,158,11,0.2);
       display: flex; justify-content: space-around;
       padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
       z-index: 100;
     }
     .nav-bottom button {
-      background: none; border: none; color: #94A3B8; font-size: 11px;
+      background: none; border: none; color: #64748B; font-size: 11px;
       cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;
       padding: 8px 12px;
       min-height: 48px;
       -webkit-tap-highlight-color: transparent;
     }
-    .nav-bottom button.active { color: #F59E0B; }
+    .nav-bottom button.active { color: #D99A00; }
 
     /* Boutons tactiles */
     button, input, select, textarea {
@@ -68,7 +68,7 @@
     /* Scrollbar discrète */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 2px; }
 
     /* Media queries pour petits écrans */
     @media (max-width: 360px) {

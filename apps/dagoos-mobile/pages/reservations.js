@@ -21,14 +21,14 @@ var passagers = {};
 function init_reservations() {
   var app = document.getElementById('app');
   app.innerHTML = `
-    <div style="background:#252540;padding:16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;border-bottom:1px solid rgba(245,158,11,0.2);">
+    <div style="background:#FFFFFF;padding:16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;border-bottom:1px solid rgba(245,158,11,0.2);">
       <i data-lucide="bus" style="font-size:22px;"></i>
-      <div style="font-size:16px;font-weight:800;color:#F59E0B;">Départs inter-urbains</div>
+      <div style="font-size:16px;font-weight:800;color:#D99A00;">Départs inter-urbains</div>
     </div>
     <div style="padding:16px;">
       <div id="departList" style="margin-bottom:16px;"></div>
-      <button onclick="chargerDeparts()" style="width:100%;padding:14px;background:#F59E0B;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;"><i data-lucide="refresh-cw" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Actualiser</button>
-      <button onclick="afficherGestion()" style="width:100%;margin-top:8px;padding:14px;background:#1E293B;color:#94A3B8;border:1px solid #333;border-radius:8px;font-weight:600;cursor:pointer;"><i data-lucide="clipboard-list" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Gérer ma réservation (OTP)</button>
+      <button onclick="chargerDeparts()" style="width:100%;padding:14px;background:#D99A00;color:#F7F8FA;border:none;border-radius:8px;font-weight:700;cursor:pointer;"><i data-lucide="refresh-cw" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Actualiser</button>
+      <button onclick="afficherGestion()" style="width:100%;margin-top:8px;padding:14px;background:#F1F5F9;color:#64748B;border:1px solid #E2E8F0;border-radius:8px;font-weight:600;cursor:pointer;"><i data-lucide="clipboard-list" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Gérer ma réservation (OTP)</button>
       <div id="gestionContainer" style="margin-top:12px;"></div>
     </div>
   `;
@@ -39,7 +39,7 @@ async function chargerDeparts() {
   var container = document.getElementById('departList');
   if (!container) return;
 
-  container.innerHTML = '<div style="text-align:center;padding:30px;color:#94A3B8;">Chargement des départs...</div>';
+  container.innerHTML = '<div style="text-align:center;padding:30px;color:#64748B;">Chargement des départs...</div>';
 
   try {
     var result = await apiGet('/public/organizations');
@@ -67,7 +67,7 @@ async function chargerDeparts() {
     });
 
     if (departs.length === 0) {
-      container.innerHTML = '<div style="text-align:center;padding:30px;color:#94A3B8;">Aucun départ disponible</div>';
+      container.innerHTML = '<div style="text-align:center;padding:30px;color:#64748B;">Aucun départ disponible</div>';
       return;
     }
 
@@ -78,7 +78,7 @@ async function chargerDeparts() {
       var placesDisponibles = depart.placesTotal - placesReservees.length;
 
       var card = document.createElement('div');
-      card.style.cssText = 'background:#252540;border-radius:12px;padding:16px;' +
+      card.style.cssText = 'background:#FFFFFF;border-radius:12px;padding:16px;' +
         'margin-bottom:10px;border:1px solid rgba(245,158,11,0.2);';
 
       var row1 = document.createElement('div');
@@ -90,7 +90,7 @@ async function chargerDeparts() {
       trajet.textContent = depart.pointDepart + ' \u2192 ' + depart.destination;
 
       var orgBadge = document.createElement('span');
-      orgBadge.style.cssText = 'background:rgba(245,158,11,0.15);color:#F59E0B;' +
+      orgBadge.style.cssText = 'background:rgba(245,158,11,0.15);color:#D99A00;' +
         'padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;';
       orgBadge.textContent = depart.organization || '';
 
@@ -100,7 +100,7 @@ async function chargerDeparts() {
 
       var row2 = document.createElement('div');
       row2.style.cssText = 'display:flex;gap:16px;font-size:11px;' +
-        'color:#94A3B8;margin-bottom:8px;';
+        'color:#64748B;margin-bottom:8px;';
 
       var dateSpan = document.createElement('span');
       dateSpan.textContent = new Date(depart.date).toLocaleDateString('fr-FR');
@@ -120,13 +120,13 @@ async function chargerDeparts() {
       row3.style.cssText = 'display:flex;justify-content:space-between;align-items:center;';
 
       var prix = document.createElement('div');
-      prix.style.cssText = 'font-size:18px;font-weight:800;color:#F59E0B;';
+      prix.style.cssText = 'font-size:18px;font-weight:800;color:#D99A00;';
       prix.textContent = Number(depart.prix || 0).toLocaleString('fr-FR') + ' Ar';
 
       var btnReserver = document.createElement('button');
       btnReserver.textContent = 'R\u00e9server';
-      btnReserver.style.cssText = 'padding:10px 16px;background:#F59E0B;' +
-        'color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;';
+      btnReserver.style.cssText = 'padding:10px 16px;background:#D99A00;' +
+        'color:#F7F8FA;border:none;border-radius:8px;font-weight:700;cursor:pointer;';
       btnReserver.addEventListener('click', function() {
         selectionnerDepart(depart.id);
       });
@@ -138,7 +138,7 @@ async function chargerDeparts() {
       container.appendChild(card);
     });
   } catch(e) {
-    container.innerHTML = '<div style="text-align:center;padding:30px;color:#E74C3C;">Erreur de chargement</div>';
+    container.innerHTML = '<div style="text-align:center;padding:30px;color:#DC2626;">Erreur de chargement</div>';
   }
 }
 
@@ -182,17 +182,17 @@ function afficherFormulaireReservation(depart) {
   // Chauffeur
   gridHtml += `
     <div style="text-align:center;margin-bottom:12px;">
-      <span style="font-size:12px;color:#94A3B8;">🧑‍✈️ Conducteur</span>
+      <span style="font-size:12px;color:#64748B;">🧑‍✈️ Conducteur</span>
     </div>
   `;
 
   // Fonction pour générer un bouton place avec label formaté
   function boutonPlace(label, estReservee, estSelectionnee) {
-    var bg = estReservee ? '#EF4444' : estSelectionnee ? '#3B82F6' : '#1A1A2E';
+    var bg = estReservee ? '#DC2626' : estSelectionnee ? '#2563EB' : '#F7F8FA';
     var color = estReservee ? '#fff' : estSelectionnee ? '#fff' : '#fff';
     var cursor = estReservee ? 'not-allowed' : 'pointer';
     return `
-      <button data-place="${label}" style="width:44px;height:44px;border-radius:8px;border:1px solid #333;background:${bg};color:${color};font-size:11px;font-weight:700;cursor:${cursor};">${label}</button>
+      <button data-place="${label}" style="width:44px;height:44px;border-radius:8px;border:1px solid #E2E8F0;background:${bg};color:${color};font-size:11px;font-weight:700;cursor:${cursor};">${label}</button>
     `;
   }
 
@@ -208,7 +208,7 @@ function afficherFormulaireReservation(depart) {
   // Rangée 1 : Conducteur + 1A 1B
   gridHtml += `
     <div style="display:flex;justify-content:center;gap:8px;margin-bottom:8px;">
-      <span style="font-size:12px;color:#94A3B8;display:flex;align-items:center;">🧑‍✈️</span>
+      <span style="font-size:12px;color:#64748B;display:flex;align-items:center;">🧑‍✈️</span>
       ${boutonPlace('1A', placesReservees.indexOf('1A') !== -1, selectedPlaces.indexOf('1A') !== -1)}
       ${boutonPlace('1B', placesReservees.indexOf('1B') !== -1, selectedPlaces.indexOf('1B') !== -1)}
     </div>
@@ -251,14 +251,14 @@ function afficherFormulaireReservation(depart) {
   }
 
   container.innerHTML = `
-    <div style="background:#252540;border-radius:14px;padding:16px;border:1px solid #F59E0B;">
-      <button onclick="chargerDeparts()" style="background:none;border:none;color:#94A3B8;font-size:12px;cursor:pointer;margin-bottom:12px;"><i data-lucide="arrow-left" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Retour aux départs</button>
+    <div style="background:#FFFFFF;border-radius:14px;padding:16px;border:1px solid #D99A00;">
+      <button onclick="chargerDeparts()" style="background:none;border:none;color:#64748B;font-size:12px;cursor:pointer;margin-bottom:12px;"><i data-lucide="arrow-left" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Retour aux départs</button>
 
-      <h3 style="font-size:18px;font-weight:800;color:#F59E0B;margin-bottom:8px;text-align:center;">1. Choisissez vos places</h3>
+      <h3 style="font-size:18px;font-weight:800;color:#D99A00;margin-bottom:8px;text-align:center;">1. Choisissez vos places</h3>
 
       <div style="text-align:center;margin-bottom:16px;">
-        <p style="font-size:12px;color:#94A3B8;margin-bottom:4px;">${depart.pointDepart} → ${depart.destination}</p>
-        <p style="font-size:11px;color:#94A3B8;"><i data-lucide="calendar" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> ${new Date(depart.date).toLocaleDateString('fr-FR')} à ${depart.heure || '--:--'}</p>
+        <p style="font-size:12px;color:#64748B;margin-bottom:4px;">${depart.pointDepart} → ${depart.destination}</p>
+        <p style="font-size:11px;color:#64748B;"><i data-lucide="calendar" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> ${new Date(depart.date).toLocaleDateString('fr-FR')} à ${depart.heure || '--:--'}</p>
       </div>
 
       <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:2px;margin-bottom:16px;">
@@ -266,38 +266,38 @@ function afficherFormulaireReservation(depart) {
       </div>
 
       <div style="display:flex;justify-content:center;gap:16px;font-size:11px;margin-bottom:16px;">
-        <span style="color:#22C55E;">● ${placesDisponibles} disponible(s)</span>
-        <span style="color:#EF4444;">● ${placesReservees.length} réservée(s)</span>
-        <span style="color:#3B82F6;">● ${selectedPlaces.length} sélectionnée(s)</span>
-        <span style="color:#EF4444;">● ${placesReservees.length} réservée(s)</span>
-        <span style="color:#3B82F6;">● ${selectedPlaces.length} sélectionnée(s)</span>
+        <span style="color:#16A34A;">● ${placesDisponibles} disponible(s)</span>
+        <span style="color:#DC2626;">● ${placesReservees.length} réservée(s)</span>
+        <span style="color:#2563EB;">● ${selectedPlaces.length} sélectionnée(s)</span>
+        <span style="color:#DC2626;">● ${placesReservees.length} réservée(s)</span>
+        <span style="color:#2563EB;">● ${selectedPlaces.length} sélectionnée(s)</span>
       </div>
 
-      <h3 style="font-size:16px;font-weight:800;color:#F59E0B;margin-bottom:12px;text-align:center;">2. Informations passagers</h3>
+      <h3 style="font-size:16px;font-weight:800;color:#D99A00;margin-bottom:12px;text-align:center;">2. Informations passagers</h3>
 
       <div id="passagersForm">
-        ${selectedPlaces.length === 0 ? '<p style="text-align:center;color:#94A3B8;font-size:12px;">Sélectionnez des places ci-dessus</p>' : ''}
+        ${selectedPlaces.length === 0 ? '<p style="text-align:center;color:#64748B;font-size:12px;">Sélectionnez des places ci-dessus</p>' : ''}
         ${selectedPlaces.map(function(place) {
           return `
             <div style="margin-bottom:8px;">
-              <label style="font-size:11px;color:#94A3B8;display:block;margin-bottom:4px;">Place ${place} — Nom du passager</label>
-              <input id="passager_${place}" data-place="${place}" placeholder="Nom du passager place ${place}" value="${escapeHtmlLocal(passagers[place])}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;">
+              <label style="font-size:11px;color:#64748B;display:block;margin-bottom:4px;">Place ${place} — Nom du passager</label>
+              <input id="passager_${place}" data-place="${place}" placeholder="Nom du passager place ${place}" value="${escapeHtmlLocal(passagers[place])}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;">
             </div>
           `;
         }).join('')}
       </div>
 
       <div style="margin-bottom:8px;">
-        <label style="font-size:11px;color:#94A3B8;display:block;margin-bottom:4px;">Votre téléphone</label>
-        <input id="resTel" type="tel" placeholder="Téléphone" value="${escapeHtmlLocal(getPassengerInfo().phone)}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;">
+        <label style="font-size:11px;color:#64748B;display:block;margin-bottom:4px;">Votre téléphone</label>
+        <input id="resTel" type="tel" placeholder="Téléphone" value="${escapeHtmlLocal(getPassengerInfo().phone)}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;">
       </div>
 
       <div style="margin-bottom:12px;">
-        <label style="font-size:11px;color:#94A3B8;display:block;margin-bottom:4px;">Référence de paiement (optionnel)</label>
-        <input id="resPaiementRef" placeholder="Référence paiement" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;">
+        <label style="font-size:11px;color:#64748B;display:block;margin-bottom:4px;">Référence de paiement (optionnel)</label>
+        <input id="resPaiementRef" placeholder="Référence paiement" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;">
       </div>
 
-      <button onclick="confirmerReservation()" style="width:100%;padding:14px;background:#F59E0B;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;"><i data-lucide="save" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Enregistrer la réservation (${selectedPlaces.length} place(s))</button>
+      <button onclick="confirmerReservation()" style="width:100%;padding:14px;background:#D99A00;color:#F7F8FA;border:none;border-radius:8px;font-weight:700;cursor:pointer;"><i data-lucide="save" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Enregistrer la réservation (${selectedPlaces.length} place(s))</button>
     </div>
   `;
 
@@ -408,14 +408,14 @@ function afficherGestion() {
   }
 
   container.innerHTML = `
-    <div style="background:#252540;border-radius:14px;padding:16px;border:1px solid #333;">
-      <h3 style="font-size:16px;font-weight:800;color:#F59E0B;margin-bottom:12px;text-align:center;"><i data-lucide="clipboard-list" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Gérer ma réservation</h3>
+    <div style="background:#FFFFFF;border-radius:14px;padding:16px;border:1px solid #E2E8F0;">
+      <h3 style="font-size:16px;font-weight:800;color:#D99A00;margin-bottom:12px;text-align:center;"><i data-lucide="clipboard-list" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Gérer ma réservation</h3>
 
-      <input id="manageTel" placeholder="Téléphone" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
-      <input id="manageNom" placeholder="Nom du passager" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
-      <input id="manageOtp" placeholder="Code OTP" value="${localStorage.getItem('dagoos_mobile_last_otp') || ''}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:12px;">
+      <input id="manageTel" placeholder="Téléphone" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;margin-bottom:8px;">
+      <input id="manageNom" placeholder="Nom du passager" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;margin-bottom:8px;">
+      <input id="manageOtp" placeholder="Code OTP" value="${localStorage.getItem('dagoos_mobile_last_otp') || ''}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;margin-bottom:12px;">
 
-      <button onclick="gererReservation()" style="width:100%;padding:14px;background:#F59E0B;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;">Vérifier</button>
+      <button onclick="gererReservation()" style="width:100%;padding:14px;background:#D99A00;color:#F7F8FA;border:none;border-radius:8px;font-weight:700;cursor:pointer;">Vérifier</button>
 
       <div id="manageResult" style="margin-top:12px;"></div>
     </div>
@@ -441,14 +441,14 @@ async function gererReservation() {
     });
 
     if (result && result.reservations) {
-      var html = '<h4 style="font-size:14px;font-weight:700;color:#F59E0B;margin-bottom:8px;">Vos réservations</h4>';
+      var html = '<h4 style="font-size:14px;font-weight:700;color:#D99A00;margin-bottom:8px;">Vos réservations</h4>';
       result.reservations.forEach(function(r) {
         html += `
-          <div style="background:#1A1A2E;border-radius:8px;padding:12px;margin-bottom:8px;border:1px solid #333;">
+          <div style="background:#F7F8FA;border-radius:8px;padding:12px;margin-bottom:8px;border:1px solid #E2E8F0;">
             <p style="font-size:13px;font-weight:600;color:#fff;margin-bottom:4px;">${r.depart?.pointDepart || ''} → ${r.depart?.destination || ''}</p>
-            <p style="font-size:11px;color:#94A3B8;margin-bottom:4px;"><i data-lucide="calendar" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> ${r.depart ? new Date(r.depart.date).toLocaleDateString('fr-FR') : ''} à ${r.depart?.heure || '--:--'}</p>
-            <p style="font-size:11px;color:#94A3B8;margin-bottom:4px;"><i data-lucide="armchair" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Place : ${r.place || '-'}</p>
-            <p style="font-size:11px;color:#94A3B8;">Statut : ${r.statut || '-'}</p>
+            <p style="font-size:11px;color:#64748B;margin-bottom:4px;"><i data-lucide="calendar" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> ${r.depart ? new Date(r.depart.date).toLocaleDateString('fr-FR') : ''} à ${r.depart?.heure || '--:--'}</p>
+            <p style="font-size:11px;color:#64748B;margin-bottom:4px;"><i data-lucide="armchair" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Place : ${r.place || '-'}</p>
+            <p style="font-size:11px;color:#64748B;">Statut : ${r.statut || '-'}</p>
           </div>
         `;
       });
@@ -456,14 +456,14 @@ async function gererReservation() {
     } else if (result && result.error) {
       resultContainer.innerHTML = '';
       var errP = document.createElement('p');
-      errP.style.cssText = 'text-align:center;color:#EF4444;font-size:12px;';
+      errP.style.cssText = 'text-align:center;color:#DC2626;font-size:12px;';
       errP.textContent = result.error || 'Erreur';
       resultContainer.appendChild(errP);
     } else {
-      resultContainer.innerHTML = '<p style="text-align:center;color:#94A3B8;font-size:12px;">Aucune réservation trouvée</p>';
+      resultContainer.innerHTML = '<p style="text-align:center;color:#64748B;font-size:12px;">Aucune réservation trouvée</p>';
     }
   } catch(e) {
-    resultContainer.innerHTML = '<p style="text-align:center;color:#EF4444;font-size:12px;">Erreur réseau</p>';
+    resultContainer.innerHTML = '<p style="text-align:center;color:#DC2626;font-size:12px;">Erreur réseau</p>';
   }
 }
 

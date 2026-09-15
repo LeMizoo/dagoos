@@ -41,27 +41,27 @@ function init_course() {
 
   var app = document.getElementById('app');
   app.innerHTML = `
-    <div style="background:#252540;padding:16px;display:flex;align-items:center;gap:12px;">
+    <div style="background:#FFFFFF;padding:16px;display:flex;align-items:center;gap:12px;">
       <i data-lucide="car" style="font-size:22px;"></i>
-      <div style="font-size:16px;font-weight:800;color:#F59E0B;">Demander un taxi</div>
+      <div style="font-size:16px;font-weight:800;color:#D99A00;">Demander un taxi</div>
     </div>
     <div style="padding:16px;">
-      <p style="text-align:center;color:#94A3B8;font-size:12px;margin-bottom:12px;">Choisissez comment vous voulez être mis en relation</p>
+      <p style="text-align:center;color:#64748B;font-size:12px;margin-bottom:12px;">Choisissez comment vous voulez être mis en relation</p>
 
       <!-- Mode de mise en relation -->
       <div style="display:flex;gap:8px;margin-bottom:16px;justify-content:center;">
-        <button id="btnChoisir" onclick="setMode('choisir')" style="padding:8px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid #F59E0B;background:#F59E0B;color:#1A1A2E;cursor:pointer;">Choisir une flotte</button>
-        <button id="btnToutes" onclick="setMode('toutes')" style="padding:8px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid #F59E0B;background:#252540;color:#F59E0B;cursor:pointer;">Toutes les flottes</button>
-        <button id="btnProche" onclick="setMode('proche')" style="padding:8px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid #F59E0B;background:#252540;color:#F59E0B;cursor:pointer;">La plus proche</button>
+        <button id="btnChoisir" onclick="setMode('choisir')" style="padding:8px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid #D99A00;background:#D99A00;color:#F7F8FA;cursor:pointer;">Choisir une flotte</button>
+        <button id="btnToutes" onclick="setMode('toutes')" style="padding:8px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid #D99A00;background:#FFFFFF;color:#D99A00;cursor:pointer;">Toutes les flottes</button>
+        <button id="btnProche" onclick="setMode('proche')" style="padding:8px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid #D99A00;background:#FFFFFF;color:#D99A00;cursor:pointer;">La plus proche</button>
       </div>
 
-      <div style="background:#252540;border-radius:14px;padding:16px;">
-        <input id="clientNom" placeholder="Votre nom" value="${escapeHtmlLocal(info.name)}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
-        <input id="clientTel" placeholder="Votre téléphone" value="${escapeHtmlLocal(info.phone)}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
-        <input id="depart" placeholder="Adresse de départ" value="${escapeHtmlLocal(depart)}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
-        <input id="arrivee" placeholder="Adresse d'arrivée" value="${escapeHtmlLocal(arrivee)}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
+      <div style="background:#FFFFFF;border-radius:14px;padding:16px;">
+        <input id="clientNom" placeholder="Votre nom" value="${escapeHtmlLocal(info.name)}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;margin-bottom:8px;">
+        <input id="clientTel" placeholder="Votre téléphone" value="${escapeHtmlLocal(info.phone)}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;margin-bottom:8px;">
+        <input id="depart" placeholder="Adresse de départ" value="${escapeHtmlLocal(depart)}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;margin-bottom:8px;">
+        <input id="arrivee" placeholder="Adresse d'arrivée" value="${escapeHtmlLocal(arrivee)}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;margin-bottom:8px;">
 
-        <select id="typeVehicule" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;">
+        <select id="typeVehicule" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;margin-bottom:8px;">
           <option value="moto"><i data-lucide="bike" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Taxi moto</option>
           <option value="voiture"><i data-lucide="car" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Taxi voiture</option>
         </select>
@@ -70,7 +70,7 @@ function init_course() {
         <div id="positionContainer" style="margin-bottom:8px;"></div>
         <div id="estimationResult" style="margin-top:12px;"></div>
 
-        <button id="btnSubmit" onclick="envoyerDemande()" style="width:100%;padding:14px;background:#F59E0B;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;margin-top:12px;">Demander un taxi</button>
+        <button id="btnSubmit" onclick="envoyerDemande()" style="width:100%;padding:14px;background:#D99A00;color:#F7F8FA;border:none;border-radius:8px;font-weight:700;cursor:pointer;margin-top:12px;">Demander un taxi</button>
       </div>
     </div>
   `;
@@ -94,16 +94,16 @@ function updateUI() {
   // Mettre à jour les boutons
   [btnChoisir, btnToutes, btnProche].forEach(function(btn) {
     if (btn) {
-      btn.style.background = '#252540';
-      btn.style.color = '#F59E0B';
-      btn.style.border = '1px solid #F59E0B';
+      btn.style.background = '#FFFFFF';
+      btn.style.color = '#D99A00';
+      btn.style.border = '1px solid #D99A00';
     }
   });
 
   var btnActif = mode === 'choisir' ? btnChoisir : mode === 'toutes' ? btnToutes : btnProche;
   if (btnActif) {
-    btnActif.style.background = '#F59E0B';
-    btnActif.style.color = '#1A1A2E';
+    btnActif.style.background = '#D99A00';
+    btnActif.style.color = '#F7F8FA';
   }
 
   // Afficher le dropdown flotte si mode = choisir
@@ -114,10 +114,10 @@ function updateUI() {
         optionsHtml += '<option value="' + escapeHtmlLocal(f.slug) + '">' + escapeHtmlLocal(f.name) + '</option>';
       });
       flotteContainer.innerHTML = `
-        <select id="flotte" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;margin-bottom:8px;" onchange="localStorage.setItem('dagoos_selected_fleet_slug', this.value); chargerBrandingOrganisation(this.value); estimerPrix()">
+        <select id="flotte" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;margin-bottom:8px;" onchange="localStorage.setItem('dagoos_selected_fleet_slug', this.value); chargerBrandingOrganisation(this.value); estimerPrix()">
           ${optionsHtml}
         </select>
-        <p style="text-align:center;color:#94A3B8;font-size:11px;margin-bottom:8px;"><i data-lucide="lightbulb" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Choisissez une flotte puis saisissez départ et arrivée pour voir l'estimation</p>
+        <p style="text-align:center;color:#64748B;font-size:11px;margin-bottom:8px;"><i data-lucide="lightbulb" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Choisissez une flotte puis saisissez départ et arrivée pour voir l'estimation</p>
       `;
     } else {
       flotteContainer.innerHTML = '';
@@ -128,7 +128,7 @@ function updateUI() {
   if (positionContainer) {
     if (mode === 'proche') {
       positionContainer.innerHTML = `
-        <button onclick="detecterPosition()" type="button" style="width:100%;padding:10px;background:#1E293B;color:#94A3B8;border:1px solid #333;border-radius:8px;font-size:12px;cursor:pointer;"><i data-lucide="map-pin" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Détecter ma position</button>
+        <button onclick="detecterPosition()" type="button" style="width:100%;padding:10px;background:#F1F5F9;color:#64748B;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;cursor:pointer;"><i data-lucide="map-pin" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Détecter ma position</button>
         <div id="posDetectee"></div>
       `;
     } else {
@@ -159,7 +159,7 @@ function detecterPosition() {
         }
         var posDiv = document.getElementById('posDetectee');
         if (posDiv) {
-          posDiv.innerHTML = '<p style="text-align:center;color:#22C55E;font-size:12px;margin-top:8px;"><i data-lucide="check-circle" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Position détectée : ' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4) + '</p>';
+          posDiv.innerHTML = '<p style="text-align:center;color:#16A34A;font-size:12px;margin-top:8px;"><i data-lucide="check-circle" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Position détectée : ' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4) + '</p>';
         }
         estimerPrix();
       },
@@ -205,14 +205,14 @@ async function estimerPrix() {
 
     if (result && result.prixEstime && container) {
       container.innerHTML = `
-        <div style="background:#1E293B;border-radius:12px;padding:16px;border:1px solid #F59E0B;">
-          <p style="text-align:center;color:#F59E0B;font-size:13px;font-weight:600;">Estimation</p>
-          <div style="font-size:11px;color:#94A3B8;">Distance approximative</div>
-          <div style="font-size:22px;font-weight:800;color:#F59E0B;">${result.distanceKm} km</div>
-          <div style="font-size:11px;color:#94A3B8;margin-top:8px;">Prix de la course</div>
-          <div style="font-size:26px;font-weight:800;color:#F59E0B;">${Number(result.prixEstime).toLocaleString('fr-FR')} Ar</div>
-          <input id="offreClient" type="number" placeholder="Votre offre (Ar)" min="0" style="width:100%;margin-top:8px;padding:12px;border-radius:8px;border:1px solid #333;background:#1A1A2E;color:#fff;text-align:center;">
-          <p style="text-align:center;color:#94A3B8;font-size:10px;margin-top:4px;"><i data-lucide="lightbulb" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Proposez votre prix — le chauffeur accepte ou refuse</p>
+        <div style="background:#F1F5F9;border-radius:12px;padding:16px;border:1px solid #D99A00;">
+          <p style="text-align:center;color:#D99A00;font-size:13px;font-weight:600;">Estimation</p>
+          <div style="font-size:11px;color:#64748B;">Distance approximative</div>
+          <div style="font-size:22px;font-weight:800;color:#D99A00;">${result.distanceKm} km</div>
+          <div style="font-size:11px;color:#64748B;margin-top:8px;">Prix de la course</div>
+          <div style="font-size:26px;font-weight:800;color:#D99A00;">${Number(result.prixEstime).toLocaleString('fr-FR')} Ar</div>
+          <input id="offreClient" type="number" placeholder="Votre offre (Ar)" min="0" style="width:100%;margin-top:8px;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;text-align:center;">
+          <p style="text-align:center;color:#64748B;font-size:10px;margin-top:4px;"><i data-lucide="lightbulb" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Proposez votre prix — le chauffeur accepte ou refuse</p>
         </div>
       `;
     }

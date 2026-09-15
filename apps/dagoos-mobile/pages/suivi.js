@@ -19,14 +19,14 @@ function init_suivi() {
 
   var app = document.getElementById('app');
   app.innerHTML = `
-    <div style="background:#252540;padding:16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;border-bottom:1px solid rgba(245,158,11,0.2);">
+    <div style="background:#FFFFFF;padding:16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;border-bottom:1px solid rgba(245,158,11,0.2);">
       <i data-lucide="clipboard-list" style="font-size:22px;"></i>
-      <div style="font-size:16px;font-weight:800;color:#F59E0B;">Suivi de demande</div>
+      <div style="font-size:16px;font-weight:800;color:#D99A00;">Suivi de demande</div>
     </div>
     <div style="padding:16px;">
-      <div style="background:#252540;border-radius:12px;padding:16px;">
-        <input id="codeSuivi" placeholder="Entrez votre code (ex: DG-XXXX)" value="${lastCode}" style="width:100%;padding:14px;border-radius:8px;border:1px solid #F59E0B;background:#1A1A2E;color:#F59E0B;font-size:16px;text-align:center;margin-bottom:12px;text-transform:uppercase;">
-        <button onclick="suivre()" style="width:100%;padding:14px;background:#F59E0B;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;"><i data-lucide="search" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Rechercher</button>
+      <div style="background:#FFFFFF;border-radius:12px;padding:16px;">
+        <input id="codeSuivi" placeholder="Entrez votre code (ex: DG-XXXX)" value="${lastCode}" style="width:100%;padding:14px;border-radius:8px;border:1px solid #D99A00;background:#F7F8FA;color:#D99A00;font-size:16px;text-align:center;margin-bottom:12px;text-transform:uppercase;">
+        <button onclick="suivre()" style="width:100%;padding:14px;background:#D99A00;color:#F7F8FA;border:none;border-radius:8px;font-weight:700;cursor:pointer;"><i data-lucide="search" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Rechercher</button>
       </div>
       <div id="suiviResult" style="margin-top:12px;"></div>
     </div>
@@ -41,7 +41,7 @@ async function suivre() {
   localStorage.setItem('dagoos_mobile_last_code', code);
 
   var container = document.getElementById('suiviResult');
-  container.innerHTML = '<div style="text-align:center;padding:20px;color:#94A3B8;">Recherche...</div>';
+  container.innerHTML = '<div style="text-align:center;padding:20px;color:#64748B;">Recherche...</div>';
 
   try {
     var result = await apiGet('/public/suivi/' + code);
@@ -73,63 +73,63 @@ async function suivre() {
         'REJECTED': 'Refusée'
       };
 
-      var statutColor = result.statut === 'ACCEPTED' ? '#22C55E' : result.statut === 'REJECTED' ? '#EF4444' : '#F59E0B';
+      var statutColor = result.statut === 'ACCEPTED' ? '#16A34A' : result.statut === 'REJECTED' ? '#DC2626' : '#D99A00';
       var statutLabel = statutLabels[result.statut] || escapeHtmlLocal(result.statut);
       var statutMessage = statutMessages[result.statut] || '';
 
       container.innerHTML = `
-        <div style="background:#252540;border-radius:14px;padding:20px;border:1px solid rgba(245,158,11,0.3);">
+        <div style="background:#FFFFFF;border-radius:14px;padding:20px;border:1px solid rgba(245,158,11,0.3);">
           <div style="text-align:center;margin-bottom:16px;">
             <span style="font-size:50px;">${result.statut === 'ACCEPTED' ? '✅' : result.statut === 'REJECTED' ? '❌' : '⏳'}</span>
             <div style="font-size:20px;font-weight:800;margin-top:8px;color:${statutColor};">${statutLabel}</div>
-            ${statutMessage ? '<div style="font-size:12px;color:#94A3B8;margin-top:8px;line-height:1.5;">' + statutMessage + '</div>' : ''}
+            ${statutMessage ? '<div style="font-size:12px;color:#64748B;margin-top:8px;line-height:1.5;">' + statutMessage + '</div>' : ''}
           </div>
 
           <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:12px;">
-            <div style="font-size:11px;color:#94A3B8;">Client</div>
+            <div style="font-size:11px;color:#64748B;">Client</div>
             <div style="font-weight:600;margin-bottom:8px;">${escapeHtmlLocal(result.clientNom) || '-'}</div>
 
-            <div style="font-size:11px;color:#94A3B8;">Trajet</div>
+            <div style="font-size:11px;color:#64748B;">Trajet</div>
             <div style="font-weight:600;margin-bottom:8px;">${escapeHtmlLocal(result.depart) || '-'} → ${escapeHtmlLocal(result.arrivee) || '-'}</div>
 
             ${result.status === 'NEGOTIATION_REQUIRED' ? `
-              <div style="font-size:11px;color:#94A3B8;">Prix</div>
-              <div style="background:rgba(59,130,246,0.15);border:1px solid #3B82F6;border-radius:8px;padding:10px;margin-bottom:8px;">
-                <div style="font-weight:700;color:#3B82F6;font-size:13px;">💬 À négocier avec le transporteur</div>
-                <div style="font-size:11px;color:#94A3B8;margin-top:4px;line-height:1.4;">
+              <div style="font-size:11px;color:#64748B;">Prix</div>
+              <div style="background:rgba(59,130,246,0.15);border:1px solid #2563EB;border-radius:8px;padding:10px;margin-bottom:8px;">
+                <div style="font-weight:700;color:#2563EB;font-size:13px;">💬 À négocier avec le transporteur</div>
+                <div style="font-size:11px;color:#64748B;margin-top:4px;line-height:1.4;">
                   Le transporteur va vous proposer un prix personnalisé pour ce service.
                 </div>
               </div>
             ` : (result.price || result.prixEstime) ? `
-              <div style="font-size:11px;color:#94A3B8;">Prix estimé</div>
-              <div style="font-weight:600;margin-bottom:8px;color:#F59E0B;">${Number(result.price || result.prixEstime).toLocaleString('fr-FR')} Ar</div>
+              <div style="font-size:11px;color:#64748B;">Prix estimé</div>
+              <div style="font-weight:600;margin-bottom:8px;color:#D99A00;">${Number(result.price || result.prixEstime).toLocaleString('fr-FR')} Ar</div>
             ` : `
-              <div style="font-size:11px;color:#94A3B8;">Prix</div>
-              <div style="font-weight:600;margin-bottom:8px;color:#94A3B8;">En cours de calcul</div>
+              <div style="font-size:11px;color:#64748B;">Prix</div>
+              <div style="font-weight:600;margin-bottom:8px;color:#64748B;">En cours de calcul</div>
             `}
 
             ${result.offreClient ? `
-              <div style="font-size:11px;color:#94A3B8;">Votre offre</div>
-              <div style="font-weight:600;margin-bottom:8px;color:#22C55E;">${Number(result.offreClient).toLocaleString('fr-FR')} Ar</div>
+              <div style="font-size:11px;color:#64748B;">Votre offre</div>
+              <div style="font-weight:600;margin-bottom:8px;color:#16A34A;">${Number(result.offreClient).toLocaleString('fr-FR')} Ar</div>
             ` : ''}
 
             ${result.contreOffreChauffeur ? `
-              <div style="font-size:11px;color:#94A3B8;">Contre-offre chauffeur</div>
-              <div style="font-weight:600;margin-bottom:8px;color:#3B82F6;">${Number(result.contreOffreChauffeur).toLocaleString('fr-FR')} Ar</div>
+              <div style="font-size:11px;color:#64748B;">Contre-offre chauffeur</div>
+              <div style="font-weight:600;margin-bottom:8px;color:#2563EB;">${Number(result.contreOffreChauffeur).toLocaleString('fr-FR')} Ar</div>
             ` : ''}
 
             ${result.statutNegociation ? `
-              <div style="font-size:11px;color:#94A3B8;">Négociation</div>
+              <div style="font-size:11px;color:#64748B;">Négociation</div>
               <div style="font-weight:600;margin-bottom:8px;">${statutNegociationLabels[result.statutNegociation] || escapeHtmlLocal(result.statutNegociation)}</div>
             ` : ''}
           </div>
         </div>
       `;
     } else {
-      container.innerHTML = '<div style="text-align:center;padding:30px;color:#94A3B8;">Aucune demande trouvée avec ce code</div>';
+      container.innerHTML = '<div style="text-align:center;padding:30px;color:#64748B;">Aucune demande trouvée avec ce code</div>';
     }
   } catch(e) {
-    container.innerHTML = '<div style="text-align:center;padding:30px;color:#E74C3C;">Erreur de recherche</div>';
+    container.innerHTML = '<div style="text-align:center;padding:30px;color:#DC2626;">Erreur de recherche</div>';
   }
 }
 
