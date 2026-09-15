@@ -116,15 +116,6 @@
       <i data-lucide="bus" style="font-size:22px;"></i><span>Interurbain</span>
     </button>
 
-    <!-- SUIVI : visible uniquement si un code de suivi existe -->
-    <button
-      id="navSuivi"
-      data-page="suivi"
-      onclick="loadPage('suivi')"
-      style="display:none;"
-    >
-      <i data-lucide="clipboard-list" style="font-size:22px;"></i><span>Suivi</span>
-    </button>
   </nav>
   <script src="/js/router.js"></script>
   <script src="/js/api.js"></script>
@@ -133,32 +124,5 @@
   -->
   <script src="js/escape.js"></script>
   <script src="js/branding.js"></script>
-  <script>
-    // Afficher le bouton Suivi uniquement si un code existe
-    (function() {
-      function updateSuiviVisibility() {
-        var btnSuivi = document.getElementById('navSuivi');
-        var lastCode = localStorage.getItem('dagoos_mobile_last_code') ||
-                       localStorage.getItem('dagoos_mobile_last_otp');
-
-        if (btnSuivi) {
-          btnSuivi.style.display = lastCode ? 'flex' : 'none';
-        }
-      }
-
-      // Vérifier au chargement
-      updateSuiviVisibility();
-
-      // Vérifier après chaque navigation
-      var originalLoadPage = window.loadPage;
-      window.loadPage = function(pageName) {
-        updateSuiviVisibility();
-        return originalLoadPage.apply(this, arguments);
-      };
-
-      // Écouter les changements localStorage
-      window.addEventListener('storage', updateSuiviVisibility);
-    })();
-  </script>
 </body>
 </html>
