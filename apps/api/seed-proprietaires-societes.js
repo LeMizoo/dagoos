@@ -87,12 +87,12 @@ async function seed() {
 
     const config = societesData[org.name] || { activite: 'Transport', adresse: 'Madagascar' };
 
-    let societe = await prisma.societe.findFirst({
+    const societe = await prisma.societe.findFirst({
       where: { organizationId: org.id },
     });
 
     if (!societe) {
-      societe = await prisma.societe.create({
+      await prisma.societe.create({
         data: {
           organizationId: org.id,
           activite: config.activite,

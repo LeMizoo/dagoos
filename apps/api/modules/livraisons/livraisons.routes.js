@@ -97,7 +97,7 @@ router.get('/', authMiddleware, requirePermission('livraisons.read'), async (req
 /*
  * POST /api/livraisons
  *
- * La sociÃ©tÃ© doit appartenir Ã  l'organisation de l'utilisateur.
+ * La societe doit appartenir a l'organisation de l'utilisateur.
  */
 router.post('/', authMiddleware, requirePermission('livraisons.manage'), async (req, res) => {
   try {

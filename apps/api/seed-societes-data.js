@@ -34,12 +34,12 @@ async function seedSocietes() {
     if (!config) continue;
 
     // Créer la société
-    let societe = await prisma.societe.findFirst({
+    const societe = await prisma.societe.findFirst({
       where: { organizationId: coop.id, activite: config.activite },
     });
 
     if (!societe) {
-      societe = await prisma.societe.create({
+      await prisma.societe.create({
         data: {
           organizationId: coop.id,
           activite: config.activite,
