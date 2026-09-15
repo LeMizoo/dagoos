@@ -14,98 +14,131 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <title>Dagoo's Driver - Connexion</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#F1C40F">
+    <meta name="theme-color" content="#F7F8FA">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
+        :root {
+            /* Surfaces — échelle claire */
+            --bg-page:     #F7F8FA;
+            --bg-surface:  #FFFFFF;
+            --bg-soft:     #F1F5F9;
+            --bg-elevated: #E2E8F0;
+
+            /* Texte — hiérarchie par la lumière */
+            --text-primary:   #1E293B;
+            --text-secondary: #64748B;
+            --text-muted:     #94A3B8;
+            --text-on-accent: #FFFFFF;
+
+            /* Accent jaune fleet — réservé aux actions */
+            --accent:       #D99A00;
+            --accent-hover: #B8860B;
+            --accent-soft:  rgba(217, 154, 0, 0.10);
+
+            /* Bordures et ombres */
+            --border:        #E2E8F0;
+            --border-strong: #CBD5E1;
+            --shadow-soft:   0 1px 3px rgba(15, 23, 42, 0.06),
+                             0 8px 24px rgba(15, 23, 42, 0.06);
+
+            /* Messages */
+            --error-bg:   #FEF2F2;
+            --error-fg:   #DC2626;
+            --success-bg: #F0FDF4;
+            --success-fg: #16A34A;
+            --info-bg:    #EFF6FF;
+            --info-fg:    #2563EB;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #F1C40F 0%, #F39C12 50%, #E67E22 100%);
+            background: var(--bg-page);
             min-height: 100vh;
       min-height: 100dvh;
             display: flex; align-items: center; justify-content: center;
         }
         .login-container {
-            background: #1A1A2E; border-radius: 16px; padding: 40px 32px;
-            width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-            color: white;
+            background: var(--bg-surface); border-radius: 16px; padding: 40px 32px;
+            width: 100%; max-width: 420px; box-shadow: var(--shadow-soft);
+            color: var(--text-primary);
         }
         .login-header { text-align: center; margin-bottom: 28px; }
         .login-logo {
-            width: 56px; height: 56px; background: #F1C40F; border-radius: 50%;
+            width: 56px; height: 56px; background: var(--accent); border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 12px; font-size: 28px; color: #1A1A2E;
+            margin: 0 auto 12px; font-size: 28px; color: var(--text-on-accent);
         }
         .login-header h1 { font-size: 22px; margin-bottom: 4px; }
-        .login-header p { color: #AAA; font-size: 13px; }
+        .login-header p { color: var(--text-secondary); font-size: 13px; }
         .badge {
-            display: inline-block; background: #F1C40F; color: #1A1A2E;
+            display: inline-block; background: var(--accent); color: var(--text-on-accent);
             padding: 4px 10px; border-radius: 50px; font-size: 11px; font-weight: 600; margin-top: 6px;
         }
         .note {
-            text-align: center; margin-bottom: 20px; padding: 10px; background: #2C2C44;
-            border-radius: 8px; font-size: 12px; color: #AAA;
+            text-align: center; margin-bottom: 20px; padding: 10px; background: var(--bg-soft);
+            border-radius: 8px; font-size: 12px; color: var(--text-secondary);
         }
-        .note i { color: #F1C40F; }
+        .note i { color: var(--accent); }
         
         .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: #CCC; }
+        .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--text-primary); }
         .form-group select {
             width: 100%; padding: 12px;
-            border: 2px solid #333; background: #2C2C44; color: white;
+            border: 2px solid var(--border-strong); background: var(--bg-surface); color: var(--text-primary);
             border-radius: 8px; font-size: 15px; font-family: 'Inter', sans-serif;
         }
-        .form-group select:focus { outline: none; border-color: #F1C40F; }
-        .form-group select option { background: #2C2C44; color: white; }
+        .form-group select:focus { outline: none; border-color: var(--accent); }
+        .form-group select option { background: var(--bg-surface); color: var(--text-primary); }
         
         .code-input-group {
             display: flex; align-items: center; gap: 0;
-            border: 2px solid #333; border-radius: 8px; overflow: hidden;
+            border: 2px solid var(--border-strong); border-radius: 8px; overflow: hidden;
             transition: border-color 0.3s;
         }
-        .code-input-group:focus-within { border-color: #F1C40F; }
+        .code-input-group:focus-within { border-color: var(--accent); }
         .code-input-group .prefix {
-            background: #F1C40F; color: #1A1A2E; padding: 12px 14px;
+            background: var(--accent); color: var(--text-on-accent); padding: 12px 14px;
             font-weight: 700; font-size: 15px; white-space: nowrap;
         }
         .code-input-group input {
-            flex: 1; padding: 12px; border: none; background: #2C2C44; color: white;
+            flex: 1; padding: 12px; border: none; background: var(--bg-surface); color: var(--text-primary);
             font-size: 15px; font-family: 'Inter', sans-serif; outline: none;
         }
-        .code-input-group input::placeholder { color: #555; font-size: 13px; }
+        .code-input-group input::placeholder { color: var(--text-muted); font-size: 13px; }
         
         .pin-row { display: flex; gap: 8px; justify-content: center; }
         .pin-row input {
             width: 48px; height: 56px; text-align: center; font-size: 24px; font-weight: 700;
-            padding: 0; border: 2px solid #333; background: #2C2C44; color: #F1C40F;
+            padding: 0; border: 2px solid var(--border-strong); background: var(--bg-surface); color: var(--accent);
             border-radius: 8px;
         }
-        .pin-row input:focus { border-color: #F1C40F; outline: none; }
+        .pin-row input:focus { border-color: var(--accent); outline: none; }
         
         .btn-login {
-            width: 100%; padding: 14px; background: #F1C40F; color: #1A1A2E;
+            width: 100%; padding: 14px; background: var(--accent); color: var(--text-on-accent);
             border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
             cursor: pointer; transition: background 0.3s; font-family: 'Inter', sans-serif; margin-top: 20px;
         }
-        .btn-login:hover { background: #F39C12; }
-        .btn-login:disabled { background: #555; color: #999; cursor: not-allowed; }
+        .btn-login:hover { background: var(--accent-hover); }
+        .btn-login:disabled { background: var(--bg-elevated); color: var(--text-muted); cursor: not-allowed; }
         
         .message {
             text-align: center; margin-top: 12px; padding: 10px; border-radius: 8px;
             font-size: 13px; display: none;
         }
-        .message.error { background: #3B1111; color: #E74C3C; display: block; }
-        .message.success { background: #0B3D0B; color: #2ECC71; display: block; }
-        .message.info { background: #1A3D5C; color: #3498DB; display: block; }
+        .message.error { background: var(--error-bg); color: var(--error-fg); display: block; }
+        .message.success { background: var(--success-bg); color: var(--success-fg); display: block; }
+        .message.info { background: var(--info-bg); color: var(--info-fg); display: block; }
         
         .links { text-align: center; margin-top: 20px; }
-        .links a { color: #AAA; text-decoration: none; font-size: 13px; }
-        .links a:hover { color: #F1C40F; }
+        .links a { color: var(--text-secondary); text-decoration: none; font-size: 13px; }
+        .links a:hover { color: var(--accent); }
         
-        .code-hint { font-size: 11px; color: #777; margin-top: 4px; text-align: right; }
+        .code-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; text-align: right; }
         
         @media (max-width: 400px) {
             .login-container { padding: 28px 18px; }
@@ -212,10 +245,10 @@
                 var btnCoop = document.getElementById('btnCoop');
                 
                 if (type === 'FLEET') {
-                    btnFleet.style.background = '#DAA520';
-                    btnFleet.style.color = '#1A1A2E';
-                    btnCoop.style.background = '#1E293B';
-                    btnCoop.style.color = '#DAA520';
+                    btnFleet.style.background = 'var(--accent)';
+                    btnFleet.style.color = 'var(--text-on-accent)';
+                    btnCoop.style.background = 'var(--bg-soft)';
+                    btnCoop.style.color = 'var(--accent)';
                 } else {
                     btnCoop.style.background = '#DAA520';
                     btnCoop.style.color = '#1A1A2E';
@@ -230,11 +263,11 @@
         <!-- Type fixe : FLEET -->
         <div style="display:flex;gap:10px;margin-bottom:16px;" id="driverTypeSelector">
             <button type="button" style="display:none;" id="btnFleet" 
-                style="flex:1;padding:12px;background:#1E293B;border:2px solid #DAA520;border-radius:10px;color:#DAA520;font-weight:700;cursor:pointer;">
+                style="flex:1;padding:12px;background:var(--bg-soft);border:2px solid var(--accent);border-radius:10px;color:var(--accent);font-weight:700;cursor:pointer;">
                 🚛 Fleet
             </button>
             <button type="button" style="display:none;" id="btnCoop" 
-                style="flex:1;padding:12px;background:#1E293B;border:2px solid #DAA520;border-radius:10px;color:#DAA520;font-weight:700;cursor:pointer;">
+                style="flex:1;padding:12px;background:var(--bg-soft);border:2px solid var(--accent);border-radius:10px;color:var(--accent);font-weight:700;cursor:pointer;">
                 🏢 Coop
             </button>
         </div>
@@ -243,14 +276,14 @@
             
             <div class="form-group" id="codeSection">
                 <label>🔑 Votre code chauffeur</label>
-                <input type="text" id="driverCode" placeholder="Ex: FL-AL-001" required autocomplete="off" style="text-transform: uppercase; width: 100%; padding: 12px; font-size: 16px; text-align: center; letter-spacing: 2px; background: #1E293B; border: 2px solid #DAA520; border-radius: 10px; color: #DAA520;">
-                <div class="code-hint" id="codeHint" style="font-size: 11px; color: #888; margin-top: 5px; text-align: center;">Code fourni par votre flotte</div>
+                <input type="text" id="driverCode" placeholder="Ex: FL-AL-001" required autocomplete="off" style="text-transform: uppercase; width: 100%; padding: 12px; font-size: 16px; text-align: center; letter-spacing: 2px; background: var(--bg-surface); border: 2px solid var(--accent); border-radius: 10px; color: var(--text-primary);">
+                <div class="code-hint" id="codeHint" style="font-size: 11px; color: var(--text-muted); margin-top: 5px; text-align: center;">Code fourni par votre flotte</div>
             </div>
             <div class="form-group" id="savedCodeSection" style="display:none;">
                 <label>🚛 Chauffeur</label>
-                <div style="background:#1E293B;border:2px solid #DAA520;border-radius:10px;padding:12px;text-align:center;">
-                    <span id="savedCodeDisplay" style="color:#DAA520;font-size:16px;font-weight:700;letter-spacing:2px;"></span>
-                    <button type="button" onclick="showCodeInput()" style="background:none;border:none;color:#888;font-size:11px;cursor:pointer;text-decoration:underline;margin-left:8px;">Changer</button>
+                <div style="background:var(--bg-soft);border:2px solid var(--accent);border-radius:10px;padding:12px;text-align:center;">
+                    <span id="savedCodeDisplay" style="color:var(--accent);font-size:16px;font-weight:700;letter-spacing:2px;"></span>
+                    <button type="button" onclick="showCodeInput()" style="background:none;border:none;color:var(--text-muted);font-size:11px;cursor:pointer;text-decoration:underline;margin-left:8px;">Changer</button>
                 </div>
             </div>
             
