@@ -25,6 +25,11 @@ window.loadPage = async function(pageName) {
   var container = document.getElementById('app');
   if (!container) { console.warn('Pas de conteneur'); return; }
 
+  // Supprimer le branding d'une organisation lors d'un changement de page.
+  // Il sera recréé uniquement lorsqu'une organisation est explicitement sélectionnée.
+  var orgBranding = document.getElementById('dagoo-org-branding');
+  if (orgBranding) orgBranding.remove();
+
   document.querySelectorAll('[data-page]').forEach(function(btn) {
     btn.classList.toggle('active', btn.dataset.page === pageName);
   });
