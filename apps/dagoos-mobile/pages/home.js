@@ -275,7 +275,7 @@ function init_home() {
     </div>
   `;
 
-  appliquerBrandingMobile(getBrandingMobile());
+  // Le home général DAGOO'S ne réapplique pas le branding d'une flotte sélectionnée.
 
   // Appeler chargerPartenaires après un délai pour s'assurer que le DOM est prêt
   setTimeout(function() {
