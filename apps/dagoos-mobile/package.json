@@ -1,5 +1,5 @@
 {
-  "name": "dago-coop-driver",
+  "name": "dago-mobile",
   "version": "1.0.0",
   "scripts": {
     "build": "echo 'No build needed - static files'"
