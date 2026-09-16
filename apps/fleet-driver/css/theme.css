@@ -11,39 +11,47 @@
    INDEX.HTML — LOGIN
    ============================================================ */
 
-:root {
-            /* Surfaces — échelle claire */
-            --bg-page:     #F7F8FA;
-            --bg-surface:  #FFFFFF;
-            --bg-soft:     #F1F5F9;
-            --bg-elevated: #E2E8F0;
+        :root {
+            /* Surfaces */
+            --bg-page:       #F7F8FA;
+            --bg-surface:    #FFFFFF;
+            --bg-soft:       #F1F5F9;
+            --bg-elevated:   #E2E8F0;
 
-            /* Texte — hiérarchie par la lumière */
-            --text-primary:   #1E293B;
-            --text-secondary: #64748B;
+            /* Texte — charte bleu marine */
+            --text-primary:   #06245F;
+            --text-secondary: #4A5A7A;
             --text-muted:     #94A3B8;
             --text-on-accent: #FFFFFF;
 
-            /* Accent jaune fleet — réservé aux actions */
-            --accent:       #D99A00;
-            --accent-hover: #B8860B;
-            --accent-soft:  rgba(217, 154, 0, 0.10);
+            /* Accent principal fleet — vert */
+            --accent:       #0A6F35;
+            --accent-hover: #085A2B;
+            --accent-soft:  #E6F4EA;
 
-            /* Bordures et ombres */
-            --border:        #E2E8F0;
-            --border-strong: #CBD5E1;
-            --shadow-soft:   0 1px 3px rgba(15, 23, 42, 0.06),
-                             0 8px 24px rgba(15, 23, 42, 0.06);
+            /* Accent secondaire — or safran */
+            --gold:       #E0A01C;
+            --gold-hover: #C68B15;
 
-            /* Messages */
+            /* États */
             --error-bg:   #FEF2F2;
             --error-fg:   #DC2626;
-            --success-bg: #F0FDF4;
-            --success-fg: #16A34A;
+            --success-bg: #E6F4EA;
+            --success-fg: #0A6F35;
+            --warning-bg: #FEF3C7;
+            --warning-fg: #E0A01C;
             --info-bg:    #EFF6FF;
-            --info-fg:    #2563EB;
-        }
+            --info-fg:    #06245F;
 
+            /* Bordures */
+            --border:        #E2E8F0;
+            --border-strong: #CBD5E1;
+
+            /* Ombres */
+            --shadow-soft: 0 1px 3px rgba(6,36,95,0.06),
+                           0 8px 24px rgba(6,36,95,0.06);
+            --shadow-card: 0 1px 3px rgba(6,36,95,0.04);
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
@@ -140,28 +148,7 @@
    DASHBOARD.HTML — BASE
    ============================================================ */
 
-:root {
-            /* Surfaces — échelle claire */
-            --bg-page:     #F7F8FA;
-            --bg-surface:  #FFFFFF;
-            --bg-soft:     #F1F5F9;
-            --bg-elevated: #E2E8F0;
 
-            /* Texte — hiérarchie par la lumière */
-            --text-primary:   #1E293B;
-            --text-secondary: #64748B;
-            --text-muted:     #94A3B8;
-            --text-on-accent: #FFFFFF;
-
-            /* Accent jaune fleet */
-            --accent:       #D99A00;
-            --accent-hover: #B98200;
-
-            /* Bordures et ombres */
-            --border:        #E2E8F0;
-            --border-strong: #CBD5E1;
-            --shadow-soft:   0 1px 3px rgba(15, 23, 42, 0.06);
-        }
 
         * {
             margin: 0;
@@ -208,7 +195,7 @@
         }
 
         .card {
-            background: white;
+            background: var(--bg-surface);
             border-radius: 12px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
             margin-bottom: 14px;
@@ -240,7 +227,7 @@
         align-items: center;
         padding: 6px 8px 10px;
         z-index: 1000;
-        box-shadow: 0 -2px 8px rgba(15, 23, 42, 0.06);
+        box-shadow: 0 -2px 8px rgba(6,36,95,0.06);
     }
 
     .bottom-nav button {
@@ -279,7 +266,7 @@
         justify-content: center;
         font-size: 22px;
         color: var(--text-on-accent);
-        box-shadow: 0 4px 12px rgba(217, 154, 0, 0.25);
+        box-shadow: 0 4px 12px rgba(10,111,53,0.25);
     }
 
     .bottom-nav button i {

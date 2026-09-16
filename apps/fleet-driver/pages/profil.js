@@ -22,21 +22,21 @@ function init_profil() {
     main.innerHTML = getHeaderHTML() +
         '<div style="padding:12px;max-width:500px;margin:0 auto;padding-bottom:80px;">' +
             // Carte infos chauffeur
-            '<div class="card" style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:20px;margin-bottom:12px;">' +
-                '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';margin-bottom:16px;">👤 Profil Chauffeur</h3>' +
+            '<div class="card" style="background:var(--bg-surface);border-radius:12px;padding:20px;margin-bottom:12px;">' +
+                '<h3 style="color:var(--text-primary);margin-bottom:16px;">👤 Profil Chauffeur</h3>' +
                 '<div style="display:flex;flex-direction:column;gap:12px;">' +
-                    '<div><span style="color:#94A3B8;font-size:11px;">Nom</span><div style="font-weight:600;color:#fff;">' + escapeHtmlLocal(user.name || 'Chauffeur') + '</div></div>' +
-                    '<div><span style="color:#94A3B8;font-size:11px;">Code</span><div style="font-weight:600;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';font-family:monospace;">' + escapeHtmlLocal(user.driverCode || '-') + '</div></div>' +
-                    '<div><span style="color:#94A3B8;font-size:11px;">Organisation</span><div style="font-weight:600;color:#fff;">' + escapeHtmlLocal(user.organization || '-') + '</div></div>' +
-                    '<div><span style="color:#94A3B8;font-size:11px;">Email</span><div style="font-weight:600;color:#fff;font-size:12px;">' + escapeHtmlLocal(user.email || '-') + '</div></div>' +
+                    '<div><span style="color:var(--text-muted);font-size:11px;">Nom</span><div style="font-weight:600;color:var(--text-primary);">' + escapeHtmlLocal(user.name || 'Chauffeur') + '</div></div>' +
+                    '<div><span style="color:var(--text-muted);font-size:11px;">Code</span><div style="font-weight:600;color:var(--text-primary);font-family:monospace;">' + escapeHtmlLocal(user.driverCode || '-') + '</div></div>' +
+                    '<div><span style="color:var(--text-muted);font-size:11px;">Organisation</span><div style="font-weight:600;color:var(--text-primary);">' + escapeHtmlLocal(user.organization || '-') + '</div></div>' +
+                    '<div><span style="color:var(--text-muted);font-size:11px;">Email</span><div style="font-weight:600;color:var(--text-primary);font-size:12px;">' + escapeHtmlLocal(user.email || '-') + '</div></div>' +
                 '</div>' +
             '</div>' +
 
             // Auto-déconnexion
-            '<div class="card" style="background:' + (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') + ';border-radius:12px;padding:20px;margin-bottom:12px;">' +
-                '<h3 style="color:' + (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') + ';margin-bottom:16px;">⏱️ Déconnexion automatique</h3>' +
-                '<label style="display:block;font-size:12px;color:#94A3B8;margin-bottom:6px;">Délai d\'inactivité</label>' +
-                '<select id="inactivityTimeout" onchange="changeInactivityTimeout(this.value)" style="width:100%;padding:10px;border:1px solid ' + (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') + ';background:' + '#1A1A2E' + ';color:#fff;border-radius:8px;font-size:14px;">' +
+            '<div class="card" style="background:var(--bg-surface);border-radius:12px;padding:20px;margin-bottom:12px;">' +
+                '<h3 style="color:var(--text-primary);margin-bottom:16px;">⏱️ Déconnexion automatique</h3>' +
+                '<label style="display:block;font-size:12px;color:var(--text-muted);margin-bottom:6px;">Délai d\'inactivité</label>' +
+                '<select id="inactivityTimeout" onchange="changeInactivityTimeout(this.value)" style="width:100%;padding:10px;border:1px solid var(--border);background:var(--bg-soft);color:var(--text-primary);border-radius:8px;font-size:14px;">' +
                     '<option value="60000">1 minute</option>' +
                     '<option value="180000">3 minutes</option>' +
                     '<option value="300000">5 minutes (défaut)</option>' +
@@ -44,22 +44,22 @@ function init_profil() {
                     '<option value="900000">15 minutes</option>' +
                     '<option value="1800000">30 minutes</option>' +
                 '</select>' +
-                '<p style="font-size:11px;color:#94A3B8;margin-top:6px;">Déconnexion automatique après cette durée sans activité.</p>' +
+                '<p style="font-size:11px;color:var(--text-muted);margin-top:6px;">Déconnexion automatique après cette durée sans activité.</p>' +
             '</div>' +
 
             // Changer PIN
-            '<div class="card" style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:20px;margin-bottom:12px;">' +
-                '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';margin-bottom:16px;">🔐 Changer mon PIN</h3>' +
+            '<div class="card" style="background:var(--bg-surface);border-radius:12px;padding:20px;margin-bottom:12px;">' +
+                '<h3 style="color:var(--text-primary);margin-bottom:16px;">🔐 Changer mon PIN</h3>' +
                 '<div style="display:flex;flex-direction:column;gap:10px;">' +
-                    '<input type="password" id="oldPin" placeholder="Ancien PIN" maxlength="4" style="padding:10px;border-radius:8px;border:1px solid '+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';background:#1A1A2E;color:#fff;text-align:center;font-size:18px;letter-spacing:8px;">' +
-                    '<input type="password" id="newPin" placeholder="Nouveau PIN" maxlength="4" style="padding:10px;border-radius:8px;border:1px solid '+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';background:#1A1A2E;color:#fff;text-align:center;font-size:18px;letter-spacing:8px;">' +
-                    '<input type="password" id="confirmPin" placeholder="Confirmer le PIN" maxlength="4" style="padding:10px;border-radius:8px;border:1px solid '+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';background:#1A1A2E;color:#fff;text-align:center;font-size:18px;letter-spacing:8px;">' +
-                    '<button onclick="changePin()" style="padding:12px;background:#F1C40F;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;">💾 Enregistrer le nouveau PIN</button>' +
+                    '<input type="password" id="oldPin" placeholder="Ancien PIN" maxlength="4" style="padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-soft);color:var(--text-primary);text-align:center;font-size:18px;letter-spacing:8px;">' +
+                    '<input type="password" id="newPin" placeholder="Nouveau PIN" maxlength="4" style="padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-soft);color:var(--text-primary);text-align:center;font-size:18px;letter-spacing:8px;">' +
+                    '<input type="password" id="confirmPin" placeholder="Confirmer le PIN" maxlength="4" style="padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-soft);color:var(--text-primary);text-align:center;font-size:18px;letter-spacing:8px;">' +
+                    '<button onclick="changePin()" style="padding:12px;background:var(--gold);color:var(--text-primary);border:none;border-radius:8px;font-weight:700;cursor:pointer;">💾 Enregistrer le nouveau PIN</button>' +
                 '</div>' +
                 '<div id="pinMessage" style="margin-top:10px;text-align:center;font-size:12px;"></div>' +
             '</div>' +
 
-            '<button onclick="logout()" style="width:100%;padding:12px;background:#EF4444;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;">🚪 Déconnexion</button>' +
+            '<button onclick="logout()" style="width:100%;padding:12px;background:var(--error-fg);color:var(--text-on-accent);border:none;border-radius:8px;font-weight:700;cursor:pointer;">🚪 Déconnexion</button>' +
         '</div>';
 
 }
@@ -72,9 +72,9 @@ async function changePin() {
     var confirmPin = document.getElementById('confirmPin').value;
     var msg = document.getElementById('pinMessage');
 
-    if (!oldPin || !newPin || !confirmPin) { msg.innerHTML = '<span style="color:#F87171;">Tous les champs sont requis</span>'; return; }
-    if (newPin !== confirmPin) { msg.innerHTML = '<span style="color:#F87171;">Les PIN ne correspondent pas</span>'; return; }
-    if (newPin.length !== 4 || !/^\d+$/.test(newPin)) { msg.innerHTML = '<span style="color:#F87171;">Le PIN doit être composé de 4 chiffres</span>'; return; }
+    if (!oldPin || !newPin || !confirmPin) { msg.innerHTML = '<span style="color:var(--error-fg);">Tous les champs sont requis</span>'; return; }
+    if (newPin !== confirmPin) { msg.innerHTML = '<span style="color:var(--error-fg);">Les PIN ne correspondent pas</span>'; return; }
+    if (newPin.length !== 4 || !/^\d+$/.test(newPin)) { msg.innerHTML = '<span style="color:var(--error-fg);">Le PIN doit être composé de 4 chiffres</span>'; return; }
 
     try {
         var result = await apiFetch('/drivers/me/pin', {
@@ -83,15 +83,15 @@ async function changePin() {
         });
 
         if (result && result.ok) {
-            msg.innerHTML = '<span style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';">✅ PIN changé avec succès !</span>';
+            msg.innerHTML = '<span style="color:var(--success-fg);">✅ PIN changé avec succès !</span>';
             document.getElementById('oldPin').value = '';
             document.getElementById('newPin').value = '';
             document.getElementById('confirmPin').value = '';
         } else {
-            msg.innerHTML = '<span style="color:#F87171;">❌ ' + escapeHtmlLocal((result && result.error) || 'Erreur') + '</span>';
+            msg.innerHTML = '<span style="color:var(--error-fg);">❌ ' + escapeHtmlLocal((result && result.error) || 'Erreur') + '</span>';
         }
     } catch(e) {
-        msg.innerHTML = '<span style="color:#F87171;">❌ Erreur réseau</span>';
+        msg.innerHTML = '<span style="color:var(--error-fg);">❌ Erreur réseau</span>';
     }
 }
 

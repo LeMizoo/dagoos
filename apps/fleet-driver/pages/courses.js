@@ -22,10 +22,10 @@ async function init_courses() {
             // TITRE
             '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">' +
                 '<div>' +
-                    '<h2 style="font-size:20px;font-weight:800;margin:0;color:#fff;">Courses</h2>' +
-                    '<div style="font-size:11px;color:#94A3B8;margin-top:3px;">Historique de vos courses</div>' +
+                    '<h2 style="font-size:20px;font-weight:800;margin:0;color:var(--text-primary);">Courses</h2>' +
+                    '<div style="font-size:11px;color:var(--text-muted);margin-top:3px;">Historique de vos courses</div>' +
                 '</div>' +
-                '<button onclick="init_courses()" style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border:1px solid #334155;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';border-radius:8px;padding:8px 10px;cursor:pointer;font-size:11px;">' +
+                '<button onclick="init_courses()" style="background:var(--bg-surface);border:1px solid var(--border-strong);color:var(--text-primary);border-radius:8px;padding:8px 10px;cursor:pointer;font-size:11px;">' +
                     'Actualiser' +
                 '</button>' +
             '</div>' +
@@ -33,7 +33,7 @@ async function init_courses() {
             // COURSES — source de vérité API
 
             // FILTRES
-            '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:10px;margin-bottom:10px;">' +
+            '<div style="background:var(--bg-surface);border-radius:12px;padding:10px;margin-bottom:10px;">' +
                 '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">' +
                     '<button onclick="filterCourses(\'all\')" id="filterAll" style="' + filterButtonStyle('all') + '">Toutes</button>' +
                     '<button onclick="filterCourses(\'today\')" id="filterToday" style="' + filterButtonStyle('today') + '">Aujourd’hui</button>' +
@@ -46,7 +46,7 @@ async function init_courses() {
 
             // LISTE
             '<div id="coursesHistory">' +
-                '<div style="text-align:center;padding:30px;color:#94A3B8;">Chargement...</div>' +
+                '<div style="text-align:center;padding:30px;color:var(--text-muted);">Chargement...</div>' +
             '</div>' +
 
         '</div>';
@@ -63,8 +63,8 @@ function filterButtonStyle(filter) {
     var active = coursesFilter === filter;
 
     return active
-        ? 'padding:8px 4px;border:none;border-radius:8px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';color:#1A1A2E;font-size:11px;font-weight:700;cursor:pointer;'
-        : 'padding:8px 4px;border:1px solid #334155;border-radius:8px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';color:#94A3B8;font-size:11px;font-weight:600;cursor:pointer;';
+        ? 'padding:8px 4px;border:none;border-radius:8px;background:var(--accent);color:var(--text-on-accent);font-size:11px;font-weight:700;cursor:pointer;'
+        : 'padding:8px 4px;border:1px solid var(--border-strong);border-radius:8px;background:var(--bg-soft);color:var(--text-muted);font-size:11px;font-weight:600;cursor:pointer;';
 }
 
 
@@ -77,7 +77,7 @@ async function loadCourses() {
 
     if (history) {
         history.innerHTML =
-            '<div style="text-align:center;padding:30px;color:#94A3B8;">Chargement des courses...</div>';
+            '<div style="text-align:center;padding:30px;color:var(--text-muted);">Chargement des courses...</div>';
     }
 
     var user = getDriverUser();
@@ -85,7 +85,7 @@ async function loadCourses() {
     if (!user.driverId) {
         if (history) {
             history.innerHTML =
-                '<div style="background:#450A0A;color:#FCA5A5;padding:14px;border-radius:10px;text-align:center;">' +
+                '<div style="background:var(--error-bg);color:var(--error-fg);padding:14px;border-radius:10px;text-align:center;">' +
                     'Chauffeur non identifié.' +
                 '</div>';
         }
@@ -110,7 +110,7 @@ async function loadCourses() {
 
         if (history) {
             history.innerHTML =
-                '<div style="background:#450A0A;color:#FCA5A5;padding:14px;border-radius:10px;text-align:center;">' +
+                '<div style="background:var(--error-bg);color:var(--error-fg);padding:14px;border-radius:10px;text-align:center;">' +
                     'Impossible de charger l’historique des courses.' +
                 '</div>';
         }
@@ -162,10 +162,10 @@ function renderCourses() {
 
     if (filtered.length === 0) {
         history.innerHTML =
-            '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:30px 15px;text-align:center;">' +
+            '<div style="background:var(--bg-surface);border-radius:12px;padding:30px 15px;text-align:center;">' +
                 '<div style="font-size:28px;margin-bottom:8px;">📋</div>' +
-                '<div style="color:#fff;font-weight:700;margin-bottom:4px;">Aucune course</div>' +
-                '<div style="color:#94A3B8;font-size:11px;">Aucune course pour cette période.</div>' +
+                '<div style="color:var(--text-primary);font-weight:700;margin-bottom:4px;">Aucune course</div>' +
+                '<div style="color:var(--text-muted);font-size:11px;">Aucune course pour cette période.</div>' +
             '</div>';
 
         return;
@@ -201,29 +201,29 @@ function renderSummary(courses, container) {
     }, 0);
 
     container.innerHTML =
-        '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:12px;">' +
-            '<div style="font-size:11px;color:#94A3B8;margin-bottom:8px;">Résumé de la période</div>' +
+        '<div style="background:var(--bg-surface);border-radius:12px;padding:12px;">' +
+            '<div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Résumé de la période</div>' +
             '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center;">' +
 
-                '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:9px;padding:9px 4px;">' +
-                    '<div style="font-size:16px;font-weight:800;color:#fff;">' +
+                '<div style="background:var(--bg-soft);border-radius:9px;padding:9px 4px;">' +
+                    '<div style="font-size:16px;font-weight:800;color:var(--text-primary);">' +
                         courses.length +
                     '</div>' +
-                    '<div style="font-size:9px;color:#94A3B8;">Courses</div>' +
+                    '<div style="font-size:9px;color:var(--text-muted);">Courses</div>' +
                 '</div>' +
 
-                '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:9px;padding:9px 4px;">' +
-                    '<div style="font-size:14px;font-weight:800;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';">' +
+                '<div style="background:var(--bg-soft);border-radius:9px;padding:9px 4px;">' +
+                    '<div style="font-size:14px;font-weight:800;color:var(--success-fg);">' +
                         formatAr(total) +
                     '</div>' +
-                    '<div style="font-size:9px;color:#94A3B8;">CA</div>' +
+                    '<div style="font-size:9px;color:var(--text-muted);">CA</div>' +
                 '</div>' +
 
-                '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:9px;padding:9px 4px;">' +
-                    '<div style="font-size:14px;font-weight:800;color:#8B5CF6;">' +
+                '<div style="background:var(--bg-soft);border-radius:9px;padding:9px 4px;">' +
+                    '<div style="font-size:14px;font-weight:800;color:var(--gold);">' +
                         formatAr(net) +
                     '</div>' +
-                    '<div style="font-size:9px;color:#94A3B8;">Net</div>' +
+                    '<div style="font-size:9px;color:var(--text-muted);">Net</div>' +
                 '</div>' +
 
             '</div>' +
@@ -262,7 +262,7 @@ function renderCourseActions(course) {
         html +=
             '<button data-action="demarrer-course" data-course-id="' +
             escapeHtml(courseId) +
-            '" style="width:100%;background:#3B82F6;color:#fff;border:none;padding:9px;border-radius:7px;font-weight:700;font-size:11px;cursor:pointer;">' +
+            '" style="width:100%;background:var(--text-primary);color:var(--text-on-accent);border:none;padding:9px;border-radius:7px;font-weight:700;font-size:11px;cursor:pointer;">' +
                 'Démarrer' +
             '</button>';
     }
@@ -271,7 +271,7 @@ function renderCourseActions(course) {
         html +=
             '<button data-action="prendre-en-charge" data-course-id="' +
             escapeHtml(courseId) +
-            '" style="width:100%;background:#8B5CF6;color:#fff;border:none;padding:9px;border-radius:7px;font-weight:700;font-size:11px;cursor:pointer;">' +
+            '" style="width:100%;background:var(--gold);color:var(--text-primary);border:none;padding:9px;border-radius:7px;font-weight:700;font-size:11px;cursor:pointer;">' +
                 'Client pris en charge' +
             '</button>';
     }
@@ -280,7 +280,7 @@ function renderCourseActions(course) {
         html +=
             '<button data-action="terminer-course" data-course-id="' +
             escapeHtml(courseId) +
-            '" style="width:100%;background:#10B981;color:#fff;border:none;padding:9px;border-radius:7px;font-weight:700;font-size:11px;cursor:pointer;">' +
+            '" style="width:100%;background:var(--accent);color:var(--text-on-accent);border:none;padding:9px;border-radius:7px;font-weight:700;font-size:11px;cursor:pointer;">' +
                 'Terminer' +
             '</button>';
     }
@@ -311,22 +311,22 @@ function renderCourseCard(course) {
     var statusColor = getStatusColor(status);
 
     return (
-        '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:13px;margin-bottom:8px;">' +
+        '<div style="background:var(--bg-surface);border-radius:12px;padding:13px;margin-bottom:8px;">' +
 
             '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">' +
 
                 '<div style="min-width:0;">' +
-                    '<div style="font-size:13px;font-weight:700;color:#fff;">' +
+                    '<div style="font-size:13px;font-weight:700;color:var(--text-primary);">' +
                         escapeHtml(type) +
                     '</div>' +
 
-                    '<div style="font-size:10px;color:#94A3B8;margin-top:3px;">' +
+                    '<div style="font-size:10px;color:var(--text-muted);margin-top:3px;">' +
                         escapeHtml(date) +
                     '</div>' +
 
                 '</div>' +
 
-                '<span style="flex-shrink:0;background:' + statusColor + ';color:#fff;padding:3px 7px;border-radius:10px;font-size:9px;font-weight:700;">' +
+                '<span style="flex-shrink:0;background:' + statusColor + ';color:var(--text-primary);padding:3px 7px;border-radius:10px;font-size:9px;font-weight:700;">' +
                     statusLabel +
                 '</span>' +
 
@@ -334,32 +334,32 @@ function renderCourseCard(course) {
 
             '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px;">' +
 
-                '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:8px;padding:8px;text-align:center;">' +
-                    '<div style="font-size:13px;font-weight:800;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';">' +
+                '<div style="background:var(--bg-soft);border-radius:8px;padding:8px;text-align:center;">' +
+                    '<div style="font-size:13px;font-weight:800;color:var(--success-fg);">' +
                         formatAr(amount) +
                     '</div>' +
-                    '<div style="font-size:8px;color:#94A3B8;">CA</div>' +
+                    '<div style="font-size:8px;color:var(--text-muted);">CA</div>' +
                 '</div>' +
 
-                '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:8px;padding:8px;text-align:center;">' +
-                    '<div style="font-size:13px;font-weight:800;color:#3B82F6;">' +
+                '<div style="background:var(--bg-soft);border-radius:8px;padding:8px;text-align:center;">' +
+                    '<div style="font-size:13px;font-weight:800;color:var(--text-primary);">' +
                         formatAr(commission) +
                     '</div>' +
-                    '<div style="font-size:8px;color:#94A3B8;">Versement</div>' +
+                    '<div style="font-size:8px;color:var(--text-muted);">Versement</div>' +
                 '</div>' +
 
-                '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:8px;padding:8px;text-align:center;">' +
-                    '<div style="font-size:13px;font-weight:800;color:#8B5CF6;">' +
+                '<div style="background:var(--bg-soft);border-radius:8px;padding:8px;text-align:center;">' +
+                    '<div style="font-size:13px;font-weight:800;color:var(--gold);">' +
                         formatAr(net) +
                     '</div>' +
-                    '<div style="font-size:8px;color:#94A3B8;">Net</div>' +
+                    '<div style="font-size:8px;color:var(--text-muted);">Net</div>' +
                 '</div>' +
 
             '</div>' +
 
             (
                 distance > 0
-                    ? '<div style="font-size:10px;color:#94A3B8;margin-top:8px;">Distance : <strong style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';">' +
+                    ? '<div style="font-size:10px;color:var(--text-muted);margin-top:8px;">Distance : <strong style="color:var(--text-primary);">' +
                         distance.toFixed(1) +
                         ' km</strong></div>'
                     : ''
@@ -652,18 +652,18 @@ function getStatusLabel(status) {
 
 function getStatusColor(status) {
     var colors = {
-        COMPLETED: ''+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +'',
-        COMPLETE: ''+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +'',
-        FINISHED: ''+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +'',
-        DONE: ''+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +'',
-        IN_PROGRESS: '#3B82F6',
-        PENDING: ''+ (window.FLEET_THEME ? window.FLEET_THEME.warning : '#F59E0B') +'',
-        CANCELLED: '#EF4444',
-        CANCELED: '#EF4444',
-        ACCEPTED: ''+ (window.FLEET_THEME ? window.FLEET_THEME.warning : '#F59E0B') +''
+        COMPLETED: 'var(--success-fg)',
+        COMPLETE: 'var(--success-fg)',
+        FINISHED: 'var(--success-fg)',
+        DONE: 'var(--success-fg)',
+        IN_PROGRESS: 'var(--text-primary)',
+        PENDING: 'var(--gold)',
+        CANCELLED: 'var(--error-fg)',
+        CANCELED: 'var(--error-fg)',
+        ACCEPTED: 'var(--gold)'
     };
 
-    return colors[status] || ''+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +'';
+    return colors[status] || 'var(--success-fg)';
 }
 
 

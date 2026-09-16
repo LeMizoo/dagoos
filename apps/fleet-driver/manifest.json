@@ -4,8 +4,8 @@
   "start_url": "/splash.html",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#1A1A2E",
-  "theme_color": "#E94560",
+  "background_color": "#F7F8FA",
+  "theme_color": "#0A6F35",
   "description": "Application chauffeur flotte urbaine Dagoo's",
   "icons": [
     {

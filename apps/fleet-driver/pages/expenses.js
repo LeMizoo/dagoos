@@ -32,21 +32,21 @@ async function init_expenses() {
       '<h2 style="font-size:20px;font-weight:bold;margin-bottom:16px;">Dépenses</h2>' +
 
       // FORMULAIRE
-      '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:16px;margin-bottom:12px;">' +
-        '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';margin-bottom:12px;font-size:14px;">Nouvelle dépense</h3>' +
+      '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : 'var(--bg-surface)') +';border-radius:12px;padding:16px;margin-bottom:12px;">' +
+        '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : 'var(--gold)') +';margin-bottom:12px;font-size:14px;">Nouvelle dépense</h3>' +
 
-        '<select id="expenseCategory" style="width:100%;padding:10px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border:1px solid #333;border-radius:8px;color:#fff;font-size:13px;margin-bottom:8px;">' +
+        '<select id="expenseCategory" style="width:100%;padding:10px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : 'var(--bg-soft)') +';border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-size:13px;margin-bottom:8px;">' +
           '<option value="carburant">Carburant</option>' +
           '<option value="entretien">Entretien</option>' +
           '<option value="pneu">Pneus</option>' +
           '<option value="autre">Autre</option>' +
         '</select>' +
 
-        '<input type="number" id="expenseAmount" placeholder="Montant (Ar)" min="1" style="width:100%;padding:10px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border:1px solid #333;border-radius:8px;color:#fff;font-size:13px;margin-bottom:8px;">' +
+        '<input type="number" id="expenseAmount" placeholder="Montant (Ar)" min="1" style="width:100%;padding:10px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : 'var(--bg-soft)') +';border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-size:13px;margin-bottom:8px;">' +
 
-        '<input type="text" id="expenseDescription" placeholder="Description (facultatif)" style="width:100%;padding:10px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border:1px solid #333;border-radius:8px;color:#fff;font-size:13px;margin-bottom:10px;">' +
+        '<input type="text" id="expenseDescription" placeholder="Description (facultatif)" style="width:100%;padding:10px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : 'var(--bg-soft)') +';border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-size:13px;margin-bottom:10px;">' +
 
-        '<button onclick="saveDriverExpense()" id="btnSaveExpense" style="width:100%;padding:12px;background:#F1C40F;color:#1A1A2E;border:none;border-radius:8px;font-weight:700;cursor:pointer;">' +
+        '<button onclick="saveDriverExpense()" id="btnSaveExpense" style="width:100%;padding:12px;background:var(--gold);color:var(--text-primary);border:none;border-radius:8px;font-weight:700;cursor:pointer;">' +
           'Enregistrer la dépense' +
         '</button>' +
 
@@ -54,12 +54,12 @@ async function init_expenses() {
       '</div>' +
 
       // LISTE
-      '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:16px;">' +
-        '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';margin-bottom:12px;font-size:14px;">Dépenses récentes</h3>' +
+      '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : 'var(--bg-surface)') +';border-radius:12px;padding:16px;">' +
+        '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : 'var(--gold)') +';margin-bottom:12px;font-size:14px;">Dépenses récentes</h3>' +
         '<div id="driverExpensesList">' +
-          '<div style="color:#94A3B8;text-align:center;padding:15px;">Chargement...</div>' +
+          '<div style="color:var(--text-muted);text-align:center;padding:15px;">Chargement...</div>' +
         '</div>' +
-        '<div id="driverExpensesTotal" style="margin-top:12px;text-align:right;font-weight:700;color:#EF4444;font-size:13px;"></div>' +
+        '<div id="driverExpensesTotal" style="margin-top:12px;text-align:right;font-weight:700;color:var(--error-fg);font-size:13px;"></div>' +
       '</div>' +
 
     '</div>';
@@ -90,7 +90,7 @@ async function loadDriverExpenses() {
 
     if (list) {
       list.innerHTML =
-        '<div style="color:#F87171;text-align:center;padding:15px;">' +
+        '<div style="color:var(--error-fg);text-align:center;padding:15px;">' +
         'Impossible de charger les dépenses.' +
         '</div>';
     }
@@ -110,7 +110,7 @@ function renderDriverExpenses() {
 
   if (!driverExpenses.length) {
     list.innerHTML =
-      '<div style="color:#94A3B8;text-align:center;padding:15px;">' +
+      '<div style="color:var(--text-muted);text-align:center;padding:15px;">' +
       'Aucune dépense enregistrée.' +
       '</div>';
 
@@ -158,28 +158,28 @@ function renderDriverExpenses() {
         : '';
 
       html +=
-        '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:8px;padding:10px;margin-bottom:7px;">' +
+        '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : 'var(--bg-soft)') +';border-radius:8px;padding:10px;margin-bottom:7px;">' +
 
           '<div style="display:flex;justify-content:space-between;gap:8px;">' +
 
             '<div>' +
-              '<div style="color:#fff;font-weight:600;font-size:12px;">' +
+              '<div style="color:var(--text-primary);font-weight:600;font-size:12px;">' +
                 (icons[category] || labels[category] || category) +
               '</div>' +
 
-              '<div style="color:#94A3B8;font-size:10px;margin-top:3px;">' +
+              '<div style="color:var(--text-muted);font-size:10px;margin-top:3px;">' +
                 escapeHtmlLocal(expense.description || expense.desc || '') +
               '</div>' +
 
               (dateLabel
-                ? '<div style="color:#64748B;font-size:9px;margin-top:3px;">' +
+                ? '<div style="color:var(--text-muted);font-size:9px;margin-top:3px;">' +
                     dateLabel +
                   '</div>'
                 : '') +
 
             '</div>' +
 
-            '<div style="color:#F87171;font-weight:700;font-size:12px;white-space:nowrap;">' +
+            '<div style="color:var(--error-fg);font-weight:700;font-size:12px;white-space:nowrap;">' +
               amount.toLocaleString() +
               ' Ar' +
             '</div>' +
@@ -223,7 +223,7 @@ async function saveDriverExpense() {
   if (amount <= 0) {
     if (message) {
       message.innerHTML =
-        '<span style="color:#F87171;">Montant invalide.</span>';
+        '<span style="color:var(--error-fg);">Montant invalide.</span>';
     }
     return;
   }
@@ -246,7 +246,7 @@ async function saveDriverExpense() {
     if (result && !result.error) {
       if (message) {
         message.innerHTML =
-          '<span style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';">Dépense enregistrée.</span>';
+          '<span style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : 'var(--success-fg)') +';">Dépense enregistrée.</span>';
       }
 
       var amountInput =
@@ -276,7 +276,7 @@ async function saveDriverExpense() {
 
     if (message) {
       message.innerHTML =
-        '<span style="color:#F87171;">' +
+        '<span style="color:var(--error-fg);">' +
         escapeHtmlLocal(err.message || 'Erreur lors de l’enregistrement') +
         '</span>';
     }

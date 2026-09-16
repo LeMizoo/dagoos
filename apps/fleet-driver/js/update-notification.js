@@ -61,8 +61,8 @@
     const card = document.createElement('div');
     card.id = 'dagoos-update-banner';
     card.style.cssText = `
-      background: #ffffff;
-      color: #1a1a2e;
+      background: var(--text-on-accent);
+      color: var(--text-primary);
       border-radius: 16px;
       padding: 28px 24px;
       max-width: 360px;
@@ -77,7 +77,7 @@
       <div style="
         width: 64px;
         height: 64px;
-        background: #fef3c7;
+        background: var(--warning-bg);
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -90,20 +90,20 @@
         font-size: 18px;
         font-weight: 700;
         margin: 0 0 8px;
-        color: #1a1a2e;
+        color: var(--text-primary);
       ">Mise à jour disponible</h3>
       
       <p style="
         font-size: 14px;
-        color: #6b7280;
+        color: var(--text-secondary);
         margin: 0 0 20px;
         line-height: 1.5;
       ">Une nouvelle version de DAGOOS est disponible. Mettez à jour pour profiter des dernières améliorations.</p>
       
       <div style="display: flex; gap: 10px; justify-content: center;">
         <button onclick="document.getElementById('dagoos-update-overlay').remove()" style="
-          background: #f3f4f6;
-          color: #4b5563;
+          background: var(--bg-soft);
+          color: var(--text-secondary);
           border: none;
           padding: 12px 20px;
           border-radius: 10px;
@@ -113,8 +113,8 @@
         ">Plus tard</button>
         
         <button onclick="forceUpdate()" style="
-          background: #1a1a2e;
-          color: #ffffff;
+          background: var(--text-primary);
+          color: var(--text-on-accent);
           border: none;
           padding: 12px 24px;
           border-radius: 10px;

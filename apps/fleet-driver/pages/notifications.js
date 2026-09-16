@@ -26,8 +26,8 @@ async function init_notifications() {
     container.innerHTML =
         getHeaderHTML() +
         '<div style="padding:16px;max-width:500px;margin:0 auto;padding-bottom:80px;">' +
-            '<h2 style="font-size:20px;font-weight:bold;margin-bottom:16px;color:#DAA520;">🔔 Notifications</h2>' +
-            '<div id="notificationsList" style="text-align:center;padding:40px;color:#94A3B8;">Chargement...</div>' +
+            '<h2 style="font-size:20px;font-weight:bold;margin-bottom:16px;color:var(--gold);">🔔 Notifications</h2>' +
+            '<div id="notificationsList" style="text-align:center;padding:40px;color:var(--text-muted);">Chargement...</div>' +
         '</div>';
 
     try {
@@ -37,7 +37,7 @@ async function init_notifications() {
         if (!listEl) return;
         
         if (!Array.isArray(notifs) || notifs.length === 0) {
-            listEl.innerHTML = '<p style="color:#94A3B8;text-align:center;padding:20px;">Aucune notification</p>';
+            listEl.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">Aucune notification</p>';
             return;
         }
         
@@ -55,16 +55,16 @@ async function init_notifications() {
             if (montantMatch) montant = montantMatch[1].trim();
             if (commentaireMatch) commentaire = commentaireMatch[1].trim();
             
-            return '<div style="background:#1E293B;border-radius:8px;padding:12px;margin-bottom:8px;border-left:3px solid #DAA520;">' +
+            return '<div style="background:var(--bg-surface);border-radius:8px;padding:12px;margin-bottom:8px;border-left:3px solid var(--gold);">' +
                 '<div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">' +
                     '<div style="flex:1;">' +
-                        '<div style="color:#fff;font-weight:600;font-size:13px;">' + escapeHtmlLocal(title) + '</div>' +
-                        '<div style="color:#94A3B8;font-size:11px;margin-top:4px;">' + escapeHtmlLocal(message) + '</div>' +
-                        (montant ? '<div style="color:#22C55E;font-weight:700;font-size:12px;margin-top:4px;">💰 ' + escapeHtmlLocal(montant) + '</div>' : '') +
-                        (commentaire ? '<div style="color:#F59E0B;font-size:11px;margin-top:2px;font-style:italic;">💬 ' + escapeHtmlLocal(commentaire) + '</div>' : '') +
-                        '<div style="color:#64748B;font-size:10px;margin-top:4px;">' + escapeHtmlLocal(dateStr) + '</div>' +
+                        '<div style="color:var(--text-primary);font-weight:600;font-size:13px;">' + escapeHtmlLocal(title) + '</div>' +
+                        '<div style="color:var(--text-muted);font-size:11px;margin-top:4px;">' + escapeHtmlLocal(message) + '</div>' +
+                        (montant ? '<div style="color:var(--success-fg);font-weight:700;font-size:12px;margin-top:4px;">💰 ' + escapeHtmlLocal(montant) + '</div>' : '') +
+                        (commentaire ? '<div style="color:var(--gold);font-size:11px;margin-top:2px;font-style:italic;">💬 ' + escapeHtmlLocal(commentaire) + '</div>' : '') +
+                        '<div style="color:var(--text-muted);font-size:10px;margin-top:4px;">' + escapeHtmlLocal(dateStr) + '</div>' +
                     '</div>' +
-                    '<button data-action="marquerLueNotification" data-id="' + escapeHtmlLocal(n.id) + '" style="background:rgba(255,255,255,0.1);border:none;padding:4px 8px;border-radius:6px;color:#DAA520;cursor:pointer;font-size:10px;white-space:nowrap;">Marquer lue</button>' +
+                    '<button data-action="marquerLueNotification" data-id="' + escapeHtmlLocal(n.id) + '" style="background:var(--bg-soft);border:none;padding:4px 8px;border-radius:6px;color:var(--gold);cursor:pointer;font-size:10px;white-space:nowrap;">Marquer lue</button>' +
                 '</div>' +
             '</div>';
         }).join('');
@@ -78,7 +78,7 @@ async function init_notifications() {
         });
     } catch(e) {
         var listEl = document.getElementById('notificationsList');
-        if (listEl) listEl.innerHTML = '<p style="color:#EF4444;">Erreur : ' + escapeHtmlLocal(e.message) + '</p>';
+        if (listEl) listEl.innerHTML = '<p style="color:var(--error-fg);">Erreur : ' + escapeHtmlLocal(e.message) + '</p>';
     }
 }
 

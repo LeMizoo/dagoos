@@ -3,23 +3,45 @@
 // ========================================
 
 window.FLEET_THEME = {
-    // Surfaces — échelle claire
-    background:  '#F7F8FA',   // fond de page
-    card:        '#FFFFFF',   // carte principale
-    cardDark:    '#F1F5F9',   // sous-éléments dans une carte
+    // Surfaces
+    background: '#F7F8FA',
+    card: '#FFFFFF',
+    cardDark: '#F1F5F9',
+    elevated: '#E2E8F0',
 
-    // Accent jaune fleet — réservé aux actions
-    primary:     '#D99A00',   // jaune fleet (boutons, actions)
-    primaryDark: '#B98200',   // jaune foncé (hover, accents)
+    // Texte — charte bleu marine
+    text: '#06245F',
+    textSecondary: '#4A5A7A',
+    textMuted: '#94A3B8',
+    textFaint: '#94A3B8',
+
+    // Accent fleet — vert
+    primary: '#0A6F35',
+    primaryDark: '#085A2B',
+    accent: '#0A6F35',
+    accentHover: '#085A2B',
+    accentSoft: '#E6F4EA',
+
+    // Accent secondaire — or safran
+    gold: '#E0A01C',
+    goldHover: '#C68B15',
 
     // États
-    success:     '#22C55E',
-    danger:      '#DC2626',
-    warning:     '#D97706',
-    info:        '#2563EB',
+    success: '#0A6F35',
+    danger: '#DC2626',
+    warning: '#E0A01C',
+    info: '#06245F',
 
-    // Texte — hiérarchie par la lumière
-    text:        '#1E293B',   // texte principal
-    textMuted:   '#64748B',   // texte secondaire
-    textFaint:   '#94A3B8'    // texte discret
+    // Fonds d'état
+    errorBg: '#FEF2F2',
+    successBg: '#E6F4EA',
+    warningBg: '#FEF3C7',
+    infoBg: '#EFF6FF',
+
+    // Texte sur accent
+    textOnAccent: '#FFFFFF',
+
+    // Bordures
+    border: '#E2E8F0',
+    borderStrong: '#CBD5E1'
 };

@@ -400,7 +400,7 @@ async function init_home() {
 
     main.innerHTML =
         getHeaderHTML() +
-        '<div style="padding:40px;text-align:center;color:#94A3B8;">' +
+        '<div style="padding:40px;text-align:center;color:var(--text-muted);">' +
             'Chargement du tableau de bord...' +
         '</div>';
 
@@ -559,10 +559,10 @@ async function init_home() {
 
     var statusColor =
         statutPresence === 'present'
-            ? ''+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +''
+            ? ''+ (window.FLEET_THEME ? window.FLEET_THEME.success : 'var(--success-fg)') +''
             : statutPresence === 'pause'
-                ? ''+ (window.FLEET_THEME ? window.FLEET_THEME.warning : '#F59E0B') +''
-                : ''+ (window.FLEET_THEME ? window.FLEET_THEME.danger : '#E74C3C') +'';
+                ? ''+ (window.FLEET_THEME ? window.FLEET_THEME.warning : 'var(--gold)') +''
+                : ''+ (window.FLEET_THEME ? window.FLEET_THEME.danger : 'var(--error-fg)') +'';
 
     var plate =
         currentVehicle &&
@@ -596,7 +596,7 @@ async function init_home() {
 
     main.innerHTML =
         // HEADER
-        '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid '+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';">' +
+        '<div style="background:var(--text-primary);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--accent);">' +
 
             '<div style="display:flex;align-items:center;gap:8px;">' +
 
@@ -605,36 +605,36 @@ async function init_home() {
                         ? '<img src="' +
                           escapeHtml(logo) +
                           '" style="width:36px;height:36px;object-fit:contain;border-radius:8px;">'
-                        : '<div style="width:36px;height:36px;border-radius:8px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';"></div>'
+                        : '<div style="width:36px;height:36px;border-radius:8px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : 'var(--bg-soft)') +';"></div>'
                 ) +
 
                 '<div>' +
 
-                    '<div style="font-size:14px;font-weight:700;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';">' +
+                    '<div style="font-size:14px;font-weight:700;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : 'var(--accent)') +';">' +
                         escapeHtml(user.name || 'Chauffeur') +
                     '</div>' +
 
-                    '<div style="font-size:10px;color:#94A3B8;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">' +
+                    '<div style="font-size:10px;color:var(--text-muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap;">' +
 
-                        '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';">' +
+                        '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:var(--bg-soft);color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : 'var(--accent)') +';">' +
                             'Flotte' +
                         '</span>' +
 
                         '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:' +
                             statusColor +
-                            ';color:#fff;">' +
+                            ';color:var(--text-on-accent);">' +
                             statusLabel +
                         '</span>' +
 
                         (
                             plate
-                                ? '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:#2a2a2a;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';">' +
+                                ? '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:var(--bg-soft);color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : 'var(--accent)') +';">' +
                                   escapeHtml(plate) +
                                   '</span>'
-                                : '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.danger : '#E74C3C') +';color:#fff;">Sans véhicule</span>'
+                                : '<span style="padding:2px 6px;border-radius:20px;font-size:9px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.danger : 'var(--error-fg)') +';color:var(--text-on-accent);">Sans véhicule</span>'
                         ) +
 
-                        '<span style="color:#94A3B8;">' +
+                        '<span style="color:var(--text-muted);">' +
                             escapeHtml(user.driverCode || '') +
                         '</span>' +
 
@@ -644,10 +644,10 @@ async function init_home() {
 
             '<div style="display:flex;gap:4px;">' +
 
-                '<button onclick="loadPage(\'notifications\')" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';cursor:pointer;font-size:14px;position:relative;" aria-label="Notifications">🔔</button>' +
-                '<button onclick="loadPage(\'profil\')" style="background:rgba(255,255,255,0.1);border:none;width:32px;height:32px;border-radius:50%;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';cursor:pointer;font-size:14px;" aria-label="Profil">📶</button>' +
+                '<button onclick="loadPage(\'notifications\')" style="background:var(--bg-soft);border:none;width:32px;height:32px;border-radius:50%;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : 'var(--accent)') +';cursor:pointer;font-size:14px;position:relative;" aria-label="Notifications">🔔</button>' +
+                '<button onclick="loadPage(\'profil\')" style="background:var(--bg-soft);border:none;width:32px;height:32px;border-radius:50%;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : 'var(--accent)') +';cursor:pointer;font-size:14px;" aria-label="Profil">📶</button>' +
 
-                '<button onclick="logout()" style="background:rgba(239,68,68,0.15);border:none;width:32px;height:32px;border-radius:50%;color:#F87171;cursor:pointer;font-size:16px;" aria-label="Déconnexion">⏻</button>' +
+                '<button onclick="logout()" style="background:var(--error-bg);border:none;width:32px;height:32px;border-radius:50%;color:var(--error-fg);cursor:pointer;font-size:16px;" aria-label="Déconnexion">⏻</button>' +
 
             '</div>' +
         '</div>' +
@@ -661,7 +661,7 @@ async function init_home() {
             // COMPTE BLOQUE
             (
                 estBloque
-                    ? '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.danger : '#E74C3C') +';color:#fff;padding:10px;border-radius:10px;text-align:center;margin-bottom:10px;">' +
+                    ? '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.danger : 'var(--error-fg)') +';color:var(--text-on-accent);padding:10px;border-radius:10px;text-align:center;margin-bottom:10px;">' +
                         'Compte bloqué - Régularisez vos versements' +
                       '</div>'
                     : ''
@@ -673,7 +673,7 @@ async function init_home() {
                 // Bouton DÉBUT — visible si NON_DEBUTE
                 (
                     statutPresence === 'absent'
-                        ? '<button onclick="changeStatus(\'present\')" style="flex:1;padding:12px 6px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
+                        ? '<button onclick="changeStatus(\'present\')" style="flex:1;padding:12px 6px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : 'var(--success-fg)') +';color:var(--text-on-accent);border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
                             (estBloque ? 'disabled' : '') +
                         '>' +
                             'Début' +
@@ -684,7 +684,7 @@ async function init_home() {
                 // Bouton PAUSE — visible si PRESENT
                 (
                     statutPresence === 'present'
-                        ? '<button onclick="changeStatus(\'pause\')" style="flex:1;padding:12px 6px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.warning : '#F59E0B') +';color:#000;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
+                        ? '<button onclick="changeStatus(\'pause\')" style="flex:1;padding:12px 6px;background:var(--gold);color:var(--text-primary);border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
                             (estBloque ? 'disabled' : '') +
                         '>' +
                             'Pause' +
@@ -695,7 +695,7 @@ async function init_home() {
                 // Bouton REPRISE — visible si PAUSE
                 (
                     statutPresence === 'pause'
-                        ? '<button onclick="changeStatus(\'reprise\')" style="flex:1;padding:12px 6px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
+                        ? '<button onclick="changeStatus(\'reprise\')" style="flex:1;padding:12px 6px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : 'var(--success-fg)') +';color:var(--text-on-accent);border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
                             (estBloque ? 'disabled' : '') +
                         '>' +
                             'Reprise' +
@@ -706,7 +706,7 @@ async function init_home() {
                 // Bouton FIN — visible si PRESENT ou PAUSE
                 (
                     statutPresence === 'present' || statutPresence === 'pause'
-                        ? '<button onclick="changeStatus(\'termine\')" style="flex:1;padding:12px 6px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.danger : '#E74C3C') +';color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
+                        ? '<button onclick="changeStatus(\'termine\')" style="flex:1;padding:12px 6px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.danger : 'var(--error-fg)') +';color:var(--text-on-accent);border:none;border-radius:14px;cursor:pointer;font-weight:700;font-size:12px;" ' +
                             (estBloque ? 'disabled' : '') +
                         '>' +
                             'Fin' +
@@ -717,73 +717,73 @@ async function init_home() {
             '</div>' +
 
             // STATISTIQUES JOUR
-            '<div class="card" style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:14px;margin-bottom:10px;">' +
+            '<div class="card" style="background:var(--bg-surface);border-radius:12px;padding:14px;margin-bottom:10px;">' +
 
-                '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';margin-bottom:10px;font-size:13px;">Aujourd\'hui</h3>' +
+                '<h3 style="color:var(--text-primary);margin-bottom:10px;font-size:13px;">Aujourd\'hui</h3>' +
 
                 '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;">' +
 
-                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:10px;padding:8px;">' +
-                        '<div style="font-size:18px;font-weight:800;color:#fff;" id="statCoursesJour">0</div>' +
-                        '<div style="font-size:9px;color:#888;">Courses</div>' +
+                    '<div style="background:var(--bg-soft);border-radius:10px;padding:8px;">' +
+                        '<div style="font-size:18px;font-weight:800;color:var(--text-primary);" id="statCoursesJour">0</div>' +
+                        '<div style="font-size:9px;color:var(--text-muted);">Courses</div>' +
                     '</div>' +
 
-                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:10px;padding:8px;">' +
-                        '<div style="font-size:18px;font-weight:800;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';" id="statCAJour">0</div>' +
-                        '<div style="font-size:9px;color:#888;">CA</div>' +
+                    '<div style="background:var(--bg-soft);border-radius:10px;padding:8px;">' +
+                        '<div style="font-size:18px;font-weight:800;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : 'var(--success-fg)') +';" id="statCAJour">0</div>' +
+                        '<div style="font-size:9px;color:var(--text-muted);">CA</div>' +
                     '</div>' +
 
-                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:10px;padding:8px;">' +
-                        '<div style="font-size:18px;font-weight:800;color:#3B82F6;" id="statCommissionJour">0</div>' +
-                        '<div style="font-size:9px;color:#888;">Part chauffeur</div>' +
+                    '<div style="background:var(--bg-soft);border-radius:10px;padding:8px;">' +
+                        '<div style="font-size:18px;font-weight:800;color:var(--info-fg);" id="statCommissionJour">0</div>' +
+                        '<div style="font-size:9px;color:var(--text-muted);">Part chauffeur</div>' +
                     '</div>' +
 
-                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:10px;padding:8px;">' +
-                        '<div style="font-size:18px;font-weight:800;color:#8B5CF6;" id="statNetJour">0</div>' +
-                        '<div style="font-size:9px;color:#888;">À verser</div>' +
+                    '<div style="background:var(--bg-soft);border-radius:10px;padding:8px;">' +
+                        '<div style="font-size:18px;font-weight:800;color:var(--accent);" id="statNetJour">0</div>' +
+                        '<div style="font-size:9px;color:var(--text-muted);">À verser</div>' +
                     '</div>' +
 
                 '</div>' +
             '</div>' +
 
             // STATISTIQUES SEMAINE
-            '<div class="card" style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:14px;margin-bottom:10px;">' +
+            '<div class="card" style="background:var(--bg-surface);border-radius:12px;padding:14px;margin-bottom:10px;">' +
 
-                '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';margin-bottom:10px;font-size:13px;">Cette semaine</h3>' +
+                '<h3 style="color:var(--text-primary);margin-bottom:10px;font-size:13px;">Cette semaine</h3>' +
 
                 '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;">' +
 
-                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:10px;padding:8px;">' +
-                        '<div style="font-size:16px;font-weight:800;color:#fff;" id="statCoursesSem">0</div>' +
-                        '<div style="font-size:9px;color:#888;">Courses</div>' +
+                    '<div style="background:var(--bg-soft);border-radius:10px;padding:8px;">' +
+                        '<div style="font-size:16px;font-weight:800;color:var(--text-primary);" id="statCoursesSem">0</div>' +
+                        '<div style="font-size:9px;color:var(--text-muted);">Courses</div>' +
                     '</div>' +
 
-                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:10px;padding:8px;">' +
-                        '<div style="font-size:16px;font-weight:800;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';" id="statCASem">0</div>' +
-                        '<div style="font-size:9px;color:#888;">CA</div>' +
+                    '<div style="background:var(--bg-soft);border-radius:10px;padding:8px;">' +
+                        '<div style="font-size:16px;font-weight:800;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : 'var(--success-fg)') +';" id="statCASem">0</div>' +
+                        '<div style="font-size:9px;color:var(--text-muted);">CA</div>' +
                     '</div>' +
 
-                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:10px;padding:8px;">' +
-                        '<div style="font-size:16px;font-weight:800;color:#3B82F6;" id="statCommissionSem">0</div>' +
-                        '<div style="font-size:9px;color:#888;">Part chauffeur</div>' +
+                    '<div style="background:var(--bg-soft);border-radius:10px;padding:8px;">' +
+                        '<div style="font-size:16px;font-weight:800;color:var(--info-fg);" id="statCommissionSem">0</div>' +
+                        '<div style="font-size:9px;color:var(--text-muted);">Part chauffeur</div>' +
                     '</div>' +
 
-                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border-radius:10px;padding:8px;">' +
-                        '<div style="font-size:16px;font-weight:800;color:#8B5CF6;" id="statNetSem">0</div>' +
-                        '<div style="font-size:9px;color:#888;">À verser</div>' +
+                    '<div style="background:var(--bg-soft);border-radius:10px;padding:8px;">' +
+                        '<div style="font-size:16px;font-weight:800;color:var(--accent);" id="statNetSem">0</div>' +
+                        '<div style="font-size:9px;color:var(--text-muted);">À verser</div>' +
                     '</div>' +
 
                 '</div>' +
             '</div>' +
 
             // NOUVELLE COURSE
-            '<div class="card" style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:14px;margin-bottom:10px;">' +
+            '<div class="card" style="background:var(--bg-surface);border-radius:12px;padding:14px;margin-bottom:10px;">' +
 
-                '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';margin-bottom:10px;font-size:13px;">Nouvelle course</h3>' +
+                '<h3 style="color:var(--text-primary);margin-bottom:10px;font-size:13px;">Nouvelle course</h3>' +
 
                 '<div style="display:flex;gap:8px;margin-bottom:8px;">' +
 
-                    '<select id="typeCourse" onchange="updateCourseForm()" style="flex:1;padding:8px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;">' +
+                    '<select id="typeCourse" onchange="updateCourseForm()" style="flex:1;padding:8px;background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-size:12px;">' +
                         typeOptions +
                     '</select>' +
 
@@ -799,7 +799,7 @@ async function init_home() {
                             ? 'disabled'
                             : ''
                     ) +
-                    ' style="width:100%;padding:12px;background:#F1C40F;color:#1A1A2E;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;">' +
+                    ' style="width:100%;padding:12px;background:var(--gold);color:var(--text-primary);border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;">' +
                     'Enregistrer la course' +
                 '</button>' +
 
@@ -808,45 +808,45 @@ async function init_home() {
             '</div>' +
 
             // DEPENSES
-            '<div class="card" style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:14px;margin-bottom:10px;">' +
+            '<div class="card" style="background:var(--bg-surface);border-radius:12px;padding:14px;margin-bottom:10px;">' +
 
-                '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';margin-bottom:10px;font-size:13px;">Dépenses du jour</h3>' +
+                '<h3 style="color:var(--text-primary);margin-bottom:10px;font-size:13px;">Dépenses du jour</h3>' +
 
                 '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;">' +
 
-                    '<button onclick="addExpense(\'carburant\')" style="padding:10px 4px;background:#1A1A2E;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';border:1px solid '+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';border-radius:8px;cursor:pointer;font-size:10px;">Carburant</button>' +
+                    '<button onclick="addExpense(\'carburant\')" style="padding:10px 4px;background:var(--bg-soft);color:var(--accent);border:1px solid var(--accent);border-radius:8px;cursor:pointer;font-size:10px;">Carburant</button>' +
 
-                    '<button onclick="addExpense(\'entretien\')" style="padding:10px 4px;background:#1A1A2E;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';border:1px solid '+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';border-radius:8px;cursor:pointer;font-size:10px;">Entretien</button>' +
+                    '<button onclick="addExpense(\'entretien\')" style="padding:10px 4px;background:var(--bg-soft);color:var(--accent);border:1px solid var(--accent);border-radius:8px;cursor:pointer;font-size:10px;">Entretien</button>' +
 
-                    '<button onclick="addExpense(\'pneu\')" style="padding:10px 4px;background:#1A1A2E;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';border:1px solid '+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';border-radius:8px;cursor:pointer;font-size:10px;">Pneus</button>' +
+                    '<button onclick="addExpense(\'pneu\')" style="padding:10px 4px;background:var(--bg-soft);color:var(--accent);border:1px solid var(--accent);border-radius:8px;cursor:pointer;font-size:10px;">Pneus</button>' +
 
-                    '<button onclick="addExpense(\'autre\')" style="padding:10px 4px;background:#1A1A2E;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';border:1px solid '+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';border-radius:8px;cursor:pointer;font-size:10px;">Autre</button>' +
+                    '<button onclick="addExpense(\'autre\')" style="padding:10px 4px;background:var(--bg-soft);color:var(--accent);border:1px solid var(--accent);border-radius:8px;cursor:pointer;font-size:10px;">Autre</button>' +
 
                 '</div>' +
 
                 '<div id="expensesList" style="max-height:120px;overflow-y:auto;font-size:11px;"></div>' +
 
-                '<div id="expensesTotal" style="margin-top:8px;text-align:right;font-weight:700;color:#EF4444;font-size:12px;"></div>' +
+                '<div id="expensesTotal" style="margin-top:8px;text-align:right;font-weight:700;color:var(--error-fg);font-size:12px;"></div>' +
 
             '</div>' +
 
             // ASSIGNATION
-            '<div class="card" style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';border-radius:12px;padding:14px;margin-bottom:10px;">' +
+            '<div class="card" style="background:var(--bg-surface);border-radius:12px;padding:14px;margin-bottom:10px;">' +
 
-                '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';margin-bottom:8px;font-size:13px;">Assignation</h3>' +
+                '<h3 style="color:var(--text-primary);margin-bottom:8px;font-size:13px;">Assignation</h3>' +
 
                 '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">' +
 
                     '<div>' +
-                        '<span style="color:#94A3B8;">Véhicule</span><br>' +
-                        '<span style="font-weight:600;color:#fff;" id="assignedVehicle">' +
+                        '<span style="color:var(--text-muted);">Véhicule</span><br>' +
+                        '<span style="font-weight:600;color:var(--text-primary);" id="assignedVehicle">' +
                             escapeHtml(plate || 'Aucun') +
                         '</span>' +
                     '</div>' +
 
                     '<div>' +
-                        '<span style="color:#94A3B8;">Organisation</span><br>' +
-                        '<span style="font-weight:600;color:#fff;">' +
+                        '<span style="color:var(--text-muted);">Organisation</span><br>' +
+                        '<span style="font-weight:600;color:var(--text-primary);">' +
                             escapeHtml(orgName) +
                         '</span>' +
                     '</div>' +
@@ -854,7 +854,7 @@ async function init_home() {
                 '</div>' +
                 '<div id="vehicleAssignmentRequestArea" style="margin-top:10px;">' +
                     (!plate
-                        ? '<button id="vehicleRequestButton" onclick="demanderVehicule()" style="width:100%;padding:11px;background:' + (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') + ';color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;">🚗 Demander une assignation</button>' +
+                        ? '<button id="vehicleRequestButton" onclick="demanderVehicule()" style="width:100%;padding:11px;background:' + (window.FLEET_THEME ? window.FLEET_THEME.primary : 'var(--accent)') + ';color:var(--text-on-accent);border:none;border-radius:8px;font-weight:700;cursor:pointer;">🚗 Demander une assignation</button>' +
                           '<div id="vehicleRequestMessage" style="margin-top:8px;text-align:center;font-size:11px;"></div>'
                         : '') +
                 '</div>' +
@@ -914,7 +914,7 @@ async function init_home() {
 
 function getHeaderLoadingHTML() {
     return (
-        '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : '#1E293B') +';padding:14px;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';text-align:center;border-bottom:1px solid '+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';">' +
+        '<div style="background:var(--text-primary);padding:14px;color:var(--text-on-accent);text-align:center;border-bottom:1px solid var(--gold);">' +
             'Dagoo\'s Fleet Driver' +
         '</div>'
     );
@@ -968,25 +968,25 @@ async function loadCourseNotifications() {
         }
 
         var notifHtml =
-            '<div id="courseNotifications" style="background:#FEF3C7;border-radius:12px;padding:12px;margin-bottom:12px;">' +
+            '<div id="courseNotifications" style="background:var(--warning-bg);border-radius:12px;padding:12px;margin-bottom:12px;">' +
 
-                '<p style="font-weight:bold;color:#92400E;margin-bottom:8px;">' +
+                '<p style="font-weight:bold;color:var(--text-primary);margin-bottom:8px;">' +
                     'Nouvelles courses disponibles' +
                 '</p>';
 
         notifs.forEach(function (notification) {
 
             notifHtml +=
-                '<div style="background:white;border-radius:8px;padding:10px;margin-bottom:6px;">' +
+                '<div style="background:var(--bg-surface);border-radius:8px;padding:10px;margin-bottom:6px;">' +
 
-                    '<p style="font-weight:bold;color:#1F2937;">' +
+                    '<p style="font-weight:bold;color:var(--text-primary);">' +
                         escapeHtml(
                             notification.title ||
                             'Course disponible'
                         ) +
                     '</p>' +
 
-                    '<p style="font-size:12px;color:#6B7280;margin-top:2px;">' +
+                    '<p style="font-size:12px;color:var(--text-secondary);margin-top:2px;">' +
                         escapeHtml(
                             notification.message || ''
                         ) +
@@ -998,7 +998,7 @@ async function loadCourseNotifications() {
                             escapeAttribute(notification.leadActionId || notification.id) +
                             '" data-notification-id="' +
                             escapeAttribute(notification.id) +
-                            '" style="flex:1;background:#10B981;color:white;border:none;padding:8px 12px;border-radius:6px;font-weight:bold;">' +
+                            '" style="flex:1;background:var(--success-fg);color:var(--text-on-accent);border:none;padding:8px 12px;border-radius:6px;font-weight:bold;">' +
                             'Accepter' +
                         '</button>' +
 
@@ -1006,7 +1006,7 @@ async function loadCourseNotifications() {
                             escapeAttribute(notification.leadActionId || notification.id) +
                             '" data-notification-id="' +
                             escapeAttribute(notification.id) +
-                            '" style="flex:1;background:#EF4444;color:white;border:none;padding:8px 12px;border-radius:6px;font-weight:bold;">' +
+                            '" style="flex:1;background:var(--error-fg);color:var(--text-on-accent);border:none;padding:8px 12px;border-radius:6px;font-weight:bold;">' +
                             'Refuser' +
                         '</button>' +
 
@@ -1259,7 +1259,7 @@ function updateCourseForm() {
 
     var commissionPct = getCommissionPct();
     var commissionLine =
-        '<div style="font-size:10px;color:#888;text-align:center;margin-bottom:8px;">' +
+        '<div style="font-size:10px;color:var(--text-muted);text-align:center;margin-bottom:8px;">' +
             'Part chauffeur : ' + commissionPct + ' % · À verser : ' + (100 - commissionPct) + ' %' +
         '</div>';
 
@@ -1269,7 +1269,7 @@ function updateCourseForm() {
             getLocationTarif(type);
 
         form.innerHTML =
-            '<div style="text-align:center;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';padding:10px;">' +
+            '<div style="text-align:center;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : 'var(--accent)') +';padding:10px;">' +
 
                 (
                     locationTarif > 0
@@ -1281,7 +1281,7 @@ function updateCourseForm() {
 
             '</div>' +
 
-            '<div style="font-size:10px;color:#888;text-align:center;margin-bottom:8px;">' +
+            '<div style="font-size:10px;color:var(--text-muted);text-align:center;margin-bottom:8px;">' +
                 'La tarification est fournie par l\'organisation.' +
             '</div>';
 
@@ -1291,7 +1291,7 @@ function updateCourseForm() {
     if (type === 'adyVarotra') {
 
         form.innerHTML =
-            '<input type="number" id="montantAdy" placeholder="Montant négocié (Ar)" min="1" style="width:100%;padding:8px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;margin-bottom:8px;">' +
+            '<input type="number" id="montantAdy" placeholder="Montant négocié (Ar)" min="1" style="width:100%;padding:8px;background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-size:12px;margin-bottom:8px;">' +
             commissionLine;
 
         return;
@@ -1302,7 +1302,7 @@ function updateCourseForm() {
         var fixe = getBaseTarif(type);
 
         form.innerHTML =
-            '<div style="text-align:center;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';padding:10px;font-size:16px;font-weight:700;" id="prixCalc">' +
+            '<div style="text-align:center;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : 'var(--accent)') +';padding:10px;font-size:16px;font-weight:700;" id="prixCalc">' +
                 (fixe > 0 ? formatAmount(fixe) : 'Tarif indisponible') +
             '</div>' +
             commissionLine;
@@ -1313,17 +1313,17 @@ function updateCourseForm() {
     form.innerHTML =
         '<div style="display:flex;gap:8px;margin-bottom:8px;">' +
 
-            '<input type="number" id="kmDepart" placeholder="Km départ" step="0.1" min="0" oninput="calcCourse()" style="flex:1;padding:8px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;">' +
+            '<input type="number" id="kmDepart" placeholder="Km départ" step="0.1" min="0" oninput="calcCourse()" style="flex:1;padding:8px;background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-size:12px;">' +
 
-            '<input type="number" id="kmArrivee" placeholder="Km arrivée" step="0.1" min="0" oninput="calcCourse()" style="flex:1;padding:8px;background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : '#252525') +';border:1px solid #333;border-radius:8px;color:#fff;font-size:12px;">' +
+            '<input type="number" id="kmArrivee" placeholder="Km arrivée" step="0.1" min="0" oninput="calcCourse()" style="flex:1;padding:8px;background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-size:12px;">' +
 
         '</div>' +
 
-        '<div style="text-align:center;color:#94A3B8;font-size:11px;margin-bottom:8px;">' +
+        '<div style="text-align:center;color:var(--text-muted);font-size:11px;margin-bottom:8px;">' +
 
             'Distance : <span id="distanceCalc">0</span> km' +
 
-            ' | Prix : <span id="prixCalc" style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : '#DAA520') +';font-weight:700;">0 Ar</span>' +
+            ' | Prix : <span id="prixCalc" style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : 'var(--accent)') +';font-weight:700;">0 Ar</span>' +
 
         '</div>' +
 
@@ -1354,7 +1354,7 @@ async function enregistrerCourse() {
     if (!currentVehicle || !currentVehicle.id) {
         if (msg) {
             msg.innerHTML =
-                '<span style="color:#F87171;">Véhicule non assigné</span>';
+                '<span style="color:var(--error-fg);">Véhicule non assigné</span>';
         }
 
         return;
@@ -1380,7 +1380,7 @@ async function enregistrerCourse() {
 
             if (msg) {
                 msg.innerHTML =
-                    '<span style="color:#F87171;">Km invalides</span>';
+                    '<span style="color:var(--error-fg);">Km invalides</span>';
             }
 
             return;
@@ -1395,7 +1395,7 @@ async function enregistrerCourse() {
 
             if (msg) {
                 msg.innerHTML =
-                    '<span style="color:#F87171;">Tarif de course indisponible</span>';
+                    '<span style="color:var(--error-fg);">Tarif de course indisponible</span>';
             }
 
             return;
@@ -1423,7 +1423,7 @@ async function enregistrerCourse() {
 
             if (msg) {
                 msg.innerHTML =
-                    '<span style="color:#F87171;">Montant requis</span>';
+                    '<span style="color:var(--error-fg);">Montant requis</span>';
             }
 
             return;
@@ -1442,7 +1442,7 @@ async function enregistrerCourse() {
 
             if (msg) {
                 msg.innerHTML =
-                    '<span style="color:#F87171;">Tarif indisponible</span>';
+                    '<span style="color:var(--error-fg);">Tarif indisponible</span>';
             }
 
             return;
@@ -1461,7 +1461,7 @@ async function enregistrerCourse() {
 
             if (msg) {
                 msg.innerHTML =
-                    '<span style="color:#F87171;">Tarif de location indisponible</span>';
+                    '<span style="color:var(--error-fg);">Tarif de location indisponible</span>';
             }
 
             return;
@@ -1544,7 +1544,7 @@ async function enregistrerCourse() {
 
             if (msg) {
                 msg.innerHTML =
-                    '<span style="color:#F87171;">' +
+                    '<span style="color:var(--error-fg);">' +
                     escapeHtml(
                         data.error ||
                         data.message ||
@@ -1558,7 +1558,7 @@ async function enregistrerCourse() {
 
         if (msg) {
             msg.innerHTML =
-                '<span style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : '#22C55E') +';">' +
+                '<span style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : 'var(--success-fg)') +';">' +
                     'Course enregistrée avec succès' +
                 '</span>';
         }
@@ -1591,7 +1591,7 @@ async function enregistrerCourse() {
 
         if (msg) {
             msg.innerHTML =
-                '<span style="color:#F87171;">' +
+                '<span style="color:var(--error-fg);">' +
                     'Erreur réseau' +
                 '</span>';
         }
@@ -1693,7 +1693,7 @@ function afficherCourseActive() {
             '<button data-action="demarrer-course-home" data-course-id="' +
             escapeAttribute(courseActive.id) +
             '" ' +
-            'style="width:100%;background:#10B981;color:white;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">' +
+            'style="width:100%;background:var(--success-fg);color:var(--text-on-accent);border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">' +
             'Démarrer' +
             '</button>';
     }
@@ -1706,23 +1706,23 @@ function afficherCourseActive() {
             '<button data-action="terminer-course-home" data-course-id="' +
             escapeAttribute(courseActive.id) +
             '" ' +
-            'style="width:100%;background:#F1C40F;color:#1A1A2E;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">' +
+            'style="width:100%;background:var(--gold);color:var(--text-primary);border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">' +
             'Terminer' +
             '</button>';
     }
 
     card.innerHTML =
-        '<div style="background:#FEF3C7;border-radius:12px;padding:12px;margin-bottom:10px;border:2px solid #F59E0B;">' +
+        '<div style="background:var(--warning-bg);border-radius:12px;padding:12px;margin-bottom:10px;border:2px solid var(--gold);">' +
 
-            '<h3 style="font-weight:bold;color:#92400E;margin-bottom:8px;font-size:13px;">' +
+            '<h3 style="font-weight:bold;color:var(--text-primary);margin-bottom:8px;font-size:13px;">' +
                 'Course en cours' +
             '</h3>' +
 
-            '<p style="font-size:12px;color:#1F2937;font-weight:bold;">' +
+            '<p style="font-size:12px;color:var(--text-primary);font-weight:bold;">' +
                 escapeHtml(statutLabel) +
             '</p>' +
 
-            '<p style="font-size:12px;color:#6B7280;">' +
+            '<p style="font-size:12px;color:var(--text-secondary);">' +
                 'Client : ' +
                 escapeHtml(
                     courseActive.clientNom ||
@@ -1731,7 +1731,7 @@ function afficherCourseActive() {
                 ) +
             '</p>' +
 
-            '<p style="font-size:12px;color:#6B7280;">' +
+            '<p style="font-size:12px;color:var(--text-secondary);">' +
                 escapeHtml(
                     courseActive.adresseDepart ||
                     'Départ inconnu'
@@ -1743,12 +1743,12 @@ function afficherCourseActive() {
                 ) +
             '</p>' +
 
-            '<p style="font-size:12px;color:#1F2937;font-weight:bold;">' +
+            '<p style="font-size:12px;color:var(--text-primary);font-weight:bold;">' +
                 'Prix : ' +
                 formatAmount(courseActive.price) +
             '</p>' +
 
-            '<p style="font-size:11px;color:#6B7280;">' +
+            '<p style="font-size:11px;color:var(--text-secondary);">' +
                 'Part chauffeur : ' +
                 formatAmount(
                     courseActive.montantChauffeur ||
@@ -1756,7 +1756,7 @@ function afficherCourseActive() {
                 ) +
             '</p>' +
 
-            '<p style="font-size:11px;color:#6B7280;">' +
+            '<p style="font-size:11px;color:var(--text-secondary);">' +
                 'À verser : ' +
                 formatAmount(
                     courseActive.montantOrganisation ||
@@ -2351,7 +2351,7 @@ function renderExpenses() {
     if (!expenses.length) {
 
         list.innerHTML =
-            '<div style="color:#94A3B8;text-align:center;padding:10px;">' +
+            '<div style="color:var(--text-muted);text-align:center;padding:10px;">' +
                 'Aucune dépense' +
             '</div>';
 
@@ -2390,9 +2390,9 @@ function renderExpenses() {
             Number(expense.amount) || 0;
 
         html +=
-            '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #333;gap:8px;">' +
+            '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);gap:8px;">' +
 
-                '<span style="color:#94A3B8;font-size:11px;">' +
+                '<span style="color:var(--text-muted);font-size:11px;">' +
                     escapeHtml(
                         labels[expense.type] ||
                         expense.type
@@ -2403,7 +2403,7 @@ function renderExpenses() {
                     ) +
                 '</span>' +
 
-                '<span style="color:#F87171;font-weight:600;white-space:nowrap;">' +
+                '<span style="color:var(--error-fg);font-weight:600;white-space:nowrap;">' +
                     formatAmount(amount) +
                 '</span>' +
 
@@ -2477,7 +2477,7 @@ async function demanderVehicule() {
 
         if (result && result.ok) {
             if (msg) {
-                msg.innerHTML = '<span style="color:#22C55E;">✅ Demande envoyée à l’administrateur.</span>';
+                msg.innerHTML = '<span style="color:var(--success-fg);">✅ Demande envoyée à l’administrateur.</span>';
             }
 
             if (button) {
@@ -2491,7 +2491,7 @@ async function demanderVehicule() {
         console.error('Demande assignation véhicule:', e);
 
         if (msg) {
-            msg.innerHTML = '<span style="color:#F87171;">❌ ' +
+            msg.innerHTML = '<span style="color:var(--error-fg);">❌ ' +
                 escapeHtmlLocal(e.message || 'Erreur réseau') +
                 '</span>';
         }
