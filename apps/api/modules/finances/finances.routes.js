@@ -1061,4 +1061,132 @@ router.get('/stats/summary', authMiddleware, requirePermission('finances.read'),
   }
 });
 
+
+// ============================================================================
+// VALIDATION SECURISEE D'UN VERSEMENT
+// PATCH /api/finances/versements/:id
+// ============================================================================
+// La validation est une action métier dédiée :
+// - seul un utilisateur disposant de finances.manage peut l'effectuer ;
+// - un gestionnaire d'organisation ne peut valider que les versements
+//   appartenant à son organisation ;
+// - seul un versement encore en_attente peut être validé ;
+// - le montant, le chauffeur et la période ne sont jamais modifiés ;
+// - dateVersement est définie exclusivement par le backend.
+router.patch(
+  '/versements/:id',
+  authMiddleware,
+  requirePermission('finances.manage'),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      if (!id || typeof id !== 'string') {
+        return res.status(400).json({
+          error: 'Identifiant de versement invalide'
+        });
+      }
+
+      const versement = await prisma.versement.findUnique({
+        where: { id },
+        include: {
+          driver: {
+            select: {
+              id: true,
+              organizationId: true,
+              driverCode: true
+            }
+          }
+        }
+      });
+
+      if (!versement) {
+        return res.status(404).json({
+          error: 'Versement introuvable'
+        });
+      }
+
+      // Les rôles ADMIN/SUPER_ADMIN ont un périmètre global.
+      // Les gestionnaires d'organisation restent strictement limités
+      // à leur propre organisation.
+      const isGlobalRole =
+        req.user.role === 'SUPER_ADMIN' ||
+        req.user.role === 'ADMIN';
+
+      if (!isGlobalRole) {
+        const organizationId = await getOrganizationId(req);
+
+        if (
+          !organizationId ||
+          !versement.driver?.organizationId ||
+          versement.driver.organizationId !== organizationId
+        ) {
+          return res.status(403).json({
+            error: 'Accès interdit à ce versement'
+          });
+        }
+      }
+
+      if (versement.status !== 'en_attente') {
+        return res.status(409).json({
+          error: 'Ce versement a déjà été traité',
+          status: versement.status
+        });
+      }
+
+      // Mise à jour conditionnelle :
+      // si une autre requête a déjà validé le versement entre-temps,
+      // aucune seconde validation ne sera effectuée.
+      const result = await prisma.versement.updateMany({
+        where: {
+          id,
+          status: 'en_attente'
+        },
+        data: {
+          status: 'valide',
+          dateVersement: new Date()
+        }
+      });
+
+      if (result.count !== 1) {
+        return res.status(409).json({
+          error: 'Le versement vient déjà d’être traité'
+        });
+      }
+
+      const updated = await prisma.versement.findUnique({
+        where: { id },
+        include: {
+          driver: {
+            select: {
+              id: true,
+              driverCode: true,
+              organizationId: true,
+              user: {
+                select: {
+                  name: true
+                }
+              }
+            }
+          }
+        }
+      });
+
+      return res.status(200).json({
+        message: 'Versement validé',
+        versement: updated
+      });
+    } catch (error) {
+      console.error(
+        '[FINANCES] Erreur validation versement:',
+        error
+      );
+
+      return res.status(500).json({
+        error: 'Erreur lors de la validation du versement'
+      });
+    }
+  }
+);
+
 module.exports = router;
