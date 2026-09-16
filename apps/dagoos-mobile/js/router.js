@@ -34,7 +34,7 @@ window.loadPage = async function(pageName) {
     btn.classList.toggle('active', btn.dataset.page === pageName);
   });
 
-  container.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#94A3B8;">Chargement...</div>';
+  container.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--text-muted);">Chargement...</div>';
 
   try {
     var script = document.createElement('script');
@@ -50,12 +50,12 @@ window.loadPage = async function(pageName) {
       }
     };
     script.onerror = function() {
-      container.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#E74C3C;">Erreur de chargement</div>';
+      container.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--error-fg);">Erreur de chargement</div>';
     };
     document.body.appendChild(script);
   } catch (err) {
     console.error(err);
-    container.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#E74C3C;">Erreur</div>';
+    container.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--error-fg);">Erreur</div>';
   }
 };
 
