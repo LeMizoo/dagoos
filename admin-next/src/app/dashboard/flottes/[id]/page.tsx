@@ -79,7 +79,7 @@ export default function FleetDetailPage() {
     <div>
       {/* Fil d'Ariane */}
       <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-        <Link href="/dashboard/flottes" className="hover:text-blue-600 transition-colors">Flottes</Link>
+        <Link href="/dashboard/flottes" className="hover:text-primary transition-colors">Flottes</Link>
         <span>/</span>
         <span className="text-gray-800 font-medium truncate">{org.name}</span>
       </div>

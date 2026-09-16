@@ -103,16 +103,16 @@ export default function FleetDriversPage() {
   return (
     <div>
       <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-        <Link href="/dashboard/flottes" className="hover:text-blue-600">Flottes</Link>
+        <Link href="/dashboard/flottes" className="hover:text-primary">Flottes</Link>
         <span>/</span>
-        <Link href={`/dashboard/flottes/${id}`} className="hover:text-blue-600">Détail</Link>
+        <Link href={`/dashboard/flottes/${id}`} className="hover:text-primary">Détail</Link>
         <span>/</span>
         <span className="text-gray-800 font-medium">Chauffeurs</span>
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h1 className="text-2xl font-bold text-gray-900">👨‍✈️ Chauffeurs</h1>
-        <button onClick={openCreate} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition shrink-0">
+        <button onClick={openCreate} className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition shrink-0">
           <Plus size={18} /> Ajouter un chauffeur
         </button>
       </div>
@@ -154,7 +154,7 @@ export default function FleetDriversPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <button onClick={() => openEdit(d)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"><Pencil size={16} /></button>
+                      <button onClick={() => openEdit(d)} className="p-1.5 text-gray-400 hover:text-primary hover:bg-blue-50 rounded-lg"><Pencil size={16} /></button>
                       <button onClick={() => setDeleteConfirm(d)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>
                     </td>
                   </tr>
@@ -180,7 +180,7 @@ export default function FleetDriversPage() {
           </select>
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">Annuler</button>
-            <button type="submit" disabled={saving} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+            <button type="submit" disabled={saving} className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50">
               {saving ? '...' : editingDriver ? 'Enregistrer' : 'Ajouter'}
             </button>
           </div>

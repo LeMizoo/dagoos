@@ -99,7 +99,7 @@ export default function MessagesPage() {
               <div className="flex-1 p-4 overflow-y-auto"><p className="text-sm text-gray-700">{selectedMsg.content}</p></div>
               <div className="p-4 border-t flex gap-2">
                 <input type="text" value={reply} onChange={e => setReply(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSend()} placeholder="Votre réponse..." className="flex-1 px-3 py-2 border rounded-lg text-sm" />
-                <button onClick={handleSend} disabled={sending || !reply.trim()} className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-800 disabled:opacity-50 transition text-sm"><Send size={14} /> {sending ? 'Envoi...' : 'Envoyer'}</button>
+                <button onClick={handleSend} disabled={sending || !reply.trim()} className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-primary/80 disabled:opacity-50 transition text-sm"><Send size={14} /> {sending ? 'Envoi...' : 'Envoyer'}</button>
               </div>
             </>
           ) : (

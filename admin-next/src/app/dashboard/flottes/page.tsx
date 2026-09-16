@@ -146,7 +146,7 @@ export default function FlottesPage() {
         </div>
         <button
           onClick={openCreate}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition shadow-sm shrink-0"
+          className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition shadow-sm shrink-0"
         >
           <Plus size={18} />
           Nouvelle flotte
@@ -170,13 +170,13 @@ export default function FlottesPage() {
             placeholder="Rechercher par nom, email ou slug..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition"
           />
         </div>
         <select
           value={planFilter}
           onChange={e => setPlanFilter(e.target.value)}
-          className="px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+          className="px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
         >
           <option value="all">Tous les plans</option>
           {plans.map(p => (
@@ -186,7 +186,7 @@ export default function FlottesPage() {
         <select
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
-          className="px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+          className="px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
         >
           <option value="all">Tous les statuts</option>
           <option value="active">Actif</option>
@@ -235,7 +235,7 @@ export default function FlottesPage() {
                     <td className="px-4 py-3">
                       <Link href={`/dashboard/flottes/${org.id}`} className="flex items-center gap-2 group">
                         <Truck size={16} className="text-blue-500" />
-                        <span className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                        <span className="font-medium text-gray-900 group-hover:text-primary transition-colors">
                           {org.name}
                         </span>
                       </Link>
@@ -269,14 +269,14 @@ export default function FlottesPage() {
                       <div className="flex items-center justify-end gap-1">
                         <Link
                           href={`/dashboard/flottes/${org.id}`}
-                          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                          className="p-1.5 text-gray-400 hover:text-primary hover:bg-blue-50 rounded-lg transition"
                           title="Voir le détail"
                         >
                           <ChevronRight size={16} />
                         </Link>
                         <button
                           onClick={() => openEdit(org)}
-                          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                          className="p-1.5 text-gray-400 hover:text-primary hover:bg-blue-50 rounded-lg transition"
                           title="Modifier"
                         >
                           <Pencil size={16} />
@@ -316,7 +316,7 @@ export default function FlottesPage() {
               type="text"
               value={formData.name}
               onChange={e => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none"
               placeholder="Ex: Flotte Alasora"
               required
             />
@@ -327,7 +327,7 @@ export default function FlottesPage() {
               type="email"
               value={formData.email}
               onChange={e => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none"
               placeholder="Ex: contact@flotte.mg"
               required
             />
@@ -338,7 +338,7 @@ export default function FlottesPage() {
               <select
                 value={formData.plan}
                 onChange={e => setFormData({ ...formData, plan: e.target.value })}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
               >
                 <option value="FREEMIUM">Freemium</option>
                 <option value="STANDARD">Standard</option>
@@ -350,7 +350,7 @@ export default function FlottesPage() {
               <select
                 value={formData.status}
                 onChange={e => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
               >
                 <option value="active">Actif</option>
                 <option value="inactive">Inactif</option>
@@ -368,7 +368,7 @@ export default function FlottesPage() {
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/90 transition disabled:opacity-50 flex items-center gap-2"
             >
               {saving && <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />}
               {editingOrg ? 'Enregistrer' : 'Créer'}

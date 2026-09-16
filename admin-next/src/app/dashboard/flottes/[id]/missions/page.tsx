@@ -8,9 +8,9 @@ export default function FleetMissionsPage() {
   return (
     <div>
       <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-        <Link href="/dashboard/flottes" className="hover:text-blue-600">Flottes</Link>
+        <Link href="/dashboard/flottes" className="hover:text-primary">Flottes</Link>
         <span>/</span>
-        <Link href={`/dashboard/flottes/${id}`} className="hover:text-blue-600">Détail</Link>
+        <Link href={`/dashboard/flottes/${id}`} className="hover:text-primary">Détail</Link>
         <span>/</span>
         <span className="text-gray-800 font-medium">Missions</span>
       </div>
