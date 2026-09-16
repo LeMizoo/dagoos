@@ -42,15 +42,15 @@ function selectDriverType(type) {
     var btnCoop = document.getElementById('btnCoop');
     
     if (type === 'FLEET') {
-        btnFleet.style.background = '#DAA520';
-        btnFleet.style.color = '#1A1A2E';
-        btnCoop.style.background = '#1E293B';
-        btnCoop.style.color = '#DAA520';
+        btnFleet.style.background = 'var(--accent)';
+        btnFleet.style.color = 'var(--text-on-accent)';
+        btnCoop.style.background = 'var(--bg-soft)';
+        btnCoop.style.color = 'var(--accent)';
     } else {
-        btnCoop.style.background = '#DAA520';
-        btnCoop.style.color = '#1A1A2E';
-        btnFleet.style.background = '#1E293B';
-        btnFleet.style.color = '#DAA520';
+        btnCoop.style.background = 'var(--accent)';
+        btnCoop.style.color = 'var(--text-on-accent)';
+        btnFleet.style.background = 'var(--bg-soft)';
+        btnFleet.style.color = 'var(--accent)';
     }
     
     localStorage.setItem('dagoo_driver_type', type);
