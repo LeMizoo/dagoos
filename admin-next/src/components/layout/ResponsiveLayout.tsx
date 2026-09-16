@@ -100,10 +100,10 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
 
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
-      <aside className="hidden lg:flex w-60 bg-[#1A1A2E] dark:bg-gray-950 text-white fixed h-full flex-col z-40">
+      <aside className="hidden lg:flex w-60 bg-dark dark:bg-gray-950 text-white fixed h-full flex-col z-40">
         {sidebarContent}
       </aside>
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-[#1A1A2E] dark:bg-gray-950 text-white">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-dark dark:bg-gray-950 text-white">
         <div className="flex items-center justify-between px-4 py-3">
           <button onClick={() => setIsOpen(!isOpen)} className="p-1">{isOpen ? <X size={24} /> : <Menu size={24} />}</button>
           <div className="flex items-center gap-2">
@@ -116,7 +116,7 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
       {isOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setIsOpen(false)} />
-          <aside className="absolute left-0 top-0 h-full w-64 bg-[#1A1A2E] dark:bg-gray-950 text-white flex flex-col shadow-2xl pt-14">
+          <aside className="absolute left-0 top-0 h-full w-64 bg-dark dark:bg-gray-950 text-white flex flex-col shadow-2xl pt-14">
             {sidebarContent}
           </aside>
         </div>
@@ -133,7 +133,7 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
             <ThemeSwitcher />
             <div className="relative">
               <button onClick={() => setShowUserMenu(!showUserMenu)} className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg px-3 py-2 transition">
-              <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+              <div className="w-9 h-9 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm">
                 {user?.name?.charAt(0) || 'U'}
               </div>
               <div className="hidden sm:block text-left">

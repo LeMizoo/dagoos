@@ -80,3 +80,5 @@ reset-super-admin.fixed.js
 coverage/
 **/coverage/
 .nyc_output/
+*.bak-*
+*.bak-vague*

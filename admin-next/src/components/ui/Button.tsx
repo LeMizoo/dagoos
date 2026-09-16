@@ -11,7 +11,7 @@ interface ButtonProps {
 }
 
 const variants = {
-  primary: 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow',
+  primary: 'bg-primary text-white hover:bg-primary/90 shadow-sm hover:shadow',
   secondary: 'bg-gray-100 text-gray-700 hover:bg-gray-200',
   danger: 'bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow',
   ghost: 'bg-transparent text-gray-600 hover:bg-gray-100',
@@ -41,7 +41,7 @@ export default function Button({
         ${variants[variant]} ${sizes[size]}
         font-semibold transition-all duration-200
         disabled:opacity-50 disabled:cursor-not-allowed
-        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary
         ${className}
       `}
     >
