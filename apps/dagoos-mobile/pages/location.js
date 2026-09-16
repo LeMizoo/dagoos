@@ -10,84 +10,84 @@ function init_location() {
 
   var app = document.getElementById('app');
   app.innerHTML = `
-    <div style="background:#FFFFFF;padding:16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;border-bottom:1px solid rgba(245,158,11,0.2);">
+    <div style="background:var(--bg-surface);padding:16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;border-bottom:1px solid rgba(245,158,11,0.2);">
       <span style="font-size:24px;"><i data-lucide="bus" style="font-size:24px;"></i></span>
-      <div style="font-size:16px;font-weight:800;color:#D99A00;">Location de véhicules</div>
+      <div style="font-size:16px;font-weight:800;color:var(--accent);">Location de véhicules</div>
     </div>
     <div style="padding:16px;">
-      <p id="locSubtitle" style="text-align:center;color:#64748B;font-size:12px;margin-bottom:12px;">Location de véhicules en ville</p>
+      <p id="locSubtitle" style="text-align:center;color:var(--text-secondary);font-size:12px;margin-bottom:12px;">Location de véhicules en ville</p>
 
       <div style="display:flex;gap:8px;margin-bottom:16px;justify-content:center;">
-        <button id="btnUrbain" onclick="setModeLocation('urbain')" style="padding:8px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid #D99A00;background:#D99A00;color:#F7F8FA;cursor:pointer;">Urbain</button>
-        <button id="btnLongHaul" onclick="setModeLocation('long_haul')" style="padding:8px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid #D99A00;background:#FFFFFF;color:#D99A00;cursor:pointer;">Inter-urbain</button>
+        <button id="btnUrbain" onclick="setModeLocation('urbain')" style="padding:8px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid var(--accent);background:var(--accent);color:var(--text-on-accent);cursor:pointer;">Urbain</button>
+        <button id="btnLongHaul" onclick="setModeLocation('long_haul')" style="padding:8px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid var(--accent);background:var(--bg-surface);color:var(--accent);cursor:pointer;">Inter-urbain</button>
       </div>
 
-      <div style="background:#FFFFFF;border-radius:14px;padding:16px;margin-bottom:12px;">
-        <input id="locNom" placeholder="Votre nom" value="${info.name || ''}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;margin-bottom:8px;">
-        <input id="locTel" placeholder="Votre téléphone" value="${info.phone || ''}" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;margin-bottom:8px;">
+      <div style="background:var(--bg-surface);border-radius:14px;padding:16px;margin-bottom:12px;">
+        <input id="locNom" placeholder="Votre nom" value="${info.name || ''}" style="width:100%;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-page);color:var(--text-primary);margin-bottom:8px;">
+        <input id="locTel" placeholder="Votre téléphone" value="${info.phone || ''}" style="width:100%;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-page);color:var(--text-primary);margin-bottom:8px;">
 
         <div id="serviceContainer" style="margin-bottom:8px;"></div>
         <div id="vehiculeContainer" style="margin-bottom:8px;"></div>
 
-        <select id="locFlotte" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;margin-bottom:8px;">
+        <select id="locFlotte" style="width:100%;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-page);color:var(--text-primary);margin-bottom:8px;">
           <option value="">-- Choisir une organisation --</option>
         </select>
 
-        <select id="locTrajet" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;margin-bottom:8px;">
+        <select id="locTrajet" style="width:100%;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-page);color:var(--text-primary);margin-bottom:8px;">
           <option value="A_B">A → B (aller simple)</option>
           <option value="A_B_A">A → B → A (aller-retour même jour)</option>
           <option value="A_B_A_MULTI">A → B → A (multi-jours)</option>
         </select>
 
-        <input id="locDepart" placeholder="Adresse de départ" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;margin-bottom:8px;" onchange="estimerLocationMobile()">
-        <input id="locArrivee" placeholder="Adresse d'arrivée" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;margin-bottom:8px;" onchange="estimerLocationMobile()">
+        <input id="locDepart" placeholder="Adresse de départ" style="width:100%;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-page);color:var(--text-primary);margin-bottom:8px;" onchange="estimerLocationMobile()">
+        <input id="locArrivee" placeholder="Adresse d'arrivée" style="width:100%;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-page);color:var(--text-primary);margin-bottom:8px;" onchange="estimerLocationMobile()">
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
           <div>
-            <label style="font-size:10px;color:#64748B;display:block;margin-bottom:4px;">Date aller</label>
-            <input id="locDateAller" type="date" style="width:100%;padding:10px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;" onchange="estimerLocationMobile()">
+            <label style="font-size:10px;color:var(--text-secondary);display:block;margin-bottom:4px;">Date aller</label>
+            <input id="locDateAller" type="date" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-page);color:var(--text-primary);" onchange="estimerLocationMobile()">
           </div>
           <div>
-            <label style="font-size:10px;color:#64748B;display:block;margin-bottom:4px;">Heure départ</label>
-            <input id="locHeureDepart" type="time" value="08:00" style="width:100%;padding:10px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;">
+            <label style="font-size:10px;color:var(--text-secondary);display:block;margin-bottom:4px;">Heure départ</label>
+            <input id="locHeureDepart" type="time" value="08:00" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-page);color:var(--text-primary);">
           </div>
         </div>
 
         <div id="retourContainer" style="display:none;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
           <div>
-            <label style="font-size:10px;color:#64748B;display:block;margin-bottom:4px;">Date retour</label>
-            <input id="locDateRetour" type="date" style="width:100%;padding:10px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;" onchange="estimerLocationMobile()">
+            <label style="font-size:10px;color:var(--text-secondary);display:block;margin-bottom:4px;">Date retour</label>
+            <input id="locDateRetour" type="date" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-page);color:var(--text-primary);" onchange="estimerLocationMobile()">
           </div>
           <div>
-            <label style="font-size:10px;color:#64748B;display:block;margin-bottom:4px;">Heure retour</label>
-            <input id="locHeureRetour" type="time" value="18:00" style="width:100%;padding:10px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;">
+            <label style="font-size:10px;color:var(--text-secondary);display:block;margin-bottom:4px;">Heure retour</label>
+            <input id="locHeureRetour" type="time" value="18:00" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-page);color:var(--text-primary);">
           </div>
         </div>
 
-        <select id="locCarburant" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;margin-bottom:8px;" onchange="estimerLocationMobile()">
+        <select id="locCarburant" style="width:100%;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-page);color:var(--text-primary);margin-bottom:8px;" onchange="estimerLocationMobile()">
           <option value="AVEC">Avec carburant</option>
           <option value="SANS">Sans carburant</option>
         </select>
 
         <div id="descriptionContainer" style="display:none;margin-bottom:12px;">
-          <label style="font-size:10px;color:#64748B;display:block;margin-bottom:4px;">📦 Description de la marchandise</label>
-          <textarea id="locDescription" placeholder="Décrivez votre marchandise (nature, quantité, poids approximatif, particularités...)" rows="3" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;resize:vertical;font-family:inherit;font-size:13px;"></textarea>
+          <label style="font-size:10px;color:var(--text-secondary);display:block;margin-bottom:4px;">📦 Description de la marchandise</label>
+          <textarea id="locDescription" placeholder="Décrivez votre marchandise (nature, quantité, poids approximatif, particularités...)" rows="3" style="width:100%;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-page);color:var(--text-primary);resize:vertical;font-family:inherit;font-size:13px;"></textarea>
         </div>
 
         <div id="photosContainer" style="display:none;margin-bottom:12px;">
-          <label style="font-size:10px;color:#64748B;display:block;margin-bottom:4px;">📸 Photos (optionnel, max 5)</label>
-          <input id="locPhotos" type="file" accept="image/*" multiple style="width:100%;padding:10px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;font-size:11px;">
+          <label style="font-size:10px;color:var(--text-secondary);display:block;margin-bottom:4px;">📸 Photos (optionnel, max 5)</label>
+          <input id="locPhotos" type="file" accept="image/*" multiple style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-page);color:var(--text-primary);font-size:11px;">
           <div id="photosPreview" style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;"></div>
-          <p id="photosStatus" style="font-size:10px;color:#64748B;margin-top:6px;"></p>
+          <p id="photosStatus" style="font-size:10px;color:var(--text-secondary);margin-top:6px;"></p>
         </div>
 
         <div id="passagersContainer" style="display:none;margin-bottom:12px;">
-          <input id="locNbPassagers" type="number" placeholder="Nombre de passagers" min="1" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;">
+          <input id="locNbPassagers" type="number" placeholder="Nombre de passagers" min="1" style="width:100%;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-page);color:var(--text-primary);">
         </div>
 
         <div id="locEstimationResult" style="margin-bottom:12px;"></div>
 
-        <button onclick="demanderLocationMobile()" style="width:100%;padding:14px;background:#D99A00;color:#F7F8FA;border:none;border-radius:8px;font-weight:700;cursor:pointer;">Envoyer la demande</button>
+        <button onclick="demanderLocationMobile()" style="width:100%;padding:14px;background:var(--accent);color:var(--text-on-accent);border:none;border-radius:8px;font-weight:700;cursor:pointer;">Envoyer la demande</button>
       </div>
     </div>
   `;
@@ -109,15 +109,15 @@ function setModeLocation(nouveauMode) {
 
   [btnUrbain, btnLongHaul].forEach(function(btn) {
     if (btn) {
-      btn.style.background = '#FFFFFF';
-      btn.style.color = '#D99A00';
+      btn.style.background = 'var(--bg-surface)';
+      btn.style.color = 'var(--accent)';
     }
   });
 
   var btnActif = modeLocation === 'urbain' ? btnUrbain : btnLongHaul;
   if (btnActif) {
-    btnActif.style.background = '#D99A00';
-    btnActif.style.color = '#F7F8FA';
+    btnActif.style.background = 'var(--accent)';
+    btnActif.style.color = 'var(--text-on-accent)';
   }
 
   // Mettre à jour le sous-titre
@@ -177,8 +177,8 @@ function updateUI() {
 
   if (modeLocation === 'long_haul') {
     serviceContainer.innerHTML = `
-      <label style="font-size:10px;color:#64748B;display:block;margin-bottom:4px;">👥 Type de service</label>
-      <select id="locTypeService" onchange="updateVehiculeOptions()" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;margin-bottom:8px;">
+      <label style="font-size:10px;color:var(--text-secondary);display:block;margin-bottom:4px;">👥 Type de service</label>
+      <select id="locTypeService" onchange="updateVehiculeOptions()" style="width:100%;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-page);color:var(--text-primary);margin-bottom:8px;">
         <option value="passagers">Transport passagers</option>
         <option value="marchandises">Marchandises</option>
         <option value="demenagement">Déménagement</option>
@@ -191,7 +191,7 @@ function updateUI() {
   } else {
     serviceContainer.innerHTML = '';
     vehiculeContainer.innerHTML = `
-      <select id="locType" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;margin-bottom:8px;">
+      <select id="locType" style="width:100%;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-page);color:var(--text-primary);margin-bottom:8px;">
         <option value="moto">Moto</option>
         <option value="voiture">Voiture</option>
         <option value="bus">Bus</option>
@@ -268,7 +268,7 @@ function updateVehiculeOptions() {
     options += '<option value="' + vehicles[i].value + '">' + vehicles[i].label + '</option>';
   }
 
-  vehiculeContainer.innerHTML = '<label style="font-size:10px;color:#64748B;display:block;margin-bottom:4px;">🚌 Véhicule compatible</label><select id="locType" style="width:100%;padding:12px;border-radius:8px;border:1px solid #E2E8F0;background:#F7F8FA;color:#1E293B;margin-bottom:8px;">' + options + '</select>';
+  vehiculeContainer.innerHTML = '<label style="font-size:10px;color:var(--text-secondary);display:block;margin-bottom:4px;">🚌 Véhicule compatible</label><select id="locType" style="width:100%;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-page);color:var(--text-primary);margin-bottom:8px;">' + options + '</select>';
 }
 
 async function estimerLocationMobile() {
@@ -324,40 +324,40 @@ async function estimerLocationMobile() {
     // Cas 1 : Estimation calculée (PER_KM, FIXED, BAREME, PER_DAY)
     if (result.status === 'ESTIMATED' && result.price) {
       container.innerHTML = `
-        <div style="background:#F1F5F9;border-radius:12px;padding:16px;border:1px solid #D99A00;">
-          <p style="text-align:center;color:#D99A00;font-size:13px;font-weight:600;">Estimation</p>
-          <div style="font-size:11px;color:#64748B;">Distance</div>
-          <div style="font-size:22px;font-weight:800;color:#D99A00;">${result.distanceKm} km</div>
-          ${result.nbJours > 1 ? '<div style="font-size:11px;color:#64748B;margin-top:6px;">Nombre de jours</div><div style="font-weight:600;">' + result.nbJours + ' jours</div>' : ''}
-          <div style="font-size:11px;color:#64748B;margin-top:8px;">Prix estimé</div>
-          <div style="font-size:26px;font-weight:800;color:#D99A00;">${Number(result.price).toLocaleString('fr-FR')} Ar</div>
-          ${result.details && result.details.pricingMethod ? '<p style="text-align:center;color:#64748B;font-size:10px;margin-top:8px;">Tarif ' + result.details.pricingMethod + '</p>' : ''}
+        <div style="background:var(--bg-soft);border-radius:12px;padding:16px;border:1px solid var(--accent);">
+          <p style="text-align:center;color:var(--accent);font-size:13px;font-weight:600;">Estimation</p>
+          <div style="font-size:11px;color:var(--text-secondary);">Distance</div>
+          <div style="font-size:22px;font-weight:800;color:var(--accent);">${result.distanceKm} km</div>
+          ${result.nbJours > 1 ? '<div style="font-size:11px;color:var(--text-secondary);margin-top:6px;">Nombre de jours</div><div style="font-weight:600;">' + result.nbJours + ' jours</div>' : ''}
+          <div style="font-size:11px;color:var(--text-secondary);margin-top:8px;">Prix estimé</div>
+          <div style="font-size:26px;font-weight:800;color:var(--accent);">${Number(result.price).toLocaleString('fr-FR')} Ar</div>
+          ${result.details && result.details.pricingMethod ? '<p style="text-align:center;color:var(--text-secondary);font-size:10px;margin-top:8px;">Tarif ' + result.details.pricingMethod + '</p>' : ''}
         </div>
       `;
     }
     // Cas 2 : Négociation requise (NEGOTIATED)
     else if (result.status === 'NEGOTIATION_REQUIRED') {
       container.innerHTML = `
-        <div style="background:#F1F5F9;border-radius:12px;padding:16px;border:1px solid #2563EB;">
-          <p style="text-align:center;color:#2563EB;font-size:13px;font-weight:600;">💬 Prix à négocier</p>
-          <div style="font-size:11px;color:#64748B;">Distance</div>
-          <div style="font-size:22px;font-weight:800;color:#2563EB;">${result.distanceKm} km</div>
-          <div style="font-size:12px;color:#94A3B8;margin-top:12px;line-height:1.5;text-align:center;">
+        <div style="background:var(--bg-soft);border-radius:12px;padding:16px;border:1px solid var(--info-fg);">
+          <p style="text-align:center;color:var(--info-fg);font-size:13px;font-weight:600;">💬 Prix à négocier</p>
+          <div style="font-size:11px;color:var(--text-secondary);">Distance</div>
+          <div style="font-size:22px;font-weight:800;color:var(--info-fg);">${result.distanceKm} km</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:12px;line-height:1.5;text-align:center;">
             Le transporteur va vous contacter avec un prix personnalisé pour ce service.
           </div>
-          <p style="text-align:center;color:#64748B;font-size:10px;margin-top:8px;">Service : ${result.typeService || result.pricingModel}</p>
+          <p style="text-align:center;color:var(--text-secondary);font-size:10px;margin-top:8px;">Service : ${result.typeService || result.pricingModel}</p>
         </div>
       `;
     }
     // Cas fallback (ancienne API)
     else if (result.prixEstime) {
       container.innerHTML = `
-        <div style="background:#F1F5F9;border-radius:12px;padding:16px;border:1px solid #D99A00;">
-          <p style="text-align:center;color:#D99A00;font-size:13px;font-weight:600;">Estimation</p>
-          <div style="font-size:11px;color:#64748B;">Distance</div>
-          <div style="font-size:22px;font-weight:800;color:#D99A00;">${result.distanceKm} km</div>
-          <div style="font-size:11px;color:#64748B;margin-top:8px;">Prix</div>
-          <div style="font-size:26px;font-weight:800;color:#D99A00;">${Number(result.prixEstime).toLocaleString('fr-FR')} Ar</div>
+        <div style="background:var(--bg-soft);border-radius:12px;padding:16px;border:1px solid var(--accent);">
+          <p style="text-align:center;color:var(--accent);font-size:13px;font-weight:600;">Estimation</p>
+          <div style="font-size:11px;color:var(--text-secondary);">Distance</div>
+          <div style="font-size:22px;font-weight:800;color:var(--accent);">${result.distanceKm} km</div>
+          <div style="font-size:11px;color:var(--text-secondary);margin-top:8px;">Prix</div>
+          <div style="font-size:26px;font-weight:800;color:var(--accent);">${Number(result.prixEstime).toLocaleString('fr-FR')} Ar</div>
         </div>
       `;
     }
@@ -495,7 +495,7 @@ function afficherPhotosPreview(files) {
       var reader = new FileReader();
       reader.onload = function(e) {
         var container = document.createElement('div');
-        container.style.cssText = 'position:relative;width:60px;height:60px;border-radius:6px;overflow:hidden;border:1px solid #E2E8F0;';
+        container.style.cssText = 'position:relative;width:60px;height:60px;border-radius:6px;overflow:hidden;border:1px solid var(--border);';
 
         var img = document.createElement('img');
         img.src = e.target.result;
@@ -503,7 +503,7 @@ function afficherPhotosPreview(files) {
 
         var btn = document.createElement('button');
         btn.innerHTML = '×';
-        btn.style.cssText = 'position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:#DC2626;color:#fff;border:none;font-size:14px;line-height:1;cursor:pointer;padding:0;';
+        btn.style.cssText = 'position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:var(--error-fg);color:var(--text-on-accent);border:none;font-size:14px;line-height:1;cursor:pointer;padding:0;';
         btn.onclick = function() { supprimerPhoto(index); };
 
         container.appendChild(img);
