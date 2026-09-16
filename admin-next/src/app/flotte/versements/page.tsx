@@ -10,6 +10,7 @@ export default function FlotteVersements() {
   const [versements, setVersements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [validatingId, setValidatingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!organization?.id) return;
@@ -36,7 +37,36 @@ export default function FlotteVersements() {
   // Calculs
   const totalVerse = versements.reduce((sum, v) => sum + Number(v.amount || 0), 0);
   const enAttente = versements.filter(v => v.status === 'en_attente').length;
-  const confirmees = versements.filter(v => v.status !== 'en_attente').length;
+  const confirmees = versements.filter(v => v.status === 'valide').length;
+
+  const validateVersement = async (id: string) => {
+    if (!id || validatingId) return;
+
+    setError('');
+    setValidatingId(id);
+
+    try {
+      const response = await apiFetch(`/finances/versements/${id}`, {
+        method: 'PATCH',
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error ||
+          data?.message ||
+          `Erreur API (${response.status})`
+        );
+      }
+
+      await load();
+    } catch (e: any) {
+      setError(e?.message || 'Erreur lors de la validation');
+    } finally {
+      setValidatingId(null);
+    }
+  };
 
   return (
     <div>
@@ -69,11 +99,12 @@ export default function FlotteVersements() {
                     <th className="px-4 py-3">Période</th>
                     <th className="px-4 py-3">Montant</th>
                     <th className="px-4 py-3">Statut</th>
+                    <th className="px-4 py-3">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {versements.length === 0 ? (
-                    <tr><td colSpan={5} className="text-center py-8 text-gray-400">Aucun versement</td></tr>
+                    <tr><td colSpan={6} className="text-center py-8 text-gray-400">Aucun versement</td></tr>
                   ) : (
                     versements.map(v => (
                       <tr key={v.id} className="border-t hover:bg-gray-50">
@@ -91,10 +122,36 @@ export default function FlotteVersements() {
                         </td>
                         <td className="px-4 py-3">
                           <span className={`text-xs px-2 py-0.5 rounded-full ${
-                            v.status === 'en_attente' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
+                            v.status === 'en_attente'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : v.status === 'valide'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-gray-100 text-gray-700'
                           }`}>
-                            {v.status || 'confirmé'}
+                            {v.status === 'en_attente'
+                              ? 'En attente'
+                              : v.status === 'valide'
+                                ? 'Validé'
+                                : v.status || '-'}
                           </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          {v.status === 'en_attente' ? (
+                            <button
+                              type="button"
+                              onClick={() => validateVersement(v.id)}
+                              disabled={validatingId === v.id}
+                              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-600 text-white text-xs font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                              title="Valider ce versement"
+                            >
+                              <CheckCircle size={15} />
+                              {validatingId === v.id ? 'Validation...' : 'Valider'}
+                            </button>
+                          ) : (
+                            <span className="text-xs text-gray-400">
+                              —
+                            </span>
+                          )}
                         </td>
                       </tr>
                     ))
