@@ -2226,6 +2226,73 @@ pricingModel: mapping.pricingModel,
 });
 
 // =========================================================
+// POST /api/public/contact
+// Contact direct depuis la landing publique (DAGO MOBILITY)
+// Crée un Message avec organizationId = null
+// =========================================================
+router.post('/contact', publicLeadLimiter, async (req, res) => {
+  try {
+    const { clientNom, clientTel, details } = req.body || {};
+
+    // ---------------------------------------------------------
+    // 1. Validation des entrées
+    // ---------------------------------------------------------
+    const clientNomNormalized = validateClientNom(clientNom);
+    if (!clientNomNormalized) {
+      return res.status(400).json({
+        error: `clientNom invalide (2-${CLIENT_NOM_MAX} caractères attendus)`
+      });
+    }
+
+    const clientTelNormalized = validateClientTel(clientTel);
+    if (!clientTelNormalized) {
+      return res.status(400).json({
+        error: 'clientTel invalide (format attendu : 03XXXXXXXX ou +261XXXXXXXXX)'
+      });
+    }
+
+    const message =
+      typeof details?.message === 'string' ? details.message.trim() : '';
+
+    if (!message) {
+      return res.status(400).json({
+        error: 'Le message est requis'
+      });
+    }
+
+    if (message.length > 2000) {
+      return res.status(400).json({
+        error: 'Le message est trop long (2000 caractères maximum)'
+      });
+    }
+
+    // ---------------------------------------------------------
+    // 2. Création du Message (organizationId: null)
+    // ---------------------------------------------------------
+    const created = await prisma.message.create({
+      data: {
+        organizationId: null,
+        subject: 'Contact depuis la landing',
+        content: message,
+        sender: `${clientNomNormalized} (${clientTelNormalized})`,
+        type: 'contact',
+        read: false,
+        replied: false,
+      }
+    });
+
+    res.status(201).json({
+      ok: true,
+      messageId: created.id,
+    });
+  } catch (error) {
+    console.error('POST /public/contact:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+
+// =========================================================
 // RÉSERVATION PUBLIQUE
 // =========================================================
 

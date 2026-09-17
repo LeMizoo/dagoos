@@ -49,10 +49,9 @@ export default function ContactPage() {
     setSending(true);
 
     try {
-      const response = await apiFetch('/public/actions', {
+      const response = await apiFetch('/public/contact', {
         method: 'POST',
         body: JSON.stringify({
-          type: 'CONTACT',
           clientNom: nomValue,
           clientTel: normalizePhone(telephoneValue),
           details: {

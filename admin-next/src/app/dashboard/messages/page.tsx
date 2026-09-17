@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { apiFetch } from '@/lib/api';
 import { Search, MessageSquare, Send, Mail, MailOpen, Trash2 } from 'lucide-react';
 
-interface Message { id: string; organization?: { name?: string; id?: string }; subject?: string; content?: string; read?: boolean; createdAt?: string; }
+interface Message { id: string; organization?: { name?: string; id?: string } | null; subject?: string; content?: string; sender?: string; type?: string; read?: boolean; createdAt?: string; }
 
 export default function MessagesPage() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -82,7 +82,7 @@ export default function MessagesPage() {
              filtered.length === 0 ? <div className="text-center py-8 text-gray-400">Aucun message</div> :
              filtered.map(m => (
               <div key={m.id} onClick={() => handleSelect(m.id)} className={`p-3 border-b cursor-pointer hover:bg-gray-50 transition ${selected === m.id ? 'bg-blue-50 border-l-2 border-l-primary' : ''}`}>
-                <div className="flex items-center gap-2 mb-1">{m.read ? <MailOpen size={14} className="text-gray-400" /> : <Mail size={14} className="text-primary" />}<span className={`text-sm ${!m.read ? 'font-semibold' : ''}`}>{m.organization?.name || 'Inconnu'}</span></div>
+                <div className="flex items-center gap-2 mb-1">{m.read ? <MailOpen size={14} className="text-gray-400" /> : <Mail size={14} className="text-primary" />}<span className={`text-sm ${!m.read ? 'font-semibold' : ''}`}>{m.organization?.name || m.sender || 'Contact public'}</span></div>
                 <div className={`text-xs ${!m.read ? 'font-medium text-gray-800' : 'text-gray-500'}`}>{m.subject || 'Sans objet'}</div>
                 <div className="text-xs text-gray-400 mt-1 truncate">{m.content || ''}</div>
               </div>
@@ -93,7 +93,7 @@ export default function MessagesPage() {
           {selectedMsg ? (
             <>
               <div className="p-4 border-b flex justify-between items-center">
-                <div><h2 className="font-semibold">{selectedMsg.subject || 'Sans objet'}</h2><p className="text-xs text-gray-500">De : {selectedMsg.organization?.name || 'Inconnu'}</p></div>
+                <div><h2 className="font-semibold">{selectedMsg.subject || 'Sans objet'}</h2><p className="text-xs text-gray-500">De : {selectedMsg.organization?.name || selectedMsg.sender || 'Contact public'}</p></div>
                 <button onClick={() => handleDelete(selectedMsg.id)} className="p-2 hover:bg-red-50 rounded-lg text-red-500 transition"><Trash2 size={16} /></button>
               </div>
               <div className="flex-1 p-4 overflow-y-auto"><p className="text-sm text-gray-700">{selectedMsg.content}</p></div>

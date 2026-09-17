@@ -57,11 +57,19 @@ router.get('/', authMiddleware, requirePermission('messages.read'), async (req, 
 
 router.get('/unread-count', authMiddleware, requirePermission('messages.read'), async (req, res) => {
   try {
-    const count = await prisma.message.count({
-      where: {
-        read: false
+    const where = { read: false };
+
+    // Un utilisateur d'organisation ne voit que SES messages non lus.
+    // Un super-admin voit tous les messages non lus (y compris les contacts publics).
+    if (!GLOBAL_ROLES.includes(req.user.role)) {
+      const organizationId = await getUserOrganizationId(req);
+      if (!organizationId) {
+        return res.status(403).json({ error: 'Organisation introuvable' });
       }
-    });
+      where.organizationId = organizationId;
+    }
+
+    const count = await prisma.message.count({ where });
 
     res.json({
       count
