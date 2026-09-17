@@ -1,38 +1,267 @@
 # Chantier Charte DAGOO'S — Admin Next.js
 
 **Date de clôture :** 2026-09-17
-**Périmètre :** `admin-next/` (interface d'administration Next.js)
-**Objectif :** Appliquer la charte graphique DAGOO'S 2026 à l'UI admin, sans casser la sémantique métier.
+**Périmètre :** `admin-next/`
+**Statut :** TERMINÉ
 
 ---
 
-## 1. Contexte
+## 1. Objectif
 
-Après l'harmonisation des 3 PWAs (`apps/fleet-driver`, `apps/coop-driver`, `apps/dagoos-mobile`) avec la charte DAGOO'S 2026, le même travail a été entrepris sur l'interface d'administration Next.js.
+Appliquer progressivement la charte graphique officielle **DAGOO'S 2026** à l'interface d'administration Next.js, sans casser la sémantique métier existante.
 
-**Principe directeur** : ne pas convertir les ~3 216 classes Tailwind natives d'un coup. Procéder par **migrations sémantiques contrôlées**, fichier par fichier, avec audit préalable.
+Principe retenu :
+
+> Migration sémantique contrôlée, avec audit préalable, plutôt qu'une conversion globale des classes Tailwind.
+
+Les quelque **3 216 classes Tailwind natives** existantes n'ont volontairement pas été converties en masse.
 
 ---
 
-## 2. Palette officielle
+## 2. Palette DAGOO'S intégrée
 
-| Token | Valeur | Usage |
-|---|---|---|
-| `primary` | `#06245F` | Navy — CTA, navigation, focus |
-| `secondary` | `#E0A01C` | Saffron — accents (à venir) |
-| `dark` | `#06245F` | Navy — sidebars, fonds sombres |
-| `success` | `#0A6F35` | Green — états positifs |
-| `white` | `#FFFFFF` | — |
+Les tokens principaux sont centralisés dans :
 
-Centralisée dans `admin-next/tailwind.config.ts` :
+`admin-next/tailwind.config.ts`
 
 ```ts
-theme: {
-  extend: {
-    colors: {
-      primary: '#06245F',
-      secondary: '#E0A01C',
-      dark: '#06245F',
-    },
-  },
-}
+primary: '#06245F',
+secondary: '#E0A01C',
+dark: '#06245F',
+```
+
+### Correspondance
+
+| Token       | Valeur    | Usage                           |
+| ----------- | --------- | ------------------------------- |
+| `primary`   | `#06245F` | Navy — CTA, navigation, focus   |
+| `secondary` | `#E0A01C` | Saffron — accents               |
+| `dark`      | `#06245F` | Navy — fonds sombres / sidebars |
+
+Les couleurs natives Tailwind restent utilisées lorsqu'elles portent une **sémantique métier**.
+
+---
+
+## 3. Travaux réalisés
+
+### Vague 1 — Tokens Tailwind
+
+Commit :
+
+`9932ed49 feat(admin-next): appliquer la charte DAGOO'S aux tokens Tailwind`
+
+Actions :
+
+* `primary` → `#06245F`
+* `secondary` → `#E0A01C`
+* `dark` → `#06245F`
+* anciennes valeurs supprimées
+* usages existants conservés
+
+---
+
+### Vague 2 — UI structurante
+
+Commit :
+
+`2d60d205 Vague 2 — admin-next: migration Button + Layouts vers charte (primary/dark)`
+
+Fichiers :
+
+* `src/components/ui/Button.tsx`
+* `src/components/layout/FlotteLayout.tsx`
+* `src/components/layout/ResponsiveLayout.tsx`
+
+Actions principales :
+
+* CTA principaux → `primary`
+* hover/focus → variantes de `primary`
+* fonds sombres → `dark`
+* navigation et avatar → `primary`
+
+---
+
+### Vague 3 — UI d'action
+
+Commit :
+
+`119c0234 Vague 3 — admin-next: migration ciblée UI vers charte`
+
+**8 fichiers** traités.
+
+Actions :
+
+* CTA
+* boutons
+* focus
+* liens d'action
+* hover
+* navigation
+
+Les bleus métier ont été volontairement conservés.
+
+Build validé après cette vague.
+
+---
+
+### Vague 4 — UI ciblée
+
+Commit :
+
+`d2e8945f Vague 4 - migration ciblee UI (8 fichiers, register/landing/settings)`
+
+**8 fichiers** traités.
+
+**20 remplacements** exactement.
+
+Zones concernées :
+
+* erreur
+* inscription
+* authentification
+* landing
+* modal de connexion
+* paramètres
+* gestion des chauffeurs
+* paramètres dashboard
+
+Build complet validé.
+
+---
+
+## 4. Sémantique métier préservée
+
+Les `blue-*` restants n'ont volontairement pas été supprimés.
+
+Il reste environ :
+
+**99 occurrences** **`blue-*`**
+
+Elles correspondent notamment à :
+
+* badges
+* KPI
+* statuts
+* plans tarifaires
+* informations
+* mappings métier
+* distinctions Urbain / Interurbain
+* éléments de graphiques
+* états sélectionnés
+* couleurs métier
+
+Exemple important conservé :
+
+```tsx
+standard: 'bg-blue-600 hover:bg-blue-700'
+```
+
+Le bleu du plan **STANDARD** n'a pas été transformé en `primary`.
+
+La distinction **Urbain / Interurbain** dans `LoginModal.tsx` a également été préservée.
+
+---
+
+## 5. Validation technique
+
+### Build
+
+Build `admin-next` validé :
+
+* Next.js `14.2.35`
+* compilation réussie
+* lint OK
+* TypeScript OK
+* génération des pages OK
+* **64/64 pages générées**
+* optimisation finale OK
+
+Les avertissements Google Fonts observés n'ont pas provoqué d'échec du build.
+
+### Git
+
+Le chantier est clôturé au commit :
+
+`87d731a9 docs: archiver le chantier Charte DAGOO'S admin-next (Vagues 1-4)`
+
+Les vagues elles-mêmes s'étalent sur les commits :
+
+`9932ed49 → d2e8945f`
+
+État final :
+
+```text
+HEAD = 87d731a9
+origin/main = 87d731a9
+working tree = clean
+```
+
+Aucune modification non commitée.
+
+### .gitignore
+
+Les règles `.env*` existantes couvrent déjà tous les backups `.env.local.bak-*`.
+
+Aucune règle supplémentaire n'a été nécessaire.
+
+---
+
+## 6. Nettoyage des backups
+
+Les backups temporaires des vagues Admin Next.js ont été supprimés après validation.
+
+**27 backups de vagues supprimés.**
+
+Les backups API hors périmètre ont été volontairement conservés :
+
+```text
+apps/api/modules/finances/finances.routes.js.bak-20260916-084730
+apps/api/modules/finances/finances.routes.js.bak-org-helper-20260916-084938
+apps/api/server.js.bak-cors-8082-20260916-102521
+```
+
+Les 2 anciens backups `admin-next` antérieurs au chantier ont également été supprimés :
+
+```text
+admin-next/.env.local.bak-20260916-091053
+admin-next/src/app/flotte/versements/page.tsx.bak-20260916-084730
+```
+
+* `.env.local.bak-20260916-091053` — supprimé pour raison de sécurité, car il contenait des secrets.
+* `versements/page.tsx.bak-20260916-084730` — supprimé car obsolète, son contenu étant déjà présent dans Git.
+
+Ils ne font donc plus partie de l'état du dépôt à la clôture du chantier.
+
+---
+
+## 7. Décision de clôture
+
+Le chantier **Charte DAGOO'S — Admin Next.js** est considéré comme :
+
+**TERMINÉ**
+
+L'interface possède désormais une base graphique cohérente avec les trois PWAs déjà migrées.
+
+Aucune Vague 5 n'est nécessaire immédiatement.
+
+Les ~99 occurrences `blue-*` restantes pourront éventuellement faire l'objet d'un audit esthétique ultérieur, **sans migration automatique**, afin de préserver la sémantique métier.
+
+---
+
+## 8. Référence Git
+
+Le chantier est clôturé au commit :
+
+`87d731a9 docs: archiver le chantier Charte DAGOO'S admin-next (Vagues 1-4)`
+
+Pour l'historique des vagues, la plage de commits de référence reste :
+
+`9932ed49 → d2e8945f`
+
+Le commit `87d731a9` correspond à l'archivage final du chantier et non à une nouvelle vague de modifications CSS.
+
+État :
+
+`main == origin/main`
+
+**Chantier clôturé le 17/09/2026.**
