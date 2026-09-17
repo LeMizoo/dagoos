@@ -264,4 +264,55 @@ Le commit `87d731a9` correspond à l'archivage final du chantier et non à une n
 
 `main == origin/main`
 
+---
+
+---
+
+## 9. Post-clôture — Correctif d'alignement
+
+Après la clôture initiale, un correctif volontaire d'alignement des layouts a été appliqué.
+
+Commit :
+
+`860a20ac fix(admin-next): align layouts with Dagoos charter`
+
+### Fichiers modifiés (4)
+
+- `admin-next/src/app/globals.css` (+36 lignes)
+- `admin-next/src/components/layout/FlotteLayout.tsx` (2 remplacements)
+- `admin-next/src/components/layout/ResponsiveLayout.tsx` (5 remplacements)
+- `admin-next/tailwind.config.ts` (+1 ligne)
+
+### Actions
+
+1. **`globals.css`** — introduction d'un système de variables CSS aligné sur les PWAs :
+   - palette (`--navy`, `--saffron`, `--green`, + variantes hover)
+   - fonds et textes (`--bg-page`, `--bg-surface`, `--text-primary`, etc.)
+   - bordures (`--border`, `--border-strong`)
+   - raccourcis (`--primary`, `--secondary`)
+2. **`tailwind.config.ts`** — ajout du token `accent: '#0A6F35'`
+3. **`FlotteLayout.tsx`** — migration `emerald-*` → `accent`
+4. **`ResponsiveLayout.tsx`** — différenciation admin/flotte :
+   - `admin` → palette `primary` (navy)
+   - `flotte` → palette `accent` (vert)
+
+### Impact `blue-*`
+
+Le compteur est passé de **99 à 101 occurrences** après le correctif.
+
+Les **99 occurrences historiques** correspondent aux usages métier volontairement conservés.
+
+Les **2 occurrences supplémentaires** correspondent aux bleus natifs Tailwind explicitement introduits dans le correctif et acceptés dans le contexte de la navigation différenciée admin/flotte.
+
+Aucun pattern UI ciblé (`bg-blue-600`, `hover:bg-blue-700`, `focus:ring-blue-500`, etc.) n'a été réintroduit.
+
+### État final acté
+
+```text
+HEAD = 860a20ac
+origin/main = 860a20ac
+working tree = clean
+Build = non revalidé après le correctif 860a20ac
+blue-* = 101
+
 **Chantier clôturé le 17/09/2026.**
