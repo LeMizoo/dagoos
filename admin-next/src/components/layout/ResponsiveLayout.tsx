@@ -79,10 +79,13 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
             {s.items.map((item: any) => {
               const Icon = item.icon;
               const active = isActive(item.href);
+              const activeClass = app === 'admin'
+                ? 'bg-primary/20 text-blue-200 shadow-lg shadow-primary/10 font-medium'
+                : 'bg-accent/20 text-green-300 shadow-lg shadow-accent/10 font-medium';
               return (
                 <Link key={item.href} href={item.href} onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition mb-0.5 ${active ? 'bg-emerald-500/20 text-emerald-400 shadow-lg shadow-emerald-500/10 font-medium' : 'text-gray-300 hover:bg-white/10'}`}>
-                  <Icon size={18} className={active ? 'text-emerald-400' : ''} />
+                  className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition mb-0.5 ${active ? activeClass : 'text-gray-300 hover:bg-white/10'}`}>
+                  <Icon size={18} className={active ? (app === 'admin' ? 'text-blue-200' : 'text-green-300') : ''} />
                   <span>{item.label}</span>
                 </Link>
               );

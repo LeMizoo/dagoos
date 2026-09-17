@@ -2,10 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --navy: #06245F;
+  --navy-hover: #041B47;
+  --saffron: #E0A01C;
+  --saffron-hover: #C68B15;
+  --green: #0A6F35;
+  --green-hover: #085A2B;
+  --bg-page: #F7F8FA;
+  --bg-surface: #FFFFFF;
+  --bg-soft: #F1F5F9;
+  --bg-elevated: #E2E8F0;
+  --text-primary: #06245F;
+  --text-secondary: #4A5A7A;
+  --text-muted: #94A3B8;
+  --border: #E2E8F0;
+  --border-strong: #CBD5E1;
+  --primary: #06245F;
+  --secondary: #E0A01C;
+}
+
 body {
   font-family: var(--font-body), system-ui, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
 }
 
 h1, h2, h3, h4, .font-display {
   font-family: var(--font-display), system-ui, sans-serif;
+}
+
+a {
+  text-decoration: none;
+  color: #464feb;
+}
+
+tr th,
+tr td {
+  border: 1px solid #e6e6e6;
+}
+
+tr th {
+  background-color: #f5f5f5;
 }

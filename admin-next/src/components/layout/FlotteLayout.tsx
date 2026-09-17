@@ -206,10 +206,10 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
               return (
                 <Link key={item.href} href={item.href} onClick={() => setIsOpen(false)}
                   className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition mb-0.5 ${
-                    active ? 'bg-emerald-500/20 text-emerald-400 shadow-lg shadow-emerald-500/10 font-medium' 
+                    active ? 'bg-accent/20 text-green-300 shadow-lg shadow-accent/10 font-medium'
                            : 'text-gray-300 hover:bg-white/10'
                   }`}>
-                  <Icon size={18} className={active ? 'text-emerald-400' : ''} />
+                  <Icon size={18} className={active ? 'text-green-300' : ''} />
                   <span>{item.label}</span>
                 </Link>
               );

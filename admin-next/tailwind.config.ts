@@ -8,6 +8,7 @@ const config: Config = {
       colors: {
         primary: '#06245F',
         secondary: '#E0A01C',
+        accent: '#0A6F35',
         dark: '#06245F',
       }
     }
