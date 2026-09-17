@@ -734,7 +734,7 @@ export default function LandingPageSettings({
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="flex-1 bg-primary text-white py-3 rounded-xl font-semibold hover:bg-blue-800 transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+          className="flex-1 bg-primary text-white py-3 rounded-xl font-semibold hover:bg-primary/80 transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {saving ? (
             '⏳ Enregistrement...'

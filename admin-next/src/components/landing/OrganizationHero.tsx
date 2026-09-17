@@ -17,7 +17,7 @@ export function OrganizationHero({ organization, type }: OrganizationHeroProps) 
   const colors = {
     fleet: {
       gradient: 'from-blue-600 to-blue-800',
-      button: 'bg-blue-600 hover:bg-blue-700',
+      button: 'bg-primary hover:bg-primary/90',
     },
     coop: {
       gradient: 'from-green-600 to-green-800',

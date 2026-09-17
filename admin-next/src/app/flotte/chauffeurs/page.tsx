@@ -454,7 +454,7 @@ export default function FlotteChauffeurs() {
                         })()}
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <a href={`/flotte/chauffeurs/${d.id}`} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg inline-flex" title="Dossier chauffeur" aria-label="Dossier chauffeur"><FileText size={16} /></a>
+                        <a href={`/flotte/chauffeurs/${d.id}`} className="p-1.5 text-gray-400 hover:text-primary hover:bg-blue-50 rounded-lg inline-flex" title="Dossier chauffeur" aria-label="Dossier chauffeur"><FileText size={16} /></a>
                         <button onClick={() => openEdit(d)} className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg"><Pencil size={16} /></button>
                         <button onClick={() => resetPin(d.id)} className="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg" title="Réinitialiser le PIN" aria-label="Réinitialiser le PIN"><Key size={16} /></button>
                         <button onClick={() => setDeleteConfirm(d)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>

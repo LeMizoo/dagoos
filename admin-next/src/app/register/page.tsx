@@ -193,7 +193,7 @@ export default function RegisterPage() {
                 <input
                   type="text"
                   required
-                  className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                   value={form.organizationName}
                   onChange={(e) => setForm({ ...form, organizationName: e.target.value })}
                   placeholder="Nom de votre flotte ou coopérative"
@@ -238,7 +238,7 @@ export default function RegisterPage() {
                 <input
                   type="text"
                   required
-                  className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="Votre nom"
@@ -250,7 +250,7 @@ export default function RegisterPage() {
                 <input
                   type="email"
                   required
-                  className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   placeholder="votre@email.com"
@@ -264,7 +264,7 @@ export default function RegisterPage() {
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   placeholder="Minimum 6 caractères"
                   required
-                  className="mt-1 border-gray-300 rounded-xl focus:ring-blue-500"
+                  className="mt-1 border-gray-300 rounded-xl focus:ring-primary"
                 />
               </div>
 
@@ -275,7 +275,7 @@ export default function RegisterPage() {
                   onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
                   placeholder="Confirmez votre mot de passe"
                   required
-                  className="mt-1 border-gray-300 rounded-xl focus:ring-blue-500"
+                  className="mt-1 border-gray-300 rounded-xl focus:ring-primary"
                 />
               </div>
 
@@ -306,7 +306,7 @@ export default function RegisterPage() {
                   value={form.paiementRef}
                   onChange={e => setForm({ ...form, paiementRef: e.target.value })}
                   placeholder="Ex: MVOLA123456789"
-                  className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
@@ -336,7 +336,7 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={loading || success}
-                className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition disabled:opacity-50"
+                className="w-full bg-primary text-white py-3 rounded-xl font-semibold hover:bg-primary/90 transition disabled:opacity-50"
               >
                 {loading ? 'Chargement...' : 'Créer un compte'}
               </button>
@@ -398,9 +398,9 @@ export default function RegisterPage() {
                   </div>
                 )}
 
-                <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-                  <h3 className="font-semibold text-blue-800 mb-2">💡 Les avantages</h3>
-                  <ul className="space-y-1 text-sm text-blue-700">
+                <div className="bg-primary/5 rounded-xl p-4 border border-primary/20">
+                  <h3 className="font-semibold text-primary mb-2">💡 Les avantages</h3>
+                  <ul className="space-y-1 text-sm text-primary">
                     <li className="flex items-center gap-2"><Check size={14} /> Support 24/7</li>
                     <li className="flex items-center gap-2"><Check size={14} /> Gestion des véhicules et chauffeurs</li>
                     <li className="flex items-center gap-2"><Check size={14} /> Tableau de bord en temps réel</li>

@@ -122,7 +122,7 @@ export default function SettingsPage() {
                   onClick={() => setTab(t.id)}
                   className={`flex items-center gap-2 px-4 py-3 text-sm transition text-left w-full ${
                     tab === t.id
-                      ? 'bg-blue-600 text-white font-medium'
+                      ? 'bg-primary text-white font-medium'
                       : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -155,7 +155,7 @@ export default function SettingsPage() {
               <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">📋 Plans & Abonnements</h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Configurez les prix et limites pour chaque entité.</p>
               <div className="flex gap-2 mb-6">
-                <button onClick={() => setEntityTab('fleet')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${entityTab === 'fleet' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>🚛 Flottes</button>
+                <button onClick={() => setEntityTab('fleet')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${entityTab === 'fleet' ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>🚛 Flottes</button>
                 <button onClick={() => setEntityTab('coop')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${entityTab === 'coop' ? 'bg-emerald-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>🏢 Coopératives</button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">

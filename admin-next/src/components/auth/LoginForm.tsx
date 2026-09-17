@@ -28,7 +28,7 @@ export interface LoginFormConfig {
 
 const accentStyles = {
   blue: {
-    button: 'bg-blue-600 hover:bg-blue-700',
+    button: 'bg-primary hover:bg-primary/90',
     iconBg: 'bg-blue-100',
     iconColor: 'text-blue-600',
     badgeBg: 'bg-blue-50 text-blue-700 border-blue-200',
