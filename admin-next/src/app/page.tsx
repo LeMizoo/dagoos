@@ -55,7 +55,7 @@ export default async function LandingPage() {
   });
 
   return (
-    <LandingLayout>
+    <LandingLayout showHeader={false}>
       <div id="top" className="min-h-screen bg-white">
       {/* HERO */}
       <HeroWithDriverModal />
