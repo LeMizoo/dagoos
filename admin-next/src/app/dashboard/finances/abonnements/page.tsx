@@ -71,9 +71,10 @@ export default function AbonnementsPage() {
   const handleUpgrade = async (orgId: string, newPlan: string) => {
   setUpgrading(orgId);
   try {
-    const res = await apiFetch('/organizations/upgrade', {
+    // PUT /organizations/:id — réservé SUPER_ADMIN (route existante côté API)
+    const res = await apiFetch(`/organizations/${orgId}`, {
       method: 'PUT',
-      body: JSON.stringify({ orgId, plan: newPlan }),
+      body: JSON.stringify({ plan: newPlan }),
     });
 
     if (!res.ok) {

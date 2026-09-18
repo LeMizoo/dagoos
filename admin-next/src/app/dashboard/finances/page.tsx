@@ -1,178 +1,232 @@
 'use client';
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { 
-  TrendingUp, TrendingDown, Wallet, Search, ArrowUpRight, ArrowDownRight,
-  Truck, Building2, CreditCard, Receipt, ArrowRight, AlertCircle,
-  Download, Filter
+import {
+  Building2, Truck, Search, AlertCircle, Crown, Zap, Coffee, Star,
+  FileText, Wallet, TrendingUp, Receipt, ArrowRight, RefreshCw,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 
-interface Transaction {
+interface Organization {
   id: string;
-  organization?: { id?: string; name?: string; type?: string };
-  amount?: number;
+  name: string;
+  email?: string;
   type?: string;
-  description?: string;
-  date?: string;
-  driverName?: string;
-  vehiclePlate?: string;
+  plan: string;
+  status: string;
+  paymentStatus?: string | null;
+  paymentRef?: string | null;
+  paymentAmount?: number | null;
+  subscriptionEnd?: string | null;
+  createdAt?: string;
 }
 
-interface KPI {
-  totalCA: number;
-  totalCommissions: number;
-  totalNet: number;
-  totalDepenses: number;
+interface Plan {
+  id: string;
+  type: string;
+  name: string;
+  price: number;
+  vehiclesMax: number;
+  driversMax: number;
+  active: boolean;
 }
+
+type StatusKey = 'all' | 'paid' | 'unpaid' | 'overdue' | 'free';
+
+const planConfig: Record<string, { icon: any; color: string; bg: string; label: string }> = {
+  premium:  { icon: Crown,    color: 'text-yellow-600', bg: 'bg-yellow-50 border-yellow-200', label: 'Premium'  },
+  standard: { icon: Zap,      color: 'text-blue-600',   bg: 'bg-blue-50 border-blue-200',     label: 'Standard' },
+  basic:    { icon: Star,     color: 'text-teal-600',   bg: 'bg-teal-50 border-teal-200',     label: 'Basic'    },
+  freemium: { icon: Coffee,   color: 'text-gray-600',   bg: 'bg-gray-50 border-gray-200',     label: 'Freemium' },
+  surdevis: { icon: FileText, color: 'text-purple-600', bg: 'bg-purple-50 border-purple-200', label: 'Sur devis'},
+};
+
+const norm = (p?: string) => (p || 'freemium').toLowerCase();
 
 export default function FinancesPage() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [orgs, setOrgs] = useState<Organization[]>([]);
+  const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'FLEET_MANAGER' | 'COOPERATIVE'>('all');
-  const [sortField, setSortField] = useState<'date' | 'amount'>('date');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [statusFilter, setStatusFilter] = useState<StatusKey>('all');
 
-  useEffect(() => { fetchTransactions(); }, []);
+  useEffect(() => { fetchAll(); }, []);
 
-  const fetchTransactions = async () => {
+  const fetchAll = async () => {
     setLoading(true);
+    setError('');
     try {
-      setError('');
-      const res = await apiFetch('/finances/transactions');
-      if (!res.ok) throw new Error(`Erreur ${res.status}`);
-      const data = await res.json();
-      setTransactions(Array.isArray(data) ? data : []);
+      const [resOrgs, resPlans] = await Promise.all([
+        apiFetch('/organizations?page=1&limit=200'),
+        apiFetch('/plans'),
+      ]);
+      if (!resOrgs.ok) throw new Error(`Organisations : erreur ${resOrgs.status}`);
+      if (!resPlans.ok) throw new Error(`Plans : erreur ${resPlans.status}`);
+
+      const orgData = await resOrgs.json();
+      const planData = await resPlans.json();
+
+      setOrgs(Array.isArray(orgData?.data) ? orgData.data : (Array.isArray(orgData) ? orgData : []));
+      setPlans(Array.isArray(planData) ? planData : []);
     } catch (err: any) {
-      setError('Impossible de charger les transactions.');
+      setError(err.message || 'Impossible de charger les données d\'abonnement.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Filtrer
-  const filtered = transactions
-    .filter(t => {
-      const matchSearch = 
-        (t.organization?.name || '').toLowerCase().includes(search.toLowerCase()) ||
-        (t.description || '').toLowerCase().includes(search.toLowerCase()) ||
-        (t.driverName || '').toLowerCase().includes(search.toLowerCase());
-      const matchType = typeFilter === 'all' || t.organization?.type === typeFilter;
-      return matchSearch && matchType;
-    })
-    .sort((a, b) => {
-      const field = sortField;
-      let valA: any = field === 'date' ? (a.date || '') : (a.amount || 0);
-      let valB: any = field === 'date' ? (b.date || '') : (b.amount || 0);
-      if (field === 'date') {
-        valA = new Date(valA).getTime() || 0;
-        valB = new Date(valB).getTime() || 0;
-      }
-      return sortDir === 'asc' ? valA - valB : valB - valA;
-    });
+  const getPlanPrice = (org: Organization): number => {
+    const plan = plans.find(
+      p => p.type === org.type && p.name.toLowerCase() === norm(org.plan),
+    );
+    return plan?.price ?? 0;
+  };
 
-  // KPIs par type
-  const fleetTrans = filtered.filter(t => t.organization?.type === 'FLEET_MANAGER');
-  const coopTrans = filtered.filter(t => t.organization?.type === 'COOPERATIVE');
+  const orgsWithoutAdmin = orgs.filter(o => o.type !== 'ADMIN');
+  const totalOrgs = orgsWithoutAdmin.length;
+  const payantes = orgsWithoutAdmin.filter(o => getPlanPrice(o) > 0).length;
+  const gratuites = orgsWithoutAdmin.filter(o => getPlanPrice(o) === 0).length;
+  const mrrTheorique = orgsWithoutAdmin.reduce((s, o) => s + Math.max(0, getPlanPrice(o)), 0);
 
-  const calcKPI = (txs: Transaction[]): KPI => ({
-    totalCA: txs.filter(t => (t.amount || 0) > 0).reduce((s, t) => s + (t.amount || 0), 0),
-    totalCommissions: txs.filter(t => t.type === 'commission').reduce((s, t) => s + Math.abs(t.amount || 0), 0),
-    totalNet: txs.filter(t => t.type === 'versement').reduce((s, t) => s + (t.amount || 0), 0),
-    totalDepenses: txs.filter(t => (t.amount || 0) < 0).reduce((s, t) => s + Math.abs(t.amount || 0), 0),
+  const now = Date.now();
+  const overdue = orgsWithoutAdmin.filter(o => {
+    if (getPlanPrice(o) === 0) return false;
+    if (o.paymentStatus === 'paid') return false;
+    if (!o.subscriptionEnd) return true;
+    return new Date(o.subscriptionEnd).getTime() < now;
+  }).length;
+
+  const mrrReel = orgsWithoutAdmin
+    .filter(o => o.paymentStatus === 'paid')
+    .reduce((s, o) => s + Math.max(0, o.paymentAmount ?? getPlanPrice(o)), 0);
+
+  const filtered = orgsWithoutAdmin.filter(o => {
+    const matchSearch =
+      o.name.toLowerCase().includes(search.toLowerCase()) ||
+      (o.email || '').toLowerCase().includes(search.toLowerCase());
+    const matchType = typeFilter === 'all' || o.type === typeFilter;
+    const price = getPlanPrice(o);
+    const isFree = price === 0;
+    const isPaid = o.paymentStatus === 'paid';
+    const isOverdue = !isFree && !isPaid;
+    const matchStatus =
+      statusFilter === 'all' ||
+      (statusFilter === 'free' && isFree) ||
+      (statusFilter === 'paid' && isPaid) ||
+      (statusFilter === 'unpaid' && !isFree && !isPaid && o.paymentStatus !== 'paid') ||
+      (statusFilter === 'overdue' && isOverdue);
+    return matchSearch && matchType && matchStatus;
   });
-
-  const allKPI = calcKPI(filtered);
-  const fleetKPI = calcKPI(fleetTrans);
-  const coopKPI = calcKPI(coopTrans);
 
   return (
     <div>
-      {/* En-tête */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">💰 Finances</h1>
-          <p className="text-sm text-gray-500 mt-1">Vue agrégée de toutes les transactions</p>
+          <p className="text-sm text-gray-500 mt-1">
+            État des abonnements des organisations — plateforme Dagoos
+          </p>
         </div>
         <div className="flex gap-2">
-          <Link
-            href="/dashboard/finances/paiements"
+          <button
+            onClick={fetchAll}
             className="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition shadow-sm"
           >
-            <CreditCard size={18} />
-            Paiements
-          </Link>
+            <RefreshCw size={16} /> Actualiser
+          </button>
           <Link
             href="/dashboard/finances/abonnements"
-            className="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition shadow-sm"
+            className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-purple-700 transition shadow-sm"
           >
-            <Receipt size={18} />
-            Abonnements
+            <Receipt size={18} /> Gérer les abonnements
           </Link>
         </div>
       </div>
 
-      {/* Erreur */}
       {error && (
         <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm flex items-center gap-2">
           <AlertCircle size={16} /> {error}
-          <button onClick={fetchTransactions} className="ml-auto text-red-700 underline text-xs">Réessayer</button>
+          <button onClick={fetchAll} className="ml-auto text-red-700 underline text-xs">Réessayer</button>
         </div>
       )}
 
-      {/* KPIs globaux */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <KpiCard icon={TrendingUp} label="Chiffre d'affaires" value={allKPI.totalCA} color="green" loading={loading} />
-        <KpiCard icon={TrendingDown} label="Commissions" value={allKPI.totalCommissions} color="blue" loading={loading} />
-        <KpiCard icon={Wallet} label="Net versé" value={allKPI.totalNet} color="purple" loading={loading} />
-        <KpiCard icon={TrendingDown} label="Dépenses" value={allKPI.totalDepenses} color="red" loading={loading} />
+        <KpiCard
+          icon={Building2}
+          label="Organisations actives"
+          value={loading ? '—' : totalOrgs.toLocaleString()}
+          sub={loading ? '' : `${payantes} payantes · ${gratuites} gratuites`}
+          color="blue"
+        />
+        <KpiCard
+          icon={TrendingUp}
+          label="MRR théorique"
+          value={loading ? '—' : `${mrrTheorique.toLocaleString()} Ar`}
+          sub="Somme des plans actifs"
+          color="purple"
+        />
+        <KpiCard
+          icon={Wallet}
+          label="MRR encaissé"
+          value={loading ? '—' : `${mrrReel.toLocaleString()} Ar`}
+          sub="Basé sur paymentAmount déclaré"
+          color="green"
+        />
+        <KpiCard
+          icon={AlertCircle}
+          label="Impayés / en retard"
+          value={loading ? '—' : overdue.toLocaleString()}
+          sub="Payantes sans règlement"
+          color="red"
+        />
       </div>
 
-      {/* KPIs par type */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-blue-100">
-          <div className="flex items-center gap-2 mb-4">
-            <Truck size={18} className="text-blue-600" />
-            <h2 className="font-semibold text-gray-800">Flottes</h2>
-            <span className="text-xs text-gray-400 ml-auto">{fleetTrans.length} transactions</span>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <MiniKpi label="CA" value={fleetKPI.totalCA} color="text-green-600" />
-            <MiniKpi label="Commissions" value={fleetKPI.totalCommissions} color="text-blue-600" />
-            <MiniKpi label="Net" value={fleetKPI.totalNet} color="text-purple-600" />
-            <MiniKpi label="Dépenses" value={fleetKPI.totalDepenses} color="text-red-600" />
-          </div>
-        </div>
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-emerald-100">
-          <div className="flex items-center gap-2 mb-4">
-            <Building2 size={18} className="text-emerald-600" />
-            <h2 className="font-semibold text-gray-800">Coopératives</h2>
-            <span className="text-xs text-gray-400 ml-auto">{coopTrans.length} transactions</span>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <MiniKpi label="CA" value={coopKPI.totalCA} color="text-green-600" />
-            <MiniKpi label="Commissions" value={coopKPI.totalCommissions} color="text-emerald-600" />
-            <MiniKpi label="Net" value={coopKPI.totalNet} color="text-purple-600" />
-            <MiniKpi label="Dépenses" value={coopKPI.totalDepenses} color="text-red-600" />
-          </div>
-        </div>
+      <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4 mb-6 text-xs">
+        <strong>Niveau administration générale.</strong> Cette vue présente l'<em>état courant</em> des
+        abonnements (plan choisi, prix catalogue, statut de paiement, échéance). Elle ne retrace
+        pas d'historique de transactions — cet historique n'existe pas encore dans le schéma
+        actuel. Les activités opérationnelles (courses, versements chauffeurs, dépenses) sont
+        gérées dans le dashboard propre à chaque organisation.
       </div>
 
-      {/* Filtres et tableau */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">
         <div className="p-4 border-b flex flex-wrap justify-between items-center gap-3">
           <div className="flex gap-2 flex-wrap">
             {(['all', 'FLEET_MANAGER', 'COOPERATIVE'] as const).map(t => (
-              <button key={t} onClick={() => setTypeFilter(t)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition ${
-                  typeFilter === t 
-                    ? 'bg-purple-600 text-white' 
+              <button
+                key={t}
+                onClick={() => setTypeFilter(t)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                  typeFilter === t
+                    ? 'bg-purple-600 text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
                 {t === 'all' ? 'Tous' : t === 'FLEET_MANAGER' ? '🚛 Flottes' : '🏢 Coops'}
+              </button>
+            ))}
+            <span className="w-px bg-gray-200 mx-1" />
+            {([
+              ['all', 'Tous statuts'],
+              ['paid', 'Payés'],
+              ['unpaid', 'Non payés'],
+              ['overdue', 'En retard'],
+              ['free', 'Gratuits'],
+            ] as const).map(([key, label]) => (
+              <button
+                key={key}
+                onClick={() => setStatusFilter(key as StatusKey)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                  statusFilter === key
+                    ? 'bg-gray-800 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {label}
               </button>
             ))}
           </div>
@@ -180,82 +234,116 @@ export default function FinancesPage() {
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Rechercher..."
+              placeholder="Rechercher une organisation..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none"
             />
           </div>
         </div>
+
         <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[700px]">
+          <table className="w-full text-sm min-w-[900px]">
             <thead className="bg-gray-50 text-left text-gray-500">
               <tr>
                 <th className="px-4 py-3 font-medium">Organisation</th>
                 <th className="px-4 py-3 font-medium">Type</th>
-                <th className="px-4 py-3 font-medium">Description</th>
-                <th className="px-4 py-3 font-medium">
-                  <button 
-                    onClick={() => { setSortField('amount'); setSortDir(d => d === 'asc' ? 'desc' : 'asc'); }}
-                    className="flex items-center gap-1 hover:text-gray-700"
-                  >
-                    Montant {sortField === 'amount' && (sortDir === 'asc' ? '↑' : '↓')}
-                  </button>
-                </th>
-                <th className="px-4 py-3 font-medium">
-                  <button 
-                    onClick={() => { setSortField('date'); setSortDir(d => d === 'asc' ? 'desc' : 'asc'); }}
-                    className="flex items-center gap-1 hover:text-gray-700"
-                  >
-                    Date {sortField === 'date' && (sortDir === 'asc' ? '↑' : '↓')}
-                  </button>
-                </th>
+                <th className="px-4 py-3 font-medium">Plan</th>
+                <th className="px-4 py-3 font-medium">Prix / mois</th>
+                <th className="px-4 py-3 font-medium">Statut paiement</th>
+                <th className="px-4 py-3 font-medium">Référence</th>
+                <th className="px-4 py-3 font-medium">Échéance</th>
+                <th className="px-4 py-3 font-medium"></th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={5} className="text-center py-12 text-gray-400">
-                  <div className="animate-spin w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full mx-auto mb-2" />
-                  Chargement...
-                </td></tr>
+                <tr>
+                  <td colSpan={8} className="text-center py-12 text-gray-400">
+                    <div className="animate-spin w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full mx-auto mb-2" />
+                    Chargement...
+                  </td>
+                </tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={5} className="text-center py-12 text-gray-400">
-                  {search || typeFilter !== 'all' ? 'Aucun résultat avec ces filtres.' : 'Aucune transaction pour le moment.'}
-                </td></tr>
+                <tr>
+                  <td colSpan={8} className="text-center py-12 text-gray-400">
+                    {search || typeFilter !== 'all' || statusFilter !== 'all'
+                      ? 'Aucun résultat avec ces filtres.'
+                      : 'Aucune organisation.'}
+                  </td>
+                </tr>
               ) : (
-                filtered.map(t => {
-                  const isPositive = (t.amount || 0) >= 0;
+                filtered.map(org => {
+                  const p = norm(org.plan);
+                  const cfg = planConfig[p] || planConfig.freemium;
+                  const Icon = cfg.icon;
+                  const price = getPlanPrice(org);
+                  const isFree = price === 0;
+                  const isPaid = org.paymentStatus === 'paid';
+                  const statusKey = isFree ? 'free' : isPaid ? 'paid' : 'unpaid';
+                  const statusLabel =
+                    statusKey === 'free' ? 'Gratuit' :
+                    statusKey === 'paid' ? 'Payé' :
+                    'Non payé';
+                  const statusClass =
+                    statusKey === 'free' ? 'bg-gray-100 text-gray-700' :
+                    statusKey === 'paid' ? 'bg-green-100 text-green-700' :
+                    'bg-amber-100 text-amber-700';
+
                   return (
-                    <tr key={t.id} className="border-t hover:bg-gray-50 transition-colors">
+                    <tr key={org.id} className="border-t hover:bg-gray-50 transition-colors">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          {t.organization?.type === 'FLEET_MANAGER' 
+                          {org.type === 'FLEET_MANAGER'
                             ? <Truck size={14} className="text-blue-500" />
-                            : <Building2 size={14} className="text-emerald-500" />
-                          }
-                          <span className="font-medium text-gray-800">{t.organization?.name || '-'}</span>
+                            : <Building2 size={14} className="text-emerald-500" />}
+                          <div>
+                            <div className="font-medium text-gray-800">{org.name}</div>
+                            {org.email && (
+                              <div className="text-xs text-gray-400">{org.email}</div>
+                            )}
+                          </div>
                         </div>
                       </td>
                       <td className="px-4 py-3">
                         <span className={`text-xs px-2 py-0.5 rounded-full ${
-                          t.organization?.type === 'FLEET_MANAGER' 
-                            ? 'bg-blue-50 text-blue-700' 
+                          org.type === 'FLEET_MANAGER'
+                            ? 'bg-blue-50 text-blue-700'
                             : 'bg-emerald-50 text-emerald-700'
                         }`}>
-                          {t.organization?.type === 'FLEET_MANAGER' ? 'Flotte' : 'Coop'}
+                          {org.type === 'FLEET_MANAGER' ? 'Flotte' : 'Coop'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-gray-500 text-xs max-w-[200px] truncate">
-                        {t.description || '-'}
-                      </td>
-                      <td className={`px-4 py-3 font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                        <span className="flex items-center gap-1">
-                          {isPositive ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-                          {isPositive ? '+' : '-'}{Math.abs(t.amount || 0).toLocaleString()} Ar
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border ${cfg.bg} ${cfg.color}`}>
+                          <Icon size={12} /> {cfg.label}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-gray-500 text-xs">
-                        {t.date ? new Date(t.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
+                      <td className="px-4 py-3 font-medium text-gray-800">
+                        {isFree ? 'Gratuit' : `${price.toLocaleString()} Ar`}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${statusClass}`}>
+                          {statusLabel}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-gray-500 font-mono">
+                        {org.paymentRef || '—'}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-gray-500">
+                        {org.subscriptionEnd
+                          ? new Date(org.subscriptionEnd).toLocaleDateString('fr-FR', {
+                              day: 'numeric', month: 'short', year: 'numeric',
+                            })
+                          : '—'}
+                      </td>
+                      <td className="px-4 py-3">
+                        <Link
+                          href="/dashboard/finances/abonnements"
+                          className="text-purple-600 hover:text-purple-800 text-xs font-medium flex items-center gap-1"
+                        >
+                          Gérer <ArrowRight size={12} />
+                        </Link>
                       </td>
                     </tr>
                   );
@@ -269,9 +357,10 @@ export default function FinancesPage() {
   );
 }
 
-// Composant KPI
-function KpiCard({ icon: Icon, label, value, color, loading }: { 
-  icon: any; label: string; value: number; color: string; loading: boolean 
+function KpiCard({
+  icon: Icon, label, value, sub, color,
+}: {
+  icon: any; label: string; value: string; sub?: string; color: string;
 }) {
   const colorMap: Record<string, string> = {
     green: 'bg-green-100 text-green-600',
@@ -287,18 +376,8 @@ function KpiCard({ icon: Icon, label, value, color, loading }: {
         </div>
         <span className="text-sm text-gray-500">{label}</span>
       </div>
-      <div className="text-2xl font-bold text-gray-800">
-        {loading ? '-' : `${value.toLocaleString()} Ar`}
-      </div>
-    </div>
-  );
-}
-
-function MiniKpi({ label, value, color }: { label: string; value: number; color: string }) {
-  return (
-    <div>
-      <div className="text-xs text-gray-500">{label}</div>
-      <div className={`text-sm font-semibold ${color}`}>{value.toLocaleString()} Ar</div>
+      <div className="text-2xl font-bold text-gray-800">{value}</div>
+      {sub && <div className="text-xs text-gray-400 mt-1">{sub}</div>}
     </div>
   );
 }
