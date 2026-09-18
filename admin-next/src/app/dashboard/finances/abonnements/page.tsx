@@ -171,10 +171,10 @@ export default function AbonnementsPage() {
                    <td className="px-4 py-3"><span className={`text-xs px-2 py-0.5 rounded-full ${org.status==='active'?'bg-green-100 text-green-700':'bg-red-100 text-red-700'}`}>{org.status||'inactif'}</span></td>
                    <td className="px-4 py-3">
                      <div className="flex gap-1 flex-wrap">
-                       {p!=='premium' && <Btn onClick={()=>handleUpgrade(org.id,'premium')} loading={upgrading===org.id} label="Premium" color="bg-yellow-100 text-yellow-700 hover:bg-yellow-200" />}
-                       {p!=='standard' && <Btn onClick={()=>handleUpgrade(org.id,'standard')} loading={upgrading===org.id} label="Standard" color="bg-blue-100 text-blue-700 hover:bg-blue-200" />}
-                       {p!=='basic' && <Btn onClick={()=>handleUpgrade(org.id,'basic')} loading={upgrading===org.id} label="Basic" color="bg-teal-100 text-teal-700 hover:bg-teal-200" />}
-                       {p!=='freemium' && <Btn onClick={()=>handleUpgrade(org.id,'freemium')} loading={upgrading===org.id} label="Freemium" color="bg-gray-100 text-gray-600 hover:bg-gray-200" />}
+                       {p!=='premium' && <Btn onClick={()=>handleUpgrade(org.id,'Premium')} loading={upgrading===org.id} label="Premium" color="bg-yellow-100 text-yellow-700 hover:bg-yellow-200" />}
+                       {p!=='standard' && <Btn onClick={()=>handleUpgrade(org.id,'Standard')} loading={upgrading===org.id} label="Standard" color="bg-blue-100 text-blue-700 hover:bg-blue-200" />}
+                       {p!=='basic' && <Btn onClick={()=>handleUpgrade(org.id,'Basic')} loading={upgrading===org.id} label="Basic" color="bg-teal-100 text-teal-700 hover:bg-teal-200" />}
+                       {p!=='freemium' && <Btn onClick={()=>handleUpgrade(org.id,'Freemium')} loading={upgrading===org.id} label="Freemium" color="bg-gray-100 text-gray-600 hover:bg-gray-200" />}
                      </div>
                    </td>
                  </tr>
