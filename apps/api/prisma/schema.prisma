@@ -556,6 +556,7 @@ model Log {
   action    String
   details   String?
   ip        String?
+  level     String   @default("info")
   createdAt DateTime @default(now())
 }
 

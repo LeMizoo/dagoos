@@ -1,5 +1,7 @@
 const prisma = require('./prisma');
 
+const VALID_LEVELS = new Set(['info', 'warning', 'error']);
+
 /**
  * Extrait l'IP client depuis la requête Express.
  * Priorité : x-forwarded-for (Vercel/Render) → req.ip → null.
@@ -26,11 +28,17 @@ async function logAction({
   userId = null,
   action,
   details = null,
+  level = 'info',
   req = null,
 }) {
   try {
     if (!action || typeof action !== 'string') {
       console.error('[logAction] action manquante ou invalide');
+      return;
+    }
+
+    if (!VALID_LEVELS.has(level)) {
+      console.error(`[logAction] niveau invalide: ${level}`);
       return;
     }
 
@@ -40,6 +48,7 @@ async function logAction({
         action,
         details: details ? String(details) : null,
         ip: getClientIp(req),
+        level,
       },
     });
   } catch (error) {
