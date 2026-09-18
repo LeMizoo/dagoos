@@ -1180,10 +1180,22 @@ router.delete('/:id', authMiddleware, async (req, res) => {
       });
     }
 
+    const org = await prisma.organization.findUnique({
+      where: { id: req.params.id },
+      select: { name: true },
+    });
+
     await prisma.organization.delete({
       where: {
         id: req.params.id,
       },
+    });
+
+    await logAction({
+      userId: req.user.id,
+      action: 'org.delete',
+      details: `orgId=${req.params.id}; name=${org?.name || 'unknown'}; role=${req.user.role}`,
+      req,
     });
 
     res.json({

@@ -96,6 +96,12 @@ router.post('/urbain-login', async (req, res) => {
       { id: user.id, email: user.email, role: user.role, organizationId: org?.id, organizationCode: org?.code, organizationName: org?.name },
       JWT_SECRET, { expiresIn: '7d' }
     );
+    await logAction({
+      userId: user.id,
+      action: 'login.fleet',
+      details: `role=${user.role}; org=${org?.name || 'n/a'}`,
+      req,
+    });
     res.json({ 
       message: 'Connexion réussie !', token, 
       redirectPath: '/flotte/urbain',
@@ -128,6 +134,12 @@ router.post('/interurbain-login', async (req, res) => {
       { id: user.id, email: user.email, role: user.role, organizationId: org?.id, organizationCode: org?.code, organizationName: org?.name },
       JWT_SECRET, { expiresIn: '7d' }
     );
+    await logAction({
+      userId: user.id,
+      action: 'login.coop',
+      details: `role=${user.role}; org=${org?.name || 'n/a'}`,
+      req,
+    });
     res.json({ 
       message: 'Connexion réussie !', token, 
       redirectPath: '/flotte/interurbain',
@@ -170,6 +182,12 @@ router.post('/driver-login', async (req, res) => {
       JWT_SECRET,
       { expiresIn: '7d' }
     );
+    await logAction({
+      userId: driver.user.id,
+      action: 'login.driver',
+      details: `driverCode=${driver.driverCode}; org=${driver.organization?.name || 'n/a'}`,
+      req,
+    });
     res.json({
       message: 'Connexion réussie !', token,
       user: { id: driver.user.id, name: driver.user.name, email: driver.user.email, driverCode: driver.driverCode, driverId: driver.id, role: 'DRIVER', organization: driver.organization?.name }
@@ -237,6 +255,12 @@ router.post('/logout', authMiddleware, async (req, res) => {
     res.clearCookie('dagoos_admin_token', { path: '/' });
     res.clearCookie('dagoos_urbain_token', { path: '/' });
     res.clearCookie('dagoos_interurbain_token', { path: '/' });
+    await logAction({
+      userId: req.user.id,
+      action: 'logout',
+      details: `role=${req.user.role}`,
+      req,
+    });
     res.json({ ok: true });
   } catch(e) {
     res.status(500).json({ error: e.message });
