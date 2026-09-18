@@ -29,7 +29,7 @@ export default function CooperativesPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<Organization | null>(null);
   const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
-  const [formData, setFormData] = useState({ name: '', email: '', plan: 'FREEMIUM', status: 'active' });
+  const [formData, setFormData] = useState({ name: '', email: '', plan: 'Freemium', status: 'active' });
   const [formError, setFormError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -65,7 +65,7 @@ export default function CooperativesPage() {
 
   const openCreate = () => {
     setEditingOrg(null);
-    setFormData({ name: '', email: '', plan: 'FREEMIUM', status: 'active' });
+    setFormData({ name: '', email: '', plan: 'Freemium', status: 'active' });
     setFormError('');
     setModalOpen(true);
   };
@@ -87,8 +87,8 @@ export default function CooperativesPage() {
     setSaving(true);
     try {
       const url = editingOrg 
-        ? `/api/proxy/organizations/${editingOrg.id}` 
-        : '/api/proxy/organizations';
+        ? `/organizations/${editingOrg.id}` 
+        : '/organizations';
       const method = editingOrg ? 'PUT' : 'POST';
       
       const body = editingOrg 
@@ -334,9 +334,10 @@ export default function CooperativesPage() {
                 onChange={e => setFormData({ ...formData, plan: e.target.value })}
                 className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
               >
-                <option value="FREEMIUM">Freemium</option>
-                <option value="STANDARD">Standard</option>
-                <option value="PREMIUM">Premium</option>
+                <option value="Freemium">Freemium</option>
+                <option value="Basic">Basic</option>
+                <option value="Standard">Standard</option>
+                <option value="Premium">Premium</option>
               </select>
             </div>
             <div>
