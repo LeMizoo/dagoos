@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const prisma = require('../../lib/prisma');
 const { authMiddleware, JWT_SECRET } = require('../../middleware/auth');
+const { logAction } = require('../../lib/log-action');
 
 const router = express.Router();
 
@@ -22,10 +23,20 @@ router.post("/register", async (req, res) => {
     const slug = organizationLabel.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) + "-" + suffix;
     const code = (role === "FLEET_MANAGER" ? "FL-" : "CO-") + crypto.randomBytes(3).toString("hex").toUpperCase();
     const hashedPassword = await bcrypt.hash(password, 12);
+    let createdUserId = null;
     await prisma.$transaction(async (tx) => {
       const organization = await tx.organization.create({ data: { name: organizationLabel, email: normalizedEmail, phone: phone || null, code, slug, type: role, plan: plan || "Freemium" } });
-      await tx.user.create({ data: { name: String(name).trim(), email: normalizedEmail, phone: phone || null, password: hashedPassword, role, organizationId: organization.id } });
+      const createdUser = await tx.user.create({ data: { name: String(name).trim(), email: normalizedEmail, phone: phone || null, password: hashedPassword, role, organizationId: organization.id } });
+      createdUserId = createdUser.id;
     });
+
+    await logAction({
+      userId: createdUserId,
+      action: 'org.create',
+      details: `orgType=${role}; plan=${plan || 'Freemium'}; role=${role}`,
+      req,
+    });
+
     res.status(201).json({ message: "Compte cree avec succes" });
   } catch (e) {
     if (e.code === "P2002") return res.status(409).json({ error: "Un compte ou une organisation utilise deja cet email" });
@@ -51,6 +62,12 @@ router.post('/login', async (req, res) => {
     if (!valid) return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
     
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    await logAction({
+      userId: user.id,
+      action: 'login.admin',
+      details: `role=${user.role}`,
+      req,
+    });
     res.json({ message: 'Connexion réussie !', token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
   } catch (e) {
     res.status(500).json({ error: e.message });

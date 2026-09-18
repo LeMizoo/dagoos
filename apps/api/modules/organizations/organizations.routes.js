@@ -10,6 +10,7 @@ cloudinary.config({
 const prisma = require('../../lib/prisma');
 const { authMiddleware } = require('../../middleware/auth');
 const { requirePermission } = require('../../security/require-permission');
+const { logAction } = require('../../lib/log-action');
 
 const router = express.Router();
 
@@ -1148,6 +1149,15 @@ router.put(
         id: req.params.id,
       },
       data,
+    });
+
+    const changedFields = Object.keys(data);
+
+    await logAction({
+      userId: req.user.id,
+      action: 'org.update',
+      details: `orgId=${req.params.id}; fields=[${changedFields.join(',')}]; role=${req.user.role}`,
+      req,
     });
 
     res.json(organization);
