@@ -3,9 +3,14 @@ import { useState, useEffect } from 'react';
 import { apiFetch } from '@/lib/api';
 import { Search, ScrollText, Download, LogIn, LogOut, Settings, AlertTriangle, User } from 'lucide-react';
 
+interface LogUser {
+  name?: string | null;
+  email?: string | null;
+}
+
 interface Log {
   id: string;
-  user?: string;
+  user?: LogUser | null;
   action?: string;
   details?: string;
   ip?: string;
@@ -56,7 +61,10 @@ export default function LogsPage() {
   const levels = ['tous', 'info', 'warning', 'error'];
 
   const filtered = logs.filter(l => {
-    const matchSearch = (l.user || '').toLowerCase().includes(search.toLowerCase()) ||
+    const userName = l.user?.name || '';
+    const userEmail = l.user?.email || '';
+    const matchSearch = userName.toLowerCase().includes(search.toLowerCase()) ||
+      userEmail.toLowerCase().includes(search.toLowerCase()) ||
       (l.action || '').toLowerCase().includes(search.toLowerCase()) ||
       (l.details || '').toLowerCase().includes(search.toLowerCase());
     const matchLevel = levelFilter === 'tous' || l.level === levelFilter;
@@ -114,7 +122,7 @@ export default function LogsPage() {
                   const date = l.date || l.createdAt;
                   return (
                     <tr key={l.id} className="border-t hover:bg-gray-50">
-                      <td className="px-4 py-3 font-medium text-xs">{l.user || 'système'}</td>
+                      <td className="px-4 py-3 font-medium text-xs">{l.user?.name || l.user?.email || 'système'}</td>
                       <td className="px-4 py-3"><span className="flex items-center gap-1"><ActionIcon size={14} className="text-gray-400" /> {l.action || '-'}</span></td>
                       <td className="px-4 py-3 text-gray-500 text-xs max-w-xs truncate">{l.details || '-'}</td>
                       <td className="px-4 py-3 text-gray-400 text-xs font-mono">{l.ip || '-'}</td>
