@@ -1087,6 +1087,31 @@ router.put(
       subscriptionEnd,
     } = req.body;
 
+    // Lire l'état AVANT modification pour enrichir le journal d'activité.
+    const before = await prisma.organization.findUnique({
+      where: { id: req.params.id },
+      select: {
+        name: true,
+        email: true,
+        phone: true,
+        logo: true,
+        description: true,
+        plan: true,
+        status: true,
+        type: true,
+        paymentStatus: true,
+        paymentRef: true,
+        paymentAmount: true,
+        subscriptionEnd: true,
+      },
+    });
+
+    if (!before) {
+      return res.status(404).json({
+        error: 'Organisation introuvable',
+      });
+    }
+
     const data = {};
 
     if (name !== undefined) data.name = name;
@@ -1101,24 +1126,13 @@ router.put(
         });
       }
 
-      const currentOrg = await prisma.organization.findUnique({
-        where: { id: req.params.id },
-        select: { type: true },
-      });
-
-      if (!currentOrg) {
-        return res.status(404).json({
-          error: 'Organisation introuvable',
-        });
-      }
-
-      if (currentOrg.type === 'ADMIN') {
+      if (before.type === 'ADMIN') {
         data.plan = plan;
       } else {
         const validPlan = await prisma.plan.findFirst({
           where: {
             name: plan,
-            type: currentOrg.type,
+            type: before.type,
             active: true,
           },
           select: {
@@ -1129,7 +1143,7 @@ router.put(
 
         if (!validPlan) {
           return res.status(400).json({
-            error: `Plan "${plan}" invalide pour une organisation de type ${currentOrg.type}`,
+            error: `Plan "${plan}" invalide pour une organisation de type ${before.type}`,
           });
         }
 
@@ -1148,6 +1162,14 @@ router.put(
         : null;
     }
 
+    if (Object.keys(data).length === 0) {
+      return res.json(
+        await prisma.organization.findUnique({
+          where: { id: req.params.id },
+        })
+      );
+    }
+
     const organization = await prisma.organization.update({
       where: {
         id: req.params.id,
@@ -1155,12 +1177,125 @@ router.put(
       data,
     });
 
-    const changedFields = Object.keys(data);
+    const parts = [];
+
+    // Plan
+    if (data.plan !== undefined && data.plan !== before.plan) {
+      parts.push(`plan ${before.plan} → ${data.plan}`);
+    }
+
+    // Statut
+    if (data.status !== undefined && data.status !== before.status) {
+      parts.push(`statut ${before.status} → ${data.status}`);
+    }
+
+    // Type
+    if (data.type !== undefined && data.type !== before.type) {
+      parts.push(`type ${before.type} → ${data.type}`);
+    }
+
+    // Paiement : statut
+    if (
+      data.paymentStatus !== undefined &&
+      data.paymentStatus !== before.paymentStatus
+    ) {
+      const labels = {
+        paid: 'payé',
+        unpaid: 'non payé',
+        overdue: 'en retard',
+        pending: 'en attente',
+      };
+
+      const after = labels[data.paymentStatus] || data.paymentStatus;
+      parts.push(`paiement marqué ${after}`);
+    }
+
+    // Paiement : montant
+    if (
+      data.paymentAmount !== undefined &&
+      data.paymentAmount !== before.paymentAmount
+    ) {
+      if (data.paymentAmount === null) {
+        parts.push('montant supprimé');
+      } else {
+        parts.push(
+          `montant ${data.paymentAmount.toLocaleString('fr-FR')} Ar`
+        );
+      }
+    }
+
+    // Paiement : référence
+    if (
+      data.paymentRef !== undefined &&
+      data.paymentRef !== before.paymentRef
+    ) {
+      if (data.paymentRef) {
+        parts.push(`réf. ${data.paymentRef}`);
+      } else {
+        parts.push('réf. supprimée');
+      }
+    }
+
+    // Échéance
+    if (data.subscriptionEnd !== undefined) {
+      const beforeTime = before.subscriptionEnd
+        ? before.subscriptionEnd.getTime()
+        : null;
+
+      const afterTime = data.subscriptionEnd
+        ? data.subscriptionEnd.getTime()
+        : null;
+
+      if (beforeTime !== afterTime) {
+        if (data.subscriptionEnd) {
+          parts.push(
+            `échéance ${data.subscriptionEnd.toLocaleDateString('fr-FR')}`
+          );
+        } else {
+          parts.push('échéance supprimée');
+        }
+      }
+    }
+
+    // Nom
+    if (data.name !== undefined && data.name !== before.name) {
+      parts.push(`nom ${before.name} → ${data.name}`);
+    }
+
+    // Email
+    if (data.email !== undefined && data.email !== before.email) {
+      parts.push(`email ${before.email} → ${data.email}`);
+    }
+
+    // Téléphone
+    if (data.phone !== undefined && data.phone !== before.phone) {
+      parts.push('téléphone modifié');
+    }
+
+    // Description
+    if (
+      data.description !== undefined &&
+      data.description !== before.description
+    ) {
+      parts.push('description modifiée');
+    }
+
+    // Logo
+    if (data.logo !== undefined && data.logo !== before.logo) {
+      parts.push('logo modifié');
+    }
+
+    const summary =
+      parts.length > 0
+        ? parts.join(' · ')
+        : 'aucun changement détecté';
+
+    const details = `${before.name} : ${summary}`;
 
     await logAction({
       userId: req.user.id,
       action: 'org.update',
-      details: `orgId=${req.params.id}; fields=[${changedFields.join(',')}]; role=${req.user.role}`,
+      details,
       req,
     });
 
