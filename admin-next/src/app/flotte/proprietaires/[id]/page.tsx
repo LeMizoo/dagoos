@@ -70,7 +70,7 @@ export default function ProprietaireDetailPage() {
   if (error || !proprietaire) {
     return (
       <div className="space-y-4">
-        <Link href="/flotte/urbain/proprietaires" className="inline-flex items-center gap-2 text-sm text-emerald-600">
+        <Link href="/flotte/proprietaires" className="inline-flex items-center gap-2 text-sm text-emerald-600">
           <ArrowLeft size={16} /> Retour aux propriétaires
         </Link>
         <div className="rounded-xl border bg-white p-6 text-sm text-red-600">{error || 'Propriétaire introuvable'}</div>
@@ -80,7 +80,7 @@ export default function ProprietaireDetailPage() {
 
   return (
     <div className="space-y-6">
-      <Link href="/flotte/urbain/proprietaires" className="inline-flex items-center gap-2 text-sm text-emerald-600 hover:underline">
+      <Link href="/flotte/proprietaires" className="inline-flex items-center gap-2 text-sm text-emerald-600 hover:underline">
         <ArrowLeft size={16} /> Retour aux propriétaires
       </Link>
 

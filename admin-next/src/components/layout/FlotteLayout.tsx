@@ -79,7 +79,7 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
     { section: 'Gestion', items: [
       { href: '/flotte/interurbain/vehicles', icon: Car, label: 'Véhicules' },
       { href: '/flotte/interurbain/drivers', icon: Users, label: 'Chauffeurs' },
-      { href: '/flotte/interurbain/proprietaires', icon: Users, label: 'Propriétaires' }
+      { href: '/flotte/proprietaires', icon: Users, label: 'Propriétaires' }
     ]},
     { section: 'Finances', items: [
       { href: '/flotte/interurbain/finances', icon: DollarSign, label: 'Finances' },
