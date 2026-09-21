@@ -30,10 +30,13 @@ router.post("/register", async (req, res) => {
       createdUserId = createdUser.id;
     });
 
+    const typeLabel = role === 'FLEET_MANAGER' ? 'flotte' : 'coopérative';
+    const details = `${organizationLabel} : organisation créée · type ${typeLabel} · plan ${plan || 'Freemium'}`;
+
     await logAction({
       userId: createdUserId,
       action: 'org.create',
-      details: `orgType=${role}; plan=${plan || 'Freemium'}; role=${role}`,
+      details,
       req,
     });
 
