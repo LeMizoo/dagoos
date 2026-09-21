@@ -210,6 +210,18 @@ export default function AbonnementsPage() {
     }
   };
 
+  const getPlanPrice = (org: Organization) => {
+    const planName = org.plan || 'Freemium';
+
+    const plan = plans.find(
+      p =>
+        p.type === org.type &&
+        p.name.toLowerCase() === planName.toLowerCase()
+    );
+
+    return plan?.price ?? 0;
+  };
+
   const openPaymentModal = (org: Organization) => {
     const paymentStatus = PAYMENT_STATUSES.some(
       item => item.value === org.paymentStatus
@@ -233,7 +245,9 @@ export default function AbonnementsPage() {
       paymentAmount:
         typeof org.paymentAmount === 'number'
           ? String(org.paymentAmount)
-          : '',
+          : getPlanPrice(org) > 0
+            ? String(getPlanPrice(org))
+            : '',
       paymentRef: org.paymentRef ?? '',
       subscriptionEnd,
     });
@@ -360,18 +374,6 @@ export default function AbonnementsPage() {
   const ts = orgs.filter(o => norm(o.plan) === 'standard').length;
   const tp = orgs.filter(o => norm(o.plan) === 'premium').length;
   const td = orgs.filter(o => norm(o.plan) === 'surdevis').length;
-
-  const getPlanPrice = (org: Organization) => {
-    const planName = org.plan || 'Freemium';
-
-    const plan = plans.find(
-      p =>
-        p.type === org.type &&
-        p.name.toLowerCase() === planName.toLowerCase()
-    );
-
-    return plan?.price ?? 0;
-  };
 
   const totalCA = orgs.reduce((sum, org) => {
     const price = getPlanPrice(org);
