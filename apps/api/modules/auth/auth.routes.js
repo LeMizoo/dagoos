@@ -24,8 +24,11 @@ router.post("/register", async (req, res) => {
     const code = (role === "FLEET_MANAGER" ? "FL-" : "CO-") + crypto.randomBytes(3).toString("hex").toUpperCase();
     const hashedPassword = await bcrypt.hash(password, 12);
     let createdUserId = null;
+    const organizationType =
+      role === "FLEET_MANAGER" ? "FLEET_MANAGER" : "COOPERATIVE";
+
     await prisma.$transaction(async (tx) => {
-      const organization = await tx.organization.create({ data: { name: organizationLabel, email: normalizedEmail, phone: phone || null, code, slug, type: role, plan: plan || "Freemium" } });
+      const organization = await tx.organization.create({ data: { name: organizationLabel, email: normalizedEmail, phone: phone || null, code, slug, type: organizationType, plan: plan || "Freemium", status: "active" } });
       const createdUser = await tx.user.create({ data: { name: String(name).trim(), email: normalizedEmail, phone: phone || null, password: hashedPassword, role, organizationId: organization.id } });
       createdUserId = createdUser.id;
     });

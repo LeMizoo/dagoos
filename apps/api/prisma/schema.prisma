@@ -63,7 +63,7 @@ model Organization {
   paymentRef           String?
   paymentAmount        Int?
   subscriptionEnd      DateTime?
-  status               String                @default("pending")
+  status               String                @default("active")
   createdAt            DateTime              @default(now())
   drivers              Driver[]
   users                User[]
