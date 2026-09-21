@@ -164,11 +164,26 @@ router.post('/vehicle-assignment-request', authMiddleware, async (req, res) => {
 
 router.get('/', authMiddleware, requirePermission('notifications.read'), async (req, res) => {
   try {
-    // Pour DRIVER : filtrer par userId
     const where = {};
 
+    // DRIVER : uniquement ses propres notifications.
     if (req.user.role === 'DRIVER') {
       where.userId = req.user.id;
+    }
+
+    // FLEET_MANAGER / COOP_MANAGER :
+    // uniquement les notifications de leur organisation.
+    else if (
+      req.user.role === 'FLEET_MANAGER' ||
+      req.user.role === 'COOP_MANAGER'
+    ) {
+      if (!req.user.organizationId) {
+        return res.status(403).json({
+          error: 'Organisation utilisateur introuvable'
+        });
+      }
+
+      where.organizationId = req.user.organizationId;
     }
 
     // Filtrer par read si query param présent
