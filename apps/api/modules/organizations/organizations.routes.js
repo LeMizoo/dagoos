@@ -85,6 +85,10 @@ router.get(
           email: true,
           phone: true,
           plan: true,
+          paymentStatus: true,
+          paymentAmount: true,
+          paymentRef: true,
+          subscriptionEnd: true,
           status: true,
           createdAt: true,
           _count: {
