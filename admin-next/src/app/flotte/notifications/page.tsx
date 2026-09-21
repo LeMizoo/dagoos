@@ -22,21 +22,20 @@ export default function FlotteNotifications() {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'type'>('date');
 
+  const organizationId = organization?.id;
+
   const load = useCallback(async () => {
-    if (!organization?.id) return;
-    
+    if (!organizationId) return;
+
     try {
       const res = await apiFetch('/notifications').then(r => r.ok ? r.json() : []);
-      const allNotifications = Array.isArray(res) ? res : [];
-      setNotifications(allNotifications.filter((n: any) => 
-        n.organizationId === organization.id
-      ));
+      setNotifications(Array.isArray(res) ? res : []);
     } catch (e: any) {
       setError(e.message);
     } finally {
       setLoading(false);
     }
-  }, [organization]);
+  }, [organizationId]);
 
   useEffect(() => {
     load();
