@@ -27,8 +27,23 @@ router.post("/register", async (req, res) => {
     const organizationType =
       role === "FLEET_MANAGER" ? "FLEET_MANAGER" : "COOPERATIVE";
 
+    const activityType =
+      role === "FLEET_MANAGER" ? "URBAN" : "INTERURBAN";
+    const activityZone =
+      role === "FLEET_MANAGER" ? "URBAN" : "NATIONAL";
+
     await prisma.$transaction(async (tx) => {
       const organization = await tx.organization.create({ data: { name: organizationLabel, email: normalizedEmail, phone: phone || null, code, slug, type: organizationType, plan: plan || "Freemium", status: "active" } });
+
+      await tx.businessActivity.create({
+        data: {
+          organizationId: organization.id,
+          type: activityType,
+          zone: activityZone,
+          active: true,
+        },
+      });
+
       const createdUser = await tx.user.create({ data: { name: String(name).trim(), email: normalizedEmail, phone: phone || null, password: hashedPassword, role, organizationId: organization.id } });
       createdUserId = createdUser.id;
     });
