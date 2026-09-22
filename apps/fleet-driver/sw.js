@@ -1,5 +1,5 @@
-const CACHE_NAME = 'dagoos-driver-v14';
-const STATIC_CACHE = 'dagoos-static-v15';
+const CACHE_NAME = 'dagoos-driver-v15';
+const STATIC_CACHE = 'dagoos-static-v16';
 
 const STATIC_ASSETS = [
   '/',

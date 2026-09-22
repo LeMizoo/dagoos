@@ -28,6 +28,8 @@
             --accent:       #0A6F35;
             --accent-hover: #085A2B;
             --accent-soft:  #E6F4EA;
+            --login-accent:       #06245F;
+            --login-accent-hover: #041B47;
 
             /* Accent secondaire — or safran */
             --gold:       #E0A01C;
@@ -67,14 +69,27 @@
         }
         .login-header { text-align: center; margin-bottom: 28px; }
         .login-logo {
-            width: 56px; height: 56px; background: var(--accent); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 12px; font-size: 28px; color: var(--text-on-accent);
-        }
+  width: 100px;
+  height: 100px;
+  background: var(--login-accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+  padding: 4px;
+  overflow: hidden;
+}
+.login-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
         .login-header h1 { font-size: 22px; margin-bottom: 4px; }
         .login-header p { color: var(--text-secondary); font-size: 13px; }
         .badge {
-            display: inline-block; background: var(--accent); color: var(--text-on-accent);
+            display: inline-block; background: var(--login-accent); color: var(--text-on-accent);
             padding: 4px 10px; border-radius: 50px; font-size: 11px; font-weight: 600; margin-top: 6px;
         }
         .note {
@@ -112,17 +127,17 @@
         .pin-row { display: flex; gap: 8px; justify-content: center; }
         .pin-row input {
             width: 48px; height: 56px; text-align: center; font-size: 24px; font-weight: 700;
-            padding: 0; border: 2px solid var(--border-strong); background: var(--bg-surface); color: var(--accent);
+            padding: 0; border: 2px solid var(--border-strong); background: var(--bg-surface); color: var(--login-accent);
             border-radius: 8px;
         }
-        .pin-row input:focus { border-color: var(--accent); outline: none; }
+        .pin-row input:focus { border-color: var(--login-accent); outline: none; }
         
         .btn-login {
-            width: 100%; padding: 14px; background: var(--accent); color: var(--text-on-accent);
+            width: 100%; padding: 14px; background: var(--login-accent); color: var(--text-on-accent);
             border: none; border-radius: 8px; font-size: 16px; font-weight: 700;
             cursor: pointer; transition: background 0.3s; font-family: 'Inter', sans-serif; margin-top: 20px;
         }
-        .btn-login:hover { background: var(--accent-hover); }
+        .btn-login:hover { background: var(--login-accent-hover); }
         .btn-login:disabled { background: var(--bg-elevated); color: var(--text-muted); cursor: not-allowed; }
         
         .message {
