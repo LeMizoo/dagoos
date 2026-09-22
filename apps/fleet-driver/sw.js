@@ -1,10 +1,11 @@
-const CACHE_NAME = 'dagoos-driver-v13';
-const STATIC_CACHE = 'dagoos-static-v14';
+const CACHE_NAME = 'dagoos-driver-v14';
+const STATIC_CACHE = 'dagoos-static-v15';
 
 const STATIC_ASSETS = [
   '/',
   '/dashboard.html',
   '/config.js',
+  '/css/theme.css',
   '/js/router.js',
   '/js/autosave.js',
   '/js/login.js',
