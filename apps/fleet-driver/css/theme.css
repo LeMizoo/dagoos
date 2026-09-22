@@ -215,6 +215,11 @@
    DASHBOARD.HTML — NAVIGATION BASSE
    ============================================================ */
 
+/* ESPACE POUR LE MENU BAS FIXE */
+#mainContent {
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+}
+
 .bottom-nav {
         position: fixed;
         bottom: 0;
