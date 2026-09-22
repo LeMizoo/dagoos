@@ -1,5 +1,5 @@
-const CACHE_NAME = 'dagoos-mobile-v5';
-const STATIC_CACHE = 'dagoos-mobile-static-v5';
+const CACHE_NAME = 'dagoos-mobile-v6';
+const STATIC_CACHE = 'dagoos-mobile-static-v6';
 
 const STATIC_ASSETS = [
   '/',
@@ -11,7 +11,8 @@ const STATIC_ASSETS = [
   '/pages/suivi.js',
   '/pages/reservations.js',
   '/pages/location.js',
-  '/manifest.json'
+  '/manifest.json',
+  '/icons/logo.png'
 ];
 
 self.addEventListener('message', (event) => {

@@ -1,5 +1,5 @@
-const CACHE_NAME = 'dagoos-driver-v12';
-const STATIC_CACHE = 'dagoos-static-v13';
+const CACHE_NAME = 'dagoos-driver-v13';
+const STATIC_CACHE = 'dagoos-static-v14';
 
 const STATIC_ASSETS = [
   '/',
@@ -18,7 +18,8 @@ const STATIC_ASSETS = [
   '/pages/profil.js',
   '/pages/notifications.js',
   '/manifest.json',
-  '/offline.html'
+  '/offline.html',
+  '/icons/logo.png'
 ];
 
 self.addEventListener('message', (event) => {
