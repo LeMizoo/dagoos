@@ -216,23 +216,31 @@
    ============================================================ */
 
 /* ESPACE POUR LE MENU BAS FIXE */
+
 #mainContent {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
   padding-bottom: calc(80px + env(safe-area-inset-bottom));
 }
 
+
 .bottom-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: var(--bg-surface);
-        border-top: 2px solid var(--accent);
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        padding: 6px 8px 10px;
-        z-index: 1000;
-        box-shadow: 0 -2px 8px rgba(6,36,95,0.06);
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    right: auto;
+    width: 100%;
+    max-width: 500px;
+    transform: translateX(-50%);
+    background: var(--bg-surface);
+    border-top: 2px solid var(--accent);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 6px 8px 10px;
+    z-index: 1000;
+    box-shadow: 0 -2px 8px rgba(6,36,95,0.06);
     }
 
     .bottom-nav button {
