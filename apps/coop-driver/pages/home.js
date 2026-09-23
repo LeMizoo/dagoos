@@ -304,7 +304,14 @@ async function init_home() {
                         : '') +
                 '</div>' +
             '</div>' +
-        '</div>';};
+        '</div>';
+
+    // Charger les dépenses depuis l'API
+    loadExpenses();
+
+    // P7-E2-B-FIX : délégation pour les boutons du manifest
+    bindManifestButtons();
+};
 
 async function accepterCourse(notificationId) {
   var user = JSON.parse(localStorage.getItem('dagoo_driver_user') || '{}');
@@ -457,49 +464,100 @@ async function loadHomeData() {
 
 function addExpense(type) {
     var amount = prompt('Montant (' + type + ') en Ar :');
-    if (!amount || isNaN(amount)) return;
+    if (!amount || isNaN(amount) || parseFloat(amount) <= 0) return;
+
     var desc = prompt('Description :') || type;
-    expenses.push({ type: type, amount: parseInt(amount), desc: desc, time: new Date().toLocaleTimeString() });
-    try { localStorage.setItem('driver_expenses', JSON.stringify(expenses)); } catch(e) {}
-    renderExpenses();
+
+    (async function () {
+        try {
+            var result = await window.apiFetch('/finances/expenses', {
+                method: 'POST',
+                body: {
+                    category: type,
+                    amount: parseFloat(amount),
+                    description: desc
+                }
+            });
+
+            if (result && result.error) {
+                console.error('addExpense:', result.error);
+                return;
+            }
+
+            await loadExpenses();
+        } catch (e) {
+            console.error('addExpense:', e);
+        }
+    })();
 }
 
 function renderExpenses() {
     var list = document.getElementById('expensesList');
     var total = document.getElementById('expensesTotal');
     if (!list) return;
+
     if (expenses.length === 0) {
         list.innerHTML = '<div style="color:#94A3B8;text-align:center;padding:10px;">Aucune dépense</div>';
         if (total) total.textContent = '';
         return;
     }
+
     var html = '', sum = 0;
-    var recent = expenses.slice(-10).reverse();
-    var labels = { carburant: '⛽', entretien: '🔧', pneu: '🛞', autre: '📝' };
+    var recent = expenses.slice(0, 10);
+
+    var labels = {
+        carburant: '⛽',
+        entretien: '🔧',
+        pneu: '🛞',
+        autre: '📝'
+    };
+
     for (var i = 0; i < recent.length; i++) {
         var e = recent[i];
+        var amount = Number(e.amount) || 0;
+
         html += '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #333;">' +
-            '<span style="color:#94A3B8;font-size:11px;">' + (labels[e.type] || '') + ' ' + escapeHtmlLocal(e.desc) + '</span>' +
-            '<span style="color:#F87171;font-weight:600;">' + Number(e.amount || 0).toLocaleString() + ' Ar</span></div>';
-        sum += e.amount;
+            '<span style="color:#94A3B8;font-size:11px;">' +
+                (labels[e.category] || '') + ' ' +
+                escapeHtmlLocal(e.description || '') +
+            '</span>' +
+            '<span style="color:#F87171;font-weight:600;">' +
+                amount.toLocaleString() + ' Ar' +
+            '</span>' +
+            '</div>';
+
+        sum += amount;
     }
+
     list.innerHTML = html;
-    if (total) total.textContent = 'Total : ' + sum.toLocaleString() + ' Ar';
+
+    if (total) {
+        total.textContent = 'Total : ' + sum.toLocaleString() + ' Ar';
+    }
 }
 
-function loadExpenses() {
+async function loadExpenses() {
     try {
-        var saved = localStorage.getItem('driver_expenses');
-        if (saved) { expenses = JSON.parse(saved); renderExpenses(); }
-    } catch(e) {}
+        var data = await window.apiFetch('/finances/expenses');
+        expenses = Array.isArray(data) ? data : [];
+    } catch (e) {
+        console.error('loadExpenses:', e);
+        expenses = [];
+    }
 
-  // P7-E2-B-FIX : délégation pour les boutons du manifest
-  var manifestBtns = main.querySelectorAll('button[data-action="marquerPaye"]');
-  manifestBtns.forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      marquerPaye(btn.dataset.id);
+    renderExpenses();
+}
+
+function bindManifestButtons() {
+    var manifestBtns = document.querySelectorAll(
+        'button[data-action="marquerPaye"]'
+    );
+
+    manifestBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            marquerPaye(btn.dataset.id);
+        });
     });
-  });
 }
 
 window.init_home = init_home;

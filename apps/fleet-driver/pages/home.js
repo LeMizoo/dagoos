@@ -2284,28 +2284,18 @@ async function proposerVersement() {
 // ========================================
 // DEPENSES
 // ========================================
-//
-// IMPORTANT :
-// Le code fourni ne montre pas de route API dépenses
-// exploitable côté Driver. Les dépenses restent donc
-// locales pour le moment.
-// Elles devront être branchées à l'API dès qu'un endpoint
-// backend dédié sera confirmé.
-//
 
-function addExpense(type) {
-
-    var amount =
-        prompt(
-            'Montant (' +
-            type +
-            ') en Ar :'
-        );
+async function addExpense(type) {
+    var amount = prompt(
+        'Montant (' +
+        type +
+        ') en Ar :'
+    );
 
     if (
         !amount ||
         isNaN(amount) ||
-        parseInt(amount, 10) <= 0
+        parseFloat(amount) <= 0
     ) {
         return;
     }
@@ -2314,22 +2304,26 @@ function addExpense(type) {
         prompt('Description :') ||
         type;
 
-    expenses.push({
-        type: type,
-        amount: parseInt(amount, 10),
-        desc: desc,
-        time:
-            new Date().toLocaleTimeString()
-    });
-
     try {
-        localStorage.setItem(
-            'driver_expenses',
-            JSON.stringify(expenses)
-        );
-    } catch (e) {}
+        var result = await window.apiFetch('/finances/expenses', {
+            method: 'POST',
+            body: {
+                category: type,
+                amount: parseFloat(amount),
+                description: desc
+            }
+        });
 
-    renderExpenses();
+        if (result && result.error) {
+            console.error('addExpense:', result.error);
+            return;
+        }
+
+        await loadExpenses();
+
+    } catch (e) {
+        console.error('addExpense:', e);
+    }
 }
 
 function renderExpenses() {
@@ -2367,8 +2361,7 @@ function renderExpenses() {
 
     var recent =
         expenses
-            .slice(-10)
-            .reverse();
+            .slice(0, 10);
 
     var labels = {
         carburant: 'Carburant',
@@ -2394,12 +2387,14 @@ function renderExpenses() {
 
                 '<span style="color:var(--text-muted);font-size:11px;">' +
                     escapeHtml(
-                        labels[expense.type] ||
-                        expense.type
+                        labels[expense.category] ||
+                        expense.category ||
+                        ''
                     ) +
                     ' - ' +
                     escapeHtml(
-                        expense.desc
+                        expense.description ||
+                        ''
                     ) +
                 '</span>' +
 
@@ -2421,39 +2416,32 @@ function renderExpenses() {
     }
 }
 
-function loadExpenses() {
+async function loadExpenses() {
 
     try {
 
-        var saved =
-            localStorage.getItem(
-                'driver_expenses'
+        var result =
+            await window.apiFetch(
+                '/finances/expenses'
             );
 
-        if (!saved) {
-            expenses = [];
-            renderExpenses();
-            return;
-        }
-
-        var parsed =
-            JSON.parse(saved);
-
         expenses =
-            Array.isArray(parsed)
-                ? parsed
+            Array.isArray(result)
+                ? result
                 : [];
-
-        renderExpenses();
 
     } catch (e) {
 
+        console.error(
+            'loadExpenses:',
+            e
+        );
+
         expenses = [];
-
-        renderExpenses();
     }
-}
 
+    renderExpenses();
+}
 
 // ========================================
 // INFOS VEHICULE
