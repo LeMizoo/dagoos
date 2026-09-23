@@ -269,8 +269,6 @@ function afficherFormulaireReservation(depart) {
         <span style="color:var(--success-fg);">● ${placesDisponibles} disponible(s)</span>
         <span style="color:var(--error-fg);">● ${placesReservees.length} réservée(s)</span>
         <span style="color:var(--info-fg);">● ${selectedPlaces.length} sélectionnée(s)</span>
-        <span style="color:var(--error-fg);">● ${placesReservees.length} réservée(s)</span>
-        <span style="color:var(--info-fg);">● ${selectedPlaces.length} sélectionnée(s)</span>
       </div>
 
       <h3 style="font-size:16px;font-weight:800;color:var(--accent);margin-bottom:12px;text-align:center;">2. Informations passagers</h3>
@@ -448,11 +446,16 @@ async function gererReservation() {
             <p style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">${r.depart?.pointDepart || ''} → ${r.depart?.destination || ''}</p>
             <p style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;"><i data-lucide="calendar" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> ${r.depart ? new Date(r.depart.date).toLocaleDateString('fr-FR') : ''} à ${r.depart?.heure || '--:--'}</p>
             <p style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;"><i data-lucide="armchair" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Place : ${r.place || '-'}</p>
-            <p style="font-size:11px;color:var(--text-secondary);">Statut : ${r.statut || '-'}</p>
+            <p style="font-size:11px;color:var(--text-secondary);margin-bottom:10px;">Statut : ${r.statut || '-'}</p>
+            <div style="display:flex;gap:8px;">
+              <button onclick="modifierPlacePWA('${r.id}')" style="flex:1;padding:10px;background:var(--bg-soft);color:var(--accent);border:1px solid var(--accent);border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;"><i data-lucide="pencil" style="font-size:14px;display:inline-block;vertical-align:middle;"></i> Modifier la place</button>
+              <button onclick="annulerReservationPWA('${r.id}')" style="flex:1;padding:10px;background:var(--bg-soft);color:var(--error-fg);border:1px solid var(--error-fg);border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;"><i data-lucide="x-circle" style="font-size:14px;display:inline-block;vertical-align:middle;"></i> Annuler</button>
+            </div>
           </div>
         `;
       });
       resultContainer.innerHTML = html;
+      if (window.lucide) window.lucide.createIcons();
     } else if (result && result.error) {
       resultContainer.innerHTML = '';
       var errP = document.createElement('p');
@@ -467,6 +470,79 @@ async function gererReservation() {
   }
 }
 
+// ============================================
+// MODIFICATION / ANNULATION DE PLACE (PWA)
+// Aligné sur la landing — actions 'modify' / 'cancel'
+// ============================================
+
+async function modifierPlacePWA(reservationId) {
+  var nouvellePlace = prompt('Entrez la nouvelle place (ex: 3B) :');
+  if (!nouvellePlace) return;
+  nouvellePlace = nouvellePlace.trim().toUpperCase();
+  if (!nouvellePlace) return;
+
+  var tel = document.getElementById('manageTel').value.trim();
+  var nom = document.getElementById('manageNom').value.trim();
+  var otp = document.getElementById('manageOtp').value.trim();
+
+  if (!tel || !nom || !otp) {
+    alert('Téléphone, nom et OTP requis');
+    return;
+  }
+
+  try {
+    var result = await apiPost('/public/reservations/manage', {
+      telephone: tel,
+      passagerNom: nom,
+      otpCode: otp,
+      action: 'modify',
+      reservationId: reservationId,
+      nouvellePlace: nouvellePlace
+    });
+
+    if (result && result.ok) {
+      alert('Place modifiée avec succès');
+      gererReservation(); // rafraîchit la liste
+    } else {
+      alert((result && result.error) || 'Erreur lors de la modification');
+    }
+  } catch(e) {
+    alert('Erreur réseau');
+  }
+}
+
+async function annulerReservationPWA(reservationId) {
+  if (!confirm('Confirmer l\u2019annulation de cette réservation ?')) return;
+
+  var tel = document.getElementById('manageTel').value.trim();
+  var nom = document.getElementById('manageNom').value.trim();
+  var otp = document.getElementById('manageOtp').value.trim();
+
+  if (!tel || !nom || !otp) {
+    alert('Téléphone, nom et OTP requis');
+    return;
+  }
+
+  try {
+    var result = await apiPost('/public/reservations/manage', {
+      telephone: tel,
+      passagerNom: nom,
+      otpCode: otp,
+      action: 'cancel',
+      reservationId: reservationId
+    });
+
+    if (result && result.ok) {
+      alert('Réservation annulée');
+      gererReservation(); // rafraîchit la liste
+    } else {
+      alert((result && result.error) || 'Erreur lors de l\u2019annulation');
+    }
+  } catch(e) {
+    alert('Erreur réseau');
+  }
+}
+
 window.init_reservations = init_reservations;
 window.chargerDeparts = chargerDeparts;
 window.selectionnerDepart = selectionnerDepart;
@@ -474,3 +550,5 @@ window.togglePlace = togglePlace;
 window.confirmerReservation = confirmerReservation;
 window.afficherGestion = afficherGestion;
 window.gererReservation = gererReservation;
+window.modifierPlacePWA = modifierPlacePWA;
+window.annulerReservationPWA = annulerReservationPWA;
