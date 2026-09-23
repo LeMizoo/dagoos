@@ -80,22 +80,9 @@ async function loadCourses() {
             '<div style="text-align:center;padding:30px;color:var(--text-muted);">Chargement des courses...</div>';
     }
 
-    var user = getDriverUser();
-
-    if (!user.driverId) {
-        if (history) {
-            history.innerHTML =
-                '<div style="background:var(--error-bg);color:var(--error-fg);padding:14px;border-radius:10px;text-align:center;">' +
-                    'Chauffeur non identifié.' +
-                '</div>';
-        }
-        return;
-    }
-
     try {
-        var response = await window.apiGet(
-            '/finances/courses?driverId=' + encodeURIComponent(user.driverId)
-        );
+        // Source de vérité : l'API détermine le chauffeur depuis le JWT.
+        var response = await window.apiFetch('/finances/courses');
 
         coursesData = Array.isArray(response)
             ? response
@@ -380,26 +367,14 @@ async function demarrerCourse(courseId) {
     if (!courseId) return;
 
     try {
-        var response = await fetch(
-            getApiUrl() + '/finances/courses/' +
+        await window.apiFetch(
+            '/finances/courses/' +
             encodeURIComponent(courseId) + '/start',
             {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + getDriverToken(),
-                    'Content-Type': 'application/json'
-                }
+                method: 'POST'
             }
         );
 
-        var data = await response.json().catch(function() {
-            return {};
-        });
-
-        if (!response.ok) {
-            alert(data.error || 'Impossible de démarrer la course');
-            return;
-        }
 
         alert('Course démarrée !');
         await loadCourses();
@@ -419,26 +394,14 @@ async function prendreEnCharge(courseId) {
     if (!courseId) return;
 
     try {
-        var response = await fetch(
-            getApiUrl() + '/finances/courses/' +
+        await window.apiFetch(
+            '/finances/courses/' +
             encodeURIComponent(courseId) + '/pickup',
             {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + getDriverToken(),
-                    'Content-Type': 'application/json'
-                }
+                method: 'POST'
             }
         );
 
-        var data = await response.json().catch(function() {
-            return {};
-        });
-
-        if (!response.ok) {
-            alert(data.error || 'Impossible de prendre en charge le client');
-            return;
-        }
 
         alert('Client pris en charge !');
         await loadCourses();
@@ -458,26 +421,14 @@ async function terminerCourse(courseId) {
     if (!courseId) return;
 
     try {
-        var response = await fetch(
-            getApiUrl() + '/finances/courses/' +
+        await window.apiFetch(
+            '/finances/courses/' +
             encodeURIComponent(courseId) + '/complete',
             {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + getDriverToken(),
-                    'Content-Type': 'application/json'
-                }
+                method: 'POST'
             }
         );
 
-        var data = await response.json().catch(function() {
-            return {};
-        });
-
-        if (!response.ok) {
-            alert(data.error || 'Impossible de terminer la course');
-            return;
-        }
 
         alert('Course terminée !');
         await loadCourses();
@@ -551,48 +502,15 @@ function getCourseTimestamp(course) {
 }
 
 function getCourseAmount(course) {
-    var value =
-        course.price ??
-        course.amount ??
-        course.montant ??
-        course.total ??
-        0;
-
-    return Number(value) || 0;
+    return Number(course.price) || 0;
 }
 
 function getCourseCommission(course) {
-    var value =
-        course.commission ??
-        course.versement ??
-        course.driverCommission ??
-        course.driver_commission;
-
-    if (value !== undefined && value !== null) {
-        return Number(value) || 0;
-    }
-
-    // Compatibilité avec les anciennes données.
-    // Le calcul n'est utilisé que si l'API ne fournit aucune valeur.
-    var pct = (typeof getCommissionPct === 'function') ? getCommissionPct() : 20;
-    return Math.round(getCourseAmount(course) * ((100 - pct) / 100));
+    return Number(course.montantOrganisation) || 0;
 }
 
 function getCourseNet(course) {
-    var value =
-        course.net ??
-        course.netAmount ??
-        course.driverNet ??
-        course.driver_net;
-
-    if (value !== undefined && value !== null) {
-        return Number(value) || 0;
-    }
-
-    var amount = getCourseAmount(course);
-    var versement = getCourseCommission(course);
-
-    return Math.max(0, amount - versement);
+    return Number(course.montantChauffeur) || 0;
 }
 
 function getCourseDistance(course) {
@@ -670,16 +588,6 @@ function getStatusColor(status) {
 // ========================================
 // CHAUFFEUR
 // ========================================
-
-function getDriverUser() {
-    try {
-        return JSON.parse(
-            localStorage.getItem('dagoo_driver_user') || '{}'
-        );
-    } catch (error) {
-        return {};
-    }
-}
 
 
 // ========================================
