@@ -214,9 +214,10 @@ La plateforme Dagoos expose deux points d'entrée pour le **passager** :
 | 4 | Ajouter photos à la landing (parité) | 🟡 Faible |
 | 5 | Login passager | 🔴 **Bloqué** (backend manquant) |
 | 6 | Notifications passager | 🔴 **Bloqué** (backend manquant) |
-| 7 | Permettre saisie offreClient même sans estimation (config flotte manquante) | 🟠 Moyenne |
+| 7 | Permettre saisie offreClient même sans estimation (config flotte manquante) | ✅ Fait (`6db3351f`) |
 | 8 | Corriger géocoding Nominatim — toponymes ambigus (Ivato→Ambositra) | ✅ Fait (`24d5cc8e`) |
 | 9 | Architecture par ville — détection auto + filtre flottes | 🟠 Moyenne |
+| 10 | Remplacer le prix par défaut hardcodé 2000 Ar par un tarif DAGOO'S standard | 🟡 Faible |
 
 ---
 
