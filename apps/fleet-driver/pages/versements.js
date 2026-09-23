@@ -17,42 +17,31 @@ function escapeHtmlLocal(value) {
 async function init_versements() {
     var main = document.getElementById('mainContent');
     var user = JSON.parse(localStorage.getItem("dagoo_driver_user") || "{}");
-    
+
     main.innerHTML = getHeaderHTML() + '<div style="padding:12px;max-width:500px;margin:0 auto;padding-bottom:80px;"><div style="text-align:center;padding:40px;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : 'var(--gold)') +';">Chargement...</div></div>';
 
     try {
-        var courses = await window.apiGet('/finances/courses?driverId=' + user.driverId);
-        var arr = Array.isArray(courses) ? courses : [];
+        // Source de vérité : API finances (aligné Coop)
+        var stats = await window.apiFetch('/finances/stats/summary');
 
-        // Commission réelle de l'organisation (paramétrée dans /flotte/settings),
-        // au lieu d'un taux 20%/80% figé dans le code.
-        var commissionPct = 20;
-        try {
-            if (user.organizationId) {
-                var tarifsOrg = await window.apiGet('/tarifs/' + user.organizationId);
-                if (tarifsOrg && tarifsOrg.commissionChauffeur !== undefined && tarifsOrg.commissionChauffeur !== null) {
-                    commissionPct = Number(tarifsOrg.commissionChauffeur);
-                }
-            }
-        } catch (e) {
-            console.warn('Commission organisation indisponible, utilisation du taux par défaut (20%):', e);
-        }
+        var today = (stats && stats.today) || {};
 
-        var totalCA = arr.reduce(function(s, c) { return s + (c.price || 0); }, 0);
-        var totalCommission = Math.round(totalCA * (commissionPct / 100));
-        var totalVerse = totalCA - totalCommission;
+        var totalCA         = Number(today.ca  || 0);
+        var totalCommission = Number(today.com || 0);
+        var totalVerse      = Number(today.net || 0);
 
         var html = getHeaderHTML() + '<div style="padding:12px;max-width:500px;margin:0 auto;padding-bottom:80px;">' +
+
             // Résumé
             '<div class="card" style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : 'var(--bg-surface)') +';border-radius:12px;padding:20px;margin-bottom:12px;">' +
                 '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : 'var(--gold)') +';margin-bottom:16px;">💰 Résumé des versements</h3>' +
                 '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;">' +
                     '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : 'var(--bg-soft)') +';border-radius:10px;padding:10px;"><div style="font-size:16px;font-weight:800;color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : 'var(--success-fg)') +';">' + totalCA.toLocaleString() + ' Ar</div><div style="font-size:9px;color:var(--text-muted);">CA Total</div></div>' +
-                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : 'var(--bg-soft)') +';border-radius:10px;padding:10px;"><div style="font-size:16px;font-weight:800;color:var(--text-primary);">' + totalCommission.toLocaleString() + ' Ar</div><div style="font-size:9px;color:var(--text-muted);">Gardé (' + commissionPct + '%)</div></div>' +
-                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : 'var(--bg-soft)') +';border-radius:10px;padding:10px;"><div style="font-size:16px;font-weight:800;color:var(--text-primary);">' + totalVerse.toLocaleString() + ' Ar</div><div style="font-size:9px;color:var(--text-muted);">Versé (' + (100 - commissionPct) + '%)</div></div>' +
+                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : 'var(--bg-soft)') +';border-radius:10px;padding:10px;"><div style="font-size:16px;font-weight:800;color:var(--text-primary);">' + totalCommission.toLocaleString() + ' Ar</div><div style="font-size:9px;color:var(--text-muted);">Part organisation</div></div>' +
+                    '<div style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.cardDark : 'var(--bg-soft)') +';border-radius:10px;padding:10px;"><div style="font-size:16px;font-weight:800;color:var(--text-primary);">' + totalVerse.toLocaleString() + ' Ar</div><div style="font-size:9px;color:var(--text-muted);">Net chauffeur</div></div>' +
                 '</div>' +
             '</div>' +
-            
+
             // Demander un versement
             '<div class="card" style="background:'+ (window.FLEET_THEME ? window.FLEET_THEME.card : 'var(--bg-surface)') +';border-radius:12px;padding:20px;margin-bottom:12px;">' +
                 '<h3 style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.primary : 'var(--gold)') +';margin-bottom:12px;">📤 Demander un versement</h3>' +
@@ -71,9 +60,11 @@ async function init_versements() {
         '</div>';
         main.innerHTML = html;
     } catch(e) {
+        console.error('init_versements:', e);
         main.innerHTML = getHeaderHTML() + '<div style="text-align:center;padding:40px;color:var(--error-fg);">Erreur de chargement</div>';
     }
 }
+
 
 async function demanderVersement() {
     var montant = document.getElementById('versementMontant').value;
@@ -81,24 +72,26 @@ async function demanderVersement() {
     var msg = document.getElementById('versementMsg');
     var user = JSON.parse(localStorage.getItem("dagoo_driver_user") || "{}");
 
-    if (!montant || parseInt(montant) <= 0) { msg.innerHTML = '<span style="color:var(--error-fg);">Veuillez entrer un montant valide</span>'; return; }
+    if (!montant || parseInt(montant) <= 0) {
+        msg.innerHTML = '<span style="color:var(--error-fg);">Veuillez entrer un montant valide</span>';
+        return;
+    }
 
     try {
-        var r = await fetch(DAGOOS_CONFIG.apiUrl + '/finances/versements', {
+        await window.apiFetch('/finances/versements', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('dagoo_driver_token') },
-            body: JSON.stringify({ driverId: user.driverId, amount: parseInt(montant), method: mode, periode: new Date().toISOString().slice(0,7) })
+            body: {
+                amount: parseInt(montant),
+                periode: new Date().toISOString().slice(0,7)
+            }
         });
-        if (r.ok) {
-            msg.innerHTML = '<span style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : 'var(--success-fg)') +';">✅ Demande de versement envoyée !</span>';
-        } else {
-            var data = await r.json();
-            msg.innerHTML = '<span style="color:var(--error-fg);">❌ ' + escapeHtmlLocal(data.error || 'Erreur') + '</span>';
-        }
+
+        msg.innerHTML = '<span style="color:'+ (window.FLEET_THEME ? window.FLEET_THEME.success : 'var(--success-fg)') +';">✅ Demande de versement envoyée !</span>';
     } catch(e) {
-        msg.innerHTML = '<span style="color:var(--error-fg);">❌ Erreur réseau</span>';
+        msg.innerHTML = '<span style="color:var(--error-fg);">❌ ' + escapeHtmlLocal(e.message || 'Erreur réseau') + '</span>';
     }
 }
+
 
 window.init_versements = init_versements;
 window.demanderVersement = demanderVersement;
