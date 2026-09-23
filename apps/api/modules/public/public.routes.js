@@ -14,6 +14,7 @@ const {
 
 // P7-C — Rate limiting sur les endpoints publics sensibles
 const { publicLeadLimiter } = require('../../middleware/rate-limit');
+const { findVilleLocal } = require('../../lib/villes-madagascar');
 
 // ============================================================
 // P7-C — VALIDATEURS D'ENTRÉE PUBLIQUE
@@ -379,16 +380,22 @@ async function reverseGeocode(lat, lng) {
 async function geocodeAdresse(adresse) {
   if (!adresse) return null;
 
+  // ----------------------------------------------------------
+  // 1. PRIORITÉ : table locale (villes et quartiers de Madagascar)
+  // ----------------------------------------------------------
+  const local = findVilleLocal(adresse);
+  if (local) {
+    return { lat: local.lat, lng: local.lng, source: 'local' };
+  }
+
+  // ----------------------------------------------------------
+  // 2. FALLBACK : Nominatim avec heuristique
+  // ----------------------------------------------------------
   try {
-    // Essayer d'abord avec Madagascar uniquement (meilleur pour les villes)
-    // Vérifier si l'adresse contient déjà une virgule (adresse complète)
-    const aDejaVirgule = adresse.includes(',');
+    const query = `${adresse}, Madagascar`;
 
-    const query = aDejaVirgule
-      ? `${adresse}, Madagascar`
-      : `${adresse}, Madagascar`;
-
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=mg`;
+    // limit=5 pour pouvoir choisir le meilleur résultat
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&countrycodes=mg&addressdetails=1`;
     const response = await fetch(url, {
       headers: { 'User-Agent': 'DAGOOS/1.0' }
     });
@@ -397,14 +404,35 @@ async function geocodeAdresse(adresse) {
 
     const data = await response.json();
 
-    if (data && data.length > 0) {
-      return {
-        lat: parseFloat(data[0].lat),
-        lng: parseFloat(data[0].lon)
-      };
-    }
+    if (!data || data.length === 0) return null;
 
-    return null;
+    // Heuristique : préférer les types "city/town/village/suburb"
+    // et pénaliser les résultats administratifs ambigus
+    const TYPE_SCORES = {
+      'city': 10,
+      'town': 9,
+      'village': 8,
+      'suburb': 7,
+      'neighbourhood': 6,
+      'quarter': 6,
+      'hamlet': 5,
+      'administrative': 2,
+    };
+
+    const scored = data.map(r => {
+      const type = (r.type || r.class || '').toLowerCase();
+      const score = TYPE_SCORES[type] || 3;
+      return { result: r, score };
+    });
+
+    scored.sort((a, b) => b.score - a.score);
+    const best = scored[0].result;
+
+    return {
+      lat: parseFloat(best.lat),
+      lng: parseFloat(best.lon),
+      source: 'nominatim'
+    };
   } catch(e) {
     console.warn('Géocodage échoué:', e.message);
     return null;
@@ -435,14 +463,30 @@ async function calculerDistance(depart, arrivee) {
 
   if (!coordDepart || !coordArrivee) return 0;
 
-  const distance = haversineDistance(
+  const distanceVolOiseau = haversineDistance(
     coordDepart.lat, coordDepart.lng,
     coordArrivee.lat, coordArrivee.lng
   );
 
   // Facteur de correction pour routes réelles (vs vol d'oiseau)
   const FACTEUR_ROUTE = 1.35;
-  return Math.round(distance * FACTEUR_ROUTE * 10) / 10;
+  const distanceKm = Math.round(distanceVolOiseau * FACTEUR_ROUTE * 10) / 10;
+
+  // ----------------------------------------------------------
+  // SANITY CHECK : rejeter les distances absurdes
+  // Madagascar fait ~1600 km dans sa plus grande dimension.
+  // Au-delà de 1500 km, c'est presque toujours une erreur de géocodage.
+  // ----------------------------------------------------------
+  const DISTANCE_MAX_MADAGASCAR_KM = 1500;
+  if (distanceKm > DISTANCE_MAX_MADAGASCAR_KM) {
+    console.warn(
+      `[calculerDistance] Distance anormale rejetée: ${distanceKm} km ` +
+      `entre "${depart}" (${coordDepart.source || '?'}) et "${arrivee}" (${coordArrivee.source || '?'})`
+    );
+    return 0;
+  }
+
+  return distanceKm;
 }
 
 /**
