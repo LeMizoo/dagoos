@@ -148,19 +148,58 @@ function updateUI() {
   }
 }
 
+async function reverseGeocoderPWA(lat, lng) {
+  try {
+    var result = await apiGet(
+      '/public/reverse-geocode?lat=' +
+      encodeURIComponent(lat) +
+      '&lng=' +
+      encodeURIComponent(lng)
+    );
+
+    if (result && result.adresse) {
+      return result.adresse;
+    }
+  } catch(e) {}
+
+  return '';
+}
+
 function detecterPosition() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
-      function(pos) {
-        positionGPS = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      async function(pos) {
+        var lat = pos.coords.latitude;
+        var lng = pos.coords.longitude;
+
+        positionGPS = { lat: lat, lng: lng };
+        adresseGPS = '';
+
         var departInput = document.getElementById('depart');
-        if (departInput) {
-          departInput.value = 'Position détectée (' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4) + ')';
-        }
         var posDiv = document.getElementById('posDetectee');
-        if (posDiv) {
-          posDiv.innerHTML = '<p style="text-align:center;color:var(--success-fg);font-size:12px;margin-top:8px;"><i data-lucide="check-circle" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Position détectée : ' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4) + '</p>';
+
+        if (departInput) {
+          departInput.value = 'Position détectée (' + lat.toFixed(4) + ', ' + lng.toFixed(4) + ')';
         }
+
+        if (posDiv) {
+          posDiv.innerHTML = '<p style="text-align:center;color:var(--success-fg);font-size:12px;margin-top:8px;"><i data-lucide="loader" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Recherche de votre adresse…</p>';
+          if (window.lucide) window.lucide.createIcons();
+        }
+
+        adresseGPS = await reverseGeocoderPWA(lat, lng);
+
+        if (adresseGPS && departInput) {
+          departInput.value = adresseGPS;
+        }
+
+        if (posDiv) {
+          posDiv.innerHTML = '<p style="text-align:center;color:var(--success-fg);font-size:12px;margin-top:8px;"><i data-lucide="check-circle" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> ' +
+            escapeHtmlLocal(adresseGPS || ('Position détectée : ' + lat.toFixed(4) + ', ' + lng.toFixed(4))) +
+            '</p>';
+          if (window.lucide) window.lucide.createIcons();
+        }
+
         estimerPrix();
       },
       function() { alert('Géolocalisation refusée'); }

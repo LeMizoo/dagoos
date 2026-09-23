@@ -91,6 +91,37 @@ const NEGOTIATION_TTL_HOURS = 48;
 // =========================================================
 
 // GET /api/public/organizations - Liste publique des organisations
+// GET /api/public/reverse-geocode?lat=...&lng=...
+// Convertit des coordonnées GPS en adresse lisible pour les clients publics.
+router.get('/reverse-geocode', publicLeadLimiter, async (req, res) => {
+  try {
+    const lat = Number(req.query.lat);
+    const lng = Number(req.query.lng);
+
+    if (
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lng) ||
+      lat < -90 ||
+      lat > 90 ||
+      lng < -180 ||
+      lng > 180
+    ) {
+      return res.status(400).json({ error: 'Coordonnées GPS invalides' });
+    }
+
+    const adresse = await reverseGeocode(lat, lng);
+
+    if (!adresse) {
+      return res.status(404).json({ error: 'Adresse introuvable' });
+    }
+
+    return res.json({ adresse, lat, lng });
+  } catch (error) {
+    console.error('GET /public/reverse-geocode:', error);
+    return res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 router.get('/organizations', async (req, res) => {
   try {
     const organizations = await prisma.organization.findMany({
@@ -309,6 +340,42 @@ function haversineDistance(lat1, lng1, lat2, lng2) {
  * Géocode une adresse via Nominatim (OpenStreetMap)
  * Retourne { lat, lng } ou null
  */
+/**
+ * Reverse geocoding via Nominatim (OpenStreetMap)
+ * Convertit des coordonnées GPS en adresse lisible.
+ * Retourne une chaîne ou null.
+ */
+async function reverseGeocode(lat, lng) {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&zoom=18&addressdetails=1`;
+    const response = await fetch(url, {
+      headers: { 'User-Agent': 'DAGOOS/1.0' }
+    });
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    if (!data || !data.address) return null;
+    if (data.address.country_code && data.address.country_code.toLowerCase() !== 'mg') return null;
+
+    const addr = data.address;
+    const quartier = addr.neighbourhood || addr.suburb || addr.quarter || '';
+    const rue = addr.road || addr.pedestrian || '';
+    const ville = addr.city || addr.town || addr.village || '';
+
+    const adresse = `${rue ? rue + ', ' : ''}${quartier ? quartier + ', ' : ''}${ville}`
+      .trim()
+      .replace(/,\s*$/, '');
+
+    return adresse || data.display_name || null;
+  } catch (e) {
+    console.warn('Reverse geocoding échoué:', e.message);
+    return null;
+  }
+}
+
 async function geocodeAdresse(adresse) {
   if (!adresse) return null;
 
