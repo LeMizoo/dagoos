@@ -208,7 +208,7 @@ La plateforme Dagoos expose deux points d'entrée pour le **passager** :
 
 | # | Action | Priorité |
 |---|---|---|
-| 1 | Exposer modification/annulation place dans le PWA | 🟠 Moyenne |
+| 1 | Exposer modification/annulation place dans le PWA | ✅ Fait (`97edfa23`) |
 | 2 | Ajouter reverse geocoding au PWA | 🟠 Moyenne |
 | 3 | Harmoniser source des départs (landing ↔ PWA) | 🟡 Faible |
 | 4 | Ajouter photos à la landing (parité) | 🟡 Faible |
