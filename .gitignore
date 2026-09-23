@@ -70,3 +70,18 @@ coverage/
 .nyc_output/
 *.bak-*
 *.bak-vague*
+
+# ============================================
+# Backups de migration (non versionnés)
+# ============================================
+*.MANUEL_BAK
+*.PRE_EXPENSES_PATCH*
+*.PRE_EXPENSES_API_PATCH
+*.PRE_PATCH
+*.bak
+*.bak-*
+
+# ============================================
+# Cloudflare Wrangler
+# ============================================
+.wrangler/
