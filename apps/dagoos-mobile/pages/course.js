@@ -18,6 +18,7 @@ var positionGPS = null;
 var adresseGPS = '';
 var mode = 'choisir';
 var flottesDisponibles = [];
+var estimationValide = false;
 
 async function chargerFlottes() {
   try {
@@ -210,18 +211,30 @@ function detecterPosition() {
 }
 
 async function estimerPrix() {
+  estimationValide = false;
+
   var depart = document.getElementById('depart').value;
   var arrivee = document.getElementById('arrivee').value;
   var typeVehicule = document.getElementById('typeVehicule').value;
   var container = document.getElementById('estimationResult');
 
-  // En mode proche, on utilise la première flotte disponible
+  // Déterminer la flotte selon le mode
   var flotte = '';
   if (mode === 'proche') {
+    // Recharger pour garantir la fraîcheur de la liste
+    await chargerFlottes();
     flotte = flottesDisponibles.length > 0 ? flottesDisponibles[0].slug : '';
   } else {
     var flotteSelect = document.getElementById('flotte');
     flotte = flotteSelect ? flotteSelect.value : '';
+
+    // Vérifier que le slug existe toujours dans la liste fraîche
+    if (flotte && !flottesDisponibles.find(function(f) { return f.slug === flotte; })) {
+      await chargerFlottes();
+      if (!flottesDisponibles.find(function(f) { return f.slug === flotte; })) {
+        flotte = '';
+      }
+    }
   }
 
   if (!depart || !arrivee) return;
@@ -230,7 +243,9 @@ async function estimerPrix() {
   localStorage.setItem('dagoos_trip_arrivee', arrivee);
 
   if (!flotte) {
-    if (container) container.innerHTML = '';
+    if (container) {
+      container.innerHTML = '<p style="text-align:center;color:var(--error-fg);font-size:12px;margin-top:8px;">Aucune flotte disponible pour l\'estimation</p>';
+    }
     return;
   }
 
@@ -242,7 +257,25 @@ async function estimerPrix() {
       typeVehicule: typeVehicule
     });
 
+    // Gestion des erreurs API
+    if (result && result.error) {
+      var msg = result.error;
+      if (msg === 'Service TAXI non configuré' ||
+          msg === 'Activité urbaine non configurée' ||
+          msg === 'Tarif V2 non configuré pour MOTO sur TAXI' ||
+          msg === 'Tarif V2 non configuré pour VOITURE sur TAXI') {
+        msg = 'Cette flotte n\'a pas encore configuré ses tarifs';
+      } else if (msg === 'Organisation introuvable') {
+        msg = 'Flotte introuvable, veuillez recharger la page';
+      }
+      if (container) {
+        container.innerHTML = '<p style="text-align:center;color:var(--error-fg);font-size:12px;padding:8px;">⚠️ ' + escapeHtmlLocal(msg) + '</p>';
+      }
+      return;
+    }
+
     if (result && result.prixEstime && container) {
+      estimationValide = true;
       container.innerHTML = `
         <div style="background:var(--bg-soft);border-radius:12px;padding:16px;border:1px solid var(--accent);">
           <p style="text-align:center;color:var(--accent);font-size:13px;font-weight:600;">Estimation</p>
@@ -254,8 +287,13 @@ async function estimerPrix() {
           <p style="text-align:center;color:var(--text-secondary);font-size:10px;margin-top:4px;"><i data-lucide="lightbulb" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Proposez votre prix — le chauffeur accepte ou refuse</p>
         </div>
       `;
+      if (window.lucide) window.lucide.createIcons();
     }
-  } catch(e) { alert('Erreur estimation'); }
+  } catch(e) {
+    if (container) {
+      container.innerHTML = '<p style="text-align:center;color:var(--error-fg);font-size:12px;padding:8px;">Erreur réseau</p>';
+    }
+  }
 }
 
 async function envoyerDemande() {
@@ -268,6 +306,13 @@ async function envoyerDemande() {
 
   if (!nom || !tel) { alert('Remplissez votre nom et téléphone'); return; }
   if (!depart || !arrivee) { alert('Remplissez départ et arrivée'); return; }
+
+  // Bloquer l'envoi si ni estimation ni offre client
+  var hasOffreClient = offreClient && Number(offreClient) > 0;
+  if (!estimationValide && !hasOffreClient) {
+    alert('Veuillez d\'abord obtenir une estimation ou saisir votre propre offre en Ar');
+    return;
+  }
 
   // Sauvegarder les infos passager
   setPassengerInfo({ name: nom, phone: tel });
