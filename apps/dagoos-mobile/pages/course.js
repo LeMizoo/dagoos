@@ -269,7 +269,14 @@ async function estimerPrix() {
         msg = 'Flotte introuvable, veuillez recharger la page';
       }
       if (container) {
-        container.innerHTML = '<p style="text-align:center;color:var(--error-fg);font-size:12px;padding:8px;">⚠️ ' + escapeHtmlLocal(msg) + '</p>';
+        container.innerHTML = `
+          <div style="background:var(--bg-soft);border-radius:12px;padding:16px;border:1px solid var(--error-fg);">
+            <p style="text-align:center;color:var(--error-fg);font-size:12px;padding:4px;">⚠️ ${escapeHtmlLocal(msg)}</p>
+            <p style="text-align:center;color:var(--text-secondary);font-size:11px;margin-top:8px;">Proposez votre prix — le chauffeur acceptera ou refusera</p>
+            <input id="offreClient" type="number" placeholder="Votre offre (Ar)" min="0" style="width:100%;margin-top:8px;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-page);color:var(--text-primary);text-align:center;">
+          </div>
+        `;
+        if (window.lucide) window.lucide.createIcons();
       }
       return;
     }
