@@ -166,11 +166,11 @@ router.get('/organizations', async (req, res) => {
             prix: true,
             placesTotal: true,
             reservations: {
-              where: { statut: 'CONFIRMED' },
+              where: { statut: { in: ['CONFIRMED', 'PENDING'] } },
               select: { place: true },
             },
           },
-          take: 5,
+          take: 20,
         },
       },
     });
