@@ -210,10 +210,20 @@ La plateforme Dagoos expose deux points d'entrée pour le **passager** :
 |---|---|---|
 | 1 | Exposer modification/annulation place dans le PWA | ✅ Fait (`97edfa23`) |
 | 2 | Ajouter reverse geocoding au PWA | ✅ Fait (`9b646a60`) |
-| 3 | Harmoniser source des départs (landing ↔ PWA) | 🟡 Faible |
+| 3 | Harmoniser source des départs (landing ↔ PWA) | ✅ Partiel (`8d5acb67`) — take:20 + PENDING. Endpoint `/public/departs` dédié à faire (#3B) |
 | 4 | Ajouter photos à la landing (parité) | 🟡 Faible |
 | 5 | Login passager | 🔴 **Bloqué** (backend manquant) |
 | 6 | Notifications passager | 🔴 **Bloqué** (backend manquant) |
 | 7 | Permettre saisie offreClient même sans estimation (config flotte manquante) | 🟠 Moyenne |
 | 8 | Corriger géocoding Nominatim — toponymes ambigus (Ivato→Ambositra) | ✅ Fait (`24d5cc8e`) |
 | 9 | Architecture par ville — détection auto + filtre flottes | 🟠 Moyenne |
+
+---
+
+## Notes de suivi
+
+- **#3A — Partiel** (`8d5acb67`) : `/organizations` retourne maintenant jusqu'à 20 départs par org + les réservations PENDING.
+  Test fonctionnel en attente (aucun départ publié en base au moment du déploiement).
+  Reste : endpoint dédié `GET /public/departs` pour harmoniser complètement avec la landing.
+- **#8 — Fait** (`24d5cc8e`) : géocoding Nominatim corrigé via table locale (`apps/api/lib/villes-madagascar.js`).
+  Test prod : Ivato → Itaosy = 16.6 km (vs 259 km avant).
