@@ -1,12 +1,12 @@
 {
-  "name": "Dagoos Mobile",
-  "short_name": "Dagoos",
+  "name": "DAGOO'S Mobile",
+  "short_name": "DAGOO'S",
   "start_url": "/splash.html",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#16213E",
-  "theme_color": "#F39C12",
-  "description": "Application passager Dagoo's - Transport à Madagascar",
+  "background_color": "#06245F",
+  "theme_color": "#E0A01C",
+  "description": "Application passager DAGOO'S — Transport à Madagascar",
   "icons": [
     {
       "src": "/icons/icon-192.png",

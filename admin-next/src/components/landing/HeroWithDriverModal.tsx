@@ -55,6 +55,10 @@ export default function HeroWithDriverModal() {
                 Chauffeur inter-urbain
                 <span className="block text-xs font-normal mt-1 text-white/80">Transport commun et départs</span>
               </a>
+              <a href="https://dago-mobile.pages.dev" target="_blank" rel="noopener noreferrer" className="bg-secondary text-dark px-6 py-4 rounded-xl font-bold text-lg hover:bg-yellow-400 transition">
+                App passager
+                <span className="block text-xs font-normal mt-1 text-dark/70">Réserver une place, suivre un départ</span>
+              </a>
             </div>
             <button onClick={() => setShowDriverModal(false)} className="mt-6 text-gray-500 hover:text-gray-700 transition">
               Fermer
