@@ -86,3 +86,4 @@ coverage/
 # ============================================
 .wrangler/
 backup-courses-*.json
+*.PRE_FINANCE_MIGRATION
