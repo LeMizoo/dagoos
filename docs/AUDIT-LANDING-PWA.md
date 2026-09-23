@@ -214,3 +214,6 @@ La plateforme Dagoos expose deux points d'entrée pour le **passager** :
 | 4 | Ajouter photos à la landing (parité) | 🟡 Faible |
 | 5 | Login passager | 🔴 **Bloqué** (backend manquant) |
 | 6 | Notifications passager | 🔴 **Bloqué** (backend manquant) |
+| 7 | Permettre saisie offreClient même sans estimation (config flotte manquante) | 🟠 Moyenne |
+| 8 | Corriger géocoding Nominatim — toponymes ambigus (Ivato→Ambositra) | 🔴 **Critique** |
+| 9 | Architecture par ville — détection auto + filtre flottes | 🟠 Moyenne |
