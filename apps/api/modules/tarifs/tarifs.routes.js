@@ -2,6 +2,7 @@ const express = require('express');
 const prisma = require('../../lib/prisma');
 const { authMiddleware } = require('../../middleware/auth');
 const { requirePermission } = require('../../security/require-permission');
+const { canAccessOrganization } = require('../../security/authorization');
 const router = express.Router();
 
 // Valeurs par défaut centralisées
@@ -19,6 +20,11 @@ const DEFAULT_TARIFS = {
 router.get('/:organizationId', authMiddleware, requirePermission('tarifs.read'), async (req, res) => {
   try {
     const { organizationId } = req.params;
+
+    // Isolation multi-tenant : SUPER_ADMIN = toutes, managers = la leur
+    if (!canAccessOrganization(req.user, organizationId)) {
+      return res.status(403).json({ error: 'Acces interdit a cette organisation' });
+    }
     let tarifs = await prisma.tarif.findUnique({ where: { organizationId }, select: { id: true, organizationId: true, prixBase: true, prixKm: true, locationJournalier: true, commissionChauffeur: true, adyVarotraActif: true, courseNormalActif: true, locationActif: true, vehiculeTarifs: true, mobileMoney: true, createdAt: true, updatedAt: true } });
     if (!tarifs) {
       return res.json(DEFAULT_TARIFS);
@@ -34,6 +40,11 @@ router.get('/:organizationId', authMiddleware, requirePermission('tarifs.read'),
 router.put('/:organizationId', authMiddleware, requirePermission('tarifs.manage'), async (req, res) => {
   try {
     const { organizationId } = req.params;
+
+    // Isolation multi-tenant : SUPER_ADMIN = toutes, managers = la leur
+    if (!canAccessOrganization(req.user, organizationId)) {
+      return res.status(403).json({ error: 'Acces interdit a cette organisation' });
+    }
     const { 
       prixBase, prixKm, locationJournalier, commissionChauffeur, 
       adyVarotraActif, courseNormalActif, locationActif,

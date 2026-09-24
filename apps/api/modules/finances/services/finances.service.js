@@ -108,12 +108,14 @@ async function getStatsSummary(filters = {}) {
   ]);
 
   const ca = todayCourses.reduce((sum, c) => sum + (Number(c.price) || 0), 0);
-  const com = Math.round(ca * 0.20);
+  // V1 - Agregation de Course.montantChauffeur (part chauffeur), plus de recalcul au taux actuel
+  const com = todayCourses.reduce((sum, c) => sum + (Number(c.montantChauffeur) || 0), 0);
   const net = ca - com;
   const expenses = todayExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
 
   const weekCa = weekCourses.reduce((sum, c) => sum + (Number(c.price) || 0), 0);
-  const weekCom = Math.round(weekCa * 0.20);
+  // V1 - Idem : agregation sur la semaine
+  const weekCom = weekCourses.reduce((sum, c) => sum + (Number(c.montantChauffeur) || 0), 0);
   const weekNet = weekCa - weekCom;
   const weekExpenseTotal = weekExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
 

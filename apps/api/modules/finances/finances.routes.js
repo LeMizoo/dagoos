@@ -215,6 +215,17 @@ router.post('/courses', authMiddleware, requirePermission('courses.create'), asy
 
     const amount = Number(price);
 
+    // V1 - Commission issue du tarif organisationnel (priorite)
+    // Priorite : Tarif > body.commissionPct > 20 (fallback)
+    const tarifOrg = await prisma.tarif.findUnique({
+      where: { organizationId: vehicle.organizationId },
+      select: { commissionChauffeur: true },
+    });
+    const commissionPctResolved = tarifOrg?.commissionChauffeur
+      ?? (req.body.commissionPct !== undefined ? Number(req.body.commissionPct) : 20);
+    const montantChauffeurResolved = Math.round(amount * commissionPctResolved / 100);
+    const montantOrganisationResolved = amount - montantChauffeurResolved;
+
     const course = await prisma.course.create({
       data: {
         driverId: driver.id,
@@ -222,15 +233,12 @@ router.post('/courses', authMiddleware, requirePermission('courses.create'), asy
         type: type || 'NORMALE',
         distanceKm: Number(distanceKm || 0),
         price: amount,
-        commission:
-          commission !== undefined
-            ? Number(commission)
-            : Math.round(amount * 0.20),
+        commission: montantChauffeurResolved,
         statut: 'TERMINEE',
         completedAt: new Date(),
-        commissionPct: req.body.commissionPct || 20,
-        montantChauffeur: req.body.montantChauffeur || Math.round(amount * 0.20),
-        montantOrganisation: req.body.montantOrganisation || Math.round(amount * 0.80)
+        commissionPct: commissionPctResolved,
+        montantChauffeur: montantChauffeurResolved,
+        montantOrganisation: montantOrganisationResolved
       },
       include: {
         driver: {
@@ -387,7 +395,7 @@ router.post('/courses/:id/complete', authMiddleware, async (req, res) => {
         price: prixFinal,
         montantChauffeur: montantChauffeurFinal,
         montantOrganisation: montantOrganisationFinal,
-        commission: montantOrganisationFinal, // legacy
+        commission: montantChauffeurFinal, // V1 - aligne sur part chauffeur
         completedAt: new Date()
       }
     });

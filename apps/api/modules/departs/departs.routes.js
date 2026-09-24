@@ -205,8 +205,15 @@ router.get('/mine', authMiddleware, async (req, res) => {
 
     const passagersPayes = depart.reservations.filter(r => r.statut === 'CONFIRMED').length;
     const recette = passagersPayes * depart.prix;
-    const versementCoop = recette * 0.8;
-    const commissionChauffeur = recette * 0.2;
+
+    // V1 - Commission issue du tarif organisationnel
+    const tarifOrg = await prisma.tarif.findUnique({
+      where: { organizationId: driver.organizationId },
+      select: { commissionChauffeur: true },
+    });
+    const commissionPct = tarifOrg?.commissionChauffeur ?? 20;
+    const commissionChauffeur = Math.round(recette * commissionPct / 100);
+    const versementCoop = recette - commissionChauffeur;
 
     res.json({
       depart: {

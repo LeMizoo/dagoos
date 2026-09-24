@@ -43,6 +43,13 @@ const PERMISSIONS = Object.freeze({
 
   LANDING_MANAGE: 'landing.manage',
 
+  // ─────────────────────────────────────────────
+  // V1 — Chantier Paramètres
+  // Permission éditoriale globale (pages publiques)
+  // Distincte de landing.manage (landing organisationnelle)
+  // ─────────────────────────────────────────────
+  CONTENT_MANAGE: 'content.manage',
+
   FLEET_READ: 'fleet.read',
   FLEET_MANAGE: 'fleet.manage',
 

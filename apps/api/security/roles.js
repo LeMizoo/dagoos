@@ -69,6 +69,11 @@ const ROLES = Object.freeze({
     PERMISSIONS.AUDIT_READ,
     PERMISSIONS.LOGS_READ,
     PERMISSIONS.LANDING_MANAGE,
+
+    // ─────────────────────────────────────────────
+    // V1 — Édition des pages publiques globales
+    // ─────────────────────────────────────────────
+    PERMISSIONS.CONTENT_MANAGE,
   ]),
 
   ADMIN: Object.freeze([
