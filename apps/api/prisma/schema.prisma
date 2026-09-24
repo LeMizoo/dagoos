@@ -729,10 +729,22 @@ model ServiceTariff {
   serviceId String
   service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
-  vehicleCategoryId String?
-  vehicleCategory   VehicleCategory? @relation(fields: [vehicleCategoryId], references: [id], onDelete: SetNull)
+  vehicleCategoryId String
+  vehicleCategory   VehicleCategory @relation(fields: [vehicleCategoryId], references: [id], onDelete: Restrict)
 
   pricingModel String
+
+  // Dimensions tarifaires explicites (V2 - O1)
+  modePrestation String? // 'normal' | 'adyVarotra'
+  zone           String? // 'regionale' | 'nationale'
+  mode           String? // 'courseNormale' | 'courseExpress'
+  categorie      String? // 'touristique' | 'familiale' | 'autres'
+
+  // Cle normalisee d'unicite (jamais NULL)
+  dimensionKey String
+
+  // Flag d'exclusion temporaire (M3 MARCHANDISES)
+  excludeFromUnique Boolean @default(false)
 
   basePrice     Float?
   unitPrice     Float?
@@ -744,6 +756,16 @@ model ServiceTariff {
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // ============================================================
+  // INDEX PARTIEL CUSTOM - non representable en Prisma DSL
+  // Nom     : ServiceTariff_unique_dim
+  // Contenu : UNIQUE (serviceId, vehicleCategoryId, pricingModel, dimensionKey)
+  // Filtre  : WHERE (active = true AND excludeFromUnique = false)
+  // Reference : docs/O1_PRISMA_POSTGRES_AUDIT.md section 6.5
+  // ATTENTION  : NE PAS SUPPRIMER lors des migrations Prisma
+  //              (index cree et maintenu hors Prisma)
+  // ============================================================
 
   @@index([serviceId, active])
   @@index([vehicleCategoryId])

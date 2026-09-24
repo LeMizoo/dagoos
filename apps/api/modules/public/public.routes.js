@@ -1,5 +1,6 @@
 const express = require('express');
 const prisma = require('../../lib/prisma');
+const { selectServiceTariff, AmbiguousTariffError } = require('../../services/pricingSelector');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
@@ -564,42 +565,48 @@ router.post('/estimate', async (req, res) => {
         serviceCode: 'TAXI',
         categoryCode: 'MOTO',
         pricingModel: 'PER_KM',
-        modePrestation: 'courseNormale'
+        responseMode: 'courseNormale',
+        tariffDimensions: { modePrestation: 'normal' }
       },
 
       voiture: {
         serviceCode: 'TAXI',
         categoryCode: 'VOITURE',
         pricingModel: 'PER_KM',
-        modePrestation: 'courseNormale'
+        responseMode: 'courseNormale',
+        tariffDimensions: { modePrestation: 'normal' }
       },
 
       taxi: {
         serviceCode: 'TAXI',
         categoryCode: 'VOITURE',
         pricingModel: 'PER_KM',
-        modePrestation: 'courseNormale'
+        responseMode: 'courseNormale',
+        tariffDimensions: { modePrestation: 'normal' }
       },
 
       bus: {
         serviceCode: 'LOCATION_URBAINE',
         categoryCode: 'BUS',
         pricingModel: 'FIXED',
-        modePrestation: 'tarifFixe'
+        responseMode: 'tarifFixe',
+        tariffDimensions: {}
       },
 
       minivan: {
         serviceCode: 'LOCATION_URBAINE',
         categoryCode: 'MINIVAN',
         pricingModel: 'FIXED',
-        modePrestation: 'tarifFixe'
+        responseMode: 'tarifFixe',
+        tariffDimensions: {}
       },
 
       tricycle: {
         serviceCode: 'LOCATION_URBAINE',
         categoryCode: 'TRICYCLE',
         pricingModel: 'FIXED',
-        modePrestation: 'tarifFixe'
+        responseMode: 'tarifFixe',
+        tariffDimensions: {}
       }
     };
 
@@ -672,22 +679,25 @@ router.post('/estimate', async (req, res) => {
     }
 
     /*
-     * 4. Tarif V2
+     * 4. Tarif V2 (selection deterministe via pricingSelector)
      */
-    const tariff = await prisma.serviceTariff.findFirst({
-      where: {
+    let tariff;
+    try {
+      tariff = await selectServiceTariff({
         serviceId: service.id,
         vehicleCategoryId: category.id,
         pricingModel: vehicleConfig.pricingModel,
-        active: true
-      },
-      select: {
-        id: true,
-        pricingModel: true,
-        basePrice: true,
-        unitPrice: true
+        dimensions: vehicleConfig.tariffDimensions,
+      });
+    } catch (e) {
+      if (e instanceof AmbiguousTariffError) {
+        console.error('POST /public/estimate - AmbiguousTariffError:', e.context);
+        return res.status(500).json({
+          error: 'Configuration tarifaire ambigue pour cette combinaison'
+        });
       }
-    });
+      throw e;
+    }
 
     if (!tariff) {
       return res.status(404).json({
@@ -737,7 +747,7 @@ router.post('/estimate', async (req, res) => {
     return res.json({
       distanceKm,
       prixEstime,
-      modePrestation: vehicleConfig.modePrestation
+      modePrestation: vehicleConfig.responseMode
     });
 
   } catch (error) {
@@ -1519,22 +1529,27 @@ router.post('/estimate-location', async (req, res) => {
         });
       }
 
-      // Trouver le tarif V2
-      const tariff = await prisma.serviceTariff.findFirst({
-        where: {
+      // Trouver le tarif V2 (selection deterministe via pricingSelector)
+      let tariff;
+      try {
+        tariff = await selectServiceTariff({
           serviceId: service.id,
           vehicleCategoryId: category.id,
           pricingModel: mapping.pricingModel,
-          active: true
-        },
-        select: {
-          id: true,
-          pricingModel: true,
-          basePrice: true,
-          unitPrice: true,
-          configuration: true
+          dimensions: {},
+        });
+      } catch (e) {
+        if (e instanceof AmbiguousTariffError) {
+          console.error(
+            'POST /public/estimate-location - AmbiguousTariffError:',
+            e.context
+          );
+          return res.status(500).json({
+            error: 'Configuration tarifaire ambigue pour cette combinaison'
+          });
         }
-      });
+        throw e;
+      }
 
       if (!tariff) {
         return res.status(404).json({
@@ -2095,23 +2110,27 @@ router.post('/actions', publicLeadLimiter, async (req, res) => {
         });
       }
 
-      // Trouver le tarif V2 de référence
-      const tariff = await prisma.serviceTariff.findFirst({
-        where: {
+      // Trouver le tarif V2 de reference (selection deterministe via pricingSelector)
+      let tariff;
+      try {
+        tariff = await selectServiceTariff({
           serviceId: service.id,
           vehicleCategoryId: category.id,
-pricingModel: mapping.pricingModel,
-                    active: true
-        },
-        select: {
-          id: true,
-          pricingModel: true,
-          basePrice: true,
-          unitPrice: true,
-          configuration: true,
-          commissionPct: true
+          pricingModel: mapping.pricingModel,
+          dimensions: {},
+        });
+      } catch (e) {
+        if (e instanceof AmbiguousTariffError) {
+          console.error(
+            'POST /public/actions - AmbiguousTariffError:',
+            e.context
+          );
+          return res.status(500).json({
+            error: 'Configuration tarifaire ambigue pour cette combinaison'
+          });
         }
-      });
+        throw e;
+      }
 
       if (!tariff) {
         return res.status(404).json({

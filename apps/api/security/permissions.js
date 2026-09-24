@@ -39,6 +39,12 @@ const PERMISSIONS = Object.freeze({
   TARIFS_READ: 'tarifs.read',
   TARIFS_MANAGE: 'tarifs.manage',
 
+  // V2 - Chantier ServiceTariff (O1 + S3)
+  SERVICE_TARIFFS_READ: 'serviceTariffs.read',
+  SERVICE_TARIFFS_MANAGE: 'serviceTariffs.manage',
+  VEHICLE_CATEGORIES_READ: 'vehicleCategories.read',
+  VEHICLE_CATEGORIES_MANAGE: 'vehicleCategories.manage',
+
   LOGS_READ: 'logs.read',
 
   LANDING_MANAGE: 'landing.manage',

@@ -52,6 +52,7 @@ app.use('/api/contrats', require('./modules/contrats/contrats.routes'));
 app.use('/api/livraisons', require('./modules/livraisons/livraisons.routes'));
 app.use('/api/plans', require('./modules/plans/plans.routes'));
 app.use('/api/tarifs', require('./modules/tarifs/tarifs.routes'));
+app.use('/api/organizations', require('./modules/service-tariffs/service-tariffs.routes'));
 app.use('/api/messages', require('./modules/messages/messages.routes'));
 app.use('/api/notifications', require('./modules/notifications/notifications.routes'));
 app.use('/api/logs', require('./modules/logs.routes'));
