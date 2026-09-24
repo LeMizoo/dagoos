@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Menu, X, LogOut, LayoutDashboard, Car, Wrench, Users, ClipboardList, DollarSign, CreditCard, MessageSquare, Bell, ScrollText, Settings, Truck, Building2, ArrowRightLeft, Receipt, User, QrCode, FileText, FileCheck, Calendar, Ticket, Clock } from 'lucide-react';
 import { useState } from 'react';
 import ThemeSwitcher from './ThemeSwitcher';
+import SettingsTabsBar, { type SettingsGroup } from './SettingsTabsBar';
 
 const menus: Record<string, any> = {
   admin: [
@@ -30,6 +31,51 @@ const menus: Record<string, any> = {
     { section: 'Systèmes', items: [{ href: '/coop/profil', icon: User, label: 'Profil' }, { href: '/coop/settings', icon: Settings, label: 'Paramètres' }] },
   ],
 };
+// Navigation super-admin a 2 niveaux (F6.4)
+// Les identifiants de sous-onglets (id) correspondent aux valeurs ?tab= existantes.
+const ADMIN_SETTINGS_GROUPS: SettingsGroup[] = [
+  {
+    id: 'general',
+    label: 'General',
+  },
+  {
+    id: 'commercial',
+    label: 'Commercial',
+    defaultSubTab: 'plans',
+    subTabs: [
+      { id: 'plans', label: 'Plans' },
+      { id: 'ady-varotra', label: 'Ady varotra' },
+    ],
+  },
+  {
+    id: 'contenu',
+    label: 'Contenu',
+    defaultSubTab: 'landing',
+    subTabs: [
+      { id: 'landing', label: 'Landing' },
+      { id: 'pages-publiques', label: 'Pages publiques' },
+    ],
+  },
+  {
+    id: 'compte',
+    label: 'Compte',
+    defaultSubTab: 'profile',
+    subTabs: [
+      { id: 'profile', label: 'Profil' },
+      { id: 'security', label: 'Securite' },
+    ],
+  },
+  {
+    id: 'systeme',
+    label: 'Systeme',
+    defaultSubTab: 'appearance',
+    subTabs: [
+      { id: 'appearance', label: 'Apparence' },
+      { id: 'notifications', label: 'Notifications' },
+      { id: 'api', label: 'API' },
+    ],
+  },
+];
 
 interface ResponsiveLayoutProps {
   app: 'admin' | 'fleet' | 'coop';
@@ -169,6 +215,9 @@ export default function ResponsiveLayout({ app, children }: ResponsiveLayoutProp
             </div>
           </div>
         </header>
+        {pathname.includes('/settings') && app === 'admin' && (
+          <SettingsTabsBar groups={ADMIN_SETTINGS_GROUPS} />
+        )}
         <div className="p-4 lg:p-6 pt-4">{children}</div>
       </main>
     </div>

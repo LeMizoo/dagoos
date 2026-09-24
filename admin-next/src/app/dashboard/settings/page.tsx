@@ -1,10 +1,12 @@
 'use client';
 export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Settings, User, Shield, Palette, Bell, Globe, Smartphone, Crown, Coffee, Star, Zap, FileText } from 'lucide-react';
 import PasswordInput from '@/components/ui/PasswordInput';
 import { apiFetch } from '@/lib/api';
 import { useTheme } from '@/lib/theme-context';
+import LandingContentEditor from '@/components/settings/LandingContentEditor';
 
 type PlanKey = 'freemium' | 'basic' | 'standard' | 'premium' | 'surdevis';
 type EntityType = 'fleet' | 'coop';
@@ -35,7 +37,8 @@ const defaultCoopPlans: Record<PlanKey, Plan> = {
 };
 
 export default function SettingsPage() {
-  const [tab, setTab] = useState('general');
+  const searchParams = useSearchParams();
+  const tab = searchParams.get('tab') || 'general';
   const [entityTab, setEntityTab] = useState<EntityType>('fleet');
   const [fleetPlans, setFleetPlans] = useState(defaultFleetPlans);
   const [coopPlans, setCoopPlans] = useState(defaultCoopPlans);
@@ -79,15 +82,16 @@ export default function SettingsPage() {
   const currentPlans = entityTab === 'fleet' ? fleetPlans : coopPlans;
   const setCurrentPlans = entityTab === 'fleet' ? setFleetPlans : setCoopPlans;
 
-  const tabs = [
-    { id: 'general', icon: Settings, label: 'Général' },
+  // Les onglets principaux sont désormais gérés par SettingsTabsBar.
+  // Le tableau local n'est conservé que pour la sous-navigation de l'onglet General.
+  const generalSubTabs = [
     { id: 'plans', icon: Crown, label: 'Plans & Abonnements' },
+    { id: 'mobile-money', icon: Smartphone, label: 'Mobile Money' },
     { id: 'profile', icon: User, label: 'Profil' },
     { id: 'security', icon: Shield, label: 'Sécurité' },
     { id: 'appearance', icon: Palette, label: 'Apparence' },
     { id: 'notifications', icon: Bell, label: 'Notifications' },
     { id: 'api', icon: Globe, label: 'API' },
-    { id: 'mobile-money', icon: Smartphone, label: 'Mobile Money' },
   ];
 
   const planIcons: Record<PlanKey, any> = { freemium: Coffee, basic: Star, standard: Zap, premium: Crown, surdevis: FileText };
@@ -111,15 +115,20 @@ export default function SettingsPage() {
       <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">⚙️ Paramètres</h1>
 
       <div className="flex flex-col lg:flex-row gap-4">
-        {/* Tabs */}
+        {/* Sous-onglets verticaux : uniquement visibles sur l'onglet General */}
+        {tab === 'general' && (
         <div className="lg:w-52 flex-shrink-0">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden lg:block flex flex-wrap">
-            {tabs.map(t => {
+            {generalSubTabs.map(t => {
               const Icon = t.icon;
               return (
                 <button
                   key={t.id}
-                  onClick={() => setTab(t.id)}
+                  onClick={() => {
+                    const params = new URLSearchParams(searchParams.toString());
+                    params.set('tab', t.id);
+                    window.location.search = params.toString();
+                  }}
                   className={`flex items-center gap-2 px-4 py-3 text-sm transition text-left w-full ${
                     tab === t.id
                       ? 'bg-primary text-white font-medium'
@@ -132,10 +141,64 @@ export default function SettingsPage() {
             })}
           </div>
         </div>
+        )}
 
         {/* Content */}
         <div className="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
           
+          {tab === 'landing' && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+                  Landing page
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Contenu éditorial global de la landing page principale.
+                </p>
+              </div>
+              <LandingContentEditor section="landing" title="Landing page" />
+            </div>
+          )}
+
+          {tab === 'pages-publiques' && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+                  Pages publiques
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Contenus accessibles depuis le footer de la landing page.
+                </p>
+              </div>
+              <LandingContentEditor section="a-propos" title="À propos" />
+              <LandingContentEditor section="faq" title="FAQ" />
+              <LandingContentEditor section="blog" title="Blog" />
+              <LandingContentEditor section="carrieres" title="Carrières" />
+              <LandingContentEditor section="aide" title="Aide" />
+              <LandingContentEditor section="contact" title="Contact" />
+              <LandingContentEditor section="statut" title="Statut" />
+            </div>
+          )}
+
+          {tab === 'ady-varotra' && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+                  Ady varotra
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Paramétrage du mécanisme de tarification négociée.
+                </p>
+              </div>
+              <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-5">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  La configuration détaillée d&apos;Ady varotra sera intégrée dans une prochaine étape.
+                  Aucun paramètre existant n&apos;est modifié ici.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* ========== GENERAL ========== */}
           {tab === 'general' && (
             <div>

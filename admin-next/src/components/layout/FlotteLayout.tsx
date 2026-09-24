@@ -14,6 +14,7 @@ import {
 import { useEffect, useState } from 'react';
 import { useTheme } from '@/lib/theme-context';
 import ThemeSwitcher from './ThemeSwitcher';
+import SettingsTabsBar, { type SettingsGroup } from './SettingsTabsBar';
 
 interface FlotteLayoutProps {
   children: React.ReactNode;
@@ -97,6 +98,20 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
   ];
 
   const menu = isUrbain ? fleetMenu : coopMenu;
+
+  // Navigation flotte : un seul groupe implicite (F6.4)
+  // La barre principale est masquee car groups.length === 1.
+  const FLEET_SETTINGS_GROUPS: SettingsGroup[] = [
+    {
+      id: 'flotte',
+      label: 'Parametres',
+      defaultSubTab: 'tarifs',
+      subTabs: [
+        { id: 'tarifs', label: 'Tarifs' },
+        { id: 'landing', label: 'Landing' },
+      ],
+    },
+  ];
 
   // ============================================================
   // Notifications : compteur non lues
@@ -317,6 +332,9 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
             </div>
           </div>
         </header>
+        {pathname.includes('/settings') && (
+          <SettingsTabsBar groups={FLEET_SETTINGS_GROUPS} />
+        )}
         <div className="p-4 lg:p-6 pt-4">{children}</div>
       </main>
     </div>

@@ -1,10 +1,20 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { apiFetch } from '@/lib/api';
 import { useOrganization } from '@/lib/organization-context';
 import { Save, AlertCircle, CheckCircle, Palette } from 'lucide-react';
 import LandingPageSettings from '@/components/settings/LandingPageSettings';
+import InterurbainTarifsSettings from '@/components/settings/InterurbainTarifsSettings';
+import {
+  Card,
+  ZoneSection,
+  ModeRow,
+  JourRow,
+  LocationSpeciale,
+  BaremeRow,
+} from '@/components/settings/_shared/TarifRows';
 import { useTheme } from '@/lib/theme-context';
 
 // ============================================================
@@ -71,6 +81,8 @@ const COOP_DEFAULT_TARIFS: any = {
 
 export default function FlotteSettings() {
   const { organization, isUrbain, isInterurbain } = useOrganization();
+  const searchParams = useSearchParams();
+  const currentTab = searchParams.get('tab') || 'tarifs';
   const [tarifs, setTarifs] = useState<any>(isUrbain ? FLEET_DEFAULT_TARIFS : COOP_DEFAULT_TARIFS);
   const [commission, setCommission] = useState(20);
   const [mobileMoney, setMobileMoney] = useState({ mvola: '', orange: '', airtel: '' });
@@ -217,6 +229,8 @@ export default function FlotteSettings() {
         </div>
       )}
 
+      {currentTab === 'tarifs' && (
+      <>
       <div className="space-y-6">
         {/* ============================================================
             TARIFS URBAIN (FLEET)
@@ -283,97 +297,8 @@ export default function FlotteSettings() {
             TARIFS INTER-URBAIN (COOP)
             ============================================================ */}
         {isInterurbain && (
-          <>
-            <Card>
-              <h2 className="text-lg font-semibold mb-4">📦 Livraison</h2>
-              <ZoneSection title="Régionale">
-                <ModeRow label="Course normale" base={tarifs.livraison?.regionale?.courseNormale?.prixBase || 0} km={tarifs.livraison?.regionale?.courseNormale?.prixKm || 0} onChange={(f, v) => updateCoopTarif('livraison', 'regionale', 'courseNormale', f, v)} />
-                <ModeRow label="Course express" base={tarifs.livraison?.regionale?.courseExpress?.prixBase || 0} km={tarifs.livraison?.regionale?.courseExpress?.prixKm || 0} onChange={(f, v) => updateCoopTarif('livraison', 'regionale', 'courseExpress', f, v)} />
-              </ZoneSection>
-              <ZoneSection title="Nationale">
-                <ModeRow label="Course normale" base={tarifs.livraison?.nationale?.courseNormale?.prixBase || 0} km={tarifs.livraison?.nationale?.courseNormale?.prixKm || 0} onChange={(f, v) => updateCoopTarif('livraison', 'nationale', 'courseNormale', f, v)} />
-                <ModeRow label="Course express" base={tarifs.livraison?.nationale?.courseExpress?.prixBase || 0} km={tarifs.livraison?.nationale?.courseExpress?.prixKm || 0} onChange={(f, v) => updateCoopTarif('livraison', 'nationale', 'courseExpress', f, v)} />
-              </ZoneSection>
-            </Card>
-
-            <Card>
-              <h2 className="text-lg font-semibold mb-4">🚌 Transport en commun</h2>
-              <ZoneSection title="Régionale">
-                <JourRow label="Tarif ligne (Ar)" value={tarifs.transportCommun?.regionale?.tarifLigne?.prixTrajet || 0} onChange={(v) => updateCoopTarif('transportCommun', 'regionale', 'tarifLigne', 'prixTrajet', v)} />
-              </ZoneSection>
-              <ZoneSection title="Nationale">
-                <JourRow label="Tarif ligne (Ar)" value={tarifs.transportCommun?.nationale?.tarifLigne?.prixTrajet || 0} onChange={(v) => updateCoopTarif('transportCommun', 'nationale', 'tarifLigne', 'prixTrajet', v)} />
-              </ZoneSection>
-            </Card>
-
-            <Card>
-              <h2 className="text-lg font-semibold mb-4">🚛 Transport de marchandises</h2>
-              <ZoneSection title="Régionale">
-                <BaremeRow
-                  base={tarifs.transportMarchandises?.regionale?.bareme?.prixBase || 0}
-                  km={tarifs.transportMarchandises?.regionale?.bareme?.prixKm || 0}
-                  tonne={tarifs.transportMarchandises?.regionale?.bareme?.prixTonne || 0}
-                  onChange={(f, v) => updateCoopTarif('transportMarchandises', 'regionale', 'bareme', f, v)}
-                />
-              </ZoneSection>
-              <ZoneSection title="Nationale">
-                <BaremeRow
-                  base={tarifs.transportMarchandises?.nationale?.bareme?.prixBase || 0}
-                  km={tarifs.transportMarchandises?.nationale?.bareme?.prixKm || 0}
-                  tonne={tarifs.transportMarchandises?.nationale?.bareme?.prixTonne || 0}
-                  onChange={(f, v) => updateCoopTarif('transportMarchandises', 'nationale', 'bareme', f, v)}
-                />
-              </ZoneSection>
-            </Card>
-
-            <Card>
-              <h2 className="text-lg font-semibold mb-4">🔑 Location de voiture</h2>
-              <JourRow label="Touristique (Ar/jour)" value={tarifs.locationVoiture?.touristique?.tarifJour || 0} onChange={(v) => updateCoopTarif('locationVoiture', 'touristique', 'tarifJour', 'prixJour', v)} />
-              <JourRow label="Familiale (Ar/jour)" value={tarifs.locationVoiture?.familiale?.tarifJour || 0} onChange={(v) => updateCoopTarif('locationVoiture', 'familiale', 'tarifJour', 'prixJour', v)} />
-              <JourRow label="Autres (Ar/jour)" value={tarifs.locationVoiture?.autres?.tarifJour || 0} onChange={(v) => updateCoopTarif('locationVoiture', 'autres', 'tarifJour', 'prixJour', v)} />
-            </Card>
-
-            <Card>
-              <h2 className="text-lg font-semibold mb-4">🚛 Longue distance (LONG_HAUL)</h2>
-              <p className="text-xs text-gray-500 mb-4">Tarifs par type de véhicule pour le transport long-courrier.</p>
-
-              <ZoneSection title="Bus">
-                <ModeRow label="Tarif" base={tarifs.bus?.longueDistance?.prixBase || 0} km={tarifs.bus?.longueDistance?.prixKm || 0} onChange={(f, v) => updateLongueDistance('bus', f, v)} />
-                <JourRow label="Forfait service (Ar)" value={tarifs.bus?.longueDistance?.forfaitService || 0} onChange={(v) => updateLongueDistance('bus', 'forfaitService', v)} />
-              </ZoneSection>
-
-              <ZoneSection title="Mini Van">
-                <ModeRow label="Tarif" base={tarifs.minivan?.longueDistance?.prixBase || 0} km={tarifs.minivan?.longueDistance?.prixKm || 0} onChange={(f, v) => updateLongueDistance('minivan', f, v)} />
-                <JourRow label="Forfait service (Ar)" value={tarifs.minivan?.longueDistance?.forfaitService || 0} onChange={(v) => updateLongueDistance('minivan', 'forfaitService', v)} />
-              </ZoneSection>
-
-              <ZoneSection title="Fourgon">
-                <ModeRow label="Tarif" base={tarifs.fourgon?.longueDistance?.prixBase || 0} km={tarifs.fourgon?.longueDistance?.prixKm || 0} onChange={(f, v) => updateLongueDistance('fourgon', f, v)} />
-                <JourRow label="Forfait service (Ar)" value={tarifs.fourgon?.longueDistance?.forfaitService || 0} onChange={(v) => updateLongueDistance('fourgon', 'forfaitService', v)} />
-              </ZoneSection>
-
-              <ZoneSection title="Camion">
-                <ModeRow label="Tarif" base={tarifs.camion?.longueDistance?.prixBase || 0} km={tarifs.camion?.longueDistance?.prixKm || 0} onChange={(f, v) => updateLongueDistance('camion', f, v)} />
-                <JourRow label="Forfait service (Ar)" value={tarifs.camion?.longueDistance?.forfaitService || 0} onChange={(v) => updateLongueDistance('camion', 'forfaitService', v)} />
-              </ZoneSection>
-
-              <ZoneSection title="Semi-remorque">
-                <ModeRow label="Tarif" base={tarifs.semi_remorque?.longueDistance?.prixBase || 0} km={tarifs.semi_remorque?.longueDistance?.prixKm || 0} onChange={(f, v) => updateLongueDistance('semi_remorque', f, v)} />
-                <JourRow label="Forfait service (Ar)" value={tarifs.semi_remorque?.longueDistance?.forfaitService || 0} onChange={(v) => updateLongueDistance('semi_remorque', 'forfaitService', v)} />
-              </ZoneSection>
-
-              <ZoneSection title="Dépanneuse">
-                <ModeRow label="Tarif" base={tarifs.depanneuse?.longueDistance?.prixBase || 0} km={tarifs.depanneuse?.longueDistance?.prixKm || 0} onChange={(f, v) => updateLongueDistance('depanneuse', f, v)} />
-                <JourRow label="Forfait service (Ar)" value={tarifs.depanneuse?.longueDistance?.forfaitService || 0} onChange={(v) => updateLongueDistance('depanneuse', 'forfaitService', v)} />
-              </ZoneSection>
-
-              <ZoneSection title="Camion frigorifique">
-                <ModeRow label="Tarif" base={tarifs.camion_frigo?.longueDistance?.prixBase || 0} km={tarifs.camion_frigo?.longueDistance?.prixKm || 0} onChange={(f, v) => updateLongueDistance('camion_frigo', f, v)} />
-                <JourRow label="Forfait service (Ar)" value={tarifs.camion_frigo?.longueDistance?.forfaitService || 0} onChange={(v) => updateLongueDistance('camion_frigo', 'forfaitService', v)} />
-              </ZoneSection>
-            </Card>
-          </>
-        )}
+  <InterurbainTarifsSettings tarifs={tarifs} setTarifs={setTarifs} />
+)}
 
         {/* ============================================================
             COMMUN : MOBILE MONEY
@@ -458,6 +383,8 @@ export default function FlotteSettings() {
           ))}
         </div>
       </Card>
+      </>
+      )}
 
       {/* ============================================================
           LANDING PAGE PREMIUM
@@ -465,109 +392,26 @@ export default function FlotteSettings() {
           Le template dépend automatiquement du type d'organisation.
           ============================================================ */}
 
-      {isUrbain && (
-        <div className="mt-6">
-          <LandingPageSettings app="fleet" />
-        </div>
+      {currentTab === 'landing' && (
+        <>
+          {isUrbain && (
+            <LandingPageSettings app="fleet" />
+          )}
+          {isInterurbain && (
+            <LandingPageSettings app="coop" />
+          )}
+        </>
       )}
 
-      {isInterurbain && (
-        <div className="mt-6">
-          <LandingPageSettings app="coop" />
-        </div>
-      )}
-
-      <button
-        onClick={handleSave}
-        className="mt-6 bg-emerald-600 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 hover:bg-emerald-700 text-sm"
-      >
-        <Save size={16} /> {saved ? '✓ Sauvegardé !' : 'Sauvegarder'}
-      </button>
-    </div>
-  );
-}
-
-// ============================================================
-// COMPOSANTS RÉUTILISABLES
-// ============================================================
-
-function Card({ children }: { children: React.ReactNode }) {
-  return <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border">{children}</div>;
-}
-
-function ZoneSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="mb-4">
-      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">{title}</h3>
-      {children}
-    </div>
-  );
-}
-
-function ModeRow({ label, base, km, onChange }: { label: string; base: number; km: number; onChange: (field: string, value: number) => void }) {
-  return (
-    <div className="bg-gray-50 dark:bg-gray-750 rounded-lg p-4 border mb-3">
-      <h4 className="text-sm font-medium mb-2">{label}</h4>
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <label className="block text-xs text-gray-500 mb-1">Base (Ar)</label>
-          <input type="number" value={base} onChange={e => onChange('prixBase', Number(e.target.value))} className="w-full px-2 py-1.5 border rounded text-xs" />
-        </div>
-        <div>
-          <label className="block text-xs text-gray-500 mb-1">Km (Ar)</label>
-          <input type="number" value={km} onChange={e => onChange('prixKm', Number(e.target.value))} className="w-full px-2 py-1.5 border rounded text-xs" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function JourRow({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
-  return (
-    <div className="bg-gray-50 dark:bg-gray-750 rounded-lg p-4 border mb-3">
-      <label className="block text-xs text-gray-500 mb-1">{label}</label>
-      <input type="number" value={value} onChange={e => onChange(Number(e.target.value))} className="w-full px-2 py-1.5 border rounded text-xs max-w-[200px]" />
-    </div>
-  );
-}
-
-function LocationSpeciale({ active, prix, onToggle, onPrix }: { active: boolean; prix: number; onToggle: (v: boolean) => void; onPrix: (v: number) => void }) {
-  return (
-    <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium">🔐 Location disponible (autorisation spéciale)</span>
-        <button type="button" onClick={() => onToggle(!active)} className={`px-3 py-1 rounded-full text-xs font-semibold transition ${active ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'}`}>
-          {active ? 'ON' : 'OFF'}
+      {currentTab === 'tarifs' && (
+        <button
+          onClick={handleSave}
+          className="mt-6 bg-emerald-600 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 hover:bg-emerald-700 text-sm"
+        >
+          <Save size={16} /> {saved ? '✓ Sauvegardé !' : 'Sauvegarder'}
         </button>
-      </div>
-      {active && (
-        <div className="max-w-[200px]">
-          <label className="block text-xs text-gray-500 mb-1">Tarif spécial / jour (Ar)</label>
-          <input type="number" value={prix} onChange={e => onPrix(Number(e.target.value))} className="w-full px-2 py-1.5 border rounded text-xs" />
-        </div>
       )}
     </div>
   );
 }
 
-function BaremeRow({ base, km, tonne, onChange }: { base: number; km: number; tonne: number; onChange: (field: string, value: number) => void }) {
-  return (
-    <div className="bg-gray-50 dark:bg-gray-750 rounded-lg p-4 border mb-3">
-      <h4 className="text-sm font-medium mb-2">Barème</h4>
-      <div className="grid grid-cols-3 gap-2">
-        <div>
-          <label className="block text-xs text-gray-500 mb-1">Base (Ar)</label>
-          <input type="number" value={base} onChange={e => onChange('prixBase', Number(e.target.value))} className="w-full px-2 py-1.5 border rounded text-xs" />
-        </div>
-        <div>
-          <label className="block text-xs text-gray-500 mb-1">Km (Ar)</label>
-          <input type="number" value={km} onChange={e => onChange('prixKm', Number(e.target.value))} className="w-full px-2 py-1.5 border rounded text-xs" />
-        </div>
-        <div>
-          <label className="block text-xs text-gray-500 mb-1">Tonne (Ar)</label>
-          <input type="number" value={tonne} onChange={e => onChange('prixTonne', Number(e.target.value))} className="w-full px-2 py-1.5 border rounded text-xs" />
-        </div>
-      </div>
-    </div>
-  );
-}
