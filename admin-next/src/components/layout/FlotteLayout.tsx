@@ -108,6 +108,7 @@ export default function FlotteLayout({ children }: FlotteLayoutProps) {
       defaultSubTab: 'tarifs',
       subTabs: [
         { id: 'tarifs', label: 'Tarifs' },
+        { id: 'tarifs-v2', label: 'Tarifs V2' },
         { id: 'landing', label: 'Landing' },
       ],
     },
