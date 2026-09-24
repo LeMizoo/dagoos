@@ -54,6 +54,7 @@ const ADMIN_SETTINGS_GROUPS: SettingsGroup[] = [
     subTabs: [
       { id: 'landing', label: 'Landing' },
       { id: 'pages-publiques', label: 'Pages publiques' },
+      { id: 'catalogue-v2', label: 'Catalogue V2' },
     ],
   },
   {

@@ -7,6 +7,7 @@ import PasswordInput from '@/components/ui/PasswordInput';
 import { apiFetch } from '@/lib/api';
 import { useTheme } from '@/lib/theme-context';
 import LandingContentEditor from '@/components/settings/LandingContentEditor';
+import ServiceTariffsEditor from '@/components/settings/ServiceTariffsEditor';
 
 type PlanKey = 'freemium' | 'basic' | 'standard' | 'premium' | 'surdevis';
 type EntityType = 'fleet' | 'coop';
@@ -177,6 +178,20 @@ export default function SettingsPage() {
               <LandingContentEditor section="aide" title="Aide" />
               <LandingContentEditor section="contact" title="Contact" />
               <LandingContentEditor section="statut" title="Statut" />
+            </div>
+          )}
+
+          {tab === 'catalogue-v2' && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+                  Catalogue V2
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Administration des ServiceTariffs V2 par organisation.
+                </p>
+              </div>
+              <ServiceTariffsEditor mode="admin" />
             </div>
           )}
 
@@ -355,7 +370,7 @@ export default function SettingsPage() {
             <div><h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">API</h2><div className="space-y-4 max-w-lg"><div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL API</label><input type="text" defaultValue="https://dagoos-api.onrender.com" className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 rounded-lg text-sm" readOnly /></div></div></div>
           )}
 
-          {tab !== 'plans' && (
+          {tab !== 'plans' && tab !== 'catalogue-v2' && (
             <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 La persistance de cet onglet sera disponible dans une prochaine version.
