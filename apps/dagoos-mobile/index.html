@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <script src="/config.js"></script>
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="/js/vendor/lucide.min.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#E0A01C">
@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="DAGOO'S">
   <meta name="format-detection" content="telephone=no">
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/svg+xml" href="/b-trans.svg">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <title>DAGOO'S Mobile</title>
@@ -22,7 +22,7 @@
         .catch(err => console.error("Erreur SW:", err));
     }
   </script>
-  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="/css/theme.css">
 </head>
 <body>
   <div id="app"></div>
@@ -40,10 +40,8 @@
   </nav>
   <script src="/js/router.js"></script>
   <script src="/js/api.js"></script>
-  <!-- UPDATE NOTIFICATION DÉSACTIVÉE TEMPORAIREMENT
   <script src="/js/update-notification.js"></script>
-  -->
-  <script src="js/escape.js"></script>
-  <script src="js/branding.js"></script>
+  <script src="/js/escape.js"></script>
+  <script src="/js/branding.js"></script>
 </body>
 </html>

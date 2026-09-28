@@ -1,17 +1,29 @@
-const CACHE_NAME = 'dagoos-mobile-v6';
-const STATIC_CACHE = 'dagoos-mobile-static-v6';
+const CACHE_NAME = 'dagoos-mobile-v7';
+const STATIC_CACHE = 'dagoos-mobile-static-v7';
 
 const STATIC_ASSETS = [
   '/',
+  '/index.html',
   '/config.js',
+  '/css/theme.css',
   '/js/router.js',
   '/js/api.js',
+  '/js/branding.js',
+  '/js/escape.js',
+  '/js/update-notification.js',
+  '/js/vendor/lucide.min.js',
   '/pages/home.js',
   '/pages/course.js',
   '/pages/suivi.js',
   '/pages/reservations.js',
   '/pages/location.js',
   '/manifest.json',
+  '/splash.html',
+  '/b-trans.svg',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+  '/icons/dagoos-logo.png',
+  '/icons/splash-logo.png',
   '/icons/logo.png'
 ];
 
