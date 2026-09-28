@@ -507,16 +507,6 @@ function normaliserTextePartenaire(value) {
 }
 
 
-function escapeHtmlPartenaire(value) {
-  return String(value || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-
 function obtenirTypePartenaire(org) {
   return org && org.type === 'FLEET_MANAGER'
     ? 'URBAIN'
@@ -605,15 +595,15 @@ function afficherResultatsRecherchePartenaires(resultats, query) {
 
   resultats.forEach(function(org) {
 
-    var nom = escapeHtmlPartenaire(
+    var nom = window.escapeHtml(
       org.name || 'Organisation'
     );
 
-    var slug = escapeHtmlPartenaire(
+    var slug = window.escapeHtml(
       org.slug || ''
     );
 
-    var plan = escapeHtmlPartenaire(
+    var plan = window.escapeHtml(
       (org.plan || 'Freemium').toUpperCase()
     );
 
@@ -621,10 +611,14 @@ function afficherResultatsRecherchePartenaires(resultats, query) {
 
     var logoHtml;
 
-    if (org.logo) {
+    if (
+      org.logo &&
+      window.isValidImageUrl &&
+      window.isValidImageUrl(org.logo)
+    ) {
       logoHtml =
         '<img' +
-          ' src="' + escapeHtmlPartenaire(org.logo) + '"' +
+          ' src="' + window.escapeHtml(org.logo) + '"' +
           ' alt=""' +
           ' style="' +
             'width:42px;' +
