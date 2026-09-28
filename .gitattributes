@@ -1,7 +1,22 @@
+# Normalisation des fins de ligne — projet Dagoos
+# Tous les fichiers texte sont stockés en LF dans Git,
+# quelle que soit la plateforme du contributeur.
+
 * text=auto eol=lf
-*.png binary
-*.jpg binary
+
+# Fichiers binaires — pas de conversion
+*.png  binary
+*.jpg  binary
 *.jpeg binary
-*.gif binary
-*.ico binary
-*.svg text eol=lf
+*.webp binary
+*.gif  binary
+*.ico  binary
+*.woff binary
+*.woff2 binary
+*.ttf  binary
+*.otf  binary
+*.pdf  binary
+*.zip  binary
+
+# Lockfile — pas de diff visuel
+package-lock.json  -diff
