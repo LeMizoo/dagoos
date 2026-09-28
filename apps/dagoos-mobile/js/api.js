@@ -1,27 +1,87 @@
 async function apiFetch(endpoint, options) {
   options = options || {};
+
   var url = DAGOOS_CONFIG.apiUrl + endpoint;
+  var controller = new AbortController();
+  var timeoutMs = options.timeout || 15000;
+
+  var timeout = setTimeout(function() {
+    controller.abort();
+  }, timeoutMs);
+
   var config = {
     method: options.method || 'GET',
-    headers: { 'Content-Type': 'application/json; charset=utf-8' }
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8'
+    },
+    signal: controller.signal
   };
 
   if (options.body !== undefined) {
-    config.body = typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
+    config.body = typeof options.body === 'string'
+      ? options.body
+      : JSON.stringify(options.body);
   }
 
   try {
     var response = await fetch(url, config);
     var contentType = response.headers.get('content-type') || '';
-    if (contentType.includes('application/json')) return await response.json();
-    return await response.text();
+    var data;
+
+    if (contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      data = await response.text();
+    }
+
+    if (!response.ok) {
+      var message = 'Erreur HTTP ' + response.status;
+
+      if (data && typeof data === 'object' && data.error) {
+        message = data.error;
+      }
+
+      var apiError = new Error(message);
+      apiError.status = response.status;
+      apiError.data = data;
+      apiError.endpoint = endpoint;
+
+      throw apiError;
+    }
+
+    return data;
   } catch (err) {
+    if (err && err.name === 'AbortError') {
+      var timeoutError = new Error(
+        'La requête API a expiré après ' + Math.round(timeoutMs / 1000) + ' secondes.'
+      );
+
+      timeoutError.code = 'API_TIMEOUT';
+      timeoutError.endpoint = endpoint;
+
+      console.error(
+        'Timeout API (' + endpoint + '):',
+        timeoutError
+      );
+
+      throw timeoutError;
+    }
+
     console.error('Erreur API (' + endpoint + '):', err);
     throw err;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
-window.apiGet = function(endpoint) { return apiFetch(endpoint); };
-window.apiPost = function(endpoint, body) {
-  return apiFetch(endpoint, { method: 'POST', body: body });
+window.apiGet = function(endpoint, options) {
+  return apiFetch(endpoint, options);
+};
+
+window.apiPost = function(endpoint, body, options) {
+  options = options || {};
+  options.method = 'POST';
+  options.body = body;
+
+  return apiFetch(endpoint, options);
 };
