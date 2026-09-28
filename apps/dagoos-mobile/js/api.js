@@ -80,6 +80,7 @@ async function apiFetch(endpoint, options) {
 
         timeoutError.code = 'API_TIMEOUT';
         timeoutError.endpoint = endpoint;
+        timeoutError.isTimeout = true;
 
         console.error(
           'Timeout API définitif (' + endpoint + '):',
