@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Backups locaux de migration — jamais versionnés
+*.bak*
