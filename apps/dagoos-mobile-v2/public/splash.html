@@ -116,9 +116,7 @@
   <script>
     // Vérifier si l'API est accessible avant de rediriger
     async function checkApiAndRedirect() {
-      const API_URL =
-        window.DAGOOS_CONFIG?.apiUrl ||
-        'https://dagoos-api.onrender.com/api';
+      const API_URL = 'https://dagoos-api.onrender.com/api';
 
       const MIN_SPLASH_TIME = 2500;
       const MAX_SPLASH_TIME = 8000;

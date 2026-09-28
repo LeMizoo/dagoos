@@ -25,3 +25,9 @@ dist-ssr
 
 # Backups locaux de migration — jamais versionnés
 *.bak*
+
+# Variables d'environnement
+.env
+.env.*
+!.env.development
+!.env.production
