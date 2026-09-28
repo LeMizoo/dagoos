@@ -1,0 +1,62 @@
+/* ============================================================
+ * DAGOO'S MOBILE — THÈME CENTRALISÉ
+ * Charte officielle DAGOO'S 2026 — version Passager
+ *
+ * Bleu marine  #06245F  : texte principal, contours
+ * Or safran    #E0A01C  : accent principal (aligné logo passager)
+ * Vert         #0A6F35  : validations
+ * Blanc        #FFFFFF  : surfaces
+ *
+ * Splash (écran de démarrage) : fond sombre #16213e conservé,
+ * spinner aligné sur l'or safran de la charte.
+ * ============================================================ */
+
+/* ============================================================
+ * 1. VARIABLES GLOBALES
+ * ============================================================ */
+:root {
+  /* Surfaces */
+  --bg-page:       #F7F8FA;
+  --bg-surface:    #FFFFFF;
+  --bg-soft:       #F1F5F9;
+  --bg-elevated:   #E2E8F0;
+
+  /* Texte */
+  --text-primary:   #06245F;
+  --text-secondary: #4A5A7A;
+  --text-muted:     #94A3B8;
+  --text-on-accent: #FFFFFF;
+
+  /* Accent principal — or safran (passager) */
+  --accent:        #E0A01C;
+  --accent-hover:  #C68B15;
+  --accent-soft:   #FEF3C7;
+
+  /* Accent secondaire — bleu marine */
+  --navy:          #06245F;
+  --navy-hover:    #041B47;
+
+  /* États */
+  --error-bg:   #FEF2F2;
+  --error-fg:   #DC2626;
+  --success-bg: #E6F4EA;
+  --success-fg: #0A6F35;
+  --warning-bg: #FEF3C7;
+  --warning-fg: #E0A01C;
+  --info-bg:    #EFF6FF;
+  --info-fg:    #06245F;
+
+  /* Bordures */
+  --border:        #E2E8F0;
+  --border-strong: #CBD5E1;
+
+  /* Ombres */
+  --shadow-soft: 0 1px 3px rgba(6, 36, 95, 0.06),
+                 0 8px 24px rgba(6, 36, 95, 0.06);
+  --shadow-card: 0 1px 3px rgba(6, 36, 95, 0.04);
+
+  /* Splash (écran de démarrage) — conservé sombre */
+  --splash-bg:     #16213e;
+  --splash-fg:     #FFFFFF;
+  --splash-accent: #E0A01C;
+}
