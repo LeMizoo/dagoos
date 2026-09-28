@@ -1,0 +1,78 @@
+const CACHE_NAME = 'dagoos-mobile-v2-v1';
+const STATIC_CACHE = 'dagoos-mobile-v2-static-v1';
+
+const STATIC_ASSETS = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/splash.html',
+  '/b-trans.svg',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+  '/icons/dagoos-logo.png',
+  '/icons/splash-logo.png',
+];
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(STATIC_CACHE).then((cache) => {
+      return cache.addAll(STATIC_ASSETS);
+    })
+  );
+  // NE PAS appeler skipWaiting automatiquement.
+  // Le nouveau SW attendra que l'utilisateur clique "Mettre à jour".
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames
+          .filter(name => name !== STATIC_CACHE && name !== CACHE_NAME)
+          .map(name => caches.delete(name))
+      );
+    })
+  );
+  self.clients.claim();
+
+  // Notifier tous les clients qu'une mise à jour est disponible
+  self.clients.matchAll({ type: 'window' }).then((clients) => {
+    clients.forEach((client) => {
+      client.postMessage({
+        type: 'UPDATE_AVAILABLE',
+        message: 'Une nouvelle version est disponible.'
+      });
+    });
+  });
+});
+
+self.addEventListener('fetch', (event) => {
+  if (event.request.url.includes('/api/')) return;
+
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        return caches.match('/');
+      })
+    );
+    return;
+  }
+
+  event.respondWith(
+    caches.match(event.request).then((cached) => {
+      if (cached) return cached;
+      return fetch(event.request).then((response) => {
+        if (!response || response.status !== 200) return response;
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        return response;
+      });
+    })
+  );
+});
