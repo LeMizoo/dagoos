@@ -449,14 +449,32 @@ async function gererReservation() {
             <p style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;"><i data-lucide="armchair" style="font-size:18px;display:inline-block;vertical-align:middle;"></i> Place : ${r.place || '-'}</p>
             <p style="font-size:11px;color:var(--text-secondary);margin-bottom:10px;">Statut : ${r.statut || '-'}</p>
             <div style="display:flex;gap:8px;">
-              <button onclick="modifierPlacePWA('${r.id}')" style="flex:1;padding:10px;background:var(--bg-soft);color:var(--accent);border:1px solid var(--accent);border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;"><i data-lucide="pencil" style="font-size:14px;display:inline-block;vertical-align:middle;"></i> Modifier la place</button>
-              <button onclick="annulerReservationPWA('${r.id}')" style="flex:1;padding:10px;background:var(--bg-soft);color:var(--error-fg);border:1px solid var(--error-fg);border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;"><i data-lucide="x-circle" style="font-size:14px;display:inline-block;vertical-align:middle;"></i> Annuler</button>
+              <button data-action="modify" data-reservation-id="${escapeHtmlLocal(String(r.id))}" style="flex:1;padding:10px;background:var(--bg-soft);color:var(--accent);border:1px solid var(--accent);border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;"><i data-lucide="pencil" style="font-size:14px;display:inline-block;vertical-align:middle;"></i> Modifier la place</button>
+              <button data-action="cancel" data-reservation-id="${escapeHtmlLocal(String(r.id))}" style="flex:1;padding:10px;background:var(--bg-soft);color:var(--error-fg);border:1px solid var(--error-fg);border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;"><i data-lucide="x-circle" style="font-size:14px;display:inline-block;vertical-align:middle;"></i> Annuler</button>
             </div>
           </div>
         `;
       });
       resultContainer.innerHTML = html;
       if (window.lucide) window.lucide.createIcons();
+
+      // P3-N13 : délégation d'événements pour les boutons de réservation
+      if (!resultContainer._manageListenerAttached) {
+        resultContainer.addEventListener('click', function(event) {
+          var btn = event.target.closest('button[data-action]');
+          if (!btn) return;
+
+          var action = btn.dataset.action;
+          var reservationId = btn.dataset.reservationId;
+
+          if (action === 'modify') {
+            modifierPlacePWA(reservationId);
+          } else if (action === 'cancel') {
+            annulerReservationPWA(reservationId);
+          }
+        });
+        resultContainer._manageListenerAttached = true;
+      }
     } else if (result && result.error) {
       resultContainer.innerHTML = '';
       var errP = document.createElement('p');

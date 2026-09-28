@@ -44,7 +44,7 @@ async function suivre() {
   container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-secondary);">Recherche...</div>';
 
   try {
-    var result = await apiGet('/public/suivi/' + code);
+    var result = await apiGet('/public/suivi/' + encodeURIComponent(code));
 
     if (result && result.statut) {
       var statutLabels = {

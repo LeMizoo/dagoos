@@ -245,7 +245,6 @@ function updateVehiculeOptions() {
     var preview = document.getElementById('photosPreview');
     if (photoInput) photoInput.value = '';
     if (preview) preview.innerHTML = '';
-    window._photosSelectionnees = [];
   }
 
   if (!vehiculeContainer) return;
@@ -390,7 +389,6 @@ var COMPRESSION_QUALITY = 0.8;
 
 var servicesAvecPhotos = ['marchandises', 'demenagement', 'depannage', 'fret'];
 
-window._photosSelectionnees = [];
 
 // ------------------------------------------------------------
 // Compresse une image via Canvas

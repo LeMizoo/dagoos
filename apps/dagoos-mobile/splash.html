@@ -14,11 +14,6 @@
     <div class="spinner"></div>
   </div>
   <script>
-    // Remplacer par le logo passager si disponible en localStorage
-    const savedLogo = localStorage.getItem('dagoos_logo_pass');
-    if (savedLogo) {
-      document.getElementById('logo').src = savedLogo;
-    }
 
     // Vérifier si l'API est accessible avant de rediriger
     async function checkApiAndRedirect() {

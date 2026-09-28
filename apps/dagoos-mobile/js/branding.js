@@ -84,7 +84,4 @@ function appliquerBrandingMobile(org) {
 
   header.appendChild(text);
 
-  document.querySelectorAll('[data-dagoo-primary]').forEach(function(el) {
-    el.style.background = primary;
-  });
 }

@@ -1,5 +1,5 @@
-const CACHE_NAME = 'dagoos-mobile-v12';
-const STATIC_CACHE = 'dagoos-mobile-static-v12';
+const CACHE_NAME = 'dagoos-mobile-v13';
+const STATIC_CACHE = 'dagoos-mobile-static-v13';
 
 const STATIC_ASSETS = [
   '/',
@@ -24,7 +24,6 @@ const STATIC_ASSETS = [
   '/icons/icon-512.png',
   '/icons/dagoos-logo.png',
   '/icons/splash-logo.png',
-  '/icons/logo.png'
 ];
 
 self.addEventListener('message', (event) => {
@@ -54,15 +53,6 @@ self.addEventListener('activate', (event) => {
     })
   );
   self.clients.claim();
-
-  // Demander aux clients de se recharger
-  self.clients.matchAll({ type: 'window' }).then((clients) => {
-    clients.forEach((client) => {
-      client.postMessage({
-        type: 'FORCE_RELOAD',
-      });
-    });
-  });
 
   // Notifier tous les clients qu'une mise à jour est disponible
   self.clients.matchAll({ type: 'window' }).then((clients) => {

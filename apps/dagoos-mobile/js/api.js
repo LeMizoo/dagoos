@@ -125,19 +125,3 @@ window.apiGetSafe = async function(endpoint, fallback, options) {
     return fallback;
   }
 };
-
-window.apiPostSafe = async function(endpoint, body, fallback, options) {
-  try {
-    return await apiPost(endpoint, body, options);
-  } catch (err) {
-    var kind = err && err.isTimeout ? 'timeout' : 'erreur';
-
-    console.warn(
-      '[apiSafe] ' + endpoint +
-      ' indisponible (' + kind + '):',
-      err && err.message ? err.message : err
-    );
-
-    return fallback;
-  }
-};
