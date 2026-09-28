@@ -21,13 +21,15 @@ var flottesDisponibles = [];
 var estimationValide = false;
 
 async function chargerFlottes() {
-  try {
-    var orgs = await apiGet('/public/organizations');
-    if (Array.isArray(orgs)) {
-      flottesDisponibles = orgs.filter(function(o) { return o.type === 'FLEET_MANAGER'; });
-      return flottesDisponibles;
-    }
-  } catch(e) {}
+  var orgs = await apiGetSafe('/public/organizations', []);
+
+  if (Array.isArray(orgs) && orgs.length > 0) {
+    flottesDisponibles = orgs.filter(function(o) {
+      return o.type === 'FLEET_MANAGER';
+    });
+    return flottesDisponibles;
+  }
+
   return [];
 }
 
@@ -150,18 +152,17 @@ function updateUI() {
 }
 
 async function reverseGeocoderPWA(lat, lng) {
-  try {
-    var result = await apiGet(
-      '/public/reverse-geocode?lat=' +
-      encodeURIComponent(lat) +
-      '&lng=' +
-      encodeURIComponent(lng)
-    );
+  var result = await apiGetSafe(
+    '/public/reverse-geocode?lat=' +
+    encodeURIComponent(lat) +
+    '&lng=' +
+    encodeURIComponent(lng),
+    null
+  );
 
-    if (result && result.adresse) {
-      return result.adresse;
-    }
-  } catch(e) {}
+  if (result && result.adresse) {
+    return result.adresse;
+  }
 
   return '';
 }

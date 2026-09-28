@@ -300,61 +300,60 @@ var partenaireTouchStartY = null;
 // ============================================================
 
 async function chargerPartenaires() {
-  try {
-    var orgs = await apiGet('/public/organizations');
+  var orgs = await apiGetSafe('/public/organizations', null);
 
-    if (!Array.isArray(orgs) || orgs.length === 0) {
-      afficherErreurPartenaires('Aucun partenaire disponible');
-      return;
-    }
-
-    // Premium en premier, puis Standard, Basic et Freemium.
-    var prioritePlan = {
-      'Premium': 0,
-      'Standard': 1,
-      'Basic': 2,
-      'Freemium': 3
-    };
-
-    // Filtrer : uniquement les organisations avec au moins 1 service actif
-    var orgsAvecServices = orgs.filter(function(org) {
-      return Array.isArray(org.organizationServices) &&
-             org.organizationServices.length > 0;
-    });
-
-    partenairesData = orgsAvecServices.slice().sort(function(a, b) {
-      var pa = prioritePlan[a.plan] !== undefined
-        ? prioritePlan[a.plan]
-        : 99;
-
-      var pb = prioritePlan[b.plan] !== undefined
-        ? prioritePlan[b.plan]
-        : 99;
-
-      return pa - pb;
-    });
-
-    partenaireIndex = 0;
-
-    // Nombre TOTAL réel d'organisations.
-    var compteur = document.getElementById('partenairesCompteur');
-
-    if (compteur) {
-      compteur.textContent =
-        partenairesData.length + ' organisations partenaires';
-    }
-
-    afficherPartenaires3D();
-    initialiserRecherchePartenaires();
-    installerControlesPartenaires();
-    demarrerRotationPartenaires();
-
-  } catch (e) {
-    console.warn('Chargement partenaires impossible', e);
+  if (orgs === null) {
     afficherErreurPartenaires(
       'Impossible de charger les partenaires'
     );
+    return;
   }
+
+  if (!Array.isArray(orgs) || orgs.length === 0) {
+    afficherErreurPartenaires('Aucun partenaire disponible');
+    return;
+  }
+
+  // Premium en premier, puis Standard, Basic et Freemium.
+  var prioritePlan = {
+    'Premium': 0,
+    'Standard': 1,
+    'Basic': 2,
+    'Freemium': 3
+  };
+
+  // Filtrer : uniquement les organisations avec au moins 1 service actif
+  var orgsAvecServices = orgs.filter(function(org) {
+    return Array.isArray(org.organizationServices) &&
+           org.organizationServices.length > 0;
+  });
+
+  partenairesData = orgsAvecServices.slice().sort(function(a, b) {
+    var pa = prioritePlan[a.plan] !== undefined
+      ? prioritePlan[a.plan]
+      : 99;
+
+    var pb = prioritePlan[b.plan] !== undefined
+      ? prioritePlan[b.plan]
+      : 99;
+
+    return pa - pb;
+  });
+
+  partenaireIndex = 0;
+
+  // Nombre TOTAL réel d'organisations.
+  var compteur = document.getElementById('partenairesCompteur');
+
+  if (compteur) {
+    compteur.textContent =
+      partenairesData.length + ' organisations partenaires';
+  }
+
+  afficherPartenaires3D();
+  initialiserRecherchePartenaires();
+  installerControlesPartenaires();
+  demarrerRotationPartenaires();
 }
 
 

@@ -151,24 +151,37 @@ function setModeLocation(nouveauMode) {
   chargerOrganisations();
 }
 
-function chargerOrganisations() {
-  apiGet('/public/organizations').then(function(orgs) {
-    var select = document.getElementById('locFlotte');
-    if (select && Array.isArray(orgs)) {
-      var typeFiltre = modeLocation === 'urbain' ? 'FLEET_MANAGER' : 'COOPERATIVE';
-      var orgsFiltrees = orgs.filter(function(o) { return o.type === typeFiltre; });
+async function chargerOrganisations() {
+  var orgs = await apiGetSafe('/public/organizations', []);
 
-      select.innerHTML = '<option value="">-- Choisir une organisation --</option>';
-      orgsFiltrees.forEach(function(f) {
-        var opt = document.createElement('option');
-        opt.value = f.slug;
-        opt.textContent = f.name;
-        select.appendChild(opt);
-      });
-      if (orgsFiltrees.length === 1) select.value = orgsFiltrees[0].slug;
+  var select = document.getElementById('locFlotte');
+
+  if (select && Array.isArray(orgs)) {
+    var typeFiltre =
+      modeLocation === 'urbain'
+        ? 'FLEET_MANAGER'
+        : 'COOPERATIVE';
+
+    var orgsFiltrees = orgs.filter(function(o) {
+      return o.type === typeFiltre;
+    });
+
+    select.innerHTML =
+      '<option value="">-- Choisir une organisation --</option>';
+
+    orgsFiltrees.forEach(function(f) {
+      var opt = document.createElement('option');
+      opt.value = f.slug;
+      opt.textContent = f.name;
+      select.appendChild(opt);
+    });
+
+    if (orgsFiltrees.length === 1) {
+      select.value = orgsFiltrees[0].slug;
     }
-    updateUI();
-  }).catch(function() {});
+  }
+
+  updateUI();
 }
 
 function updateUI() {

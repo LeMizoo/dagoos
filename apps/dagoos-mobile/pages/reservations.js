@@ -41,9 +41,15 @@ async function chargerDeparts() {
 
   container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-secondary);">Chargement des départs...</div>';
 
-  try {
-    var result = await apiGet('/public/organizations');
-    var orgs = Array.isArray(result) ? result : [];
+  var result = await apiGetSafe('/public/organizations', null);
+
+  if (result === null) {
+    container.innerHTML =
+      '<div style="text-align:center;padding:30px;color:var(--error-fg);">Erreur de chargement</div>';
+    return;
+  }
+
+  var orgs = Array.isArray(result) ? result : [];
     var departs = [];
 
     // Extraire TOUS les départs retournés par l'API
@@ -137,14 +143,11 @@ async function chargerDeparts() {
 
       container.appendChild(card);
     });
-  } catch(e) {
-    container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--error-fg);">Erreur de chargement</div>';
-  }
 }
 
 function selectionnerDepart(departId) {
   // Recharger les départs pour avoir les données fraîches
-  apiGet('/public/organizations').then(function(orgs) {
+  apiGetSafe('/public/organizations', []).then(function(orgs) {
     var allDeparts = [];
     if (Array.isArray(orgs)) {
       orgs.forEach(function(org) {
@@ -162,8 +165,6 @@ function selectionnerDepart(departId) {
     passagers = {};
 
     afficherFormulaireReservation(depart);
-  }).catch(function() {
-    alert('Erreur de chargement');
   });
 }
 
