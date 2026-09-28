@@ -2,75 +2,98 @@ async function apiFetch(endpoint, options) {
   options = options || {};
 
   var url = DAGOOS_CONFIG.apiUrl + endpoint;
-  var controller = new AbortController();
-  var timeoutMs = options.timeout || 15000;
+  var timeoutMs = options.timeout || 30000;
+  var maxAttempts = options.retry === false ? 1 : 2;
+  var attempt = 0;
 
-  var timeout = setTimeout(function() {
-    controller.abort();
-  }, timeoutMs);
+  while (attempt < maxAttempts) {
+    attempt++;
 
-  var config = {
-    method: options.method || 'GET',
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8'
-    },
-    signal: controller.signal
-  };
+    var controller = new AbortController();
 
-  if (options.body !== undefined) {
-    config.body = typeof options.body === 'string'
-      ? options.body
-      : JSON.stringify(options.body);
-  }
+    var timeout = setTimeout(function() {
+      controller.abort();
+    }, timeoutMs);
 
-  try {
-    var response = await fetch(url, config);
-    var contentType = response.headers.get('content-type') || '';
-    var data;
+    var config = {
+      method: options.method || 'GET',
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8'
+      },
+      signal: controller.signal
+    };
 
-    if (contentType.includes('application/json')) {
-      data = await response.json();
-    } else {
-      data = await response.text();
+    if (options.body !== undefined) {
+      config.body = typeof options.body === 'string'
+        ? options.body
+        : JSON.stringify(options.body);
     }
 
-    if (!response.ok) {
-      var message = 'Erreur HTTP ' + response.status;
+    try {
+      var response = await fetch(url, config);
+      var contentType = response.headers.get('content-type') || '';
+      var data;
 
-      if (data && typeof data === 'object' && data.error) {
-        message = data.error;
+      if (contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        data = await response.text();
       }
 
-      var apiError = new Error(message);
-      apiError.status = response.status;
-      apiError.data = data;
-      apiError.endpoint = endpoint;
+      if (!response.ok) {
+        var message = 'Erreur HTTP ' + response.status;
 
-      throw apiError;
+        if (data && typeof data === 'object' && data.error) {
+          message = data.error;
+        }
+
+        var apiError = new Error(message);
+        apiError.status = response.status;
+        apiError.data = data;
+        apiError.endpoint = endpoint;
+
+        throw apiError;
+      }
+
+      return data;
+    } catch (err) {
+      if (err && err.name === 'AbortError') {
+        if (attempt < maxAttempts) {
+          console.warn(
+            'Timeout API (' + endpoint + ') après ' +
+            Math.round(timeoutMs / 1000) +
+            ' secondes. Nouvelle tentative...'
+          );
+
+          await new Promise(function(resolve) {
+            setTimeout(resolve, 500);
+          });
+
+          continue;
+        }
+
+        var timeoutError = new Error(
+          'La requête API a expiré après ' +
+          Math.round(timeoutMs / 1000) +
+          ' secondes et une nouvelle tentative.'
+        );
+
+        timeoutError.code = 'API_TIMEOUT';
+        timeoutError.endpoint = endpoint;
+
+        console.error(
+          'Timeout API définitif (' + endpoint + '):',
+          timeoutError
+        );
+
+        throw timeoutError;
+      }
+
+      console.error('Erreur API (' + endpoint + '):', err);
+      throw err;
+    } finally {
+      clearTimeout(timeout);
     }
-
-    return data;
-  } catch (err) {
-    if (err && err.name === 'AbortError') {
-      var timeoutError = new Error(
-        'La requête API a expiré après ' + Math.round(timeoutMs / 1000) + ' secondes.'
-      );
-
-      timeoutError.code = 'API_TIMEOUT';
-      timeoutError.endpoint = endpoint;
-
-      console.error(
-        'Timeout API (' + endpoint + '):',
-        timeoutError
-      );
-
-      throw timeoutError;
-    }
-
-    console.error('Erreur API (' + endpoint + '):', err);
-    throw err;
-  } finally {
-    clearTimeout(timeout);
   }
 }
 
