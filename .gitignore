@@ -64,6 +64,10 @@ reset-super-admin.fixed.js
 
 .env*
 
+# Exception : dagoos-mobile-v2 — .env non secrets (URLs publiques API Render)
+!apps/dagoos-mobile-v2/.env.development
+!apps/dagoos-mobile-v2/.env.production
+
 # Coverage (généré par les tests)
 coverage/
 **/coverage/
