@@ -1,3 +1,8 @@
+// ============================================================
+// Hooks — useBranding
+// Phase 1 — Étape 1.3
+// ============================================================
+
 import { useContext } from 'react';
 import {
   BrandingContext,

@@ -1,12 +1,13 @@
 // ============================================================
 // Pages — Course
-// Phase 1 — Étape 1.6.b
+// Phase 1 — Étape 1.6.d
 //
 // Parcours urbain : demande de taxi.
 //   - 2 modes de mise en relation : 'choisir' | 'toutes'
 //   - mode 'proche' (géoloc) reporté en Phase 2
 //   - estimation via POST /public/estimate
 //   - envoi via POST /public/actions (type COURSE_REQUEST)
+//   - garde défensive : /course réservé aux FLEET_MANAGER
 //
 // Porté de apps/dagoos-mobile/pages/course.js
 // ============================================================
@@ -55,7 +56,13 @@ function formatEstimateError(message: string): string {
 
 export function CoursePage() {
   const navigate = useNavigate();
-  const { slug: brandingSlug, selectOrganization } = useBranding();
+
+  const {
+    slug: brandingSlug,
+    organization,
+    selectOrganization,
+  } = useBranding();
+
   const { organizations, loading: loadingOrganizations } =
     useOrganizations();
 
@@ -86,6 +93,17 @@ export function CoursePage() {
     brandingSlug ?? ''
   );
   const [offreClient, setOffreClient] = useState<string>('');
+
+  // ----------------------------------------------------------
+  // Garde défensive : /course est réservé aux FLEET_MANAGER.
+  // Si une autre organisation est sélectionnée, on redirige.
+  // ----------------------------------------------------------
+
+  useEffect(() => {
+    if (organization && organization.type !== 'FLEET_MANAGER') {
+      navigate('/location', { replace: true });
+    }
+  }, [organization, navigate]);
 
   // Flottes urbaines uniquement.
   const flottes = useMemo(
