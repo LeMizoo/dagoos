@@ -1651,58 +1651,100 @@ router.post('/estimate-location', async (req, res) => {
       });
     }
 
-    // Récupérer le tarif location du type de véhicule
+    // ======================================================
+    // CAR_RENTAL — Calcul du prix
+    // ======================================================
+    //
+    // Contrat tarifaire (2.0.a) :
+    //   1. vehiculeTarifs[cle].location.prixBase → calcul location
+    //   2. vehiculeTarifs[cle].tarifFixe.prixTrajet + A_B + AVEC → tarif fixe
+    //   3. sinon → 404 explicite
+    //
+    // Règle d'arrondi unique à la fin (arrondirPrix).
+    // ======================================================
+
     const typeMap = { 'bus': 'bus', 'minivan': 'minivan', 'tricycle': 'tricycle' };
     const cle = typeMap[typeVehicule] || 'bus';
-    const tarifLocation = vehiculeTarifs[cle]?.location || {};
 
-    const prixBase =
-      Number(tarifLocation.prixBase) ||
-      Number(tarif.prixBase) ||
-      100000;
+    const vehicleConfig = vehiculeTarifs[cle] || {};
+    const tarifLocation = vehicleConfig.location || {};
+    const tarifFixe = vehicleConfig.tarifFixe || {};
 
-    const prixKm =
-      Number(tarifLocation.prixKm) ||
-      Number(tarif.prixKm) ||
-      1500;
-
-    const forfaitJournalier =
-      Number(tarifLocation.forfaitJournalier) ||
-      50000;
-
-    // Calculer le nombre de jours
-    let nbJours = 1;
-    if (typeTrajet === 'A_B_A_MULTI' && dateAller && dateRetour) {
-      const debut = new Date(dateAller);
-      const fin = new Date(dateRetour);
-      nbJours = Math.max(1, Math.ceil((fin.getTime() - debut.getTime()) / (1000 * 3600 * 24)) + 1);
-    }
+    const hasLocation = Number(tarifLocation.prixBase) > 0;
+    const hasTarifFixe = Number(tarifFixe.prixTrajet) > 0;
 
     let prixEstime = 0;
+    let nbJours = 1;
 
-    switch (typeTrajet) {
-      case 'A_B':
-        if (carburant === 'AVEC') {
-          // Tarif fixe sans km
+    if (hasLocation) {
+      // ----------------------------------------
+      // Cas 1 : location.prixBase configuré
+      // ----------------------------------------
+      const prixBase =
+        Number(tarifLocation.prixBase) ||
+        Number(tarif.prixBase) ||
+        100000;
+
+      const prixKm =
+        Number(tarifLocation.prixKm) ||
+        Number(tarif.prixKm) ||
+        1500;
+
+      const forfaitJournalier =
+        Number(tarifLocation.forfaitJournalier) ||
+        50000;
+
+      // Nombre de jours (uniquement pour A_B_A_MULTI)
+      if (typeTrajet === 'A_B_A_MULTI' && dateAller && dateRetour) {
+        const debut = new Date(dateAller);
+        const fin = new Date(dateRetour);
+        nbJours = Math.max(
+          1,
+          Math.ceil((fin.getTime() - debut.getTime()) / (1000 * 3600 * 24)) + 1
+        );
+      }
+
+      switch (typeTrajet) {
+        case 'A_B':
+          if (carburant === 'AVEC') {
+            prixEstime = prixBase;
+          } else {
+            prixEstime = prixBase + (distanceKm * prixKm) + (prixBase * 0.5);
+          }
+          break;
+
+        case 'A_B_A':
+          prixEstime = (2 * prixBase) + (2 * distanceKm * prixKm);
+          break;
+
+        case 'A_B_A_MULTI':
+          prixEstime =
+            prixBase +
+            (distanceKm * prixKm) +
+            (forfaitJournalier * nbJours) +
+            (distanceKm * prixKm) +
+            prixBase;
+          break;
+
+        default:
           prixEstime = prixBase;
-        } else {
-          // Base + (x × prixKm) + ½ Base
-          prixEstime = prixBase + (distanceKm * prixKm) + (prixBase * 0.5);
-        }
-        break;
+      }
 
-      case 'A_B_A':
-        // 2 × Base + (2x × prixKm)
-        prixEstime = (2 * prixBase) + (2 * distanceKm * prixKm);
-        break;
+    } else if (hasTarifFixe && typeTrajet === 'A_B' && carburant === 'AVEC') {
+      // ----------------------------------------
+      // Cas 2 : tarifFixe.prixTrajet (A_B + AVEC)
+      // ----------------------------------------
+      prixEstime = Number(tarifFixe.prixTrajet);
 
-      case 'A_B_A_MULTI':
-        // Base + (xJ1 × prixKm) + (forfait × nbJours) + (xJn × prixKm) + Base
-        prixEstime = prixBase + (distanceKm * prixKm) + (forfaitJournalier * nbJours) + (distanceKm * prixKm) + prixBase;
-        break;
-
-      default:
-        prixEstime = prixBase;
+    } else {
+      // ----------------------------------------
+      // Cas 3 : aucune configuration exploitable
+      // ----------------------------------------
+      return res.status(404).json({
+        error:
+          `Tarif location non configuré pour ${typeVehicule} ` +
+          `(trajet ${typeTrajet}, carburant ${carburant || 'AVEC'})`
+      });
     }
 
     prixEstime = arrondirPrix(prixEstime);
