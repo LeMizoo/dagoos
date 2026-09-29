@@ -1,10 +1,24 @@
-import { Building2, Star } from 'lucide-react';
+// ============================================================
+// Pages — Home
+// Phase 1 — Catalogue partenaires
+//
+// Routage selon le type d'organisation :
+//   FLEET_MANAGER  → /course       (taxi urbain)
+//   COOPERATIVE    → /location     (location interurbaine)
+//   Autre          → /home         (fallback)
+//
+// ⚠️ Ce routage pourra être affiné en 1.8 selon les services
+// réels de chaque organisation (LOCATION_INTERURBAINE,
+// LOCATION_URBAINE, TAXI, etc.).
+// ============================================================
+
 import { useState } from 'react';
+import { Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { PartnerCarousel } from '../components/PartnerCarousel';
 import { PartnerSearch } from '../components/PartnerSearch';
-import { useOrganizations } from '../hooks/useOrganizations';
 import { useBranding } from '../hooks/useBranding';
+import { useOrganizations } from '../hooks/useOrganizations';
 import type { Organization } from '../types/api';
 
 export function HomePage() {
@@ -15,7 +29,18 @@ export function HomePage() {
 
   const handleSelect = async (organization: Organization) => {
     await selectOrganization(organization.slug);
-    navigate('/course');
+
+    if (organization.type === 'FLEET_MANAGER') {
+      navigate('/course');
+      return;
+    }
+
+    if (organization.type === 'COOPERATIVE') {
+      navigate('/location');
+      return;
+    }
+
+    navigate('/home');
   };
 
   return (
@@ -23,24 +48,31 @@ export function HomePage() {
       <header className="home-page__header">
         <div className="home-page__brand">
           <Building2 size={28} aria-hidden="true" />
+
           <div>
-            <strong>DAGOO&apos;S</strong>
-            <span>Chez les potes, ça roule.</span>
+            <strong>DAGOO’S</strong>
+            <span>Mobilité simple, rapide et accessible</span>
           </div>
         </div>
       </header>
 
       <section className="home-page__intro">
         <h1>Choisissez un service</h1>
+        <p>
+          Sélectionnez un partenaire pour accéder aux services
+          disponibles.
+        </p>
       </section>
 
       <section className="home-page__partners">
         <div className="home-page__section-title">
-          <h2>
-            <Star size={18} aria-hidden="true" />
-            Nos partenaires
-          </h2>
-          <p>Des flottes et coopératives qui utilisent DAGOO&apos;S</p>
+          <div>
+            <h2>Nos partenaires</h2>
+            <p>
+              Choisissez la flotte ou la coopérative avec laquelle
+              vous souhaitez continuer.
+            </p>
+          </div>
         </div>
 
         <PartnerSearch
@@ -51,12 +83,17 @@ export function HomePage() {
         />
 
         {loading && (
-          <div className="home-page__state">Chargement...</div>
+          <div className="home-page__state">
+            Chargement des partenaires…
+          </div>
         )}
 
-        {!loading && error && (
+        {error && !loading && (
           <div className="home-page__state home-page__state--error">
-            <p>Impossible de charger les partenaires</p>
+            <p>
+              Impossible de charger les partenaires.
+            </p>
+
             <button type="button" onClick={refetch}>
               Réessayer
             </button>
@@ -65,7 +102,7 @@ export function HomePage() {
 
         {!loading && !error && organizations.length === 0 && (
           <div className="home-page__state">
-            Aucun partenaire disponible
+            Aucun partenaire disponible.
           </div>
         )}
 
@@ -76,11 +113,12 @@ export function HomePage() {
               onSelect={handleSelect}
             />
 
-            <p className="home-page__count">
-              {organizations.length} organisation
-              {organizations.length > 1 ? 's' : ''} partenaire
-              {organizations.length > 1 ? 's' : ''}
-            </p>
+            <div className="home-page__count">
+              {organizations.length}{' '}
+              {organizations.length > 1
+                ? 'partenaires disponibles'
+                : 'partenaire disponible'}
+            </div>
           </>
         )}
       </section>

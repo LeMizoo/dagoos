@@ -1,6 +1,6 @@
 // ============================================================
 // App — Router + Layout principal
-// Phase 1 — Étape 1.3
+// Phase 1 — Étape 1.3 + 1.6.c
 //
 // Structure :
 //   <BrandingProvider>        ← multi-tenant (dans main.tsx)
@@ -26,13 +26,20 @@ import { useLocalStorage } from './hooks/useLocalStorage';
 import { HomePage } from './pages/Home';
 import { CoursePage } from './pages/Course';
 import { ReservationsPage } from './pages/Reservations';
+import { LocationPage } from './pages/Location';
 
 // ------------------------------------------------------------
 // Persistance de la page courante (équivalent legacy
 // localStorage.dagoos_mobile_page).
 // ------------------------------------------------------------
 
-const VALID_PATHS = ['/home', '/course', '/reservations'] as const;
+const VALID_PATHS = [
+  '/home',
+  '/course',
+  '/reservations',
+  '/location',
+] as const;
+
 const DEFAULT_PATH = '/home';
 
 function normalizeSavedPath(saved: string): string {
@@ -83,6 +90,7 @@ function Layout() {
           <Route path="/home" element={<HomePage />} />
           <Route path="/course" element={<CoursePage />} />
           <Route path="/reservations" element={<ReservationsPage />} />
+          <Route path="/location" element={<LocationPage />} />
           <Route path="*" element={<Navigate to={DEFAULT_PATH} replace />} />
         </Routes>
       </main>
