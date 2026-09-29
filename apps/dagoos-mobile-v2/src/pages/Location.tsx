@@ -389,6 +389,7 @@ export function LocationPage() {
         ...(effectiveTypeTrajet
           ? { typeTrajet: effectiveTypeTrajet }
           : {}),
+        ...(photos.length > 0 ? { photos } : {}),
         ...(mode === 'long_haul'
           ? {
               typeService,
