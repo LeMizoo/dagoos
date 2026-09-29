@@ -670,26 +670,33 @@ export function ReservationsPage() {
       place,
     }));
 
-    const result = await submit({
+        const outcome = await submit({
       departId: selectedDepart.id,
       telephone: telephone.trim(),
       passagers: passagersPayload,
     });
 
-    if (!result) {
-      if (conflictPlaces.length > 0) {
-        refetch();
-        setSelectedPlaces([]);
-        setPassengers({});
-      }
-
+    // 409 — places en conflit : la valeur est disponible
+    // directement via outcome.conflictPlaces (pas de stale closure).
+    if (outcome.conflictPlaces.length > 0) {
+      refetch();
+      setSelectedPlaces([]);
+      setPassengers({});
       return;
     }
 
-    if (result.otpCode) {
+    const response = outcome.response;
+
+    if (!response) {
+      // Erreur générique (réseau, 5xx, etc.) : déjà exposée via
+      // reservationError du hook. On ne ré-affiche pas d'alerte ici
+      // pour éviter le doublon avec le bandeau error.
+      return;
+    }
+
+    if (response.otpCode) {
       const firstPassenger = orderedPlaces[0];
 
-      // Sauvegarder le passager principal (si présent)
       if (firstPassenger) {
         const firstPassengerNom = (passengers[firstPassenger] ?? '').trim();
 
@@ -701,14 +708,14 @@ export function ReservationsPage() {
         }
       }
 
-      storage.setLastOtp(result.otpCode);
-      storage.setLastCode(result.otpCode);
+      storage.setLastOtp(response.otpCode);
+      storage.setLastCode(response.otpCode);
 
       alert(
-        `Réservation en attente !\n\nCode OTP : ${result.otpCode}\n\nConservez ce code pour gérer votre réservation.`
+        `Réservation en attente !\n\nCode OTP : ${response.otpCode}\n\nConservez ce code pour gérer votre réservation.`
       );
     } else {
-      alert(result.message ?? 'Réservation enregistrée avec succès.');
+      alert(response.message ?? 'Réservation enregistrée avec succès.');
     }
 
     setSelectedPlaces([]);

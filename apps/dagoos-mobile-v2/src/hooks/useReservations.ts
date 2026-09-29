@@ -1,10 +1,15 @@
 // ============================================================
 // Hooks — useReservations
-// Phase 1 — Étape 1.7.a
+// Phase 1 — Étape 1.7.a (durci en 1.7.c)
 //
 // POST /public/reservations/batch
 // Crée N réservations (une par passager) pour un même départ,
 // avec un code OTP unique partagé.
+//
+// 1.7.c :
+//   submit() retourne { response, conflictPlaces } pour que
+//   l'appelant lise les places en conflit de manière synchrone,
+//   sans dépendre du state React (stale closure).
 // ============================================================
 
 import { useCallback, useState } from 'react';
@@ -14,14 +19,20 @@ import type {
   BatchReservationResponse,
 } from '../types/api';
 
+export interface SubmitOutcome {
+  response: BatchReservationResponse | null;
+  /** Places en conflit (409) — disponible de manière synchrone. */
+  conflictPlaces: string[];
+}
+
 export interface UseReservationsResult {
   loading: boolean;
   error: Error | null;
-  /** Places en conflit en cas d'erreur 409. */
+  /** Places en conflit — destiné à l'affichage UI (render suivant). */
   conflictPlaces: string[];
   submit: (
     payload: BatchReservationRequest
-  ) => Promise<BatchReservationResponse | null>;
+  ) => Promise<SubmitOutcome>;
   reset: () => void;
 }
 
@@ -33,7 +44,7 @@ export function useReservations(): UseReservationsResult {
   const submit = useCallback(
     async (
       payload: BatchReservationRequest
-    ): Promise<BatchReservationResponse | null> => {
+    ): Promise<SubmitOutcome> => {
       setLoading(true);
       setError(null);
       setConflictPlaces([]);
@@ -44,20 +55,29 @@ export function useReservations(): UseReservationsResult {
           payload
         );
 
-        // Le backend renvoie { error } en HTTP 200 pour
-        // certains cas métier (ex. places en conflit).
+        // Cas métier : backend renvoie { error } sans throw HTTP.
         if (result && typeof result === 'object' && result.error) {
-          if (Array.isArray(result.places)) {
-            setConflictPlaces(result.places);
+          const places = Array.isArray(result.places)
+            ? result.places
+            : [];
+
+          if (places.length > 0) {
+            setConflictPlaces(places);
           }
+
           setError(new Error(result.error));
-          return null;
+
+          return { response: null, conflictPlaces: places };
         }
 
-        return result;
+        return { response: result, conflictPlaces: [] };
       } catch (err) {
-        setError(err instanceof Error ? err : new Error(String(err)));
-        return null;
+        const wrapped =
+          err instanceof Error ? err : new Error(String(err));
+
+        setError(wrapped);
+
+        return { response: null, conflictPlaces: [] };
       } finally {
         setLoading(false);
       }

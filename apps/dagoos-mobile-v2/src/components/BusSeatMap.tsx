@@ -1,10 +1,12 @@
+import { UserRound } from 'lucide-react';
+
 // ============================================================
 // Components — BusSeatMap
 // Phase 1 — Étape 1.7.b
 //
 // Grille des places d'un bus interurbain (26 places).
 // Format fidèle au legacy :
-//   🧑‍✈️ Conducteur 1A 1B
+//   [i] Conducteur 1A 1B
 //   2A 2B | 2C 2D
 //   3A 3B | 3C 3D
 //   4A 4B | 4C 4D
@@ -123,9 +125,7 @@ export function BusSeatMap({
           marginBottom: 4,
         }}
       >
-        <span style={{ fontSize: 16 }} aria-hidden="true">
-          🧑‍✈️
-        </span>
+        <UserRound size={16} aria-hidden="true" />
         <span
           style={{
             fontSize: 11,
