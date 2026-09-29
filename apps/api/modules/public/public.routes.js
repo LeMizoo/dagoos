@@ -48,7 +48,8 @@ const ALLOWED_DETAILS_KEYS = new Set([
   'carburant', 'typeTrajet', 'offreClient',
   'type', 'mode', 'position',
   'date', 'heure', 'priseEnCharge', 'destination',
-  'message', 'description'
+  'message', 'description',
+  'photos', 'heureDepart', 'heureRetour'
 ]);
 
 function sanitizeDetails(details) {
@@ -894,6 +895,8 @@ router.get('/suivi/:code', async (req, res) => {
       typeVehicule: details.typeVehicule || null,
       depart: details.depart || '',
       arrivee: details.arrivee || '',
+      // Photos uploadées (Cloudinary) — 2.0.c
+      photos: Array.isArray(details.photos) ? details.photos : [],
       // V2 champs
       pricingModel,
       status,
