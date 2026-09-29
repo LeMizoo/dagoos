@@ -27,6 +27,7 @@ import { HomePage } from './pages/Home';
 import { CoursePage } from './pages/Course';
 import { ReservationsPage } from './pages/Reservations';
 import { LocationPage } from './pages/Location';
+import { SuiviPage } from './pages/Suivi';
 
 // ------------------------------------------------------------
 // Persistance de la page courante (équivalent legacy
@@ -38,6 +39,7 @@ const VALID_PATHS = [
   '/course',
   '/reservations',
   '/location',
+  '/suivi',
 ] as const;
 
 const DEFAULT_PATH = '/home';
@@ -91,6 +93,7 @@ function Layout() {
           <Route path="/course" element={<CoursePage />} />
           <Route path="/reservations" element={<ReservationsPage />} />
           <Route path="/location" element={<LocationPage />} />
+          <Route path="/suivi" element={<SuiviPage />} />
           <Route path="*" element={<Navigate to={DEFAULT_PATH} replace />} />
         </Routes>
       </main>
