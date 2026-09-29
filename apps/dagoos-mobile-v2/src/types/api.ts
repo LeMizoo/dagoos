@@ -161,11 +161,54 @@ export interface ReverseGeocodeResponse {
 }
 
 // ------------------------------------------------------------
-// Suivi (placeholder — à préciser après audit suivi.js)
+// Suivi — par code (Phase 1 — 1.9.a)
 // ------------------------------------------------------------
 
-export interface SuiviResponse {
+/**
+ * Négociation LONG_HAUL en cours.
+ * La structure peut évoluer côté backend.
+ */
+export interface SuiviNegotiation {
+  driverId?: string;
+  vehicleId?: string;
+  proposedPrice?: number;
+  status?: string;
+  expiresAt?: string;
+  respondedAt?: string;
+  respondedBy?: string;
+  responseChannel?: string;
   [key: string]: unknown;
+}
+
+/**
+ * Réponse GET /public/suivi/:code.
+ * Le backend expose à la fois les champs V2 et legacy.
+ */
+export interface SuiviResponse {
+  codeSuivi: string;
+  statut: string;
+  clientNom: string;
+  type: string;
+  typeService: string | null;
+  typeVehicule: string | null;
+  depart: string;
+  arrivee: string;
+
+  // V2 — tarification
+  pricingModel: string | null;
+  status: string | null;
+  price: number | null;
+  estimated: boolean;
+  negotiation: SuiviNegotiation | null;
+
+  // Legacy — compatibilité
+  prixEstime: number | null;
+  offreClient: number | null;
+  contreOffreChauffeur: number | null;
+  statutNegociation: string | null;
+
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ------------------------------------------------------------
