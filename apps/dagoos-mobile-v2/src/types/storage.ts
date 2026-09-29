@@ -20,10 +20,10 @@ export interface StoredBranding {
   id: string;
   name: string;
   slug: string;
-  logo?: string;
-  slogan?: string;
-  primaryColor?: string;
-  secondaryColor?: string;
+  logo?: string | undefined;
+  slogan?: string | undefined;
+  primaryColor?: string | undefined;
+  secondaryColor?: string | undefined;
 }
 
 /**
@@ -37,4 +37,5 @@ export type StorageKey =
   | 'last_otp'
   | 'selected_fleet_slug'
   | 'trip_depart'
-  | 'trip_arrivee';
+  | 'trip_arrivee'
+  | 'page';
