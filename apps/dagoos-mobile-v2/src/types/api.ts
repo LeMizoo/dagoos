@@ -66,8 +66,7 @@ export type OrganizationPlan =
  * Structure complète à préciser après audit location/reservations.
  */
 export interface OrganizationService {
-  typeService: string;
-  serviceLabel?: string;
+  service: string;
   [key: string]: unknown;
 }
 

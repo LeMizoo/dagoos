@@ -184,6 +184,73 @@ router.get('/organizations', async (req, res) => {
 
 // GET /api/public/organizations/:slug - Infos publiques de l'organisation
 // GET /api/public/organizations/:slug - Infos publiques de l'organisation
+
+// GET /api/public/partners - Partenaires publics réellement exploitables
+// Un partenaire doit être actif et disposer d'au moins un service actif.
+router.get('/partners', async (req, res) => {
+  try {
+    const partners = await prisma.organization.findMany({
+      where: {
+        status: 'active',
+        organizationServices: {
+          some: { active: true },
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        type: true,
+        phone: true,
+        mvolaNumber: true,
+        orangeNumber: true,
+        airtelNumber: true,
+        logo: true,
+        plan: true,
+        organizationServices: {
+          where: { active: true },
+          select: { service: true },
+        },
+        createdAt: true,
+        departs: {
+          where: {
+            statut: 'PUBLISHED',
+            OR: [
+              { date: { gt: new Date() } },
+              {
+                date: {
+                  gte: new Date(new Date().setHours(0, 0, 0, 0)),
+                  lte: new Date(new Date().setHours(23, 59, 59, 999)),
+                },
+              },
+            ],
+          },
+          orderBy: [{ date: 'asc' }, { heure: 'asc' }],
+          select: {
+            id: true,
+            pointDepart: true,
+            destination: true,
+            date: true,
+            heure: true,
+            prix: true,
+            placesTotal: true,
+            reservations: {
+              where: { statut: { in: ['CONFIRMED', 'PENDING'] } },
+              select: { place: true },
+            },
+          },
+          take: 20,
+        },
+      },
+    });
+
+    return res.json(partners);
+  } catch (error) {
+    console.error('GET /public/partners:', error);
+    return res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 router.get('/organizations/:slug', async (req, res) => {
   try {
     const { slug } = req.params;
