@@ -234,6 +234,115 @@ export interface CourseRequestDetails {
 }
 
 // ------------------------------------------------------------
+// Location — estimation et demande (Phase 1 — 1.8)
+// ------------------------------------------------------------
+
+export type LocationMode = 'urbain' | 'long_haul';
+
+export type LocationType = 'CAR_RENTAL' | 'LONG_HAUL';
+
+export type LocationTripType = 'A_B' | 'A_B_A' | 'A_B_A_MULTI';
+
+export type LocationFuel = 'AVEC' | 'SANS';
+
+export type LocationService =
+  | 'passagers'
+  | 'marchandises'
+  | 'demenagement'
+  | 'depannage'
+  | 'fret';
+
+export type LocationVehicle =
+  | 'moto'
+  | 'voiture'
+  | 'bus'
+  | 'minivan'
+  | 'tricycle'
+  | 'fourgon'
+  | 'camion'
+  | 'camion_frigo'
+  | 'semi_remorque'
+  | 'depanneuse';
+
+export interface LocationEstimateRequest {
+  organizationSlug: string;
+  type: LocationType;
+  typeVehicule: LocationVehicle;
+  typeTrajet?: LocationTripType;
+  typeService?: LocationService;
+  nbPassagers?: number;
+  description?: string;
+  depart: string;
+  arrivee: string;
+  dateAller?: string | null;
+  dateRetour?: string | null;
+  carburant?: LocationFuel;
+}
+
+export interface LocationEstimateResponse {
+  distanceKm?: number;
+  prixEstime?: number;
+  price?: number;
+  pricingModel?: string;
+  estimated?: boolean;
+  status?: string;
+  negotiation?: {
+    [key: string]: unknown;
+  } | null;
+  nbJours?: number;
+  typeTrajet?: LocationTripType;
+  carburant?: LocationFuel;
+  type?: LocationType;
+  typeVehicule?: LocationVehicle;
+  typeService?: LocationService;
+  nbPassagers?: number;
+  volume?: number;
+  error?: string;
+}
+
+export interface LocationRequestDetails {
+  depart: string;
+  arrivee: string;
+  typeVehicule: LocationVehicle;
+  typeTrajet?: LocationTripType;
+  typeService?: LocationService;
+  dateAller?: string | null;
+  dateRetour?: string | null;
+  heureDepart?: string | null;
+  heureRetour?: string | null;
+  carburant?: LocationFuel;
+  nbPassagers?: number;
+  description?: string;
+  photos?: string[];
+}
+
+export interface LocationRequest {
+  organizationSlug: string;
+  type: LocationType;
+  clientNom: string;
+  clientTel: string;
+  details: LocationRequestDetails;
+}
+
+export interface LocationRequestResponse {
+  ok?: boolean;
+  actionId?: string;
+  codeSuivi?: string;
+  error?: string;
+}
+
+export interface PhotoUploadResponse {
+  success?: boolean;
+  url?: string;
+  publicId?: string;
+  format?: string;
+  width?: number;
+  height?: number;
+  bytes?: number;
+  createdAt?: string;
+  error?: string;
+}
+// ------------------------------------------------------------
 // Réservations interurbaines (Phase 1 — 1.7.a)
 // ------------------------------------------------------------
 
