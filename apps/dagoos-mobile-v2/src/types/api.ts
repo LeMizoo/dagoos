@@ -167,3 +167,25 @@ export interface ReverseGeocodeResponse {
 export interface SuiviResponse {
   [key: string]: unknown;
 }
+
+// ------------------------------------------------------------
+// Course urbaine — types étendus (Phase 1 — 1.6.a)
+// ------------------------------------------------------------
+
+/**
+ * Mode de mise en relation.
+ * Le mode 'proche' (géolocalisation) est reporté en Phase 2.
+ */
+export type CourseMode = 'choisir' | 'toutes';
+
+/**
+ * Corps étendu envoyé à /public/actions pour une COURSE_REQUEST.
+ */
+export interface CourseRequestDetails {
+  depart: string;
+  arrivee: string;
+  typeVehicule: TypeVehicule;
+  mode: CourseMode;
+  offreClient?: number;
+  [key: string]: unknown;
+}
