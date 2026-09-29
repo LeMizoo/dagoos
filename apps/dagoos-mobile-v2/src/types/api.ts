@@ -189,3 +189,65 @@ export interface CourseRequestDetails {
   offreClient?: number;
   [key: string]: unknown;
 }
+
+// ------------------------------------------------------------
+// Réservations interurbaines (Phase 1 — 1.7.a)
+// ------------------------------------------------------------
+
+/**
+ * Place réservée dans un départ (info minimale renvoyée par l'API).
+ */
+export interface DepartReservation {
+  place: string;
+}
+
+/**
+ * Départ publié par une organisation (bus interurbain).
+ * Renvoyé dans le tableau `departs[]` de chaque organisation
+ * via GET /public/organizations.
+ */
+export interface Depart {
+  id: string;
+  pointDepart: string;
+  destination: string;
+  date: string;             // ISO date
+  heure: string;            // "HH:MM"
+  prix: number;
+  placesTotal: number;
+  statut: string;           // 'PUBLISHED' | 'LEFT' | ...
+  reservations?: DepartReservation[];
+  /** Nom de l'organisation à laquelle appartient le départ. */
+  organizationName?: string;
+}
+
+/**
+ * Passager pour une place dans une réservation groupée.
+ */
+export interface ReservationPassenger {
+  passagerNom: string;
+  place: string;
+}
+
+/**
+ * Payload POST /public/reservations/batch.
+ */
+export interface BatchReservationRequest {
+  departId: string;
+  telephone: string;
+  passagers: ReservationPassenger[];
+}
+
+/**
+ * Réponse POST /public/reservations/batch (succès).
+ * Le backend génère un unique code OTP partagé par toutes
+ * les réservations de la requête.
+ */
+export interface BatchReservationResponse {
+  ok?: boolean;
+  otpCode?: string;
+  message?: string;
+  reservations?: unknown[];
+  error?: string;
+  /** Présent en cas d'erreur 409 : places déjà réservées. */
+  places?: string[];
+}
