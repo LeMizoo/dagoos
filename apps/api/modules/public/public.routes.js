@@ -520,16 +520,29 @@ function genererCodeSuivi() {
 }
 
 /**
- * Calcule la distance entre deux adresses
- * Retourne la distance en km, ou 0 si géocodage impossible
+ * Calcule la distance entre deux adresses.
+ * Retourne la distance en km, ou null si le géocodage échoue.
+ *
+ * Convention (2.0.b) :
+ *   - retourne un nombre > 0 en cas de succès
+ *   - retourne null si une adresse est introuvable ou si la
+ *     distance dépasse le seuil de cohérence Madagascar (1500 km)
+ *   - les appelants DOIVENT vérifier null et renvoyer un 400
  */
 async function calculerDistance(depart, arrivee) {
-  if (!depart || !arrivee) return 0;
+  if (!depart || !arrivee) return null;
 
   const coordDepart = await geocodeAdresse(depart);
   const coordArrivee = await geocodeAdresse(arrivee);
 
-  if (!coordDepart || !coordArrivee) return 0;
+  if (!coordDepart || !coordArrivee) {
+    console.warn(
+      `[calculerDistance] Géocodage échoué: ` +
+      `"${depart}" (${coordDepart ? coordDepart.source : 'introuvable'}) → ` +
+      `"${arrivee}" (${coordArrivee ? coordArrivee.source : 'introuvable'})`
+    );
+    return null;
+  }
 
   const distanceVolOiseau = haversineDistance(
     coordDepart.lat, coordDepart.lng,
@@ -551,7 +564,7 @@ async function calculerDistance(depart, arrivee) {
       `[calculerDistance] Distance anormale rejetée: ${distanceKm} km ` +
       `entre "${depart}" (${coordDepart.source || '?'}) et "${arrivee}" (${coordArrivee.source || '?'})`
     );
-    return 0;
+    return null;
   }
 
   return distanceKm;
@@ -602,6 +615,11 @@ router.post('/estimate', async (req, res) => {
     }
 
     const distanceKm = await calculerDistance(depart, arrivee);
+    if (distanceKm === null) {
+      return res.status(400).json({
+        error: 'Impossible de déterminer la distance entre les adresses fournies'
+      });
+    }
 
     /*
      * ========================================================
@@ -1503,6 +1521,11 @@ router.post('/estimate-location', async (req, res) => {
 
     // Calculer la distance
     const distanceKm = await calculerDistance(depart, arrivee);
+    if (distanceKm === null) {
+      return res.status(400).json({
+        error: 'Impossible de déterminer la distance entre les adresses fournies'
+      });
+    }
 
     // Récupérer le tarif
     const tarif = await prisma.tarif.findUnique({
@@ -1952,6 +1975,11 @@ router.post('/actions', publicLeadLimiter, async (req, res) => {
 
       // Calculer la distance entre départ et arrivée (géocodage backend)
       distanceKm = await calculerDistance(details?.depart, details?.arrivee);
+      if (distanceKm === null) {
+        return res.status(400).json({
+          error: 'Impossible de déterminer la distance entre les adresses fournies'
+        });
+      }
 
       const tarif = await prisma.tarif.findUnique({
         where: { organizationId: org?.id }
@@ -2026,6 +2054,11 @@ router.post('/actions', publicLeadLimiter, async (req, res) => {
 
       // Distance calculée exclusivement par le backend
       distanceKm = await calculerDistance(depart, arrivee);
+      if (distanceKm === null) {
+        return res.status(400).json({
+          error: 'Impossible de déterminer la distance entre les adresses fournies'
+        });
+      }
 
       // Tarif de l'organisation
       const tarifLocationOrg = await prisma.tarif.findUnique({
@@ -2127,6 +2160,12 @@ router.post('/actions', publicLeadLimiter, async (req, res) => {
       const depart = details?.depart || '';
       const arrivee = details?.arrivee || '';
       const distanceKmLong = await calculerDistance(depart, arrivee);
+
+      if (distanceKmLong === null) {
+        return res.status(400).json({
+          error: 'Impossible de déterminer la distance entre les adresses fournies'
+        });
+      }
 
       if (!VALID_LONG_HAUL_SERVICES.includes(typeService)) {
         return res.status(400).json({
