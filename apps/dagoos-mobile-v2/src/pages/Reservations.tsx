@@ -1,33 +1,47 @@
 // ============================================================
 // Pages — Reservations
-// Phase 1 — Étape 1.7.b
+// Phase 1 — Étape 1.7.b + 2.1.a.3
 //
 // Parcours réservation interurbaine :
 //   Écran 1 → liste des départs
 //   Écran 2 → choix des places + informations passagers
+//   Écran 3 → gestion d'une réservation par OTP
 //
 // Source métier :
 //   GET  /public/organizations
 //   POST /public/reservations/batch
+//   POST /public/reservations/manage
 //
 // Règles backend conservées côté serveur :
 //   - maximum 5 places par téléphone
 //   - places déjà réservées
 //   - départ publié et futur
 //   - génération OTP
+//   - vérification OTP pour la gestion
 //
 // La référence de paiement n'est pas envoyée :
 // le backend actuel ne la consomme pas.
+//
+// Sécurité :
+//   - localStorage sert uniquement au préremplissage pratique
+//   - le backend reste la source de vérité
+//   - aucune décision métier critique n'est prise côté frontend
 // ============================================================
 
-import { ArrowLeft, CalendarDays, Clock, RefreshCw } from 'lucide-react';
+import {
+  ArrowLeft,
+  CalendarDays,
+  Clock,
+  RefreshCw,
+} from 'lucide-react';
 import { useMemo, useState, type CSSProperties } from 'react';
 import { BusSeatMap } from '../components/BusSeatMap';
 import { PassengerForm } from '../components/PassengerForm';
 import { useDeparts } from '../hooks/useDeparts';
+import { useReservationManage } from '../hooks/useReservationManage';
 import { useReservations } from '../hooks/useReservations';
 import { storage } from '../services/storage';
-import type { Depart } from '../types/api';
+import type { Depart, ReservationFull } from '../types/api';
 
 // ------------------------------------------------------------
 // Tri des places
@@ -117,6 +131,31 @@ const secondaryButtonStyle: CSSProperties = {
   padding: '8px 12px',
 };
 
+const inputStyle: CSSProperties = {
+  width: '100%',
+  minHeight: 42,
+  boxSizing: 'border-box',
+  border: '1px solid var(--border)',
+  borderRadius: 8,
+  background: 'var(--bg-page)',
+  color: 'var(--text-primary)',
+  fontFamily: 'inherit',
+  fontSize: 13,
+  padding: '9px 11px',
+};
+
+const successBoxStyle: CSSProperties = {
+  ...cardStyle,
+  borderColor: 'var(--success-fg)',
+  color: 'var(--success-fg)',
+};
+
+const errorBoxStyle: CSSProperties = {
+  ...cardStyle,
+  borderColor: 'var(--error-fg)',
+  color: 'var(--error-fg)',
+};
+
 // ------------------------------------------------------------
 // Écran 1 — Liste des départs
 // ------------------------------------------------------------
@@ -127,6 +166,7 @@ interface DepartListProps {
   error: Error | null;
   onRefresh: () => void;
   onSelect: (depart: Depart) => void;
+  onManage: () => void;
 }
 
 function DepartList({
@@ -135,6 +175,7 @@ function DepartList({
   error,
   onRefresh,
   onSelect,
+  onManage,
 }: DepartListProps) {
   return (
     <div style={pageStyle}>
@@ -190,14 +231,22 @@ function DepartList({
         </button>
       </div>
 
+      <button
+        type="button"
+        onClick={onManage}
+        style={{
+          ...secondaryButtonStyle,
+          width: '100%',
+          marginBottom: 12,
+        }}
+      >
+        Gérer ma réservation (OTP)
+      </button>
+
       {error ? (
         <div
           role="alert"
-          style={{
-            ...cardStyle,
-            borderColor: 'var(--error-fg)',
-            color: 'var(--error-fg)',
-          }}
+          style={errorBoxStyle}
         >
           <strong>Impossible de charger les départs.</strong>
 
@@ -519,11 +568,7 @@ function ReservationScreen({
       {conflictPlaces.length > 0 ? (
         <div
           role="alert"
-          style={{
-            ...cardStyle,
-            borderColor: 'var(--error-fg)',
-            color: 'var(--error-fg)',
-          }}
+          style={errorBoxStyle}
         >
           Certaines places viennent d'être réservées :
           <strong> {conflictPlaces.join(', ')}</strong>.
@@ -535,11 +580,7 @@ function ReservationScreen({
       {error && conflictPlaces.length === 0 ? (
         <div
           role="alert"
-          style={{
-            ...cardStyle,
-            borderColor: 'var(--error-fg)',
-            color: 'var(--error-fg)',
-          }}
+          style={errorBoxStyle}
         >
           {error.message}
         </div>
@@ -566,8 +607,429 @@ function ReservationScreen({
 }
 
 // ------------------------------------------------------------
+// Écran 3 — Gestion d'une réservation
+// ------------------------------------------------------------
+
+interface ReservationManageScreenProps {
+  telephone: string;
+  passagerNom: string;
+  otpCode: string;
+  reservations: ReservationFull[];
+  loading: boolean;
+  error: Error | null;
+  validationError: string | null;
+  message: string | null;
+  placeEdits: Record<string, string>;
+  onTelephoneChange: (value: string) => void;
+  onPassagerNomChange: (value: string) => void;
+  onOtpCodeChange: (value: string) => void;
+  onPlaceChange: (reservationId: string, value: string) => void;
+  onVerify: () => void;
+  onModify: (reservation: ReservationFull) => void;
+  onCancel: (reservation: ReservationFull) => void;
+  onBack: () => void;
+}
+
+function ReservationManageScreen({
+  telephone,
+  passagerNom,
+  otpCode,
+  reservations,
+  loading,
+  error,
+  validationError,
+  message,
+  placeEdits,
+  onTelephoneChange,
+  onPassagerNomChange,
+  onOtpCodeChange,
+  onPlaceChange,
+  onVerify,
+  onModify,
+  onCancel,
+  onBack,
+}: ReservationManageScreenProps) {
+  return (
+    <div style={pageStyle}>
+      <button
+        type="button"
+        onClick={onBack}
+        style={{
+          ...secondaryButtonStyle,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 6,
+          marginBottom: 12,
+        }}
+      >
+        <ArrowLeft size={17} aria-hidden="true" />
+        Retour aux départs
+      </button>
+
+      <div style={{ ...cardStyle, marginBottom: 14 }}>
+        <h1
+          style={{
+            fontSize: 20,
+            fontWeight: 800,
+            margin: '0 0 6px',
+            color: 'var(--text-primary)',
+          }}
+        >
+          Gérer ma réservation
+        </h1>
+
+        <p
+          style={{
+            ...secondaryTextStyle,
+            margin: 0,
+            lineHeight: 1.5,
+          }}
+        >
+          Utilisez le téléphone, le nom du passager et le code OTP reçu lors
+          de la réservation.
+        </p>
+      </div>
+
+      <div style={cardStyle}>
+        <div style={{ marginBottom: 10 }}>
+          <label
+            htmlFor="manage-telephone"
+            style={{
+              display: 'block',
+              marginBottom: 5,
+              fontSize: 12,
+              fontWeight: 700,
+              color: 'var(--text-primary)',
+            }}
+          >
+            Téléphone
+          </label>
+
+          <input
+            id="manage-telephone"
+            type="tel"
+            value={telephone}
+            onChange={(event) => onTelephoneChange(event.target.value)}
+            autoComplete="tel"
+            style={inputStyle}
+          />
+        </div>
+
+        <div style={{ marginBottom: 10 }}>
+          <label
+            htmlFor="manage-passager-nom"
+            style={{
+              display: 'block',
+              marginBottom: 5,
+              fontSize: 12,
+              fontWeight: 700,
+              color: 'var(--text-primary)',
+            }}
+          >
+            Nom du passager
+          </label>
+
+          <input
+            id="manage-passager-nom"
+            type="text"
+            value={passagerNom}
+            onChange={(event) => onPassagerNomChange(event.target.value)}
+            autoComplete="name"
+            style={inputStyle}
+          />
+        </div>
+
+        <div style={{ marginBottom: 12 }}>
+          <label
+            htmlFor="manage-otp"
+            style={{
+              display: 'block',
+              marginBottom: 5,
+              fontSize: 12,
+              fontWeight: 700,
+              color: 'var(--text-primary)',
+            }}
+          >
+            Code OTP
+          </label>
+
+          <input
+            id="manage-otp"
+            type="text"
+            value={otpCode}
+            onChange={(event) => onOtpCodeChange(event.target.value)}
+            inputMode="numeric"
+            maxLength={6}
+            autoComplete="one-time-code"
+            style={inputStyle}
+          />
+        </div>
+
+        {validationError ? (
+          <div
+            role="alert"
+            style={{
+              ...errorBoxStyle,
+              marginBottom: 10,
+            }}
+          >
+            {validationError}
+          </div>
+        ) : null}
+
+        <button
+          type="button"
+          onClick={onVerify}
+          disabled={
+            loading ||
+            !telephone.trim() ||
+            !passagerNom.trim() ||
+            !otpCode.trim()
+          }
+          style={{
+            ...primaryButtonStyle,
+            opacity:
+              loading ||
+              !telephone.trim() ||
+              !passagerNom.trim() ||
+              !otpCode.trim()
+                ? 0.5
+                : 1,
+            cursor:
+              loading ||
+              !telephone.trim() ||
+              !passagerNom.trim() ||
+              !otpCode.trim()
+                ? 'not-allowed'
+                : 'pointer',
+          }}
+        >
+          {loading ? 'Vérification...' : 'Vérifier'}
+        </button>
+      </div>
+
+      {error ? (
+        <div
+          role="alert"
+          style={errorBoxStyle}
+        >
+          {error.message}
+        </div>
+      ) : null}
+
+      {message ? (
+        <div
+          role="status"
+          style={successBoxStyle}
+        >
+          {message}
+        </div>
+      ) : null}
+
+      {reservations.length > 0 ? (
+        <div>
+          <h2
+            style={{
+              fontSize: 16,
+              fontWeight: 800,
+              color: 'var(--text-primary)',
+              margin: '18px 0 10px',
+            }}
+          >
+            Mes réservations
+          </h2>
+
+          {reservations.map((reservation) => {
+            const depart = reservation.depart;
+            const currentPlace =
+              placeEdits[reservation.id] ?? reservation.place;
+
+            return (
+              <article
+                key={reservation.id}
+                style={{
+                  ...cardStyle,
+                  marginBottom: 10,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 800,
+                    color: 'var(--text-primary)',
+                    marginBottom: 8,
+                  }}
+                >
+                  {depart
+                    ? `${depart.pointDepart} → ${depart.destination}`
+                    : 'Trajet indisponible'}
+                </div>
+
+                {depart ? (
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: 10,
+                      marginBottom: 10,
+                    }}
+                  >
+                    <span
+                      style={{
+                        ...secondaryTextStyle,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                      }}
+                    >
+                      <CalendarDays size={14} aria-hidden="true" />
+                      {formatDate(depart.date)}
+                    </span>
+
+                    <span
+                      style={{
+                        ...secondaryTextStyle,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                      }}
+                    >
+                      <Clock size={14} aria-hidden="true" />
+                      {depart.heure}
+                    </span>
+                  </div>
+                ) : null}
+
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                    gap: 8,
+                    marginBottom: 12,
+                  }}
+                >
+                  <div
+                    style={{
+                      padding: 10,
+                      borderRadius: 8,
+                      background: 'var(--bg-secondary)',
+                    }}
+                  >
+                    <div style={secondaryTextStyle}>Passager</div>
+                    <strong
+                      style={{
+                        display: 'block',
+                        marginTop: 3,
+                        fontSize: 13,
+                        color: 'var(--text-primary)',
+                      }}
+                    >
+                      {reservation.passagerNom}
+                    </strong>
+                  </div>
+
+                  <div
+                    style={{
+                      padding: 10,
+                      borderRadius: 8,
+                      background: 'var(--bg-secondary)',
+                    }}
+                  >
+                    <div style={secondaryTextStyle}>Statut</div>
+                    <strong
+                      style={{
+                        display: 'block',
+                        marginTop: 3,
+                        fontSize: 13,
+                        color:
+                          reservation.statut === 'CANCELLED'
+                            ? 'var(--error-fg)'
+                            : 'var(--success-fg)',
+                      }}
+                    >
+                      {reservation.statut}
+                    </strong>
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: 10 }}>
+                  <label
+                    htmlFor={`reservation-place-${reservation.id}`}
+                    style={{
+                      display: 'block',
+                      marginBottom: 5,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: 'var(--text-primary)',
+                    }}
+                  >
+                    Place
+                  </label>
+
+                  <input
+                    id={`reservation-place-${reservation.id}`}
+                    type="text"
+                    value={currentPlace}
+                    onChange={(event) =>
+                      onPlaceChange(reservation.id, event.target.value)
+                    }
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: 8,
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => onModify(reservation)}
+                    disabled={loading || !currentPlace.trim()}
+                    style={{
+                      ...primaryButtonStyle,
+                      opacity:
+                        loading || !currentPlace.trim() ? 0.5 : 1,
+                      cursor:
+                        loading || !currentPlace.trim()
+                          ? 'not-allowed'
+                          : 'pointer',
+                    }}
+                  >
+                    Modifier la place
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => onCancel(reservation)}
+                    disabled={loading}
+                    style={{
+                      ...secondaryButtonStyle,
+                      width: '100%',
+                      minHeight: 44,
+                      opacity: loading ? 0.5 : 1,
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    Annuler la réservation
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+// ------------------------------------------------------------
 // Page principale
 // ------------------------------------------------------------
+
+type ReservationMode = 'create' | 'manage';
 
 export function ReservationsPage() {
   const {
@@ -585,10 +1047,33 @@ export function ReservationsPage() {
     reset,
   } = useReservations();
 
+  const {
+    loading: manageLoading,
+    error: manageError,
+    list: listManagedReservations,
+    cancel: cancelManagedReservation,
+    modify: modifyManagedReservation,
+    reset: resetManage,
+  } = useReservationManage();
+
+  const [mode, setMode] = useState<ReservationMode>('create');
+
   const [selectedDepart, setSelectedDepart] = useState<Depart | null>(null);
   const [selectedPlaces, setSelectedPlaces] = useState<string[]>([]);
   const [passengers, setPassengers] = useState<Record<string, string>>({});
   const [telephone, setTelephone] = useState('');
+
+  const [manageTelephone, setManageTelephone] = useState('');
+  const [managePassagerNom, setManagePassagerNom] = useState('');
+  const [manageOtpCode, setManageOtpCode] = useState('');
+  const [managedReservations, setManagedReservations] = useState<
+    ReservationFull[]
+  >([]);
+  const [manageValidationError, setManageValidationError] = useState<
+    string | null
+  >(null);
+  const [manageMessage, setManageMessage] = useState<string | null>(null);
+  const [placeEdits, setPlaceEdits] = useState<Record<string, string>>({});
 
   const sortedSelectedPlaces = useMemo(
     () => sortPlaces(selectedPlaces),
@@ -597,6 +1082,7 @@ export function ReservationsPage() {
 
   const handleSelectDepart = (depart: Depart) => {
     reset();
+    setMode('create');
     setSelectedDepart(depart);
     setSelectedPlaces([]);
     setPassengers({});
@@ -607,6 +1093,36 @@ export function ReservationsPage() {
     setSelectedDepart(null);
     setSelectedPlaces([]);
     setPassengers({});
+  };
+
+  const handleOpenManage = () => {
+    resetManage();
+
+    const passenger = storage.getPassenger();
+    const lastOtp = storage.getLastOtp();
+
+    setMode('manage');
+    setSelectedDepart(null);
+    setSelectedPlaces([]);
+    setPassengers({});
+
+    setManageTelephone(passenger?.phone ?? telephone);
+    setManagePassagerNom(passenger?.name ?? '');
+    setManageOtpCode(lastOtp ?? '');
+    setManagedReservations([]);
+    setManageValidationError(null);
+    setManageMessage(null);
+    setPlaceEdits({});
+  };
+
+  const handleBackFromManage = () => {
+    resetManage();
+
+    setMode('create');
+    setManagedReservations([]);
+    setManageValidationError(null);
+    setManageMessage(null);
+    setPlaceEdits({});
   };
 
   const handleTogglePlace = (place: string) => {
@@ -670,7 +1186,7 @@ export function ReservationsPage() {
       place,
     }));
 
-        const outcome = await submit({
+    const outcome = await submit({
       departId: selectedDepart.id,
       telephone: telephone.trim(),
       passagers: passagersPayload,
@@ -724,6 +1240,146 @@ export function ReservationsPage() {
     refetch();
   };
 
+  const handleManageVerify = async () => {
+    const telephoneValue = manageTelephone.trim();
+    const passagerNomValue = managePassagerNom.trim();
+    const otpCodeValue = manageOtpCode.trim();
+
+    setManageValidationError(null);
+    setManageMessage(null);
+    resetManage();
+
+    if (!telephoneValue || !passagerNomValue || !otpCodeValue) {
+      setManageValidationError(
+        'Veuillez renseigner le téléphone, le nom du passager et le code OTP.'
+      );
+      return;
+    }
+
+    const reservations = await listManagedReservations({
+      telephone: telephoneValue,
+      passagerNom: passagerNomValue,
+      otpCode: otpCodeValue,
+    });
+
+    if (reservations === null) {
+      setManagedReservations([]);
+      return;
+    }
+
+    setManagedReservations(reservations);
+    setPlaceEdits(
+      reservations.reduce<Record<string, string>>((current, reservation) => {
+        current[reservation.id] = reservation.place;
+        return current;
+      }, {})
+    );
+
+    if (reservations.length === 0) {
+      setManageMessage('Aucune réservation à gérer.');
+    }
+  };
+
+  const handleManageModify = async (reservation: ReservationFull) => {
+    const nouvellePlace = (
+      placeEdits[reservation.id] ?? reservation.place
+    ).trim();
+
+    if (!nouvellePlace) {
+      setManageMessage(null);
+      setManageValidationError('Veuillez renseigner une nouvelle place.');
+      return;
+    }
+
+    setManageValidationError(null);
+    setManageMessage(null);
+
+    const success = await modifyManagedReservation({
+      telephone: manageTelephone.trim(),
+      passagerNom: managePassagerNom.trim(),
+      otpCode: manageOtpCode.trim(),
+      reservationId: reservation.id,
+      nouvellePlace,
+    });
+
+    if (!success) {
+      return;
+    }
+
+    setManageMessage('La place a été modifiée avec succès.');
+
+    const reservations = await listManagedReservations({
+      telephone: manageTelephone.trim(),
+      passagerNom: managePassagerNom.trim(),
+      otpCode: manageOtpCode.trim(),
+    });
+
+    if (reservations !== null) {
+      setManagedReservations(reservations);
+      setPlaceEdits(
+        reservations.reduce<Record<string, string>>(
+          (current, currentReservation) => {
+            current[currentReservation.id] = currentReservation.place;
+            return current;
+          },
+          {}
+        )
+      );
+    }
+  };
+
+  const handleManageCancel = async (reservation: ReservationFull) => {
+    const confirmed = window.confirm(
+      'Voulez-vous vraiment annuler cette réservation ?'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setManageValidationError(null);
+    setManageMessage(null);
+
+    const success = await cancelManagedReservation({
+      telephone: manageTelephone.trim(),
+      passagerNom: managePassagerNom.trim(),
+      otpCode: manageOtpCode.trim(),
+      reservationId: reservation.id,
+    });
+
+    if (!success) {
+      return;
+    }
+
+    setManageMessage('La réservation a été annulée avec succès.');
+
+    const reservations = await listManagedReservations({
+      telephone: manageTelephone.trim(),
+      passagerNom: managePassagerNom.trim(),
+      otpCode: manageOtpCode.trim(),
+    });
+
+    if (reservations !== null) {
+      setManagedReservations(reservations);
+      setPlaceEdits(
+        reservations.reduce<Record<string, string>>(
+          (current, currentReservation) => {
+            current[currentReservation.id] = currentReservation.place;
+            return current;
+          },
+          {}
+        )
+      );
+    }
+  };
+
+  const handlePlaceChange = (reservationId: string, value: string) => {
+    setPlaceEdits((current) => ({
+      ...current,
+      [reservationId]: value,
+    }));
+  };
+
   if (selectedDepart) {
     return (
       <ReservationScreen
@@ -745,6 +1401,36 @@ export function ReservationsPage() {
     );
   }
 
+  if (mode === 'manage') {
+    return (
+      <ReservationManageScreen
+        telephone={manageTelephone}
+        passagerNom={managePassagerNom}
+        otpCode={manageOtpCode}
+        reservations={managedReservations}
+        loading={manageLoading}
+        error={manageError}
+        validationError={manageValidationError}
+        message={manageMessage}
+        placeEdits={placeEdits}
+        onTelephoneChange={setManageTelephone}
+        onPassagerNomChange={setManagePassagerNom}
+        onOtpCodeChange={setManageOtpCode}
+        onPlaceChange={handlePlaceChange}
+        onVerify={() => {
+          void handleManageVerify();
+        }}
+        onModify={(reservation) => {
+          void handleManageModify(reservation);
+        }}
+        onCancel={(reservation) => {
+          void handleManageCancel(reservation);
+        }}
+        onBack={handleBackFromManage}
+      />
+    );
+  }
+
   return (
     <DepartList
       departs={departs}
@@ -752,6 +1438,7 @@ export function ReservationsPage() {
       error={departsError}
       onRefresh={refetch}
       onSelect={handleSelectDepart}
+      onManage={handleOpenManage}
     />
   );
 }
