@@ -403,3 +403,67 @@ export interface BatchReservationResponse {
   /** Présent en cas d'erreur 409 : places déjà réservées. */
   places?: string[];
 }
+
+// ------------------------------------------------------------
+// Gestion de réservation par OTP (Phase 2.1.a)
+// ------------------------------------------------------------
+
+/**
+ * Réservation complète telle qu'exposée par l'API
+ * (Prisma Reservation, sans otpHash ni otpExpiresAt côté front).
+ *
+ * Retournée par POST /public/reservations/manage
+ * (lecture des réservations PENDING du client).
+ */
+export interface ReservationFull {
+  id: string;
+  departId: string;
+  passagerNom: string;
+  telephone: string;
+  place: string;
+  statut: string;             // 'PENDING' | 'CONFIRMED' | 'CANCELLED'
+  createdAt: string;          // ISO date
+  updatedAt: string;          // ISO date
+  /** Départ associé (inclus par /manage via `include: { depart: true }`). */
+  depart?: Depart;
+}
+
+/**
+ * Payload POST /public/reservations/manage.
+ *
+ * Trois usages, selon les champs présents :
+ *   - `{ telephone, passagerNom, otpCode }`
+ *     -> lecture : renvoie `{ reservations: ReservationFull[] }`
+ *   - `{ ..., action: 'cancel', reservationId }`
+ *     -> annulation : renvoie `{ ok: true, message: 'Réservation annulée' }`
+ *   - `{ ..., action: 'modify', reservationId, nouvellePlace }`
+ *     -> modification de place : renvoie `{ ok: true, message: 'Place modifiée' }`
+ */
+export interface ManageReservationRequest {
+  telephone: string;
+  passagerNom: string;
+  otpCode: string;
+  action?: 'cancel' | 'modify';
+  reservationId?: string;
+  nouvellePlace?: string;
+}
+
+/**
+ * Réponse POST /public/reservations/manage.
+ *
+ * Union selon l'usage :
+ *   - lecture : `{ reservations: ReservationFull[] }`
+ *   - cancel  : `{ ok: true, message: string }`
+ *   - modify  : `{ ok: true, message: string }`
+ *   - erreur  : `{ error: string, places?: string[] }`
+ *
+ * Tous les champs sont optionnels car la réponse varie selon
+ * l'action demandée et le code HTTP renvoyé.
+ */
+export interface ManageReservationResponse {
+  reservations?: ReservationFull[];
+  ok?: boolean;
+  message?: string;
+  error?: string;
+  places?: string[];
+}
