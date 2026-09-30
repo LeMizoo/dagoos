@@ -1,10 +1,11 @@
 // ============================================================
 // Pages — Course
-// Phase 1 — Étape 1.6.d
+// Phase 2 — Étape 2.1.b.2
 //
 // Parcours urbain : demande de taxi.
-//   - 2 modes de mise en relation : 'choisir' | 'toutes'
-//   - mode 'proche' (géoloc) reporté en Phase 2
+//   - 3 modes : 'choisir' | 'toutes' | 'proche'
+//   - mode 'proche' : GPS + reverse-geocoding
+//   - fallback manuel si GPS indisponible/refusé
 //   - estimation via POST /public/estimate
 //   - envoi via POST /public/actions (type COURSE_REQUEST)
 //   - garde défensive : /course réservé aux FLEET_MANAGER
@@ -18,15 +19,17 @@ import { Car } from 'lucide-react';
 import { useBranding } from '../hooks/useBranding';
 import { useCourseRequest } from '../hooks/useCourseRequest';
 import { useEstimate } from '../hooks/useEstimate';
+import { useGeolocation } from '../hooks/useGeolocation';
 import { useOrganizations } from '../hooks/useOrganizations';
+import { useReverseGeocode } from '../hooks/useReverseGeocode';
 import { storage } from '../services/storage';
-import type { TypeVehicule } from '../types/api';
+import type { ActionPosition, TypeVehicule } from '../types/api';
 
 // ------------------------------------------------------------
 // Constantes
 // ------------------------------------------------------------
 
-type Mode = 'choisir' | 'toutes';
+type Mode = 'choisir' | 'toutes' | 'proche';
 
 const VEHICULES: { value: TypeVehicule; label: string }[] = [
   { value: 'moto', label: 'Taxi moto' },
@@ -76,6 +79,21 @@ export function CoursePage() {
 
   const { submit, loading: submitting } = useCourseRequest();
 
+  const {
+    position,
+    loading: locating,
+    error: geolocationError,
+    getPosition,
+    reset: resetGeolocation,
+  } = useGeolocation();
+
+  const {
+    loading: reverseGeocoding,
+    error: reverseGeocodeError,
+    reverseGeocode,
+    reset: resetReverseGeocode,
+  } = useReverseGeocode();
+
   // ----------------------------------------------------------
   // État du formulaire
   // ----------------------------------------------------------
@@ -93,6 +111,7 @@ export function CoursePage() {
     brandingSlug ?? ''
   );
   const [offreClient, setOffreClient] = useState<string>('');
+  const [gpsStatus, setGpsStatus] = useState<string>('');
 
   // ----------------------------------------------------------
   // Garde défensive : /course est réservé aux FLEET_MANAGER.
@@ -136,11 +155,53 @@ export function CoursePage() {
   }
 
   // ----------------------------------------------------------
+  // Mode proche : GPS puis reverse-geocoding.
+  //
+  // Le fallback reste manuel :
+  // si le GPS échoue, l'utilisateur peut saisir/modifier
+  // directement son adresse de départ.
+  // ----------------------------------------------------------
+
+  async function handleProche() {
+    setMode('proche');
+    setGpsStatus('Recherche de votre position…');
+    resetGeolocation();
+    resetReverseGeocode();
+
+    const nextPosition = await getPosition();
+
+    if (!nextPosition) {
+      setGpsStatus(
+        'Position GPS indisponible. Saisissez votre départ manuellement.'
+      );
+      return;
+    }
+
+    setGpsStatus('Position trouvée. Recherche de votre adresse…');
+
+    const address = await reverseGeocode(
+      nextPosition.lat,
+      nextPosition.lng
+    );
+
+    if (!address) {
+      setGpsStatus(
+        'Adresse GPS introuvable. Saisissez votre départ manuellement.'
+      );
+      return;
+    }
+
+    setDepart(address);
+    setGpsStatus('Départ GPS détecté.');
+  }
+
+  // ----------------------------------------------------------
   // Estimation
   // ----------------------------------------------------------
 
   async function handleEstimate() {
-    const slug = mode === 'toutes' ? flottes[0]?.slug : flotteSlug;
+    const slug =
+      mode === 'toutes' ? flottes[0]?.slug : flotteSlug;
 
     if (!slug) {
       alert('Veuillez choisir une flotte');
@@ -198,11 +259,19 @@ export function CoursePage() {
     storage.setTripDepart(depart);
     storage.setTripArrivee(arrivee);
 
-    const details = {
+    const details: {
+      depart: string;
+      arrivee: string;
+      typeVehicule: TypeVehicule;
+      mode: Mode;
+      position?: ActionPosition;
+      offreClient?: number;
+    } = {
       depart,
       arrivee,
       typeVehicule,
       mode,
+      ...(mode === 'proche' && position ? { position } : {}),
       ...(hasOffre ? { offreClient: Number(offreClient) } : {}),
     };
 
@@ -314,52 +383,54 @@ export function CoursePage() {
             gap: 8,
             marginBottom: 16,
             justifyContent: 'center',
+            flexWrap: 'wrap',
           }}
         >
           <button
             type="button"
-            onClick={() => setMode('choisir')}
-            style={{
-              padding: '8px 12px',
-              borderRadius: 20,
-              fontSize: 11,
-              fontWeight: 600,
-              cursor: 'pointer',
-              border: '1px solid var(--accent)',
-              background:
-                mode === 'choisir'
-                  ? 'var(--accent)'
-                  : 'var(--bg-surface)',
-              color:
-                mode === 'choisir'
-                  ? 'var(--text-on-accent)'
-                  : 'var(--accent)',
+            onClick={() => {
+              setMode('choisir');
+              setGpsStatus('');
+              resetGeolocation();
+              resetReverseGeocode();
             }}
+            style={modeButtonStyle(mode === 'choisir')}
           >
             Choisir une flotte
           </button>
 
           <button
             type="button"
-            onClick={() => setMode('toutes')}
-            style={{
-              padding: '8px 12px',
-              borderRadius: 20,
-              fontSize: 11,
-              fontWeight: 600,
-              cursor: 'pointer',
-              border: '1px solid var(--accent)',
-              background:
-                mode === 'toutes'
-                  ? 'var(--accent)'
-                  : 'var(--bg-surface)',
-              color:
-                mode === 'toutes'
-                  ? 'var(--text-on-accent)'
-                  : 'var(--accent)',
+            onClick={() => {
+              setMode('toutes');
+              setGpsStatus('');
+              resetGeolocation();
+              resetReverseGeocode();
             }}
+            style={modeButtonStyle(mode === 'toutes')}
           >
             Toutes les flottes
+          </button>
+
+          <button
+            type="button"
+            onClick={() => void handleProche()}
+            disabled={locating || reverseGeocoding}
+            style={{
+              ...modeButtonStyle(mode === 'proche'),
+              opacity:
+                locating || reverseGeocoding ? 0.6 : 1,
+              cursor:
+                locating || reverseGeocoding
+                  ? 'wait'
+                  : 'pointer',
+            }}
+          >
+            {locating
+              ? 'Localisation…'
+              : reverseGeocoding
+                ? 'Recherche adresse…'
+                : 'Proche de moi'}
           </button>
         </div>
 
@@ -386,6 +457,25 @@ export function CoursePage() {
             style={inputStyle}
           />
 
+          {mode === 'proche' && gpsStatus && (
+            <div
+              style={{
+                marginBottom: 8,
+                padding: 10,
+                borderRadius: 8,
+                background: 'var(--bg-soft)',
+                color:
+                  geolocationError || reverseGeocodeError
+                    ? 'var(--error-fg)'
+                    : 'var(--text-secondary)',
+                fontSize: 11,
+                textAlign: 'center',
+              }}
+            >
+              {gpsStatus}
+            </div>
+          )}
+
           <input
             type="text"
             placeholder="Adresse de départ"
@@ -393,6 +483,21 @@ export function CoursePage() {
             onChange={(e) => setDepart(e.target.value)}
             style={inputStyle}
           />
+
+          {mode === 'proche' && (
+            <p
+              style={{
+                color: 'var(--text-secondary)',
+                fontSize: 10,
+                marginTop: -4,
+                marginBottom: 8,
+                textAlign: 'center',
+              }}
+            >
+              Vous pouvez modifier manuellement le départ si
+              nécessaire.
+            </p>
+          )}
 
           <input
             type="text"
@@ -447,6 +552,20 @@ export function CoursePage() {
                 arrivée pour voir l'estimation
               </p>
             </>
+          )}
+
+          {mode === 'proche' && (
+            <p
+              style={{
+                textAlign: 'center',
+                color: 'var(--text-secondary)',
+                fontSize: 11,
+                marginBottom: 8,
+              }}
+            >
+              Votre position sert uniquement à déterminer votre
+              adresse de départ.
+            </p>
           )}
 
           <button
@@ -616,6 +735,23 @@ export function CoursePage() {
 // ------------------------------------------------------------
 // Styles partagés
 // ------------------------------------------------------------
+
+function modeButtonStyle(active: boolean): React.CSSProperties {
+  return {
+    padding: '8px 12px',
+    borderRadius: 20,
+    fontSize: 11,
+    fontWeight: 600,
+    cursor: 'pointer',
+    border: '1px solid var(--accent)',
+    background: active
+      ? 'var(--accent)'
+      : 'var(--bg-surface)',
+    color: active
+      ? 'var(--text-on-accent)'
+      : 'var(--accent)',
+  };
+}
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
