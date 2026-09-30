@@ -15,6 +15,13 @@ export async function registerServiceWorker(
     return null;
   }
 
+  // SW désactivé en dev : casse le WebSocket HMR de Vite
+  // (ws://localhost:5173 → 400) et masque les erreurs de cache.
+  // Activé uniquement en build de production.
+  if (import.meta.env.DEV) {
+    return null;
+  }
+
   try {
     const registration = await navigator.serviceWorker.register('/sw.js');
 
