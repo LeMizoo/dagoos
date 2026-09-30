@@ -1958,7 +1958,7 @@ router.post('/actions', publicLeadLimiter, async (req, res) => {
     // ========================================
     // CALCUL DU PRIX (backend uniquement)
     // ========================================
-    let prixEstime = 2000;
+    let prixEstime = 0;
     let modePrestation = 'courseNormale';
     // Distance calculée par le backend via géocodage
     let distanceKm = 0;
@@ -1966,55 +1966,223 @@ router.post('/actions', publicLeadLimiter, async (req, res) => {
     let nbJours = 1;
 
     if (type === 'COURSE_REQUEST' || type === 'TAXI_RESERVATION') {
-      const VEHICLE_TYPE_MAP = {
-        'moto': 'moto',
-        'voiture': 'voiture',
-        'taxi': 'voiture',
-        'bus': 'bus',
-        'minivan': 'minivan',
-        'tricycle': 'tricycle'
+      const VEHICLE_CONFIG = {
+        moto: {
+          serviceCode: 'TAXI',
+          categoryCode: 'MOTO',
+          pricingModel: 'PER_KM',
+          responseMode: 'courseNormale',
+          tariffDimensions: { modePrestation: 'normal' }
+        },
+        voiture: {
+          serviceCode: 'TAXI',
+          categoryCode: 'VOITURE',
+          pricingModel: 'PER_KM',
+          responseMode: 'courseNormale',
+          tariffDimensions: { modePrestation: 'normal' }
+        },
+        taxi: {
+          serviceCode: 'TAXI',
+          categoryCode: 'VOITURE',
+          pricingModel: 'PER_KM',
+          responseMode: 'courseNormale',
+          tariffDimensions: { modePrestation: 'normal' }
+        },
+        bus: {
+          serviceCode: 'LOCATION_URBAINE',
+          categoryCode: 'BUS',
+          pricingModel: 'FIXED',
+          responseMode: 'tarifFixe',
+          tariffDimensions: {}
+        },
+        minivan: {
+          serviceCode: 'LOCATION_URBAINE',
+          categoryCode: 'MINIVAN',
+          pricingModel: 'FIXED',
+          responseMode: 'tarifFixe',
+          tariffDimensions: {}
+        },
+        tricycle: {
+          serviceCode: 'LOCATION_URBAINE',
+          categoryCode: 'TRICYCLE',
+          pricingModel: 'FIXED',
+          responseMode: 'tarifFixe',
+          tariffDimensions: {}
+        }
       };
-      const cleTarif = VEHICLE_TYPE_MAP[details?.typeVehicule] || 'moto';
 
-      // Calculer la distance entre départ et arrivée (géocodage backend)
-      distanceKm = await calculerDistance(details?.depart, details?.arrivee);
+      const typeVehicule = details?.typeVehicule;
+      const vehicleConfig = VEHICLE_CONFIG[typeVehicule];
+
+      if (!vehicleConfig) {
+        return res.status(400).json({
+          error: `Type de véhicule invalide: ${typeVehicule}`
+        });
+      }
+
+      distanceKm = await calculerDistance(
+        details?.depart,
+        details?.arrivee
+      );
+
       if (distanceKm === null) {
         return res.status(400).json({
           error: 'Impossible de déterminer la distance entre les adresses fournies'
         });
       }
 
-      const tarif = await prisma.tarif.findUnique({
-        where: { organizationId: org?.id }
-      }).catch(() => null);
+      /*
+       * V2 prioritaire — même mapping que /public/estimate.
+       */
+      let tariffV2 = null;
 
-      commissionPct = tarif?.commissionChauffeur ?? 20;
+      if (org?.id) {
+        const activity = await prisma.businessActivity.findFirst({
+          where: {
+            organizationId: org.id,
+            type: 'URBAN',
+            active: true
+          },
+          select: { id: true }
+        });
 
-      if (tarif?.vehiculeTarifs) {
-        try {
-          const vehiculeTarifs = JSON.parse(tarif.vehiculeTarifs);
-          const tarifVehicule = vehiculeTarifs[cleTarif];
+        if (activity) {
+          const service = await prisma.service.findFirst({
+            where: {
+              businessActivityId: activity.id,
+              code: vehicleConfig.serviceCode,
+              active: true
+            },
+            select: { id: true }
+          });
+
+          if (service) {
+            const category = await prisma.vehicleCategory.findUnique({
+              where: { code: vehicleConfig.categoryCode },
+              select: { id: true }
+            });
+
+            if (category) {
+              try {
+                tariffV2 = await selectServiceTariff({
+                  serviceId: service.id,
+                  vehicleCategoryId: category.id,
+                  pricingModel: vehicleConfig.pricingModel,
+                  dimensions: vehicleConfig.tariffDimensions
+                });
+              } catch (e) {
+                if (e instanceof AmbiguousTariffError) {
+                  console.error(
+                    'POST /public/actions - AmbiguousTariffError:',
+                    e.context
+                  );
+                  return res.status(500).json({
+                    error: 'Configuration tarifaire ambigue pour cette combinaison'
+                  });
+                }
+                throw e;
+              }
+            }
+          }
+        }
+      }
+
+      if (tariffV2) {
+        if (tariffV2.pricingModel === 'PER_KM') {
+          if (
+            typeof tariffV2.basePrice !== 'number' ||
+            typeof tariffV2.unitPrice !== 'number'
+          ) {
+            return res.status(500).json({
+              error: 'Configuration tarifaire V2 invalide'
+            });
+          }
+
+          prixEstime = arrondirPrix(
+            tariffV2.basePrice +
+            (distanceKm * tariffV2.unitPrice)
+          );
+        } else if (tariffV2.pricingModel === 'FIXED') {
+          if (typeof tariffV2.basePrice !== 'number') {
+            return res.status(500).json({
+              error: 'Configuration tarifaire fixe V2 invalide'
+            });
+          }
+
+          prixEstime = tariffV2.basePrice;
+        } else {
+          return res.status(500).json({
+            error: `Modèle tarifaire V2 non supporté: ${tariffV2.pricingModel}`
+          });
+        }
+
+        modePrestation = vehicleConfig.responseMode;
+        commissionPct = tariffV2.commissionPct ?? 20;
+      } else {
+        /*
+         * Fallback V1 temporaire.
+         * Aucun tarif V1 => erreur explicite, jamais 2000 Ar.
+         */
+        const tarif = await prisma.tarif.findUnique({
+          where: { organizationId: org?.id }
+        }).catch(() => null);
+
+        if (!tarif) {
+          return res.status(404).json({
+            error: 'Tarif non configuré pour cette organisation'
+          });
+        }
+
+        commissionPct = tarif.commissionChauffeur ?? 20;
+
+        if (tarif.vehiculeTarifs) {
+          let vehiculeTarifs = {};
+
+          try {
+            vehiculeTarifs = JSON.parse(tarif.vehiculeTarifs);
+          } catch (e) {
+            console.error('Erreur parsing vehiculeTarifs:', e);
+          }
+
+          const tarifVehicule = vehiculeTarifs[vehicleConfig.categoryCode.toLowerCase()];
 
           if (tarifVehicule) {
-            if (['bus', 'minivan', 'tricycle'].includes(cleTarif)) {
-              prixEstime = tarifVehicule?.tarifFixe?.prixTrajet || tarif.prixBase;
+            if (
+              ['bus', 'minivan', 'tricycle'].includes(
+                vehicleConfig.categoryCode.toLowerCase()
+              )
+            ) {
+              prixEstime =
+                tarifVehicule?.tarifFixe?.prixTrajet ||
+                tarif.prixBase;
               modePrestation = 'tarifFixe';
             } else if (tarifVehicule?.courseNormale) {
-              const prixBase = tarifVehicule.courseNormale.prixBase || tarif.prixBase;
-              const prixKm = tarifVehicule.courseNormale.prixKm || tarif.prixKm;
-              prixEstime = arrondirPrix(prixBase + (distanceKm * prixKm));
+              const prixBase =
+                tarifVehicule.courseNormale.prixBase ||
+                tarif.prixBase;
+              const prixKm =
+                tarifVehicule.courseNormale.prixKm ||
+                tarif.prixKm;
+
+              prixEstime = arrondirPrix(
+                prixBase + (distanceKm * prixKm)
+              );
               modePrestation = 'courseNormale';
             } else {
-              prixEstime = arrondirPrix(tarif.prixBase + (distanceKm * tarif.prixKm));
+              prixEstime = arrondirPrix(
+                tarif.prixBase + (distanceKm * tarif.prixKm)
+              );
             }
           } else {
-            prixEstime = arrondirPrix(tarif.prixBase + (distanceKm * tarif.prixKm));
+            prixEstime = arrondirPrix(
+              tarif.prixBase + (distanceKm * tarif.prixKm)
+            );
           }
-        } catch(e) {
-          prixEstime = arrondirPrix(tarif.prixBase + (distanceKm * tarif.prixKm));
+        } else {
+          prixEstime = arrondirPrix(
+            tarif.prixBase + (distanceKm * tarif.prixKm)
+          );
         }
-      } else if (tarif) {
-        prixEstime = arrondirPrix(tarif.prixBase + (distanceKm * tarif.prixKm));
       }
 
     } else if (type === 'CAR_RENTAL') {
