@@ -133,6 +133,9 @@ export function CoursePage() {
     [organizations]
   );
 
+  const effectiveFlotteSlug =
+    flotteSlug || flottes[0]?.slug || '';
+
   // ----------------------------------------------------------
   // Reset estimation quand les champs changent
   // ----------------------------------------------------------
@@ -201,7 +204,7 @@ export function CoursePage() {
 
   async function handleEstimate() {
     const slug =
-      mode === 'toutes' ? flottes[0]?.slug : flotteSlug;
+      mode === 'toutes' ? flottes[0]?.slug : effectiveFlotteSlug;
 
     if (!slug) {
       alert('Veuillez choisir une flotte');
@@ -307,13 +310,13 @@ export function CoursePage() {
       return;
     }
 
-    if (!flotteSlug) {
+    if (!effectiveFlotteSlug) {
       alert('Veuillez choisir une flotte');
       return;
     }
 
     const result = await submit({
-      organizationSlug: flotteSlug,
+      organizationSlug: effectiveFlotteSlug,
       type: 'COURSE_REQUEST',
       clientNom: trimmedNom,
       clientTel: trimmedTel,
@@ -339,7 +342,7 @@ export function CoursePage() {
   // ----------------------------------------------------------
 
   const canEstimate =
-    mode === 'toutes' || Boolean(flotteSlug);
+    mode === 'toutes' || Boolean(effectiveFlotteSlug);
 
   return (
     <div>
