@@ -400,3 +400,324 @@ describe('POST /api/public/actions + GET /api/public/suivi/:code', () => {
     expect(action.details.heureRetour).toBe('17:00');
   });
 });
+
+// ============================================================
+// 2.1.a.4 — RESERVATIONS/MANAGE
+// ============================================================
+
+describe('POST /api/public/reservations/manage', () => {
+  const bcrypt = require('bcryptjs');
+
+  jest.setTimeout(30000);
+
+  const otpHashes = new Map();
+
+  async function getOtpHash(otpCode) {
+    const key = String(otpCode);
+
+    if (!otpHashes.has(key)) {
+      otpHashes.set(key, await bcrypt.hash(key, 12));
+    }
+
+    return otpHashes.get(key);
+  }
+
+  async function createManageFixture({
+    telephone = '0340000000',
+    passagerNom = 'Passager Test',
+    place = '1',
+    otpCode = '123456',
+    otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000),
+    departOverrides = {},
+  } = {}) {
+    const organization = await createOrganization({
+      slug: `manage-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      type: 'COOPERATIVE',
+    });
+
+    const depart = await prisma.depart.create({
+      data: {
+        organizationId: organization.id,
+        pointDepart: 'Antananarivo',
+        destination: 'Toamasina',
+        date: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        heure: '08:00',
+        prix: 15000,
+        placesTotal: 20,
+        statut: 'PUBLISHED',
+        ...departOverrides,
+      },
+    });
+
+    const otpHash = await getOtpHash(otpCode);
+
+    const reservation = await prisma.reservation.create({
+      data: {
+        departId: depart.id,
+        passagerNom,
+        telephone,
+        place,
+        statut: 'PENDING',
+        otpHash,
+        otpExpiresAt,
+      },
+    });
+
+    return {
+      organization,
+      depart,
+      reservation,
+      otpCode,
+    };
+  }
+
+  test('retourne les réservations PENDING avec un OTP valide', async () => {
+    const fixture = await createManageFixture();
+
+    const response = await request(app)
+      .post('/api/public/reservations/manage')
+      .send({
+        telephone: fixture.reservation.telephone,
+        passagerNom: fixture.reservation.passagerNom,
+        otpCode: fixture.otpCode,
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.reservations).toHaveLength(1);
+    expect(response.body.reservations[0].id).toBe(fixture.reservation.id);
+    expect(response.body.reservations[0].place).toBe('1');
+    expect(response.body.reservations[0].statut).toBe('PENDING');
+    expect(response.body.reservations[0].depart.id).toBe(fixture.depart.id);
+  });
+
+  test('retourne 400 si telephone, nom ou OTP manque', async () => {
+    const cases = [
+      {
+        passagerNom: 'Passager Test',
+        otpCode: '123456',
+      },
+      {
+        telephone: '0340000000',
+        otpCode: '123456',
+      },
+      {
+        telephone: '0340000000',
+        passagerNom: 'Passager Test',
+      },
+    ];
+
+    for (const payload of cases) {
+      const response = await request(app)
+        .post('/api/public/reservations/manage')
+        .send(payload);
+
+      expect(response.status).toBe(400);
+      expect(response.body.error).toBe(
+        'Telephone, nom et code OTP requis'
+      );
+    }
+  });
+
+  test('retourne 404 si aucune réservation ne correspond au téléphone et au nom', async () => {
+    const fixture = await createManageFixture();
+
+    const response = await request(app)
+      .post('/api/public/reservations/manage')
+      .send({
+        telephone: fixture.reservation.telephone,
+        passagerNom: 'Autre Passager',
+        otpCode: fixture.otpCode,
+      });
+
+    expect(response.status).toBe(404);
+    expect(response.body.error).toBe(
+      'Aucune réservation trouvée avec ces informations'
+    );
+  });
+
+  test('retourne 403 avec un OTP invalide', async () => {
+    const fixture = await createManageFixture();
+
+    const response = await request(app)
+      .post('/api/public/reservations/manage')
+      .send({
+        telephone: fixture.reservation.telephone,
+        passagerNom: fixture.reservation.passagerNom,
+        otpCode: '999999',
+      });
+
+    expect(response.status).toBe(403);
+    expect(response.body.error).toBe('Code OTP invalide ou expire');
+  });
+
+  test('retourne 403 avec un OTP expiré', async () => {
+    const fixture = await createManageFixture({
+      otpExpiresAt: new Date(Date.now() - 60 * 1000),
+    });
+
+    const response = await request(app)
+      .post('/api/public/reservations/manage')
+      .send({
+        telephone: fixture.reservation.telephone,
+        passagerNom: fixture.reservation.passagerNom,
+        otpCode: fixture.otpCode,
+      });
+
+    expect(response.status).toBe(403);
+    expect(response.body.error).toBe('Code OTP invalide ou expire');
+  });
+
+  test('annule une réservation appartenant au client authentifié', async () => {
+    const fixture = await createManageFixture();
+
+    const response = await request(app)
+      .post('/api/public/reservations/manage')
+      .send({
+        telephone: fixture.reservation.telephone,
+        passagerNom: fixture.reservation.passagerNom,
+        otpCode: fixture.otpCode,
+        action: 'cancel',
+        reservationId: fixture.reservation.id,
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      ok: true,
+      message: 'Réservation annulée',
+    });
+
+    const updated = await prisma.reservation.findUnique({
+      where: { id: fixture.reservation.id },
+      select: { statut: true },
+    });
+
+    expect(updated.statut).toBe('CANCELLED');
+  });
+
+  test('refuse l annulation d une réservation étrangère', async () => {
+    const fixtureA = await createManageFixture({
+      telephone: '0340000001',
+      passagerNom: 'Passager A',
+      place: '1',
+      otpCode: '111111',
+    });
+
+    const fixtureB = await createManageFixture({
+      telephone: '0340000002',
+      passagerNom: 'Passager B',
+      place: '2',
+      otpCode: '222222',
+    });
+
+    const response = await request(app)
+      .post('/api/public/reservations/manage')
+      .send({
+        telephone: fixtureA.reservation.telephone,
+        passagerNom: fixtureA.reservation.passagerNom,
+        otpCode: fixtureA.otpCode,
+        action: 'cancel',
+        reservationId: fixtureB.reservation.id,
+      });
+
+    expect(response.status).toBe(404);
+    expect(response.body.error).toBe('Réservation introuvable');
+
+    const foreignReservation = await prisma.reservation.findUnique({
+      where: { id: fixtureB.reservation.id },
+      select: { statut: true },
+    });
+
+    expect(foreignReservation.statut).toBe('PENDING');
+  });
+
+  test('modifie la place lorsque la nouvelle place est disponible', async () => {
+    const fixture = await createManageFixture({
+      place: '1',
+    });
+
+    const response = await request(app)
+      .post('/api/public/reservations/manage')
+      .send({
+        telephone: fixture.reservation.telephone,
+        passagerNom: fixture.reservation.passagerNom,
+        otpCode: fixture.otpCode,
+        action: 'modify',
+        reservationId: fixture.reservation.id,
+        nouvellePlace: '5',
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      ok: true,
+      message: 'Place modifiée',
+    });
+
+    const updated = await prisma.reservation.findUnique({
+      where: { id: fixture.reservation.id },
+      select: { place: true },
+    });
+
+    expect(updated.place).toBe('5');
+  });
+
+  test('refuse une nouvelle place déjà réservée', async () => {
+    const fixture = await createManageFixture({
+      place: '1',
+    });
+
+    await prisma.reservation.create({
+      data: {
+        departId: fixture.depart.id,
+        passagerNom: 'Autre Passager',
+        telephone: '0340000999',
+        place: '5',
+        statut: 'PENDING',
+        otpHash: await getOtpHash('654321'),
+        otpExpiresAt: new Date(Date.now() + 15 * 60 * 1000),
+      },
+    });
+
+    const response = await request(app)
+      .post('/api/public/reservations/manage')
+      .send({
+        telephone: fixture.reservation.telephone,
+        passagerNom: fixture.reservation.passagerNom,
+        otpCode: fixture.otpCode,
+        action: 'modify',
+        reservationId: fixture.reservation.id,
+        nouvellePlace: '5',
+      });
+
+    expect(response.status).toBe(409);
+    expect(response.body.error).toBe('Place déjà réservée');
+
+    const unchanged = await prisma.reservation.findUnique({
+      where: { id: fixture.reservation.id },
+      select: { place: true },
+    });
+
+    expect(unchanged.place).toBe('1');
+  });
+
+  test('ne retourne pas une réservation CANCELLED', async () => {
+    const fixture = await createManageFixture();
+
+    await prisma.reservation.update({
+      where: { id: fixture.reservation.id },
+      data: { statut: 'CANCELLED' },
+    });
+
+    const response = await request(app)
+      .post('/api/public/reservations/manage')
+      .send({
+        telephone: fixture.reservation.telephone,
+        passagerNom: fixture.reservation.passagerNom,
+        otpCode: fixture.otpCode,
+      });
+
+    expect(response.status).toBe(404);
+    expect(response.body.error).toBe(
+      'Aucune réservation trouvée avec ces informations'
+    );
+  });
+});
