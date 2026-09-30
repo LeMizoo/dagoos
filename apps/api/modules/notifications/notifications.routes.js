@@ -2,6 +2,7 @@ const express = require('express');
 const prisma = require('../../lib/prisma');
 const { authMiddleware } = require('../../middleware/auth');
 const { requirePermission } = require('../../security/require-permission');
+const { buildNotificationScope } = require('./notifications.scope');
 
 const router = express.Router();
 
@@ -162,38 +163,32 @@ router.post('/vehicle-assignment-request', authMiddleware, async (req, res) => {
   }
 });
 
+/*
+ * GET /api/notifications
+ * Liste les notifications visibles par l'utilisateur connecté.
+ *
+ * Isolation :
+ *   - DRIVER                        → userId
+ *   - FLEET_MANAGER / COOP_MANAGER  → organizationId
+ *   - ADMIN / SUPER_ADMIN           → global
+ *   - autre                         → 403 (via buildNotificationScope)
+ */
 router.get('/', authMiddleware, requirePermission('notifications.read'), async (req, res) => {
   try {
-    const where = {};
+    const scope = buildNotificationScope(req.user);
 
-    // DRIVER : uniquement ses propres notifications.
-    if (req.user.role === 'DRIVER') {
-      where.userId = req.user.id;
+    if (!scope.ok) {
+      return res.status(scope.status).json({ error: scope.error });
     }
 
-    // FLEET_MANAGER / COOP_MANAGER :
-    // uniquement les notifications de leur organisation.
-    else if (
-      req.user.role === 'FLEET_MANAGER' ||
-      req.user.role === 'COOP_MANAGER'
-    ) {
-      if (!req.user.organizationId) {
-        return res.status(403).json({
-          error: 'Organisation utilisateur introuvable'
-        });
-      }
+    const where = { ...scope.where };
 
-      where.organizationId = req.user.organizationId;
-    }
-
-    // Filtrer par read si query param présent
     if (req.query.read === 'true') {
       where.read = true;
     } else if (req.query.read === 'false') {
       where.read = false;
     }
 
-    // Filtrer par type si présent
     if (req.query.type) {
       where.type = req.query.type;
     }
@@ -209,11 +204,23 @@ router.get('/', authMiddleware, requirePermission('notifications.read'), async (
     res.status(500).json({ error: e.message });
   }
 });
+
+/*
+ * GET /api/notifications/unread-count
+ * Compteur des notifications non lues pour l'utilisateur connecté.
+ * Même périmètre d'isolation que GET /.
+ */
 router.get('/unread-count', authMiddleware, requirePermission('notifications.read'), async (req, res) => {
   try {
+    const scope = buildNotificationScope(req.user);
+
+    if (!scope.ok) {
+      return res.status(scope.status).json({ error: scope.error });
+    }
+
     const count = await prisma.notification.count({
       where: {
-        userId: req.user.id,
+        ...scope.where,
         read: false
       }
     });
@@ -223,8 +230,20 @@ router.get('/unread-count', authMiddleware, requirePermission('notifications.rea
     res.status(500).json({ error: e.message });
   }
 });
+
+/*
+ * GET /api/notifications/:id
+ * Détail d'une notification, sous réserve d'appartenance au périmètre.
+ * 404 si introuvable, 403 si hors périmètre.
+ */
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
+    const scope = buildNotificationScope(req.user);
+
+    if (!scope.ok) {
+      return res.status(scope.status).json({ error: scope.error });
+    }
+
     const notification = await prisma.notification.findUnique({
       where: { id: req.params.id }
     });
@@ -233,8 +252,11 @@ router.get('/:id', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Notification introuvable' });
     }
 
-    // Pour DRIVER : vérifier que la notification lui appartient
-    if (req.user.role === 'DRIVER' && notification.userId !== req.user.id) {
+    const isAllowed = Object.entries(scope.where).every(
+      ([key, value]) => notification[key] === value
+    );
+
+    if (!isAllowed) {
       return res.status(403).json({ error: 'Accès refusé' });
     }
 
@@ -244,7 +266,44 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
+/*
+ * PUT /api/notifications/:id/read
+ * Marque une notification comme lue, sous réserve d'appartenance.
+ * 404 si introuvable, 403 si hors périmètre. Aucun update si refusé.
+ */
 router.put('/:id/read', authMiddleware, async (req, res) => {
-  try { await prisma.notification.update({ where: { id: req.params.id }, data: { read: true } }); res.json({ ok: true }); } catch (e) { res.status(500).json({ error: e.message }); }
+  try {
+    const scope = buildNotificationScope(req.user);
+
+    if (!scope.ok) {
+      return res.status(scope.status).json({ error: scope.error });
+    }
+
+    const notification = await prisma.notification.findUnique({
+      where: { id: req.params.id }
+    });
+
+    if (!notification) {
+      return res.status(404).json({ error: 'Notification introuvable' });
+    }
+
+    const isAllowed = Object.entries(scope.where).every(
+      ([key, value]) => notification[key] === value
+    );
+
+    if (!isAllowed) {
+      return res.status(403).json({ error: 'Accès refusé' });
+    }
+
+    await prisma.notification.update({
+      where: { id: req.params.id },
+      data: { read: true }
+    });
+
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
+
 module.exports = router;
