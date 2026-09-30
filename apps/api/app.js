@@ -22,7 +22,7 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization", "X-Auth-Space"],
   maxAge: 86400,
 }));
-app.use(express.json({ 
+app.use(express.json({
   limit: "10mb",
   type: ['application/json', 'application/json; charset=utf-8']
 }));
