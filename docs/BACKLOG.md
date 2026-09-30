@@ -50,55 +50,6 @@ ce qui est un **chantier d'architecture séparé** (hors 2.1.c).
 Créer une **timeline passager** publique via
 `GET /public/suivi/:code/events` (voir chantier 2.4 ci-dessous).
 
----
-
-## 2.3 — Hardening API notifications
-
-**Statut :** ouvert
-**Identifié :** 2026-09-30 (Phase 2.1.c.0-d)
-**Priorité :** haute (sécurité)
-
-### Symptôme
-
-Trois failles dans `apps/api/modules/notifications/notifications.routes.js` :
-
-#### 2.3.1 — `PUT /:id/read` : aucun contrôle de propriété
-
-La route permet actuellement de marquer une notification comme lue
-sans vérifier son propriétaire ou son organisation.
-
-**Impact :** tout utilisateur authentifié peut potentiellement marquer
-n'importe quelle notification comme lue s'il connaît son `id`.
-
-#### 2.3.2 — `GET /:id` : contrôle partiel
-
-Le contrôle actuel protège uniquement les `DRIVER`.
-
-**Impact :** un `FLEET_MANAGER`, `COOP_MANAGER` ou autre rôle autorisé
-peut potentiellement lire une notification d'une autre organisation.
-
-#### 2.3.3 — `GET /unread-count` : filtre incohérent
-
-`GET /` applique une isolation différente selon le rôle, alors que
-`GET /unread-count` utilise actuellement `userId` sans alignement avec
-la logique organisationnelle.
-
-**Impact :** compteur potentiellement inexact pour les managers.
-
-### Correctif envisagé
-
-- `PUT /:id/read` : contrôle DRIVER (`userId`) / MANAGER
-  (`organizationId`)
-- `GET /:id` : étendre le contrôle d'isolation aux rôles concernés
-- `GET /unread-count` : aligner sur la logique de `GET /`
-
-### Tests à ajouter
-
-Chaque correctif devra être couvert par des tests **OK / 403 / 404**
-selon le cas.
-
----
-
 ## 2.4 — Timeline passager dans /suivi (piste)
 
 **Statut :** ouvert (à préciser)
