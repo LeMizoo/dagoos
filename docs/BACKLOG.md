@@ -151,7 +151,7 @@ Créer `docs/API-PUBLIC-CONTRACTS.md` documentant explicitement :
 - section `/public/actions` documentée
 - référence croisée depuis `docs/BACKLOG.md`
 
-### 2.5.2 — Duplication VEHICLE_CONFIG entre /estimate et /actions
+### 2.5.2 — Duplication VEHICLE_CONFIG entre /estimate et /actions — livré (`42fc5cec`)
 
 **Constat :**
 
