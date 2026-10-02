@@ -3,6 +3,7 @@ const prisma = require('../../lib/prisma');
 const { selectServiceTariff, AmbiguousTariffError } = require('../../services/pricingSelector');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const { VEHICLE_CONFIG } = require('./vehicle-config');
 
 const router = express.Router();
 
@@ -645,56 +646,6 @@ router.post('/estimate', async (req, res) => {
      *
      * Aucun fallback V1.
      */
-
-    const VEHICLE_CONFIG = {
-      moto: {
-        serviceCode: 'TAXI',
-        categoryCode: 'MOTO',
-        pricingModel: 'PER_KM',
-        responseMode: 'courseNormale',
-        tariffDimensions: { modePrestation: 'normal' }
-      },
-
-      voiture: {
-        serviceCode: 'TAXI',
-        categoryCode: 'VOITURE',
-        pricingModel: 'PER_KM',
-        responseMode: 'courseNormale',
-        tariffDimensions: { modePrestation: 'normal' }
-      },
-
-      taxi: {
-        serviceCode: 'TAXI',
-        categoryCode: 'VOITURE',
-        pricingModel: 'PER_KM',
-        responseMode: 'courseNormale',
-        tariffDimensions: { modePrestation: 'normal' }
-      },
-
-      bus: {
-        serviceCode: 'LOCATION_URBAINE',
-        categoryCode: 'BUS',
-        pricingModel: 'FIXED',
-        responseMode: 'tarifFixe',
-        tariffDimensions: {}
-      },
-
-      minivan: {
-        serviceCode: 'LOCATION_URBAINE',
-        categoryCode: 'MINIVAN',
-        pricingModel: 'FIXED',
-        responseMode: 'tarifFixe',
-        tariffDimensions: {}
-      },
-
-      tricycle: {
-        serviceCode: 'LOCATION_URBAINE',
-        categoryCode: 'TRICYCLE',
-        pricingModel: 'FIXED',
-        responseMode: 'tarifFixe',
-        tariffDimensions: {}
-      }
-    };
 
     const vehicleConfig = VEHICLE_CONFIG[typeVehicule];
 
@@ -1966,51 +1917,6 @@ router.post('/actions', publicLeadLimiter, async (req, res) => {
     let nbJours = 1;
 
     if (type === 'COURSE_REQUEST' || type === 'TAXI_RESERVATION') {
-      const VEHICLE_CONFIG = {
-        moto: {
-          serviceCode: 'TAXI',
-          categoryCode: 'MOTO',
-          pricingModel: 'PER_KM',
-          responseMode: 'courseNormale',
-          tariffDimensions: { modePrestation: 'normal' }
-        },
-        voiture: {
-          serviceCode: 'TAXI',
-          categoryCode: 'VOITURE',
-          pricingModel: 'PER_KM',
-          responseMode: 'courseNormale',
-          tariffDimensions: { modePrestation: 'normal' }
-        },
-        taxi: {
-          serviceCode: 'TAXI',
-          categoryCode: 'VOITURE',
-          pricingModel: 'PER_KM',
-          responseMode: 'courseNormale',
-          tariffDimensions: { modePrestation: 'normal' }
-        },
-        bus: {
-          serviceCode: 'LOCATION_URBAINE',
-          categoryCode: 'BUS',
-          pricingModel: 'FIXED',
-          responseMode: 'tarifFixe',
-          tariffDimensions: {}
-        },
-        minivan: {
-          serviceCode: 'LOCATION_URBAINE',
-          categoryCode: 'MINIVAN',
-          pricingModel: 'FIXED',
-          responseMode: 'tarifFixe',
-          tariffDimensions: {}
-        },
-        tricycle: {
-          serviceCode: 'LOCATION_URBAINE',
-          categoryCode: 'TRICYCLE',
-          pricingModel: 'FIXED',
-          responseMode: 'tarifFixe',
-          tariffDimensions: {}
-        }
-      };
-
       const typeVehicule = details?.typeVehicule;
       const vehicleConfig = VEHICLE_CONFIG[typeVehicule];
 
