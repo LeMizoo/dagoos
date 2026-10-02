@@ -1,9 +1,28 @@
-### Impact
+# BACKLOG
+
+## 2.2 — Pricing /public/actions (CLOS)
+
+**Statut :** clos
+**Décision :** 2026-09-30 (Phase 2.2)
+**Référence :** commit `3006a206`
+
+### Contexte
+
+Le calcul du prix pour `COURSE_REQUEST` / `TAXI_RESERVATION` utilisait
+un fallback silencieux à 2000 Ar et ne s'alignait pas sur le moteur V2
+de `POST /public/estimate`.
+
+### Correctif livré
+
+Alignement sur `selectServiceTariff` + pipeline V2 → V1 → 404.
+Détails complets dans le commit `3006a206`.
+
+### Impact résiduel (archivé)
 
 - Incohérence visible côté client : estimation ≠ prix final.
 - Le prix affiché dans `/suivi` ne reflète pas la distance.
 
-### Correctif envisagé
+### Correctif historique envisagé (archivé)
 
 Utiliser le même moteur que `/public/estimate` :
 
@@ -14,6 +33,7 @@ const tariff = await selectServiceTariff({
   pricingModel: vehicleConfig.pricingModel,
   dimensions: vehicleConfig.tariffDimensions,
 });
+```
 
 ---
 
@@ -50,6 +70,8 @@ ce qui est un **chantier d'architecture séparé** (hors 2.1.c).
 Créer une **timeline passager** publique via
 `GET /public/suivi/:code/events` (voir chantier 2.4 ci-dessous).
 
+---
+
 ## 2.4 — Timeline passager dans /suivi (piste)
 
 **Statut :** ouvert (à préciser)
@@ -83,3 +105,111 @@ Nouvelle route publique `GET /public/suivi/:code/events` qui liste les
 
 Ce chantier est **distinct de 2.1.c**. Il s'agit d'une nouvelle
 fonctionnalité pour le passager, pas d'une migration legacy.
+
+---
+
+## 2.5 — Documentation + dette technique (post-2.2)
+
+**Statut :** ouvert
+**Identifié :** 2026-10-02 (post-2.2)
+**Priorité :** moyenne (dette structurante, pas de bug actif)
+
+### Contexte
+
+Trois points issus du chantier 2.2 n'ont pas été traités à la livraison,
+car ils sortaient du périmètre strict du bug pricing. Ils sont
+documentés ici pour ne pas être perdus.
+
+### 2.5.1 — Contrat HTTP de POST /public/actions non documenté
+
+**Constat :**
+
+`POST /api/public/actions` renvoie aujourd'hui trois champs seulement :
+`ok` (booléen), `actionId` (string), `codeSuivi` (string).
+
+Il **ne renvoie pas** `prixEstime`, `modePrestation`, `distanceKm`,
+ni `commissionPct`. Ces valeurs sont **persistées** dans
+`LeadAction.details` et lues via `GET /api/public/suivi/:code`.
+
+**Impact :**
+
+Un futur dev peut supposer à tort que `/public/actions` renvoie le prix
+calculé, et coder un client sur un contrat inexistant.
+
+**Action envisagée :**
+
+Créer `docs/API-PUBLIC-CONTRACTS.md` documentant explicitement :
+
+- l'input attendu de `POST /public/actions`
+- l'output réel
+- le chemin de lecture du prix (`GET /public/suivi/:code`)
+- le pipeline V2 → V1 → 404
+
+**Critère de clôture :**
+
+- fichier `docs/API-PUBLIC-CONTRACTS.md` créé
+- section `/public/actions` documentée
+- référence croisée depuis `docs/BACKLOG.md`
+
+### 2.5.2 — Duplication VEHICLE_CONFIG entre /estimate et /actions
+
+**Constat :**
+
+Le mapping `VEHICLE_CONFIG` (moto/voiture/taxi/bus/minivan/tricycle →
+serviceCode / categoryCode / pricingModel / responseMode /
+tariffDimensions) est **dupliqué** entre :
+
+- `POST /public/estimate` (bloc historique)
+- `POST /public/actions` (bloc ajouté en 2.2)
+
+**Impact :**
+
+Toute évolution du mapping doit être appliquée **deux fois**. Risque de
+divergence silencieuse (un véhicule supporté dans un endpoint, oublié
+dans l'autre).
+
+**Action envisagée :**
+
+Extraire vers `apps/api/modules/public/vehicle-config.js` :
+
+- source unique du mapping
+- consommée par `/estimate` et `/actions`
+- tests unitaires sur le mapping
+
+Chantier dédié : section `2.5.x` (à ouvrir ultérieurement).
+
+**Critère de clôture :**
+
+- module `vehicle-config.js` créé et exporté
+- `/estimate` et `/actions` l'importent
+- aucun mapping inline résiduel
+- tests de non-régression : `public.integration.test.js`,
+  `public.actions.pricing.test.js` verts
+
+### 2.5.3 — Migration V1 → V2 des organisations restantes
+
+**Constat :**
+
+Le pipeline livré en 2.2 conserve un **fallback V1 temporaire** pour les
+organisations non encore migrées vers la configuration V2
+(`BusinessActivity` + `Service` + `VehicleCategory` + `ServiceTariff`).
+
+**Impact :**
+
+- Deux sources tarifaires coexistent.
+- Le fallback V1 est un chemin mort à terme, mais maintenu indéfiniment
+  introduit de la dette.
+
+**Action envisagée :**
+
+1. Identifier les organisations actuellement V1-only en production.
+2. Migrer leur configuration en V2.
+3. Supprimer le fallback V1 dans `POST /public/actions`.
+4. Supprimer le fallback V1 dans `POST /public/estimate-location` si
+   applicable (à auditer).
+
+**Critère de clôture :**
+
+- zéro organisation V1-only en production
+- fallback V1 supprimé du code
+- tests de non-régression verts
