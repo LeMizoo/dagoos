@@ -120,7 +120,7 @@ Trois points issus du chantier 2.2 n'ont pas été traités à la livraison,
 car ils sortaient du périmètre strict du bug pricing. Ils sont
 documentés ici pour ne pas être perdus.
 
-### 2.5.1 — Contrat HTTP de POST /public/actions non documenté
+### 2.5.1 — Contrat HTTP de POST /public/actions non documenté — livré (`7f33d7b`)
 
 **Constat :**
 
@@ -136,20 +136,31 @@ ni `commissionPct`. Ces valeurs sont **persistées** dans
 Un futur dev peut supposer à tort que `/public/actions` renvoie le prix
 calculé, et coder un client sur un contrat inexistant.
 
-**Action envisagée :**
+**Action réalisée :**
 
-Créer `docs/API-PUBLIC-CONTRACTS.md` documentant explicitement :
+Création de `docs/API-PUBLIC-CONTRACTS.md`, documentant les contrats
+des principales routes publiques :
 
-- l'input attendu de `POST /public/actions`
-- l'output réel
-- le chemin de lecture du prix (`GET /public/suivi/:code`)
-- le pipeline V2 → V1 → 404
+- `POST /api/public/actions`
+- `GET /api/public/suivi/:code`
+- `POST /api/public/actions/respond`
+- `POST /api/public/estimate`
+- `POST /api/public/estimate-location`
+
+Le document précise notamment :
+
+- l'input attendu ;
+- l'output réel ;
+- les validations et principaux codes d'erreur ;
+- le chemin de lecture du prix via `GET /public/suivi/:code` ;
+- le pipeline tarifaire V2 → V1 → 404 lorsqu'il s'applique.
 
 **Critère de clôture :**
 
-- fichier `docs/API-PUBLIC-CONTRACTS.md` créé
-- section `/public/actions` documentée
-- référence croisée depuis `docs/BACKLOG.md`
+- `docs/API-PUBLIC-CONTRACTS.md` créé ;
+- section `/public/actions` documentée ;
+- les principales routes publiques documentées ;
+- référence croisée présente dans ce backlog.
 
 ### 2.5.2 — Duplication VEHICLE_CONFIG entre /estimate et /actions — livré (`42fc5cec`)
 
