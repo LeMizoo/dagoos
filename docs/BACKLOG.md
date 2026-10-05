@@ -224,3 +224,42 @@ organisations non encore migrées vers la configuration V2
 - zéro organisation V1-only en production
 - fallback V1 supprimé du code
 - tests de non-régression verts
+
+### 2.5.4 — Écart `sanitizeDetails` vs pipeline LONG_HAUL — livré (`e2d1f540`)
+
+**Constat :**
+
+Le pipeline LONG_HAUL écrivait dans `details` 5 champs V2
+(`pricingModel`, `estimated`, `price`, `status`, `negotiation`),
+mais `sanitizeDetails` les filtrait silencieusement à la persistance
+(car hors `ALLOWED_DETAILS_KEYS`). Conséquence observable côté client :
+`negotiation` était toujours `null` dans `GET /public/suivi/:code`,
+bloquant la détection des négociations dans `Suivi.tsx`
+(`dagoos-mobile-v2`).
+
+**Correctif livré :**
+
+Séparation stricte entre :
+
+- l'input client, filtré par `sanitizeDetails` (frontière de sécurité
+  inchangée) ;
+- les champs internes produits par le pipeline LONG_HAUL, accumulés
+  dans une variable `v2Details` puis spread en fin de `details` à la
+  création de `LeadAction`.
+
+`sanitizeDetails` et `ALLOWED_DETAILS_KEYS` restent inchangés :
+aucun élargissement de la whitelist d'entrée client.
+
+**Tests ajoutés :**
+
+- Test 6 : persistance des 5 champs V2 LONG_HAUL NEGOTIATED.
+- Test 7 : exposition correcte via `GET /public/suivi/:code`.
+- Test 8 : non-régression LONG_HAUL PER_KM.
+
+**Référence :** commit `e2d1f540`.
+
+**Dette résiduelle (hors périmètre) :**
+
+Le front `Suivi.tsx` ne teste que le statut `PROPOSITION_EN_ATTENTE_CLIENT`,
+alors que le backend produit `EN_ATTENTE_TRANSPORTEUR` à la création.
+Alignement des statuts à tracer comme chantier séparé.
