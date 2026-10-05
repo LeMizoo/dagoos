@@ -2030,69 +2030,13 @@ router.post('/actions', publicLeadLimiter, async (req, res) => {
         commissionPct = tariffV2.commissionPct ?? 20;
       } else {
         /*
-         * Fallback V1 temporaire.
-         * Aucun tarif V1 => erreur explicite, jamais 2000 Ar.
+         * 2.5.6 — Fallback V1 supprimé.
+         * Aucun ServiceTariff V2 configure pour cette combinaison
+         * (Service + VehicleCategory + pricingModel) => 404 explicite.
          */
-        const tarif = await prisma.tarif.findUnique({
-          where: { organizationId: org?.id }
-        }).catch(() => null);
-
-        if (!tarif) {
-          return res.status(404).json({
-            error: 'Tarif non configuré pour cette organisation'
-          });
-        }
-
-        commissionPct = tarif.commissionChauffeur ?? 20;
-
-        if (tarif.vehiculeTarifs) {
-          let vehiculeTarifs = {};
-
-          try {
-            vehiculeTarifs = JSON.parse(tarif.vehiculeTarifs);
-          } catch (e) {
-            console.error('Erreur parsing vehiculeTarifs:', e);
-          }
-
-          const tarifVehicule = vehiculeTarifs[vehicleConfig.categoryCode.toLowerCase()];
-
-          if (tarifVehicule) {
-            if (
-              ['bus', 'minivan', 'tricycle'].includes(
-                vehicleConfig.categoryCode.toLowerCase()
-              )
-            ) {
-              prixEstime =
-                tarifVehicule?.tarifFixe?.prixTrajet ||
-                tarif.prixBase;
-              modePrestation = 'tarifFixe';
-            } else if (tarifVehicule?.courseNormale) {
-              const prixBase =
-                tarifVehicule.courseNormale.prixBase ||
-                tarif.prixBase;
-              const prixKm =
-                tarifVehicule.courseNormale.prixKm ||
-                tarif.prixKm;
-
-              prixEstime = arrondirPrix(
-                prixBase + (distanceKm * prixKm)
-              );
-              modePrestation = 'courseNormale';
-            } else {
-              prixEstime = arrondirPrix(
-                tarif.prixBase + (distanceKm * tarif.prixKm)
-              );
-            }
-          } else {
-            prixEstime = arrondirPrix(
-              tarif.prixBase + (distanceKm * tarif.prixKm)
-            );
-          }
-        } else {
-          prixEstime = arrondirPrix(
-            tarif.prixBase + (distanceKm * tarif.prixKm)
-          );
-        }
+        return res.status(404).json({
+          error: `Tarif V2 non configure pour ${vehicleConfig.categoryCode} sur ${vehicleConfig.serviceCode}`
+        });
       }
 
     } else if (type === 'CAR_RENTAL') {

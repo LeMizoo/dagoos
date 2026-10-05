@@ -6,10 +6,10 @@ require('dotenv/config');
 // Phase 2.2.3
 //
 // Objectif :
-// - V2 ServiceTariff prioritaire
-// - fallback V1 si V2 absent
+// - V2 ServiceTariff comme source tarifaire
 // - jamais de prix par défaut à 2000 Ar
-// - erreur explicite si aucun tarif
+// - erreur explicite si ServiceTariff V2 absent
+// - aucun accès au Tarif V1 pour le pricing COURSE_REQUEST
 // - rejet d'une configuration V2 ambiguë
 // ============================================================
 
@@ -216,47 +216,8 @@ describe('POST /api/public/actions — pricing 2.2', () => {
     expect(prisma.tarif.findUnique).not.toHaveBeenCalled();
   });
 
-  test('3. utilise V1 lorsque ServiceTariff V2 est absent', async () => {
+  test('3. retourne 404 si ServiceTariff V2 est absent', async () => {
     selectServiceTariff.mockResolvedValueOnce(null);
-
-    prisma.tarif.findUnique.mockResolvedValueOnce({
-      id: 'tarif-v1',
-      organizationId: 'org-1',
-      prixBase: 3000,
-      prixKm: 500,
-      commissionChauffeur: 20,
-      vehiculeTarifs: JSON.stringify({
-        moto: {
-          courseNormale: {
-            prixBase: 3000,
-            prixKm: 500,
-          },
-        },
-      }),
-    });
-
-    const response = await request(app)
-      .post('/api/public/actions')
-      .send(payload());
-
-    expect(response.status).toBe(201);
-    expect(response.body.ok).toBe(true);
-
-    const leadActionData = prisma.leadAction.create.mock.calls[0][0].data;
-    expect(leadActionData.details.prixEstime).toBeGreaterThan(0);
-    expect(leadActionData.details.prixEstime).not.toBe(2000);
-    expect(leadActionData.details.modePrestation).toBe('courseNormale');
-
-    expect(prisma.tarif.findUnique).toHaveBeenCalledWith({
-      where: {
-        organizationId: 'org-1',
-      },
-    });
-  });
-
-  test('4. retourne 404 si V2 et V1 sont absents', async () => {
-    selectServiceTariff.mockResolvedValueOnce(null);
-    prisma.tarif.findUnique.mockResolvedValueOnce(null);
 
     const response = await request(app)
       .post('/api/public/actions')
@@ -264,12 +225,15 @@ describe('POST /api/public/actions — pricing 2.2', () => {
 
     expect(response.status).toBe(404);
     expect(response.body.error).toBe(
-      'Tarif non configuré pour cette organisation'
+      'Tarif V2 non configure pour MOTO sur TAXI'
     );
     expect(response.body.prixEstime).toBeUndefined();
+
+    expect(prisma.tarif.findUnique).not.toHaveBeenCalled();
+    expect(prisma.leadAction.create).not.toHaveBeenCalled();
   });
 
-  test('5. retourne 500 si la configuration V2 est ambiguë', async () => {
+  test('4. retourne 500 si la configuration V2 est ambiguë', async () => {
     selectServiceTariff.mockRejectedValueOnce(
       new AmbiguousTariffError({
         serviceId: 'service-1',
@@ -289,7 +253,7 @@ describe('POST /api/public/actions — pricing 2.2', () => {
     expect(prisma.tarif.findUnique).not.toHaveBeenCalled();
   });
 
-  test('6. persiste le résultat V2 LONG_HAUL NEGOTIATED', async () => {
+  test('5. persiste le résultat V2 LONG_HAUL NEGOTIATED', async () => {
     prisma.service.findFirst.mockResolvedValueOnce({
       id: 'service-long-haul',
       code: 'MARCHANDISES',
@@ -343,7 +307,7 @@ describe('POST /api/public/actions — pricing 2.2', () => {
     });
   });
 
-  test('7. expose le résultat V2 LONG_HAUL NEGOTIATED via /suivi', async () => {
+  test('6. expose le résultat V2 LONG_HAUL NEGOTIATED via /suivi', async () => {
     prisma.service.findFirst.mockResolvedValueOnce({
       id: 'service-long-haul',
       code: 'MARCHANDISES',
@@ -414,7 +378,7 @@ describe('POST /api/public/actions — pricing 2.2', () => {
     });
   });
 
-  test('8. conserve le calcul réel LONG_HAUL PER_KM', async () => {
+  test('7. conserve le calcul réel LONG_HAUL PER_KM', async () => {
     prisma.service.findFirst.mockResolvedValueOnce({
       id: 'service-long-haul',
       code: 'LOCATION_INTERURBAINE',
