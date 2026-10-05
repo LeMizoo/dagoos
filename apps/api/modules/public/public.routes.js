@@ -1916,6 +1916,10 @@ router.post('/actions', publicLeadLimiter, async (req, res) => {
     let commissionPct = 20;
     let nbJours = 1;
 
+    // 2.5.3 — Champs V2 issus du pipeline LONG_HAUL, persistés
+    // séparément de l'input client.
+    let v2Details = {};
+
     if (type === 'COURSE_REQUEST' || type === 'TAXI_RESERVATION') {
       const typeVehicule = details?.typeVehicule;
       const vehicleConfig = VEHICLE_CONFIG[typeVehicule];
@@ -2384,12 +2388,14 @@ router.post('/actions', publicLeadLimiter, async (req, res) => {
       modePrestation = pricingResult.pricingModel === 'NEGOTIATED' ? 'negociation' : 'long_haul';
       commissionPct = tariff.commissionPct || 20;
 
-      // Stocker le résultat V2 dans details
-      details.pricingModel = pricingResult.pricingModel;
-      details.estimated = pricingResult.estimated;
-      details.price = pricingResult.price;
-      details.status = pricingResult.status;
-      details.negotiation = pricingResult.negotiation || null;
+      // 2.5.3 — Stocker le résultat V2 dans une couche interne dédiée.
+      v2Details = {
+        pricingModel: pricingResult.pricingModel,
+        estimated: pricingResult.estimated,
+        price: pricingResult.price,
+        status: pricingResult.status,
+        negotiation: pricingResult.negotiation || null,
+      };
 
     }
 
@@ -2411,7 +2417,8 @@ router.post('/actions', publicLeadLimiter, async (req, res) => {
           nbJours: (type === 'CAR_RENTAL' || type === 'LONG_HAUL') ? nbJours : undefined,
           offreClient: details?.offreClient ? Number(details.offreClient) : null,
           codeSuivi: genererCodeSuivi(),
-          statutNegociation: details?.offreClient ? 'OFFRE_CLIENT' : 'PRIX_SUGGERE'
+          statutNegociation: details?.offreClient ? 'OFFRE_CLIENT' : 'PRIX_SUGGERE',
+          ...v2Details
         },
         statut: 'NEW',
       },

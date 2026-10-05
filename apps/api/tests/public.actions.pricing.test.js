@@ -37,6 +37,7 @@ jest.mock('../lib/prisma', () => ({
   },
   leadAction: {
     create: jest.fn(),
+    findFirst: jest.fn(),
   },
   notification: {
     create: jest.fn(),
@@ -286,5 +287,178 @@ describe('POST /api/public/actions — pricing 2.2', () => {
     );
 
     expect(prisma.tarif.findUnique).not.toHaveBeenCalled();
+  });
+
+  test('6. persiste le résultat V2 LONG_HAUL NEGOTIATED', async () => {
+    prisma.service.findFirst.mockResolvedValueOnce({
+      id: 'service-long-haul',
+      code: 'MARCHANDISES',
+    });
+
+    prisma.vehicleCategory.findUnique.mockResolvedValueOnce({
+      id: 'category-camion',
+      code: 'CAMION',
+    });
+
+    selectServiceTariff.mockResolvedValueOnce({
+      id: 'tariff-negotiated',
+      pricingModel: 'NEGOTIATED',
+      basePrice: 0,
+      unitPrice: 0,
+      commissionPct: 20,
+      configuration: {},
+    });
+
+    const response = await request(app)
+      .post('/api/public/actions')
+      .send({
+        organizationSlug: 'test-org',
+        type: 'LONG_HAUL',
+        clientNom: 'Client Test',
+        clientTel: '0340000000',
+        details: {
+          typeService: 'marchandises',
+          typeVehicule: 'camion',
+          depart: 'Antananarivo',
+          arrivee: 'Toamasina',
+          volume: 10,
+        },
+      });
+
+    expect(response.status).toBe(201);
+
+    const createCall = prisma.leadAction.create.mock.calls[0][0];
+    const savedDetails = createCall.data.details;
+
+    expect(savedDetails.pricingModel).toBe('NEGOTIATED');
+    expect(savedDetails.estimated).toBe(false);
+    expect(savedDetails.price).toBeNull();
+    expect(savedDetails.status).toBe('NEGOTIATION_REQUIRED');
+    expect(savedDetails.negotiation).toEqual({
+      status: 'EN_ATTENTE_TRANSPORTEUR',
+      proposedPrice: null,
+      note: null,
+      proposedAt: null,
+      respondedAt: null,
+    });
+  });
+
+  test('7. expose le résultat V2 LONG_HAUL NEGOTIATED via /suivi', async () => {
+    prisma.service.findFirst.mockResolvedValueOnce({
+      id: 'service-long-haul',
+      code: 'MARCHANDISES',
+    });
+
+    prisma.vehicleCategory.findUnique.mockResolvedValueOnce({
+      id: 'category-camion',
+      code: 'CAMION',
+    });
+
+    selectServiceTariff.mockResolvedValueOnce({
+      id: 'tariff-negotiated',
+      pricingModel: 'NEGOTIATED',
+      basePrice: 0,
+      unitPrice: 0,
+      commissionPct: 20,
+      configuration: {},
+    });
+
+    const createResponse = await request(app)
+      .post('/api/public/actions')
+      .send({
+        organizationSlug: 'test-org',
+        type: 'LONG_HAUL',
+        clientNom: 'Client Test',
+        clientTel: '0340000000',
+        details: {
+          typeService: 'marchandises',
+          typeVehicule: 'camion',
+          depart: 'Antananarivo',
+          arrivee: 'Toamasina',
+          volume: 10,
+        },
+      });
+
+    expect(createResponse.status).toBe(201);
+
+    const createCall = prisma.leadAction.create.mock.calls[0][0];
+    const savedDetails = createCall.data.details;
+    const codeSuivi = savedDetails.codeSuivi;
+
+    prisma.leadAction.findFirst.mockResolvedValueOnce({
+      id: 'action-1',
+      clientNom: 'Client Test',
+      clientTel: '0340000000',
+      type: 'LONG_HAUL',
+      statut: 'PENDING',
+      details: savedDetails,
+      createdAt: new Date('2026-10-05T05:00:00.000Z'),
+      updatedAt: new Date('2026-10-05T05:00:00.000Z'),
+    });
+
+    const suiviResponse = await request(app)
+      .get(`/api/public/suivi/${codeSuivi}`);
+
+    expect(suiviResponse.status).toBe(200);
+    expect(suiviResponse.body.codeSuivi).toBe(codeSuivi);
+    expect(suiviResponse.body.pricingModel).toBe('NEGOTIATED');
+    expect(suiviResponse.body.estimated).toBe(false);
+    expect(suiviResponse.body.price).toBeNull();
+    expect(suiviResponse.body.status).toBe('NEGOTIATION_REQUIRED');
+    expect(suiviResponse.body.negotiation).toEqual({
+      status: 'EN_ATTENTE_TRANSPORTEUR',
+      proposedPrice: null,
+      note: null,
+      proposedAt: null,
+      respondedAt: null,
+    });
+  });
+
+  test('8. conserve le calcul réel LONG_HAUL PER_KM', async () => {
+    prisma.service.findFirst.mockResolvedValueOnce({
+      id: 'service-long-haul',
+      code: 'LOCATION_INTERURBAINE',
+    });
+
+    prisma.vehicleCategory.findUnique.mockResolvedValueOnce({
+      id: 'category-bus',
+      code: 'BUS',
+    });
+
+    selectServiceTariff.mockResolvedValueOnce({
+      id: 'tariff-per-km',
+      pricingModel: 'PER_KM',
+      basePrice: 5000,
+      unitPrice: 1000,
+      commissionPct: 15,
+      configuration: {},
+    });
+
+    const response = await request(app)
+      .post('/api/public/actions')
+      .send({
+        organizationSlug: 'test-org',
+        type: 'LONG_HAUL',
+        clientNom: 'Client Test',
+        clientTel: '0340000000',
+        details: {
+          typeService: 'passagers',
+          typeVehicule: 'bus',
+          depart: 'Antananarivo',
+          arrivee: 'Ambohimangakely',
+          nbPassagers: 2,
+        },
+      });
+
+    expect(response.status).toBe(201);
+
+    const createCall = prisma.leadAction.create.mock.calls[0][0];
+    const savedDetails = createCall.data.details;
+
+    expect(savedDetails.pricingModel).toBe('PER_KM');
+    expect(savedDetails.estimated).toBe(true);
+    expect(savedDetails.status).toBe('ESTIMATED');
+    expect(savedDetails.price).toBeGreaterThan(5000);
+    expect(savedDetails.negotiation).toBeNull();
   });
 });
