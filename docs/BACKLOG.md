@@ -197,33 +197,23 @@ Chantier dédié : section `2.5.x` (à ouvrir ultérieurement).
 - tests de non-régression : `public.integration.test.js`,
   `public.actions.pricing.test.js` verts
 
-### 2.5.3 — Migration V1 → V2 des organisations restantes
+### 2.5.3 — Migration V1 → V2 des organisations restantes — clôturé via 2.5.6
 
-**Constat :**
-
-Le pipeline livré en 2.2 conserve un **fallback V1 temporaire** pour les
-organisations non encore migrées vers la configuration V2
+Le chantier historique 2.5.3 identifiait le fallback V1 de
+`POST /public/actions` comme dette technique à supprimer après migration
+des organisations concernées vers la configuration V2
 (`BusinessActivity` + `Service` + `VehicleCategory` + `ServiceTariff`).
 
-**Impact :**
+La suppression effective du fallback V1 dans `POST /public/actions` a été
+traitée et clôturée dans le chantier **2.5.6**.
 
-- Deux sources tarifaires coexistent.
-- Le fallback V1 est un chemin mort à terme, mais maintenu indéfiniment
-  introduit de la dette.
+**Périmètre restant volontairement hors 2.5.6 :**
 
-**Action envisagée :**
+- `POST /public/estimate-location` conserve son usage V1 existant.
+- Les autres consommateurs V1 (`departs`, `finances`, administration des
+  `Tarif`) restent actifs et ne sont pas supprimés dans ce chantier.
 
-1. Identifier les organisations actuellement V1-only en production.
-2. Migrer leur configuration en V2.
-3. Supprimer le fallback V1 dans `POST /public/actions`.
-4. Supprimer le fallback V1 dans `POST /public/estimate-location` si
-   applicable (à auditer).
-
-**Critère de clôture :**
-
-- zéro organisation V1-only en production
-- fallback V1 supprimé du code
-- tests de non-régression verts
+**Référence :** chantier 2.5.6.
 
 ### 2.5.4 — Écart `sanitizeDetails` vs pipeline LONG_HAUL — livré (`e2d1f540`)
 
@@ -306,3 +296,41 @@ Dans `Suivi.tsx` :
 - Section `GET /public/suivi/:code` de `docs/API-PUBLIC-CONTRACTS.md`
   mise à jour : table des cinq valeurs de `negotiation.status`.
 - **Référence :** commit `959bb5c4`.
+
+
+### 2.5.6 — Suppression du fallback V1 de `POST /public/actions` — livré
+
+**Objectif :**
+
+Finaliser la migration du pricing `COURSE_REQUEST` / `TAXI_RESERVATION`
+vers la configuration V2 et supprimer le fallback V1 encore présent dans
+`POST /public/actions`.
+
+**Correctif livré :**
+
+- `ServiceTariff` V2 est désormais la seule source tarifaire pour
+  `COURSE_REQUEST` / `TAXI_RESERVATION`.
+- Si aucun `ServiceTariff` V2 ne correspond à la combinaison
+  `Service` + `VehicleCategory` + `pricingModel`, l'API retourne `404`.
+- Aucun appel à `prisma.tarif.findUnique` n'est effectué pour ce chemin.
+- Une configuration V2 ambiguë continue de produire `500` via
+  `AmbiguousTariffError`.
+- Les scénarios `LONG_HAUL` existants restent inchangés.
+
+**Tests :**
+
+- `apps/api/tests/public.actions.pricing.test.js`
+- 7/7 tests ciblés verts.
+- Le test d'absence de `ServiceTariff` vérifie explicitement l'absence
+  d'appel au Tarif V1.
+
+**Hors périmètre :**
+
+- `POST /public/estimate-location` conserve son usage V1.
+- `CAR_RENTAL` conserve son pricing V1 existant.
+- Le modèle `Tarif` et ses trois configurations existantes ne sont pas
+  supprimés.
+- Les modules `departs`, `finances` et l'administration des tarifs V1
+  ne sont pas modifiés.
+
+**Référence :** chantier 2.5.6.

@@ -103,9 +103,10 @@ Il est persisté dans `LeadAction.details` et doit être lu via
 Le prix est calculé côté backend selon le `type` :
 
 - `COURSE_REQUEST` / `TAXI_RESERVATION` :
-  - V2 prioritaire via `ServiceTariff` + `VEHICLE_CONFIG` (URBAN).
-  - Fallback V1 via `Tarif` si V2 absent.
-  - Erreur 404 si ni V2 ni V1.
+  - V2 via `ServiceTariff` + `VEHICLE_CONFIG` (URBAN).
+  - Aucun fallback V1 : `Tarif` n'est pas utilisé pour ce pricing.
+  - Erreur 404 si aucun `ServiceTariff` V2 n'est configuré pour la
+    combinaison demandée.
   - Erreur 500 si configuration V2 ambiguë (`AmbiguousTariffError`).
 - `CAR_RENTAL` :
   - V1 uniquement (`Tarif.vehiculeTarifs[cle].location` ou
@@ -173,7 +174,7 @@ apportée dans cette version.
 | 400 | `details` vide pour type le requérant | `{ error: "details ne peut pas être vide pour le type X" }` |
 | 400 | `typeVehicule` invalide (COURSE/TAXI) | `{ error: "Type de véhicule invalide: X" }` |
 | 400 | Distance non calculable | `{ error: "Impossible de déterminer la distance..." }` |
-| 404 | V2 + V1 absents (COURSE/TAXI) | `{ error: "Tarif non configuré pour cette organisation" }` |
+| 404 | `ServiceTariff` V2 absent (COURSE/TAXI) | `{ error: "Tarif V2 non configure pour X sur Y" }` |
 | 500 | Configuration V2 ambiguë | `{ error: "Configuration tarifaire ambigue pour cette combinaison" }` |
 | 400 | Tarif location absent (CAR_RENTAL) | `{ error: "Tarif non configuré pour cette organisation" }` |
 | 400 | `typeVehicule` incompatible LONG_HAUL | `{ error: "Véhicule X incompatible avec le service Y" }` |
