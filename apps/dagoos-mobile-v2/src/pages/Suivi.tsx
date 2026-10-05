@@ -129,6 +129,8 @@ function SuiviCard({ suivi }: SuiviCardProps) {
 
   // Négociation éventuelle
   const neg = suivi.negotiation;
+  const negotiationAwaitingDriver =
+    neg && neg.status === 'EN_ATTENTE_TRANSPORTEUR';
   const negotiationPending =
     neg && neg.status === 'PROPOSITION_EN_ATTENTE_CLIENT';
 
@@ -261,6 +263,7 @@ function SuiviCard({ suivi }: SuiviCardProps) {
 
       {(suivi.offreClient !== null ||
         suivi.contreOffreChauffeur !== null ||
+        negotiationAwaitingDriver ||
         negotiationPending) && (
         <div style={cardStyle}>
           <div
@@ -306,6 +309,22 @@ function SuiviCard({ suivi }: SuiviCardProps) {
               <strong style={{ color: 'var(--info-fg)' }}>
                 {formatPrice(suivi.contreOffreChauffeur)}
               </strong>
+            </div>
+          )}
+
+          {negotiationAwaitingDriver && (
+            <div
+              style={{
+                marginTop: 10,
+                padding: 10,
+                background: 'var(--accent-soft)',
+                borderRadius: 8,
+                fontSize: 12,
+                color: 'var(--text-primary)',
+                lineHeight: 1.4,
+              }}
+            >
+              Votre demande est en attente d'un chauffeur pour la négociation.
             </div>
           )}
 
