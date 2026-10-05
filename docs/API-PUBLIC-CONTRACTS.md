@@ -228,6 +228,39 @@ Consulter l'état d'une demande à partir de son `codeSuivi`.
 
 **C'est cette route qui expose le prix au client.**
 
+### Négociation LONG_HAUL — valeurs de `negotiation.status`
+
+`negotiation` est non-null uniquement pour les demandes LONG_HAUL dont
+le `pricingModel` est `NEGOTIATED`.
+
+Le champ `negotiation.status` prend **cinq valeurs** distinctes :
+
+| Valeur | Signification | Émetteur |
+|---|---|---|
+| `EN_ATTENTE_TRANSPORTEUR` | Demande créée, aucun chauffeur n'a encore proposé | `POST /public/actions` |
+| `PROPOSITION_EN_ATTENTE_CLIENT` | Un chauffeur a proposé un prix, en attente de réponse client | `POST /actions/:id/propose` |
+| `ACCEPTEE` | Le client a accepté la proposition | `POST /public/actions/respond` |
+| `REFUSEE` | Le client a refusé la proposition | `POST /public/actions/respond` |
+| `EXPIREE` | Proposition expirée (TTL 48h, expiration paresseuse) | `POST /public/actions/respond` |
+
+**Ne pas confondre :**
+
+- `status` (top-level) : état du **pricing** (`ESTIMATED` |
+  `NEGOTIATION_REQUIRED`).
+- `negotiation.status` : état de la **négociation** elle-même.
+- `statutNegociation` (legacy) : état du flux d'offre client
+  (`PRIX_SUGGERE` | `OFFRE_CLIENT`).
+
+**Consommation côté client :**
+
+Les deux états qui concernent l'UX avant décision finale sont :
+
+- `EN_ATTENTE_TRANSPORTEUR` → afficher « recherche d'un chauffeur ».
+- `PROPOSITION_EN_ATTENTE_CLIENT` → afficher « proposition reçue ».
+
+Les trois autres (`ACCEPTEE`, `REFUSEE`, `EXPIREE`) sont des états
+terminaux.
+
 ### Codes d'erreur
 
 | HTTP | Condition | Réponse |

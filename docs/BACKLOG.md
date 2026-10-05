@@ -263,3 +263,46 @@ aucun élargissement de la whitelist d'entrée client.
 Le front `Suivi.tsx` ne teste que le statut `PROPOSITION_EN_ATTENTE_CLIENT`,
 alors que le backend produit `EN_ATTENTE_TRANSPORTEUR` à la création.
 Alignement des statuts à tracer comme chantier séparé.
+
+### 2.5.5 — Alignement des statuts de négociation backend ↔ Suivi.tsx — livré (`959bb5c4`)
+
+**Constat :**
+
+Le backend produit cinq statuts distincts dans `negotiation.status`
+(`EN_ATTENTE_TRANSPORTEUR`, `PROPOSITION_EN_ATTENTE_CLIENT`,
+`ACCEPTEE`, `REFUSEE`, `EXPIREE`). Le front `Suivi.tsx`
+(`dagoos-mobile-v2`) ne testait que `PROPOSITION_EN_ATTENTE_CLIENT`.
+
+Conséquence UX : entre la création d'une demande LONG_HAUL NEGOTIATED
+et la première proposition d'un chauffeur, l'écran de suivi n'affichait
+**aucun message** sur l'état de la négociation. Le client pouvait croire
+que rien ne se passait.
+
+Le backend est sémantiquement correct. L'écart est temporel (deux états
+UX à distinguer), pas une incohérence de nom.
+
+**Correctif livré :**
+
+Dans `Suivi.tsx` :
+
+- Nouveau state dérivé `negotiationAwaitingDriver` (`EN_ATTENTE_TRANSPORTEUR`).
+- `negotiationPending` conservé (`PROPOSITION_EN_ATTENTE_CLIENT`).
+- Bloc UI distinct pour chaque état :
+  - en attente → « Votre demande est en attente d'un chauffeur pour la négociation. »
+  - proposition reçue → « Le chauffeur vous a proposé X Ar. »
+- Condition d'affichage du bloc `Négociation` élargie pour couvrir
+  les deux états.
+
+**Périmètre strict :**
+
+- `apps/dagoos-mobile-v2/src/pages/Suivi.tsx` uniquement.
+- Aucun changement backend (`pricingModel`, `status`,
+  `statutNegociation` inchangés).
+- Les fronts V1 mobile et `admin-next` ne sont pas touchés (ils
+  utilisent d'autres contrats et ne présentent pas le problème).
+
+**Documentation :**
+
+- Section `GET /public/suivi/:code` de `docs/API-PUBLIC-CONTRACTS.md`
+  mise à jour : table des cinq valeurs de `negotiation.status`.
+- **Référence :** commit `959bb5c4`.
