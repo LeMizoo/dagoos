@@ -39,10 +39,14 @@ jest.mock('../lib/prisma', () => ({
     create: jest.fn(),
     findFirst: jest.fn(),
   },
+  leadActionEvent: {
+    create: jest.fn(),
+  },
   notification: {
     create: jest.fn(),
     createMany: jest.fn(),
   },
+  $transaction: jest.fn(),
 }));
 
 jest.mock('../services/pricingSelector', () => {
@@ -106,6 +110,25 @@ describe('POST /api/public/actions — pricing 2.2', () => {
     });
 
     prisma.driver.findMany.mockResolvedValue([]);
+
+    // 3.b.10.a — Le patch Zone 1 enveloppe la création LeadAction
+    // et les écritures d'événements dans une $transaction.
+    // On reconfigure le mock pour exécuter le callback avec un `tx`
+    // exposant `leadAction.create` (même jest.fn que prisma) et
+    // `leadActionEvent.create` (mock dédié).
+    prisma.$transaction.mockImplementation(async (callback) => {
+      const tx = {
+        leadAction: {
+          create: prisma.leadAction.create,
+          updateMany: jest.fn(),
+          findUnique: jest.fn(),
+        },
+        leadActionEvent: {
+          create: prisma.leadActionEvent.create,
+        },
+      };
+      return await callback(tx);
+    });
   });
 
   function mockDistance() {
