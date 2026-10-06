@@ -21,6 +21,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { useSuivi } from '../hooks/useSuivi';
+import { useSuiviEvents } from '../hooks/useSuiviEvents';
 import { storage } from '../services/storage';
 import type { SuiviResponse } from '../types/api';
 
@@ -362,21 +363,31 @@ export function SuiviPage() {
 
   const [code, setCode] = useState(initialCode);
   const { suivi, loading, error, fetchSuivi, reset } = useSuivi();
+  const {
+    events,
+    fetchEvents,
+    reset: resetEvents,
+  } = useSuiviEvents();
 
-  // Si un code est passé dans l'URL, on lance la recherche automatiquement
+  // Si un code est passé dans l'URL, on lance la recherche automatiquement.
+  // Snapshot et Timeline sont chargés en parallèle, indépendamment.
   useEffect(() => {
-    if (initialCode && !suivi) {
-      void fetchSuivi(initialCode);
+    if (initialCode) {
+      void Promise.allSettled([
+        fetchSuivi(initialCode),
+        fetchEvents(initialCode),
+      ]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSearch = () => {
-    void fetchSuivi(code);
+    void Promise.allSettled([fetchSuivi(code), fetchEvents(code)]);
   };
 
   const handleReset = () => {
     reset();
+    resetEvents();
     setCode('');
   };
 
