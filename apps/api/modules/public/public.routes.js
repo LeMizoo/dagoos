@@ -17,6 +17,7 @@ const {
 // P7-C — Rate limiting sur les endpoints publics sensibles
 const { publicLeadLimiter } = require('../../middleware/rate-limit');
 const { findVilleLocal } = require('../../lib/villes-madagascar');
+const { recordEvent, EVENT_TYPES, ACTORS } = require('../../lib/lead-action-events');
 
 // ============================================================
 // P7-C — VALIDATEURS D'ENTRÉE PUBLIQUE
@@ -1920,6 +1921,11 @@ router.post('/actions', publicLeadLimiter, async (req, res) => {
     // séparément de l'input client.
     let v2Details = {};
 
+    // 3.b.5 — Données pour PRICE_ESTIMATED (non persistées dans LeadAction).
+    // Renseignées par chaque branche selon ce qu'elle sait.
+    let priceEstimatedPricingModel;
+    let priceEstimatedEstimated;
+
     if (type === 'COURSE_REQUEST' || type === 'TAXI_RESERVATION') {
       const typeVehicule = details?.typeVehicule;
       const vehicleConfig = VEHICLE_CONFIG[typeVehicule];
@@ -2028,6 +2034,9 @@ router.post('/actions', publicLeadLimiter, async (req, res) => {
 
         modePrestation = vehicleConfig.responseMode;
         commissionPct = tariffV2.commissionPct ?? 20;
+
+        // 3.b.5 — Donnée disponible pour PRICE_ESTIMATED.
+        priceEstimatedPricingModel = vehicleConfig.pricingModel;
       } else {
         /*
          * 2.5.6 — Fallback V1 supprimé.
@@ -2341,31 +2350,87 @@ router.post('/actions', publicLeadLimiter, async (req, res) => {
         negotiation: pricingResult.negotiation || null,
       };
 
+      // 3.b.5 — Données disponibles pour PRICE_ESTIMATED.
+      priceEstimatedPricingModel = v2Details.pricingModel;
+      priceEstimatedEstimated = v2Details.estimated;
+
     }
 
     // ========================================
     // CRÉATION LEAD ACTION (avec données enrichies)
+    // + Journal d'événements Timeline (2.4.2 — 3.b.5)
     // ========================================
-    const action = await prisma.leadAction.create({
-      data: {
-        organizationId: org?.id,
-        type,
-        clientNom: clientNomNormalized,
-        clientTel: clientTelNormalized,
-        details: {
-          ...sanitizeDetails(details),
-          distanceKm,
-          prixEstime,
-          modePrestation,
-          commissionPct,
-          nbJours: (type === 'CAR_RENTAL' || type === 'LONG_HAUL') ? nbJours : undefined,
-          offreClient: details?.offreClient ? Number(details.offreClient) : null,
-          codeSuivi: genererCodeSuivi(),
-          statutNegociation: details?.offreClient ? 'OFFRE_CLIENT' : 'PRIX_SUGGERE',
-          ...v2Details
+    const action = await prisma.$transaction(async (tx) => {
+      const created = await tx.leadAction.create({
+        data: {
+          organizationId: org?.id,
+          type,
+          clientNom: clientNomNormalized,
+          clientTel: clientTelNormalized,
+          details: {
+            ...sanitizeDetails(details),
+            distanceKm,
+            prixEstime,
+            modePrestation,
+            commissionPct,
+            nbJours: (type === 'CAR_RENTAL' || type === 'LONG_HAUL') ? nbJours : undefined,
+            offreClient: details?.offreClient ? Number(details.offreClient) : null,
+            codeSuivi: genererCodeSuivi(),
+            statutNegociation: details?.offreClient ? 'OFFRE_CLIENT' : 'PRIX_SUGGERE',
+            ...v2Details
+          },
+          statut: 'NEW',
         },
-        statut: 'NEW',
-      },
+      });
+
+      // 1. LEAD_CREATED (contrat 2.4.1 §5.2)
+      await recordEvent(tx, {
+        leadActionId: created.id,
+        type: EVENT_TYPES.LEAD_CREATED,
+        actor: ACTORS.CLIENT,
+        payload: {
+          type,
+          ...(details?.depart ? { depart: details.depart } : {}),
+          ...(details?.arrivee ? { arrivee: details.arrivee } : {}),
+          ...(details?.typeVehicule ? { typeVehicule: details.typeVehicule } : {}),
+        },
+      });
+
+      // 2. PRICE_ESTIMATED (contrat 2.4.1 §5.2, amendement 1)
+      //    Émis pour les 3 branches. Champs optionnels omis si indisponibles.
+      await recordEvent(tx, {
+        leadActionId: created.id,
+        type: EVENT_TYPES.PRICE_ESTIMATED,
+        actor: ACTORS.SYSTEM,
+        payload: {
+          price: prixEstime,
+          currency: 'MGA',
+          ...(priceEstimatedPricingModel
+            ? { pricingModel: priceEstimatedPricingModel }
+            : {}),
+          ...(typeof priceEstimatedEstimated === 'boolean'
+            ? { estimated: priceEstimatedEstimated }
+            : {}),
+        },
+      });
+
+      // 3. NEGOTIATION_OPENED_BY_CLIENT (contrat 2.4.1 §5.2, conditionnel)
+      if (details?.offreClient) {
+        await recordEvent(tx, {
+          leadActionId: created.id,
+          type: EVENT_TYPES.NEGOTIATION_OPENED_BY_CLIENT,
+          actor: ACTORS.CLIENT,
+          payload: {
+            offreClient: Number(details.offreClient),
+            currency: 'MGA',
+            responseChannel: 'PUBLIC_CODE',
+            respondedBy: 'CLIENT',
+            respondedAt: new Date().toISOString(),
+          },
+        });
+      }
+
+      return created;
     });
     
     // Créer une notification pour les managers uniquement
