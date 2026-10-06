@@ -1225,7 +1225,6 @@ export function ReservationsPage() {
       }
 
       storage.setLastOtp(response.otpCode);
-      storage.setLastCode(response.otpCode);
 
       alert(
         `Réservation en attente !\n\nCode OTP : ${response.otpCode}\n\nConservez ce code pour gérer votre réservation.`
