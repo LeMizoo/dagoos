@@ -372,6 +372,15 @@ router.post('/:id/accept', authMiddleware, async (req, res) => {
           throw new Error('Cette course a déjà été acceptée');
         }
 
+        // LEAD_ACCEPTED — transition métier NEW → ACCEPTED.
+        // L'événement est écrit dans la même transaction que la mutation.
+        await recordEvent(tx, {
+          leadActionId: actionId,
+          type: EVENT_TYPES.LEAD_ACCEPTED,
+          actor: ACTORS.DRIVER,
+          payload: {},
+        });
+
         // Créer la Course complète avec tous les champs métier
         const course = await tx.course.create({
           data: {
