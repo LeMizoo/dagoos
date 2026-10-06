@@ -31,7 +31,30 @@ async function apiFetch<T>(
 ): Promise<T> {
   const url = API_URL + endpoint;
   const timeoutMs = options.timeout ?? DEFAULT_TIMEOUT_MS;
-  const maxAttempts = options.retry === false ? 1 : DEFAULT_RETRY_ATTEMPTS;
+
+  // ----------------------------------------------------------
+  // Politique de retry — sûre par défaut
+  //
+  // GET / HEAD      : retry automatique (lectures idempotentes).
+  // POST/PUT/PATCH/DELETE : 1 seule tentative par défaut
+  //   (créations / mutations : un retry peut rejouer une action
+  //    déjà appliquée côté backend).
+  //
+  // Overrides explicites (toujours prioritaires) :
+  //   retry: true  -> force le retry (appel réellement idempotent)
+  //   retry: false -> force une seule tentative
+  // ----------------------------------------------------------
+  const method = (options.method ?? 'GET').toUpperCase();
+  const isIdempotentMethod = method === 'GET' || method === 'HEAD';
+
+  const maxAttempts =
+    options.retry === true
+      ? DEFAULT_RETRY_ATTEMPTS
+      : options.retry === false
+        ? 1
+        : isIdempotentMethod
+          ? DEFAULT_RETRY_ATTEMPTS
+          : 1;
 
   let attempt = 0;
 
