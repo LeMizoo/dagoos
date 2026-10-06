@@ -620,8 +620,37 @@ model LeadAction {
   notifications          Notification[]
   course                 Course?
   operation              Operation?
+  events                 LeadActionEvent[]
   createdAt              DateTime       @default(now())
   updatedAt              DateTime       @updatedAt
+}
+
+// ============================================================
+// 2.4.2 — TIMELINE PASSAGER
+// Journal d'événements métier du cycle de vie d'une LeadAction.
+//
+// - Immuable et append-only (aucune mise à jour, aucune suppression
+//   hors cascade métier).
+// - Écrit dans la même transaction que la mutation primaire.
+// - `occurredAt` = date métier (jamais modifiée).
+// - `recordedAt` = date d'enregistrement, usage audit uniquement.
+//   Ne JAMAIS utiliser `recordedAt` pour trier ou paginer.
+// - `partial` = true pour les événements synthétiques
+//   (rétro-remplissage historique uniquement).
+// ============================================================
+model LeadActionEvent {
+  id           String     @id @default(cuid())
+  leadActionId String
+  leadAction   LeadAction @relation(fields: [leadActionId], references: [id], onDelete: Cascade)
+  type         String
+  actor        String
+  occurredAt   DateTime
+  recordedAt   DateTime   @default(now())
+  payload      Json?
+  partial      Boolean    @default(false)
+
+  @@index([leadActionId, occurredAt])
+  @@index([leadActionId, type])
 }
 
 // ============================================================
