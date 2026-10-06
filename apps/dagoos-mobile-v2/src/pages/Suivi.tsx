@@ -23,7 +23,7 @@ import {
 import { useSuivi } from '../hooks/useSuivi';
 import { useSuiviEvents } from '../hooks/useSuiviEvents';
 import { storage } from '../services/storage';
-import type { SuiviResponse } from '../types/api';
+import type { SuiviEventsResponse, SuiviResponse } from '../types/api';
 
 // ------------------------------------------------------------
 // Styles
@@ -354,6 +354,142 @@ function SuiviCard({ suivi }: SuiviCardProps) {
 }
 
 // ------------------------------------------------------------
+// Timeline — rendu visuel (Phase 2.4.4.c)
+// ------------------------------------------------------------
+
+const EVENT_TYPE_LABELS: Record<string, string> = {
+  LEAD_CREATED: 'Demande créée',
+  PRICE_ESTIMATED: 'Prix estimé',
+  NEGOTIATION_OPENED_BY_CLIENT: 'Négociation ouverte',
+  NEGOTIATION_OFFERED_TO_CLIENT: 'Proposition envoyée',
+  NEGOTIATION_ACCEPTED_BY_CLIENT: 'Négociation acceptée',
+  NEGOTIATION_REFUSED_BY_CLIENT: 'Négociation refusée',
+  NEGOTIATION_EXPIRED: 'Négociation expirée',
+  LEAD_ACCEPTED: 'Demande acceptée',
+  LEAD_REJECTED: 'Demande refusée',
+};
+
+function eventTypeLabel(type: string): string {
+  return EVENT_TYPE_LABELS[type] ?? type;
+}
+
+const dateTimeFormatter = new Intl.DateTimeFormat('fr-FR', {
+  dateStyle: 'short',
+  timeStyle: 'short',
+});
+
+function formatOccurredAt(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return dateTimeFormatter.format(date);
+}
+
+interface SuiviTimelineProps {
+  data: SuiviEventsResponse;
+}
+
+function SuiviTimeline({ data }: SuiviTimelineProps) {
+  return (
+    <div style={cardStyle}>
+      <div
+        style={{
+          fontSize: 11,
+          color: 'var(--text-secondary)',
+          marginBottom: 8,
+        }}
+      >
+        Historique
+      </div>
+
+      {data.partial && (
+        <div
+          style={{
+            marginBottom: 10,
+            padding: 8,
+            borderRadius: 8,
+            background: 'var(--accent-soft)',
+            fontSize: 11,
+            color: 'var(--text-secondary)',
+            lineHeight: 1.4,
+          }}
+        >
+          Historique partiel — certains événements peuvent manquer.
+        </div>
+      )}
+
+      {data.events.length === 0 ? (
+        <div
+          style={{
+            fontSize: 12,
+            color: 'var(--text-secondary)',
+          }}
+        >
+          Aucun événement
+        </div>
+      ) : (
+        <ul
+          style={{
+            listStyle: 'none',
+            margin: 0,
+            padding: 0,
+          }}
+        >
+          {data.events.map((event, index) => (
+            <li
+              key={event.id}
+              style={{
+                paddingTop: index === 0 ? 0 : 8,
+                paddingBottom: 8,
+                borderTop:
+                  index === 0 ? 'none' : '1px solid var(--border)',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: 8,
+                  marginBottom: 2,
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: 'var(--text-primary)',
+                  }}
+                >
+                  {eventTypeLabel(event.type)}
+                </span>
+                <span
+                  style={{
+                    fontSize: 11,
+                    color: 'var(--text-secondary)',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {formatOccurredAt(event.occurredAt)}
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: 'var(--text-secondary)',
+                }}
+              >
+                {event.actor}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+// ------------------------------------------------------------
 // Page
 // ------------------------------------------------------------
 
@@ -474,6 +610,8 @@ export function SuiviPage() {
       {suivi && (
         <>
           <SuiviCard suivi={suivi} />
+
+          {events && <SuiviTimeline data={events} />}
 
           <button
             type="button"
