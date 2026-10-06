@@ -1258,6 +1258,31 @@ router.post('/actions/respond', async (req, res) => {
             throw new Error('NEGOTIATION_CONCURRENT_UPDATE');
           }
 
+          // Chaîne causale : NEGOTIATION_EXPIRED puis LEAD_REJECTED.
+          // occurredAt = expiresAt (date métier, contrat 2.4.1 §8).
+          // detectedAt = moment de la détection.
+          const expiresAtDate = new Date(freshNegotiation.expiresAt);
+          const detectedAt = new Date().toISOString();
+
+          await recordEvent(tx, {
+            leadActionId: action.id,
+            type: EVENT_TYPES.NEGOTIATION_EXPIRED,
+            actor: ACTORS.SYSTEM,
+            occurredAt: expiresAtDate,
+            payload: {
+              expiresAt: freshNegotiation.expiresAt,
+              detectedAt,
+            },
+          });
+
+          await recordEvent(tx, {
+            leadActionId: action.id,
+            type: EVENT_TYPES.LEAD_REJECTED,
+            actor: ACTORS.SYSTEM,
+            occurredAt: expiresAtDate,
+            payload: {},
+          });
+
           return { expired: true };
         }
 
@@ -1300,6 +1325,29 @@ router.post('/actions/respond', async (req, res) => {
             throw new Error('NEGOTIATION_CONCURRENT_UPDATE');
           }
 
+          // Chaîne causale : NEGOTIATION_REFUSED_BY_CLIENT puis LEAD_REJECTED.
+          const respondedAtDate = new Date(now);
+
+          await recordEvent(tx, {
+            leadActionId: action.id,
+            type: EVENT_TYPES.NEGOTIATION_REFUSED_BY_CLIENT,
+            actor: ACTORS.CLIENT,
+            occurredAt: respondedAtDate,
+            payload: {
+              responseChannel: 'PUBLIC_CODE',
+              respondedBy: 'CLIENT',
+              respondedAt: now,
+            },
+          });
+
+          await recordEvent(tx, {
+            leadActionId: action.id,
+            type: EVENT_TYPES.LEAD_REJECTED,
+            actor: ACTORS.SYSTEM,
+            occurredAt: respondedAtDate,
+            payload: {},
+          });
+
           return;
         }
 
@@ -1323,6 +1371,31 @@ router.post('/actions/respond', async (req, res) => {
         if (updated.count !== 1) {
           throw new Error('NEGOTIATION_CONCURRENT_UPDATE');
         }
+
+        // Chaîne causale : NEGOTIATION_ACCEPTED_BY_CLIENT puis LEAD_ACCEPTED.
+        // LEAD_ACCEPTED actor SYSTEM : le chauffeur n'agit pas ici,
+        // la transition est la conséquence automatique de l'acceptation client.
+        const respondedAtDate = new Date(now);
+
+        await recordEvent(tx, {
+          leadActionId: action.id,
+          type: EVENT_TYPES.NEGOTIATION_ACCEPTED_BY_CLIENT,
+          actor: ACTORS.CLIENT,
+          occurredAt: respondedAtDate,
+          payload: {
+            responseChannel: 'PUBLIC_CODE',
+            respondedBy: 'CLIENT',
+            respondedAt: now,
+          },
+        });
+
+        await recordEvent(tx, {
+          leadActionId: action.id,
+          type: EVENT_TYPES.LEAD_ACCEPTED,
+          actor: ACTORS.SYSTEM,
+          occurredAt: respondedAtDate,
+          payload: {},
+        });
 
         // Le prix vient exclusivement de negotiation.proposedPrice.
         courseCree = await tx.course.create({
