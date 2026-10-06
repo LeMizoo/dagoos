@@ -6,6 +6,7 @@ const {
   VALID_LONG_HAUL_SERVICES,
   isVehicleCompatibleWithService
 } = require('../public/long-haul-matrix');
+const { recordEvent, EVENT_TYPES, ACTORS } = require('../../lib/lead-action-events');
 
 const router = express.Router();
 
@@ -522,42 +523,69 @@ router.post('/:id/propose', authMiddleware, async (req, res) => {
       });
     }
 
-    // 10. Transaction atomique — verrou optimiste sur updatedAt
-    const updated = await prisma.leadAction.updateMany({
-      where: {
-        id: actionId,
-        statut: 'NEW',
-        updatedAt: action.updatedAt
-      },
-      data: {
-        details: {
-          ...action.details,
-          negotiation: {
-            ...negotiation,
-            status: 'PROPOSITION_EN_ATTENTE_CLIENT',
-            proposedPrice,
-            proposedAt: new Date().toISOString(),
-            expiresAt: new Date(
-              Date.now() + NEGOTIATION_TTL_HOURS * 3600 * 1000
-            ).toISOString(),
-            respondedAt: null,
-            respondedBy: null,
-            responseChannel: null,
-            // Identité du proposant — nécessaire pour /respond
-            driverId: driver.id,
-            vehicleId: driver.vehicleId
+    // 10. Horodatages figés une seule fois (métier + audit).
+    const proposedAt = new Date();
+    const expiresAt = new Date(
+      proposedAt.getTime() + NEGOTIATION_TTL_HOURS * 3600 * 1000
+    );
+
+    // 11. Transaction atomique — verrou optimiste sur updatedAt
+    //     Mutation LeadAction + événement Timeline dans la même transaction.
+    const result = await prisma.$transaction(async (tx) => {
+      const updated = await tx.leadAction.updateMany({
+        where: {
+          id: actionId,
+          statut: 'NEW',
+          updatedAt: action.updatedAt
+        },
+        data: {
+          details: {
+            ...action.details,
+            negotiation: {
+              ...negotiation,
+              status: 'PROPOSITION_EN_ATTENTE_CLIENT',
+              proposedPrice,
+              proposedAt: proposedAt.toISOString(),
+              expiresAt: expiresAt.toISOString(),
+              respondedAt: null,
+              respondedBy: null,
+              responseChannel: null,
+              // Identité du proposant — nécessaire pour /respond
+              driverId: driver.id,
+              vehicleId: driver.vehicleId
+            }
           }
         }
+      });
+
+      if (updated.count !== 1) {
+        return { ok: false };
       }
+
+      // NEGOTIATION_OFFERED_TO_CLIENT (contrat 2.4.1 §5.2)
+      // actor SYSTEM : l'événement constate la bascule, pas l'action chauffeur.
+      // occurredAt : proposedAt (date métier), jamais la date d'enregistrement.
+      await recordEvent(tx, {
+        leadActionId: actionId,
+        type: EVENT_TYPES.NEGOTIATION_OFFERED_TO_CLIENT,
+        actor: ACTORS.SYSTEM,
+        occurredAt: proposedAt,
+        payload: {
+          proposedPrice,
+          currency: 'MGA',
+        },
+      });
+
+      return { ok: true };
     });
 
-    if (updated.count !== 1) {
+    if (!result.ok) {
       return res.status(409).json({
         error: 'Proposition concurrente détectée, réessayez'
       });
     }
 
-    // 11. Notification interne (traçabilité managers)
+    // 12. Notification interne (traçabilité managers), hors transaction.
     await prisma.notification.create({
       data: {
         organizationId: driver.organizationId,
