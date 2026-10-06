@@ -718,18 +718,35 @@ router.post('/:id/reject', authMiddleware, async (req, res) => {
     // DEMANDE PRIVÉE / ORGANISATION
     // ========================================================
 
-    const updated = await prisma.leadAction.updateMany({
-      where: {
-        id: actionId,
-        statut: 'NEW',
-        organizationId: driver.organizationId
-      },
-      data: {
-        statut: 'REJECTED'
+    const result = await prisma.$transaction(async (tx) => {
+      const updated = await tx.leadAction.updateMany({
+        where: {
+          id: actionId,
+          statut: 'NEW',
+          organizationId: driver.organizationId
+        },
+        data: {
+          statut: 'REJECTED'
+        }
+      });
+
+      if (updated.count === 0) {
+        return { ok: false };
       }
+
+      // LEAD_REJECTED — transition métier NEW → REJECTED (branche privée uniquement).
+      // actor DRIVER : un chauffeur a explicitement refusé.
+      await recordEvent(tx, {
+        leadActionId: actionId,
+        type: EVENT_TYPES.LEAD_REJECTED,
+        actor: ACTORS.DRIVER,
+        payload: {},
+      });
+
+      return { ok: true };
     });
 
-    if (updated.count === 0) {
+    if (!result.ok) {
       return res.status(409).json({
         error: 'Cette course a déjà été traitée'
       });
