@@ -284,7 +284,15 @@ export function CoursePage() {
         return;
       }
 
-      let sent = 0;
+      // Mode 'toutes' : plusieurs demandes independantes, donc
+      // potentiellement plusieurs codes de suivi distincts.
+      // Contrat (Option 3) :
+      //   - collecter uniquement les reponses avec codeSuivi ;
+      //   - afficher flotte + code pour chaque succes ;
+      //   - ne PAS ecrire lastCode ;
+      //   - ne PAS naviguer vers /suivi.
+      // /suivi reste un parcours mono-code.
+      const successes: Array<{ name: string; code: string }> = [];
 
       for (const fleet of flottes) {
         const result = await submit({
@@ -295,18 +303,28 @@ export function CoursePage() {
           details,
         });
 
-        if (result && result.ok !== false) {
-          sent++;
+        if (result?.codeSuivi) {
+          successes.push({
+            name: fleet.name,
+            code: result.codeSuivi,
+          });
         }
       }
 
-      if (sent === 0) {
+      if (successes.length === 0) {
         alert('Aucune demande n’a pu être envoyée');
         return;
       }
 
-      alert(`Demande envoyée à ${sent} flotte(s) !`);
-      navigate('/suivi');
+      const lines = successes
+        .map(({ name, code }) => `• ${name} : ${code}`)
+        .join('\n');
+
+      alert(
+        `Demande envoyée à ${successes.length} flotte(s).\n\n` +
+          `Codes de suivi :\n${lines}\n\n` +
+          `Conservez ces codes. Le suivi se fait avec un code à la fois.`
+      );
       return;
     }
 
