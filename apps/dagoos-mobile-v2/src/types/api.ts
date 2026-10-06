@@ -212,6 +212,26 @@ export interface SuiviResponse {
 }
 
 // ------------------------------------------------------------
+// Timeline — événements de suivi (Phase 2.4.4.a)
+// ------------------------------------------------------------
+
+export interface SuiviEvent {
+  id: string;
+  type: string;
+  actor: string;
+  occurredAt: string;
+  recordedAt: string;
+  payload: Record<string, unknown>;
+  partial: boolean;
+}
+
+export interface SuiviEventsResponse {
+  codeSuivi: string;
+  partial: boolean;
+  events: SuiviEvent[];
+}
+
+// ------------------------------------------------------------
 // Course urbaine — types étendus (Phase 1 — 1.6.a)
 // ------------------------------------------------------------
 
