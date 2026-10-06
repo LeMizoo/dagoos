@@ -872,6 +872,96 @@ router.get('/suivi/:code', async (req, res) => {
 });
 
 
+// GET /api/public/suivi/:code/events - Timeline passager
+// Contrat 2.4.1 §9.1. Rate limited. Accès par codeSuivi seul.
+router.get('/suivi/:code/events', publicLeadLimiter, async (req, res) => {
+  try {
+    const { code } = req.params;
+
+    // 1. Validation du code
+    if (!code || typeof code !== 'string' || !code.trim()) {
+      return res.status(400).json({ error: 'Code requis' });
+    }
+
+    const normalizedCode = code.trim();
+
+    // 2. Résoudre la LeadAction par codeSuivi (même logique que /suivi/:code)
+    const action = await prisma.leadAction.findFirst({
+      where: {
+        details: {
+          path: ['codeSuivi'],
+          equals: normalizedCode
+        }
+      },
+      select: { id: true }
+    });
+
+    if (!action) {
+      return res.status(404).json({ error: 'Demande introuvable' });
+    }
+
+    // 3. Validation de `since` (optionnel, inclusif)
+    const { since, limit } = req.query;
+    let sinceDate = null;
+
+    if (since !== undefined && since !== null && since !== '') {
+      sinceDate = new Date(since);
+      if (Number.isNaN(sinceDate.getTime())) {
+        return res.status(400).json({
+          error: 'Paramètre `since` invalide (ISO 8601 attendu)'
+        });
+      }
+    }
+
+    // 4. Validation de `limit` (défaut 100, max 500, clamp silencieux)
+    let parsedLimit = 100;
+    if (limit !== undefined && limit !== null && limit !== '') {
+      const n = parseInt(limit, 10);
+      if (Number.isFinite(n)) {
+        parsedLimit = Math.min(Math.max(n, 1), 500);
+      }
+    }
+
+    // 5. Lecture des événements (ordre fonctionnel : occurredAt puis id)
+    const where = { leadActionId: action.id };
+    if (sinceDate) {
+      where.occurredAt = { gte: sinceDate };
+    }
+
+    const events = await prisma.leadActionEvent.findMany({
+      where,
+      orderBy: [
+        { occurredAt: 'asc' },
+        { id: 'asc' }
+      ],
+      take: parsedLimit
+    });
+
+    // 6. Mapping pour l'exposition API (exclut leadActionId)
+    const mappedEvents = events.map((event) => ({
+      id: event.id,
+      type: event.type,
+      actor: event.actor,
+      occurredAt: event.occurredAt,
+      recordedAt: event.recordedAt,
+      payload: event.payload ?? {},
+      partial: event.partial
+    }));
+
+    const anyPartial = events.some((event) => event.partial === true);
+
+    res.json({
+      codeSuivi: normalizedCode,
+      partial: anyPartial,
+      events: mappedEvents
+    });
+  } catch (error) {
+    console.error('GET /public/suivi/:code/events:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 // =========================================================
 // RÉPONSE CLIENT — NÉGOCIATION LONG_HAUL
 // POST /api/public/actions/respond
