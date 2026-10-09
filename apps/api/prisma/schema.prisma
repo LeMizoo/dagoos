@@ -848,3 +848,38 @@ model Operation {
   @@index([driverId])
   @@index([createdAt])
 }
+
+// ========================================
+// IDEMPOTENCE — Mutations publiques
+// Phase 2.6 — Reponses rejouables
+//
+// Stocke les reponses des POST publics mutantes
+// (/public/actions, /public/reservations/batch)
+// pour permettre un replay fiable en cas de perte
+// de reponse cote client.
+//
+// Regles :
+//   - clé fournie par le client (UUID v4, header Idempotency-Key) ;
+//   - meme clé + meme payload -> rejouer la reponse cachee ;
+//   - meme clé + payload different -> 409 Conflict ;
+//   - status PENDING -> attente active puis 409 si non finalise ;
+//   - response chiffree AES-256-GCM (base64) si donnee sensible ;
+//   - error = code controle uniquement (jamais de donnee sensible) ;
+//   - nettoyage opportuniste : COMPLETED/FAILED expires OU PENDING
+//     plus vieux que la fenetre de grace.
+// ========================================
+model IdempotencyKey {
+  key         String    @id
+  endpoint    String
+  requestHash String
+  status      String    @default("PENDING")
+  statusCode  Int?
+  response    String?   @db.Text
+  error       String?
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+  expiresAt   DateTime
+
+  @@index([expiresAt])
+  @@index([status, createdAt])
+}
